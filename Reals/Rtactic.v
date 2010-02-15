@@ -636,7 +636,7 @@ Definition aaa n m := INR (n + m).
 
 Example hfdd : sum_f_R0 (fun n => (aaa n n) / 1) 0 = 1.
 Proof.
-assert (1 <> 0) by admit.
+assert (1 <> 0) by (intro Hc; fourier).
 elim_ident.
 admit.
 Qed.
@@ -648,13 +648,9 @@ repeat elim_ident.
 ring.
 Qed.
 
-Example njfk : forall x, 1/ Rabs x + ((IZR (-5) + INR 7) + 4 ^ 2 + sqrt (5 * 5)) = IZR (2 * 9) + Rsqr 2 + Rabs (1 / x) + 1.
+Example njfk : forall x, x <> 0 -> 1 / Rabs x + ((IZR (-5) + INR 7) + 4 ^ 2 + sqrt (5 * 5)) = IZR (2 * 9) + Rsqr 2 + Rabs (1 / x) + 1.
+Proof.
 intros.
-elim_ident.
-assert (x <> 0) by admit.
 repeat elim_ident.
 ring.
 Qed.
-
-
-

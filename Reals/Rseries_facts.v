@@ -166,7 +166,7 @@ intros.
 apply Rseq_cv_eq_compat with (sum_f_R0 Un - sum_f_R0 Vn).
 unfold Rseq_eq, Rseq_minus.
 intro n.
-rewrite <- tech11 with _ Un Vn n.
+rewrite <- tech11 with (Un - Vn) Un Vn n.
 trivial.
 trivial.
 apply Rseq_cv_minus_compat.

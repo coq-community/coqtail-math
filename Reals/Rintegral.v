@@ -26,7 +26,6 @@ Require Import RiemannInt.
 Require Import RIneq.
 Require Import Fourier.
 Require Import R_sqr.
-Add LoadPath "../mytheories/myReals/".
 Require Import MyRfunctions.
 Open Local Scope R_scope.
 
@@ -440,7 +439,7 @@ destruct (continuity_ab_min f c d) as [m Hm].
 
  intros x Hcxd.
  apply Hcont.
- split; apply Rle_trans with _; [apply Hacb | apply Hcxd | apply Hcxd | apply Hadb].
+ split; eapply Rle_trans; [apply Hacb | apply Hcxd | apply Hcxd | apply Hadb].
 apply Rlt_le_trans with ((f m) * (d - c)).
  apply Rmult_lt_0_compat; [apply Hstp; apply Hm | fourier].
 apply Rle_trans with T.

@@ -21,6 +21,7 @@ USA.
 
 (* This work has been mainly taken from Guillaume Allais's internship (MARELLE team - INRIA Sophia Antipolis)*)
 
+Require Import Reals.
 Require Import Rbase.
 Require Import Ranalysis.
 Require Import Rfunctions.

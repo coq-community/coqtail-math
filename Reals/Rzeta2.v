@@ -661,7 +661,8 @@ induction n.
  assert (j = Z0) by (replace (Z_of_nat O) with Z0 in H by trivial; omega); subst; trivial.
  simpl; ring.
  
- simpl bisum.
+ set (h := fun i => if Z_eq_dec i j then g j else f i).
+ simpl bisum; unfold h in *.
  destruct (Z_eq_dec (Zpos (P_of_succ_nat n)) j) as [e|e];
  destruct (Z_eq_dec (Zneg (P_of_succ_nat n)) j) as [e'|e']; subst; try inversion e'.
   rewrite bisum_not_in.

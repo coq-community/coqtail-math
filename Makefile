@@ -80,9 +80,9 @@ indep: $(INDEP_VO)
 
 theories: $(THEORIES_VO)
 
-INDEP = mytheories/myReals/Ranalysis5
-$(INDEP).vo $(INDEP).glob : $(INDEP).v
-	$(COQC) -dump-glob $(INDEP).glob $(INDEP).v
+#INDEP = mytheories/myReals/Ranalysis5
+#$(INDEP).vo $(INDEP).glob : $(INDEP).v
+#	$(COQC) -dump-glob $(INDEP).glob $(INDEP).v
 
 clean:
 	find . -name '*.vo' -o -name '*.glob' -o -name '*.v.d' | xargs rm -f
