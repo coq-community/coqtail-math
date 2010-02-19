@@ -25,6 +25,7 @@ Require Import Rbase.
 Require Import Ranalysis1.
 Require Import Fourier.
 Require Import Rfunctions.
+Require Import MyRIneq.
 
 Local Open Scope R_scope.
 
@@ -32,6 +33,7 @@ Local Open Scope R_scope.
 
 Definition open_interval (lb ub x:R) := lb < x < ub.
 Definition interval (lb ub x:R) := lb <= x <= ub.
+Definition middle (x:R) (y:R) : R := (x+y)/2.
 
 Definition continuity_open_interval (f : R -> R) (lb ub:R) := forall x:R,
       open_interval lb ub x -> continuity_pt f x.
@@ -78,6 +80,27 @@ Definition reciprocal (f g:R -> R) := forall x, (comp f g) x = id x.
 
 (** Manipulation *)
 
+Lemma middle_interval : forall lb ub x y, interval lb ub x -> interval lb ub y ->
+       interval lb ub (middle x y).
+Proof.
+intros lb ub x y x_in_I y_in_I.
+ split ; unfold middle, interval in *.
+ replace lb with ((lb + lb) * /2) by field.
+ unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
+ replace ub with ((ub + ub) * /2) by field.
+ unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
+Qed.
+
+Lemma interval_l : forall lb ub, lb <= ub -> interval lb ub lb.
+Proof.
+intros ; split ; [right |] ; trivial.
+Qed.
+
+Lemma interval_r : forall lb ub, lb <= ub -> interval lb ub ub.
+Proof.
+intros ; split ; [| right] ; trivial.
+Qed.
+
 Lemma open_interval_interval : forall lb ub x,
      open_interval lb ub x -> interval lb ub x.
 Proof.
@@ -98,6 +121,44 @@ Proof.
 intros ; unfold open_interval in * ; split ; intuition ; fourier.
 Qed.
 
+Lemma strictly_increasing_strictly_monotonous_interval : forall f lb ub,
+      strictly_increasing_interval f lb ub -> strictly_monotonous_interval f lb ub.
+Proof.
+intros ; left ; assumption.
+Qed.
+
+Lemma strictly_decreasing_strictly_monotonous_interval : forall f lb ub,
+      strictly_decreasing_interval f lb ub -> strictly_monotonous_interval f lb ub.
+Proof.
+intros ; right ; assumption.
+Qed.
+
+Lemma strictly_increasing_increasing_interval : forall f lb ub,
+     strictly_increasing_interval f lb ub -> increasing_interval f lb ub.
+Proof.
+intros f lb ub f_incr x y x_in_I y_in_I x_le_y.
+ destruct x_le_y as [x_lt_y | x_eq_y].
+ left ; apply f_incr ; assumption.
+ right ; subst ; reflexivity.
+Qed.
+
+Lemma strictly_decreasing_decreasing_interval : forall f lb ub,
+     strictly_decreasing_interval f lb ub -> decreasing_interval f lb ub.
+Proof.
+intros f lb ub f_incr x y x_in_I y_in_I x_le_y.
+ destruct x_le_y as [x_lt_y | x_eq_y].
+ left ; apply f_incr ; assumption.
+ right ; subst ; reflexivity.
+Qed.
+
+Lemma strictly_monotonous_monotonous_interval : forall f lb ub,
+     strictly_monotonous_interval f lb ub ->
+     monotonous_interval f lb ub.
+Proof.
+intros f lb ub [H | H] ; [left ; apply strictly_increasing_increasing_interval
+ | right ; apply strictly_decreasing_decreasing_interval] ; apply H.
+Qed.
+
 Lemma strictly_monotonous_injective_interval : forall f lb ub,
       strictly_monotonous_interval f lb ub -> injective_interval f lb ub.
 Proof.
@@ -116,6 +177,13 @@ intros f c r Hf ; destruct Hf as [f_incr | f_decr] ;
    assert (H := f_decr _ _ y_in_B x_in_B y_lt_x) ; rewrite fx_eq_fy in H ;
    elim (Rlt_irrefl _ H).
    symmetry ; assumption.
+Qed.
+
+Lemma derivable_continuous_interval : forall f lb ub,
+	derivable_interval f lb ub -> continuity_interval f lb ub.
+Proof.
+intros f lb ub H x x_in ; apply derivable_continuous_pt ;
+ apply H ; assumption.
 Qed.
 
 Lemma continuity_open_interval_opp_rev : forall f lb ub,
@@ -153,32 +221,6 @@ intros f lb ub f_cont b b_in_I eps eps_pos.
  unfold Rminus ; rewrite <- Ropp_plus_distr, Rabs_Ropp ; apply (proj2 Hx).
 Qed.
 
-Lemma strictly_increasing_increasing_interval : forall f lb ub,
-     strictly_increasing_interval f lb ub -> increasing_interval f lb ub.
-Proof.
-intros f lb ub f_incr x y x_in_I y_in_I x_le_y.
- destruct x_le_y as [x_lt_y | x_eq_y].
- left ; apply f_incr ; assumption.
- right ; subst ; reflexivity.
-Qed.
-
-Lemma strictly_decreasing_decreasing_interval : forall f lb ub,
-     strictly_decreasing_interval f lb ub -> decreasing_interval f lb ub.
-Proof.
-intros f lb ub f_incr x y x_in_I y_in_I x_le_y.
- destruct x_le_y as [x_lt_y | x_eq_y].
- left ; apply f_incr ; assumption.
- right ; subst ; reflexivity.
-Qed.
-
-Lemma strictly_monotonous_monotonous_interval : forall f lb ub,
-     strictly_monotonous_interval f lb ub ->
-     monotonous_interval f lb ub.
-Proof.
-intros f lb ub [H | H] ; [left ; apply strictly_increasing_increasing_interval
- | right ; apply strictly_decreasing_decreasing_interval] ; apply H.
-Qed.
-
 Lemma strictly_increasing_strictly_decreasing_interval : forall f lb ub,
     strictly_increasing_interval f lb ub -> strictly_decreasing_interval (-f)%F lb ub.
 Proof.
@@ -208,6 +250,104 @@ Lemma strictly_decreasing_strictly_increasing_interval2 : forall f lb ub,
 Proof.
 intros f c r f_decr ; intros x y x_in_B y_in_B x_lt_y.
  apply f_decr ; unfold interval in * ; try split ; intuition ; fourier.
+Qed.
+
+Lemma strictly_monotonous_recip_interval_comm : forall f g lb ub,
+       strictly_monotonous_interval f lb ub ->
+       reciprocal_interval f g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) ->
+       (forall x, interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) x -> interval lb ub (g x)) ->
+       reciprocal_interval g f lb ub.
+Proof.
+intros f g lb ub f_mono f_recip_g g_right x x_encad.
+  assert(f_inj := strictly_monotonous_injective_interval _ _ _ f_mono).
+ destruct f_mono as [f_incr | f_decr].
+ assert (f_incr2 := strictly_increasing_increasing_interval _ _ _ f_incr).
+ assert (Hrew : forall x, lb <= x <= ub -> f (g (f x)) = f x).
+  intros x0 x0_encad ;
+   assert (fx0_encad : interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) (f x0)).
+   split.
+    apply Rle_trans with (f lb) ; [apply Rmin_l | apply f_incr2].
+     split ; [right ; reflexivity | apply Rle_trans with x0 ; intuition].
+     assumption.
+     intuition.
+    apply Rle_trans with (f ub) ; [apply f_incr2 | apply RmaxLess2].
+     assumption.
+     split ; [apply Rle_trans with x0 ; intuition | right ; reflexivity].
+     intuition.
+  apply f_recip_g ; assumption.
+  assert (fx_encad : interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) (f x)).
+ split ; unfold interval in x_encad.
+   apply Rle_trans with (f lb) ; [apply Rmin_l | apply f_incr2].
+    split ; [right ; reflexivity | apply Rle_trans with x ; intuition].
+    assumption.
+    intuition.
+    apply Rle_trans with (f ub) ; [apply f_incr2 | apply RmaxLess2].
+    assumption.
+    split ; [apply Rle_trans with x ; intuition | right ; reflexivity].
+    intuition.
+apply f_inj.
+ apply g_right.
+    assumption.
+    assumption.
+    apply f_recip_g.
+    assumption.
+
+ assert (f_decr2 := strictly_decreasing_decreasing_interval _ _ _ f_decr).
+ assert (Hrew : forall x, lb <= x <= ub -> f (g (f x)) = f x).
+  intros x0 x0_encad ;
+   assert (fx0_encad : interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) (f x0)).
+   split.
+    apply Rle_trans with (f ub) ; [apply Rmin_r | apply f_decr2].
+     assumption.
+     split ; [apply Rle_trans with x0 ; intuition | right ; reflexivity].
+     intuition.
+    apply Rle_trans with (f lb) ; [apply f_decr2 | apply RmaxLess1].
+     split ; [right ; reflexivity | apply Rle_trans with x0 ; intuition].
+     assumption.
+     intuition.
+  apply f_recip_g ; assumption.
+  assert (fx_encad : interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) (f x)).
+ split ; unfold interval in x_encad.
+   apply Rle_trans with (f ub) ; [apply Rmin_r | apply f_decr2].
+     assumption.
+     split ; [apply Rle_trans with x ; intuition | right ; reflexivity].
+     intuition.
+    apply Rle_trans with (f lb) ; [apply f_decr2 | apply RmaxLess1].
+     split ; [right ; reflexivity | apply Rle_trans with x ; intuition].
+     assumption.
+     intuition.
+apply f_inj.
+ apply g_right.
+    assumption.
+    assumption.
+    apply f_recip_g.
+    assumption.
+Qed.
+
+Lemma strictly_increasing_reciprocal_interval_compat : forall f g lb ub,
+     	strictly_increasing_interval f lb ub ->
+	reciprocal_interval f g (f lb) (f ub) ->
+            (forall x, interval (f lb) (f ub) x -> interval lb ub (g x)) ->
+            strictly_increasing_interval g (f lb) (f ub).
+Proof.
+intros f g lb ub f_incr f_recip_g g_ok x y x_in_I y_in_I x_lt_y.
+ destruct (Rlt_le_dec (g x) (g y)) as [T | F].
+  assumption.
+  destruct F as [F | F].
+   assert (Hf : y < x).
+    unfold reciprocal_interval, id in f_recip_g ; rewrite <- f_recip_g.
+    apply Rgt_lt ; rewrite <- f_recip_g.
+    unfold comp ; apply f_incr ; [apply g_ok | apply g_ok |] ; assumption.
+    assumption.
+    assumption.
+   apply False_ind ; apply Rlt_irrefl with x ; apply Rlt_trans with y ; assumption.
+   assert (Hf : x = y).
+    unfold reciprocal_interval, id in f_recip_g ; rewrite <- f_recip_g.
+    symmetry ; rewrite <- f_recip_g.
+    unfold comp ; rewrite F ; reflexivity.
+    assumption.
+    assumption.
+   rewrite Hf in x_lt_y ; elim (Rlt_irrefl _ x_lt_y).
 Qed.
 
 Lemma reciprocal_opp_compat_interval : forall f g lb ub,

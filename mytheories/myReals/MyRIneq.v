@@ -22,11 +22,39 @@ USA.
 Require Export Raxioms.
 Require Import RIneq.
 Require Import Rfunctions.
-Require Import Ranalysis_def.
 
 Open Scope R_scope.
 
 Implicit Type r : R.
+
+Lemma Rmin_eq_l : forall r1 r2, r1 <= r2 -> Rmin r1 r2 = r1.
+Proof.
+intros r1 r2 r1_le_r2 ; unfold Rmin ; destruct (Rle_dec r1 r2).
+ reflexivity.
+ contradiction.
+Qed.
+
+Lemma Rmin_eq_r : forall r1 r2, r1 <= r2 -> Rmin r2 r1 = r1.
+Proof.
+intros r1 r2 r1_le_r2 ; rewrite Rmin_comm ;
+ apply Rmin_eq_l ; assumption.
+Qed.
+
+Lemma Rmax_eq_l : forall r1 r2, r2 <= r1 -> Rmax r1 r2 = r1.
+Proof.
+intros r1 r2 r1_le_r2 ; unfold Rmax ; destruct (Rle_dec r1 r2).
+ destruct r.
+ apply False_ind ; apply Rlt_irrefl with r2 ;
+ apply Rle_lt_trans with r1 ; assumption.
+ symmetry ; trivial.
+ reflexivity.
+Qed.
+
+Lemma Rmax_eq_r : forall r1 r2, r2 <= r1 -> Rmax r2 r1 = r1.
+Proof.
+intros r1 r2 r1_le_r2 ; rewrite Rmax_comm ; apply Rmax_eq_l ;
+ assumption.
+Qed.
 
 Lemma Rabs_eq_compat : forall r1 r2, r1 = r2 -> Rabs r1 = Rabs r2.
 Proof.
@@ -132,17 +160,4 @@ intros m n Hyp. unfold Rle in Hyp.
  case Hyp1.
  intuition.
  intro Hfalse ; apply False_ind ; apply Hyp2 ; exact Hfalse.
-Qed.
-
-Definition middle (x:R) (y:R) : R := (x+y)/2.
-
-Lemma middle_interval : forall lb ub x y, interval lb ub x -> interval lb ub y ->
-       interval lb ub (middle x y).
-Proof.
-intros lb ub x y x_in_I y_in_I.
- split ; unfold middle, interval in *.
- replace lb with ((lb + lb) * /2) by field.
- unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
- replace ub with ((ub + ub) * /2) by field.
- unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
 Qed.
