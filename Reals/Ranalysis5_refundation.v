@@ -384,7 +384,16 @@ Lemma derivable_pt_reciprocal_interv2 : forall (f g:R->R) (lb ub x : R)
          <> 0 ->
          derivable_pt g x.
 Proof.
-intros f g lb ub x x_in_I f_recip_g g_ok f_deriv lb_lt_ub [f_incr | f_decr] Df_neq.
+assert (Main : forall (f g:R->R) (lb ub x : R)
+         (x_in_I : open_interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) x)
+         (f_recip_g : reciprocal_interval f g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)))
+         (g_ok : forall x, interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) x -> interval lb ub (g x))
+         (f_deriv : derivable_interval f lb ub), lb < ub ->
+         strictly_increasing_interval f lb ub ->
+         derive_pt f (g x) (f_deriv (g x) (g_ok x (open_interval_interval _ _ _ x_in_I)))
+         <> 0 ->
+         derivable_pt g x).
+intros f g lb ub x x_in_I f_recip_g g_ok f_deriv lb_lt_ub f_incr Df_neq.
  assert (f lb < f ub).
   apply f_incr ; [apply interval_l | apply interval_r |] ; intuition.
  assert (x_in_I' := x_in_I) ; rewrite Rmin_eq_l, Rmax_eq_r in x_in_I' ;
@@ -415,6 +424,71 @@ rewrite pr_nu_var2 with (g:=f) (pr2:=f_deriv (g x)
               (g_ok x (open_interval_interval (Rmin (f lb) (f ub))
               (Rmax (f lb) (f ub)) x x_in_I))) ; intuition.
 
-admit.
+intros f g lb ub x x_in_I f_recip_g g_ok f_deriv lb_lt_ub [f_incr | f_decr] Df_neq.
+ eapply Main ; eassumption.
+ assert (f ub < f lb).
+  apply f_decr ; [apply interval_l | apply interval_r |] ; intuition.
+ assert (x_in_I' := x_in_I) ; rewrite Rmin_eq_r, Rmax_eq_l in x_in_I' ; intuition.
+ assert (x_in_I'' : open_interval (Rmin ((- f)%F lb) ((- f)%F ub))
+                 (Rmax ((- f)%F lb) ((- f)%F ub)) (- x)).
+  rewrite Rmin_eq_l, Rmax_eq_r ; intuition ; try (unfold opp_fct ; intuition).
+  clear - x_in_I' ; unfold open_interval in * ; intuition ; fourier.
+ assert (f_recip_g' : reciprocal_interval (- f)%F (fun x : R => g (- x))
+      (Rmin ((- f)%F lb) ((- f)%F ub)) (Rmax ((- f)%F lb) ((- f)%F ub))).
+  unfold opp_fct ; rewrite Rmin_opp_opp_Rmax, Rmax_opp_opp_Rmin ;
+  apply reciprocal_opp_compat_interval2 ; assumption.
+ assert (g_ok' : forall x : R,
+              interval (Rmin ((- f)%F lb) ((- f)%F ub))
+              (Rmax ((- f)%F lb) ((- f)%F ub)) x ->
+              interval lb ub ((fun x0 : R => g (- x0)) x)).
+  clear -g_ok ; intros x x_in_I ; apply g_ok.
+  unfold opp_fct, interval in x_in_I ; rewrite Rmin_opp_opp_Rmax, Rmax_opp_opp_Rmin in x_in_I.
+  split ; intuition ; fourier.
+ assert (f_deriv' : derivable_interval (- f)%F lb ub).
+  intros a Ha ; reg ; apply f_deriv ; assumption.
+ assert (f_incr : strictly_increasing_interval (- f)%F lb ub) by
+  (apply strictly_decreasing_strictly_increasing_interval ; assumption).
+
+assert (Df_neq' : derive_pt (- f) ((fun x : R => g (- x)) (- x))
+       (f_deriv' ((fun x : R => g (- x)) (- x))
+          (g_ok' (- x)
+             (open_interval_interval (Rmin ((- f)%F lb) ((- f)%F ub))
+                (Rmax ((- f)%F lb) ((- f)%F ub)) (- x) x_in_I''))) = 0 ->
+     False).
+intro Hf.
+apply Df_neq.
+destruct (f_deriv' (g (- - x))
+          (g_ok' (- x)
+          (open_interval_interval (Rmin ((- f)%F lb) ((- f)%F ub))
+          (Rmax ((- f)%F lb) ((- f)%F ub)) (- x) x_in_I''))) as (l1, Hl1).
+destruct (f_deriv (g x)
+          (g_ok x
+          (open_interval_interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) x
+          x_in_I))) as (l2, Hl2).
+assert (Hl1' := Hl1) ; rewrite Ropp_involutive in Hl1'.
+assert (Hl1'' := derivable_pt_lim_opp _ _ _ Hl2).
+assert (l1 = -l2) by (eapply uniqueness_limite ; eassumption).
+assert (l1 = 0).
+ rewrite derive_pt_eq in Hf.
+ eapply uniqueness_limite ; [apply Hl1 | apply Hf].
+rewrite H1 in H0.
+assert (l2 = 0) by (clear -H0 ; symmetry ; rewrite <- Ropp_involutive, <- H0 ; intuition).
+subst ; simpl ; reflexivity.
+
+assert (L := Main (-f)%F (fun x => g(-x)) lb ub (-x) x_in_I''
+           f_recip_g' g_ok' f_deriv' lb_lt_ub f_incr Df_neq').
+clear - L ; destruct L as (l, Hl) ; exists (-l) ; intros eps eps_pos ;
+ destruct (Hl eps eps_pos) as (delta, Hdelta) ; exists delta ;
+ intros h h_neq h_bd.
+ assert (R := Hdelta (-h)).
+ rewrite Ropp_plus_distr, Ropp_involutive in R.
+ apply Rle_lt_trans with (Rabs ((g (x + - - h) - g x) / - h - l)).
+ right ; rewrite <- Rabs_Ropp ; apply Rabs_eq_compat.
+ unfold Rminus, Rdiv ; rewrite Ropp_plus_distr ;
+ repeat rewrite Ropp_involutive ; field ; assumption.
+ apply R.
+ intro Hf ; apply h_neq.
+ symmetry ; rewrite <- Ropp_involutive ; intuition.
+ rewrite Rabs_Ropp ; assumption.
 
 Qed.

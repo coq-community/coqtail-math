@@ -27,6 +27,27 @@ Open Scope R_scope.
 
 Implicit Type r : R.
 
+Lemma Rmin_opp_opp_Rmax : forall r1 r2, Rmin (-r1) (-r2) = - (Rmax r1 r2).
+Proof.
+intros r1 r2 ; unfold Rmin, Rmax ; destruct (Rle_dec r1 r2) as [L1 | R1] ;
+ destruct (Rle_dec (-r1) (-r2)) as [L2 | R2].
+ assert (H := Ropp_le_cancel _ _ L2) ; apply Ropp_eq_compat ;
+  apply Rle_antisym ; assumption.
+ reflexivity.
+ reflexivity.
+ assert (H1 := Rnot_le_lt _ _ R1).
+ assert (H2 := Ropp_lt_cancel _ _ (Rnot_le_lt _ _ R2)).
+ apply False_ind ; apply Rlt_irrefl with r1 ; apply Rlt_trans with r2 ;
+  assumption.
+Qed.
+
+Lemma Rmax_opp_opp_Rmin : forall r1 r2, Rmax (-r1) (-r2) = - (Rmin r1 r2).
+Proof.
+intros r1 r2.
+replace (Rmin r1 r2) with (Rmin (--r1) (--r2)) by (rewrite Ropp_involutive ; intuition).
+ rewrite Rmin_opp_opp_Rmax ; rewrite Ropp_involutive ; reflexivity.
+Qed.
+
 Lemma Rmin_eq_l : forall r1 r2, r1 <= r2 -> Rmin r1 r2 = r1.
 Proof.
 intros r1 r2 r1_le_r2 ; unfold Rmin ; destruct (Rle_dec r1 r2).
