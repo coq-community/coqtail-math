@@ -625,6 +625,7 @@ Ltac elim_ident :=
 elim_infequal ; 
 match goal with 
 	| |- (?X1 = ?X2) => elim_ident1 X1 ; elim_ident1 X2
+	| |- (?X1 < ?X2) => elim_ident1 X1 ; elim_ident1 X2
 
 end.
 

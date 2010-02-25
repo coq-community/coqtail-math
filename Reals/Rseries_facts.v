@@ -739,7 +739,24 @@ unfold Rseq_minus.
 ring.
 Qed.
 
+Lemma Rser_rem_scal : forall x (Un : Rseq) lu n (Vn := (fun n => x * Un n )%R)  
+  (Hlu : Rser_cv Un lu) (Hlv : Rser_cv Vn (x * lu)),
+   (x * Rser_rem Un lu Hlu n = Rser_rem Vn (x * lu) Hlv n)%R.
+Proof.
+intros x Un lu n Vn Hlu Hlv.
+unfold Rser_rem.
+rewrite Rmult_minus_distr_l. rewrite scal_sum.
+unfold Vn.
+induction n. 
+ simpl. ring.
+
+ repeat rewrite tech5. unfold Rminus in *. 
+ repeat rewrite Ropp_plus_distr. rewrite <- Rplus_assoc. rewrite IHn. ring.
+Qed.
+
 End Rser_rem.
+
+
 
 
 (** * Summing Landau's relations when the series converge*)
@@ -918,6 +935,82 @@ assert (EC : forall a b x, Rseq_cv (a + b - b)%Rseq x -> Rseq_cv a x).
   
   apply Rseq_constant_cv.
 Qed.
+
+Lemma Rser_cv_shift_rev : forall (Un : nat -> R) (l : R),
+  Rser_cv (Rseq_shift Un) l ->
+   Rser_cv Un (l + Un 0%nat).
+Proof.
+intros Un l H.
+apply Rseq_cv_shift_compat.
+assert (EC : forall a b x, Rseq_cv (a - b + b)%Rseq x -> Rseq_cv a x).
+ intros; apply Rseq_cv_eq_compat with (a - b + b)%Rseq.
+  intro; compute; field.
+  assumption.
+ 
+ apply EC with (Un O)%Rseq.
+  intros e1 ep; destruct (H e1 ep) as [N He]; exists N; intros n nN.
+  unfold Rseq_plus; unfold Rseq_shift. unfold Rseq_constant. unfold Rseq_minus.
+  generalize (He n nN) ; intros H1.
+  rewrite Rsum_shift in H1.
+  unfold Rseq_shift, Rseq_minus, Rseq_constant, Rseq_plus, Rseq_shift, Rseq_constant in H1.
+  unfold R_dist in *. ring_simplify (sum_f_R0 Un (S n) - Un 0%nat + Un 0%nat - (l + Un 0%nat)).
+  apply H1.
+Qed.
+
+(* TODO hide and/or move *)
+Lemma sum_minus: forall Un n n2, 
+- sum_f_R0 Un n + sum_f_R0 Un (S (n2 + n)) =
+sum_f_R0 (fun k : nat => Un (S n + k)%nat) n2.
+Proof.
+intros Un n n2.
+induction n2.
+ simpl. ring_simplify. rewrite plus_0_r. reflexivity.
+ 
+ repeat rewrite tech5. rewrite <- IHn2. 
+ rewrite <- plus_n_Sm. do 2 rewrite plus_Sn_m.
+ rewrite plus_comm.
+ ring.
+Qed.
+
+Lemma Rser_cv_shift_n : forall n (Un : nat -> R) (l : R),
+  Rser_cv (fun k : nat => Un (S n + k)%nat) (l) ->
+    Rser_cv Un (l + sum_f_R0 Un n).
+Proof.
+intros n Un l Hun.
+unfold Rser_cv in *. unfold Rseq_cv in *.
+intros eps Heps. destruct (Hun eps Heps) as (N, Hun1). clear Hun.
+exists (S n + N)%nat. intros n1 Hn1.
+pose (n2 := (n1 - S n)%nat).
+assert (H3 : (n2 >= N)%nat). unfold n2. intuition. 
+generalize (Hun1 n2 H3). intros Hun. clear Hun1.
+unfold R_dist in *. unfold Rminus. rewrite Ropp_plus_distr.
+rewrite Rplus_comm. rewrite Rplus_assoc.
+destruct n1.
+ simpl. unfold n2 in *. destruct n. inversion Hn1.
+ inversion H3. unfold minus in *. inversion Hn1.
+
+ replace (S n1) with (n2 + S n)%nat in * by (unfold n2 ; intuition).
+ rewrite <- plus_n_Sm. rewrite sum_minus.
+ rewrite Rplus_comm. apply Hun.
+Qed.
+
+Lemma Rser_cv_shift_n_rev : forall n (Un : nat -> R) (l : R),
+  Rser_cv Un (l + sum_f_R0 Un n) ->
+   Rser_cv (fun k : nat => Un (S n + k)%nat) (l).
+Proof.
+intros n Un l Hun.
+unfold Rser_cv, Rseq_cv in *. 
+intros eps Heps. destruct (Hun eps Heps) as (N, Hun1). clear Hun.
+exists (N - n)%nat. intros n1 Hn1.
+pose (n2 := S (n1 + n)%nat).
+assert (H3 : (n2 >= N)%nat). unfold n2. intuition. 
+generalize (Hun1 n2 H3). intros Hun. clear Hun1.
+unfold R_dist in *. unfold Rminus in Hun. rewrite Ropp_plus_distr in Hun.
+rewrite Rplus_comm in Hun. rewrite Rplus_assoc in Hun.
+rewrite <- sum_minus. fold n2.
+rewrite Rplus_comm in Hun. assumption.
+Qed.
+
 
 Lemma Rser_cv_sig_shift_compat Un : {l | Rser_cv Un l} -> {l | Rser_cv (Rseq_shift Un) l}.
 Proof.
@@ -1348,3 +1441,320 @@ apply Rser_pos_maj_cv_shift with (fun i => / INR (S i) ^ 2).
   apply Rle_pow; auto; INR_solve.
 apply Rser_cv_square_inv.
 Qed.
+
+
+(** * Rser_rem Rser compatibility with le lt... *)
+Lemma Rseq_le_limit : forall Un Vn lu lv,
+(forall k : nat, Un k < Vn k) -> Rseq_cv Un lu -> Rseq_cv Vn lv ->
+(forall k : nat, Un k - lu < 0) -> (forall k : nat, Vn k - lv < 0) ->
+lu <= lv.
+Proof.
+intros Un Vn lu lv Hlt Hcvlu Hcvlv H1 H2.
+unfold Rseq_cv in *.
+destruct (Req_dec lu lv) as [H3|H3].
+ intuition.
+ 
+ pose (eps := (lv - lu)%R).
+ destruct (Rtotal_order eps 0) as [H|[H|H]].
+  assert (Heps : -eps > 0). intuition.
+  destruct (Hcvlu (-eps)%R Heps) as (N1, Hcvlu1).
+  destruct (Hcvlv (-eps)%R Heps) as (N2, Hcvlv2).
+  clear Hcvlv Hcvlu H.
+  assert (H : {n | n >= (max N1 N2)}%nat). exists (max N1 N2). intuition.
+  destruct H as (n, Hn).
+  assert (Hn1 :  (n >= N1)%nat). apply le_trans with (max N1 N2) ; intuition.
+  assert (Hn2 :  (n >= N2)%nat). apply le_trans with (max N1 N2) ; intuition.
+  generalize (Hcvlu1 n Hn1). generalize (Hcvlv2 n Hn2). intros Hcvlv Hcvlu.
+  unfold R_dist, Rabs in *.
+  destruct (Rcase_abs (Vn n - lv)) as [He|He] ; [|generalize (H2 n) ; intros ; fourier].
+  destruct (Rcase_abs (Un n - lu)) as [He1|He1] ; [|generalize (H1 n) ; intros ; fourier].
+  unfold eps in *.
+  assert (Un n - lv > 0). fourier.
+  assert (lv > Vn n). fourier.
+  assert (Un n > Vn n). fourier. generalize (Hlt n) ; intros. fourier.
+
+  unfold eps in *. destruct H3 ; intuition. 
+
+  destruct (Hcvlu eps H) as (N1, Hcvlu1).
+  destruct (Hcvlv eps H) as (N2, Hcvlv2).
+  clear Hcvlv Hcvlu.
+  assert (H4 : {n | n >= (max N1 N2)}%nat). exists (max N1 N2). intuition.
+  destruct H4 as (n, Hn).
+  assert (Hn1 :  (n >= N1)%nat). apply le_trans with (max N1 N2) ; intuition.
+  assert (Hn2 :  (n >= N2)%nat). apply le_trans with (max N1 N2) ; intuition.
+  generalize (Hcvlu1 n Hn1). generalize (Hcvlv2 n Hn2). intros Hcvlv Hcvlu.
+  clear Hcvlu1 Hcvlv2.
+  unfold R_dist in *. unfold Rabs in *.
+  destruct (Rcase_abs (Vn n - lv)) as [He|He] ; [|generalize (H2 n) ; intros ; fourier].
+  destruct (Rcase_abs (Un n - lu)) as [He1|He1] ; [|generalize (H1 n) ; intros ; fourier].
+  unfold eps in *.
+  left. apply Rlt_trans with (Vn n) ; fourier.
+Qed.
+(*TODO to move and rename *)
+Lemma sum_lt : forall Un Vn n, (forall k, Un k < Vn k) ->  
+sum_f_R0 Un n < sum_f_R0 Vn n.
+Proof.
+intros Un Vn n Hlt.
+induction n.
+ simpl. apply Hlt.
+
+ do 2 rewrite tech5.
+ apply Rplus_lt_compat.
+  apply IHn.
+
+  apply Hlt.
+Qed.
+
+Lemma Rser_Rser_rem_equiv : forall Un Vn x l (H : Rser_cv Vn l) n,
+  (forall k, (k > n)%nat -> Un (k - S n)%nat = Vn k) -> 
+   Rser_cv Un x -> x = Rser_rem Vn l H n.
+Proof.
+intros Un Vn x l Hv n Heq Hu.
+assert ( Hucv : Rseq_cv Un 0). apply Rser_cv_zero with x. assumption.
+unfold Rser_rem.
+assert (forall k, (k > n)%nat -> sum_f_R0 Un (k - S n)%nat 
++ sum_f_R0 Vn n = sum_f_R0 Vn k).
+ intros k Hk.
+ induction Hk. 
+  rewrite <- minus_diag_reverse. simpl.
+  rewrite (minus_diag_reverse (S n)). rewrite Heq. ring. intuition.
+  
+  rewrite tech5. rewrite <- IHHk. rewrite <- minus_Sn_m.
+  rewrite tech5. repeat rewrite Rplus_assoc. apply Rplus_eq_compat_l.
+  rewrite minus_Sn_m. rewrite Heq. ring. intuition. apply Hk. apply Hk.
+assert (Rser_cv (Vn - Un)%Rseq (l - x)).
+ apply Rser_cv_minus_compat ; assumption.
+assert (Rser_cv (Vn - Un)%Rseq (sum_f_R0 Vn n)).
+ intros eps Heps. 
+ assert (Heps1 : eps / INR (S n) > 0). 
+  assert (/INR (S n) > 0) by intuition.
+  unfold Rdiv. apply Rmult_gt_0_compat ; assumption.
+ destruct (Hucv (eps/INR (S n)) Heps1) as (N, HucvN).
+ exists (2 * S n + N)%nat. intros n1 Hn1.
+ unfold R_dist, Rseq_minus.
+ rewrite minus_sum. rewrite <- H.
+  ring_simplify ( sum_f_R0 Un (n1 - S n) + sum_f_R0 Vn n - sum_f_R0 Un n1 - sum_f_R0 Vn n).
+  apply Rlt_le_trans with (INR (S n) * (eps / INR (S n))).
+   eapply Rlt_le_trans with (sum_f_R0 (fun n0 => eps / INR (S n)) (n)).
+    assert (n1 >= 2 * S n)%nat. intuition.
+    pose (n2 := (n1 - S n)%nat). fold n2. replace n1 with (n2 + S n)%nat by (unfold n2 ; intuition).
+    rewrite <- Rabs_Ropp. rewrite Ropp_minus_distr. unfold Rminus. 
+    rewrite Rplus_comm. rewrite <- plus_n_Sm. rewrite plus_comm. 
+    rewrite sum_minus. eapply Rle_lt_trans with (sum_f_R0 (fun k : nat => Rabs (Un (S n2 + k)%nat)) n ).
+     apply Rsum_abs.
+
+     apply sum_lt. unfold R_dist in HucvN.
+     intros k. rewrite <- (Rminus_0_r (Un (S n2 + k)%nat)). apply HucvN.
+     unfold n2. assert (n1 - S n >= S n + N)%nat. intuition. intuition.
+    
+    rewrite sum_cte. right. unfold Rdiv. ring.
+   right. field. apply not_0_INR ; intuition.
+  intuition.
+assert (H2 : l - x = sum_f_R0 Vn n) by (apply (Rseq_cv_unique (sum_f_R0 (Vn - Un)%Rseq)) ; intuition).
+rewrite <- H2. ring.
+Qed.
+
+(* TODO to move and rename *)
+Lemma sum_pos_minus : forall Un n k, (n >= k)%nat ->
+  (forall i, (i > k)%nat -> Un i >= 0) ->
+    sum_f_R0 Un n - sum_f_R0 Un k >= 0.
+Proof.
+intros Un n k Hnk Hpos.
+induction Hnk.
+ right. ring.
+
+ rewrite tech5. rewrite Rplus_comm. unfold Rminus in *. rewrite Rplus_assoc.
+ replace 0 with (0 + 0) by intuition.
+ apply Rle_ge. apply Rplus_le_compat ; intuition.
+Qed.
+
+Lemma Rser_rem_pos : forall Un k lu (Hlu : Rser_cv Un lu) , 
+  (forall n, (n > k)%nat -> Un n >= 0) ->
+   {n | (n > k)%nat /\ Un n > 0} ->
+    Rser_rem Un lu Hlu k > 0.
+Proof.
+intros Un k lu Hlu Hpos Hstrict.
+unfold Rser_cv, Rseq_cv in Hlu.
+unfold Rser_rem.
+destruct Hstrict as [n1 [Hn1k Heps]].
+destruct (Hlu (Un n1) Heps) as (N, Hlu1).
+assert (H2 : {n | n >= N /\ n >= S n1}%nat) by (exists (max N (S n1)) ; intuition).
+destruct H2 as [n [HnN Hnk]].
+generalize (Hlu1 n HnN). intros H5.
+replace (lu - sum_f_R0 Un k) with ((lu - sum_f_R0 Un n) + (sum_f_R0 Un n - sum_f_R0 Un k)) by ring.
+replace 0 with (-Un (n1) + Un (n1)) by intuition.
+apply Rplus_lt_le_compat.
+ unfold R_dist, Rabs in *. destruct (Rcase_abs (sum_f_R0 Un n - lu)) ; fourier.
+ 
+ intuition. clear HnN H5. 
+ induction Hnk.
+  rewrite tech5. rewrite sum_N_predN ; [|inversion Hn1k ; intuition].
+  unfold Rminus. rewrite Rplus_comm. repeat rewrite <- Rplus_assoc.
+  replace (Un n1) with (0 + Un n1) by intuition. rewrite Rplus_assoc.
+  apply Rplus_le_compat.
+   rewrite Rplus_comm. apply Rge_le. apply sum_pos_minus ; intuition.
+   
+   ring_simplify. replace (Un n1) with (Un n1 + 0) by intuition.
+   apply Rplus_le_compat ; intuition.
+ 
+ apply Rle_trans with (sum_f_R0 Un m - sum_f_R0 Un k).
+  apply IHHnk.
+
+  rewrite tech5. ring_simplify.
+  assert (Un (S m) >= 0) by intuition. fourier.
+Qed.
+
+Lemma Rser_rem_lt_le : forall Un lu lv (n : nat) Vn 
+  (Hlu : Rser_cv Un lu) (Hlv : Rser_cv Vn lv),
+   (forall k, (k > n)%nat -> Un k <= Vn k) ->
+    {k | (k > n)%nat /\ Un k < Vn k} ->
+     Rser_rem Un lu Hlu n < Rser_rem Vn lv Hlv n.
+Proof.
+intros Un lu lv n Vn Hlu Hlv Hle Hlt.
+assert (Rser_cv (Vn - Un)%Rseq (lv - lu)).
+ apply Rser_cv_minus_compat ; assumption.
+
+assert (Hpos : (forall k, (k > n)%nat -> Vn k - Un k >= 0)). 
+ intros. apply Rge_minus. apply Rle_ge. apply Hle. assumption.
+
+apply Rminus_gt. generalize (Rser_rem_minus_compat Vn Un lv lu Hlv Hlu n).
+intros Hrewrite. unfold Rseq_minus in Hrewrite. rewrite Hrewrite.
+apply Rser_rem_pos. 
+ apply Hpos. 
+
+ destruct Hlt as [k [Hkn Hlt]].
+exists k. 
+split. 
+ apply Hkn.
+
+ apply Rgt_minus. apply Hlt.
+Qed.
+
+(* begin hide *)
+Lemma seq_exist_subproof :  forall Un Vn n, 
+  (forall k, (k > n)%nat -> Vn k <= Un (k - S n)%nat) ->
+    {k | (k > n)%nat /\ Vn k < Un (k - S n)%nat} ->
+      {Wn : (nat -> R)&{k | (forall k1, Vn k1 + Wn k1 = Un (k1 - S n)%nat /\ 
+        ((k1 > n)%nat -> Wn k1 >= 0)) /\
+          (k > n)%nat /\ Wn k > 0}}.
+Proof.
+intros Un Vn n Hle Hlt.
+pose (Un1 := fun k => Un (k - S n)%nat).
+pose (Wn := (Un1 - Vn)%Rseq).
+destruct Hlt as [k [Hnk Hlt]].
+exists Wn. exists k.
+split. 
+ unfold Wn. unfold Rseq_minus, Un1; intuition.
+ apply Rge_minus. apply Rle_ge. apply Hle. assumption.
+
+ split ; [assumption|unfold Wn, Rseq_minus, Un1].
+ apply Rgt_minus. assumption.
+Qed.
+
+Lemma Rsum_eq_compat1 :  forall Un Vn n, 
+  (forall k, (k <= n)%nat -> Un k = Vn k) ->
+    sum_f_R0 Un n = sum_f_R0 Vn n.
+Proof.
+intros Un Vn n Hk.
+induction n.
+ simpl. apply Hk ; intuition.
+
+ do 2 rewrite tech5.
+ rewrite IHn. rewrite Hk. ring.
+  intuition.
+  intuition.
+Qed.
+
+Lemma sum_reorder_0 : forall Un n N, (n <= N)%nat -> 
+  sum_f_R0 (fun k0 : nat => Un (k0 - N)%nat) n =
+    INR (S n) * Un O.
+Proof.
+intros Un n N HnN.
+induction n.
+ simpl ; ring.
+
+ rewrite tech5. rewrite IHn ; intuition.
+ do 3 rewrite S_INR.
+ inversion HnN.
+  rewrite minus_diag. ring.
+   
+  rewrite not_le_minus_0. 
+   ring.
+   intuition.
+Qed.   
+
+Lemma Rser_cv_reorder : forall n Un l, 
+  Rser_cv Un l ->
+    Rser_cv (fun k => Un (k - S n)%nat) (l + INR (S n) * (Un O)).
+Proof.
+intros n Un l Uncv.
+intros eps Heps.
+destruct (Uncv eps Heps) as (N, Hn).
+exists (S n + N)%nat.
+intros k Hk.
+assert (HkN : (k >= N)%nat) by intuition.
+generalize (Hn k HkN) ; intros Hcv.
+unfold R_dist in *.
+assert (forall k n, (k >= S n)%nat -> sum_f_R0 (fun k0 : nat => Un (k0 - S n)%nat) k =
+  sum_f_R0 Un (k - S n) + INR (S n) * Un O).
+ intros m n0 Hmn0.
+ induction Hmn0.
+  induction n0.
+   simpl. ring.
+   
+   rewrite sum_reorder_0. repeat rewrite S_INR.
+    rewrite <- minus_diag_reverse.
+    simpl. ring.
+    
+    intuition.
+   rewrite tech5. rewrite IHHmn0. rewrite <- minus_Sn_m.
+    rewrite tech5. ring.
+
+    intuition.
+  rewrite H. ring_simplify (sum_f_R0 Un (k - S n) + INR (S n) * Un 0%nat - (l + INR (S n) * Un 0%nat)).
+   assert (k - S n >= N)%nat by intuition. 
+   generalize (Hn (k - S n)%nat H0). intuition.
+   
+   intuition.
+Qed.
+(* end hide *)
+
+Lemma Rser_Rser_rem_lt_le : forall Un Vn x l (H : Rser_cv Vn l) n,
+  (forall k, (k > n)%nat -> Vn k <= Un (k - S n)%nat) ->
+   {k | (k > n)%nat /\ Vn k < Un (k - S n)%nat} ->
+    Rser_cv Un x -> Rser_rem Vn l H n < x.
+Proof.
+intros Un Vn x l Hv n Hle Hlt Hu.
+destruct (seq_exist_subproof Un Vn n Hle Hlt) as (Wn, [k2 [Hwn11 [Hwn2 Hwn3]]]).
+assert (Hwn :  Rser_cv Wn (x + INR (S n) * (Un O) - l)).
+ assert (H1 : Rser_cv (fun k => Un (k - S n)%nat) (x + INR (S n) * (Un O))).
+  apply Rser_cv_reorder. assumption.
+ 
+ apply Rser_cv_eq_compat with ((fun k => Un (k - S n)%nat) - Vn)%Rseq.
+  intros k. generalize (Hwn11 k) ; intros Hwn1. destruct Hwn1 as (Hwn1, _).
+  unfold Rseq_minus. rewrite <- Hwn1. ring.
+
+  apply Rser_cv_minus_compat ; intuition.
+pose (l1 := x + INR (S n) * Un 0%nat - l).
+assert (H1 : Rser_cv (Vn + Wn)%Rseq (l + l1)).
+ apply Rser_cv_plus_compat ; assumption.
+
+rewrite (Rser_Rser_rem_equiv Un (Vn + Wn)%Rseq x (l + l1) H1 n).
+ apply Rser_rem_lt_le. 
+  unfold Rseq_plus. intuition.
+  replace (Vn k) with (Vn k + 0) by intuition.
+  apply Rplus_le_compat.
+   intuition. 
+
+   destruct (Hwn11 k) as (_, Hwn1). destruct (Hwn1 H) ; intuition.
+
+  destruct Hlt as (k, H2). exists k ; intuition.
+  destruct (Hwn11 k) as (Hwn1, Hwn5). unfold Rseq_plus. rewrite Hwn1. intuition.
+
+ intros k Hkn.
+ destruct (Hwn11 k) as (Hwn1, Hwn5). unfold Rseq_plus. rewrite Hwn1. intuition.
+
+ assumption.
+Qed.
+
+
