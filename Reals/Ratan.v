@@ -28,7 +28,9 @@ Require Import Rfunctions.
 Require Import AltSeries.
 Require Import Rseries.
 Require Import SeqProp.
-Require Import MyRanalysis5.
+Require Import Ranalysis_def.
+Require Import Ranalysis5_clean.
+Require Import RIVT.
 Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
 Open Scope R_scope.
@@ -209,7 +211,9 @@ intros lb ub y lb_lt_ub lb_cond ub_cond y_encad.
        apply Rlt_minus. assumption.
       assert (H2 : 0 < (fun x : R => tan x - y) ub).
        apply Rgt_minus. assumption.
-     destruct (IVT_interv (fun x => tan x - y) lb ub Cont lb_lt_ub H1 H2) as (x,Hx).
+      assert (Hinterval : interval ((fun x : R => tan x - y) lb) ( (fun x : R => tan x - y) ub) 0) by
+       (unfold interval ; split ; intuition).
+     destruct (IVT_interv (fun x => tan x - y) lb ub Cont lb_lt_ub Hinterval) as (x,Hx).
      exists x.
      destruct Hx as (Hyp,Result).
      intuition.
@@ -219,15 +223,15 @@ intros lb ub y lb_lt_ub lb_cond ub_cond y_encad.
        apply Rgt_not_eq ; assumption.
       clear - Temp2 Result. apply Temp2.
       intuition.
-     clear -Temp2 H3.
-      case H3 ; intuition. apply False_ind ; apply Temp2 ; symmetry ; assumption.
+     clear -Temp2 Hyp.
+      case (proj1 Hyp) ; intuition. apply False_ind ; apply Temp2 ; symmetry ; assumption.
       assert (Temp : x <> ub).
       intro Hfalse. rewrite Hfalse in Result.
       assert (Temp2 : y <> tan ub).
        apply Rlt_not_eq ; assumption.
       clear - Temp2 Result. apply Temp2.
       intuition.
-      case H4 ; intuition.
+      case (proj2 Hyp) ; intuition.
 Qed.
 
 Lemma exists_myatan : forall lb ub y, -PI/2 < lb -> ub < PI/2 -> lb < ub ->
@@ -642,7 +646,7 @@ rewrite H.
 reflexivity.
 Qed.
 
-Lemma continuity_pt_tan : forall x, -PI/2 < x < PI/2 -> continuity_pt tan x.
+Lemma continuity_open_interval_tan : continuity_open_interval tan (-PI/2) (PI/2).
 Proof.
 intros x Hx.
 apply derivable_continuous_pt.
@@ -663,23 +667,18 @@ destruct lb_def as (lb_def, _).
 destruct ub_def as (_, ub_def).
 assert (Pr : tan lb <= y <= tan ub).
 split ; fourier.
-apply continuity_pt_recip_interv with tan lb ub ; intuition.
-apply tan_increasing2. eapply Rlt_le_trans. apply lb_def. assumption.
-assumption. eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
-apply tanarctan. 
-rewrite <- (arctantan lb).
-destruct H3 as [H3|H3].
-left. apply arctan_increasing. assumption.
-right. rewrite H3. reflexivity.
-intuition. eapply Rlt_trans. apply lb_lt_ub. assumption.
-rewrite <- (arctantan ub).
-destruct H4 as [H4|H4].
-left. apply arctan_increasing. assumption.
-right. rewrite H4. reflexivity.
-intuition. eapply Rlt_trans. apply lb_def. assumption.
-apply continuity_pt_tan.
-split. eapply Rlt_le_trans. apply lb_def. assumption.
-eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
+apply continuity_reciprocal_strictly_increasing_interval with tan lb ub ; intuition.
+intros a b a_in_I b_in_I a_lt_b ; apply tan_increasing2 ; unfold interval in * ; intuition.
+eapply Rlt_le_trans. apply lb_def. assumption.
+eapply Rle_lt_trans ; [| eassumption] ; assumption.
+intros a a_in_I ; apply arctantan ; split ; unfold interval, id in *.
+apply Rlt_le_trans with lb ; intuition.
+apply Rle_lt_trans with ub ; intuition.
+intros a a_in_I ; apply continuity_open_interval_tan ; split ;
+ [apply Rlt_le_trans with lb | apply Rle_lt_trans with ub] ;
+ unfold interval in a_in_I ; intuition.
+split. eapply Rle_lt_trans ; [eapply Rmin_l |] ; assumption.
+eapply Rlt_le_trans ; [| eapply RmaxLess2] ; assumption.
 Qed.
 
 Lemma arctan_increasing_le : forall x y, x <= y -> arctan x <= arctan y.
@@ -704,28 +703,28 @@ destruct ub_def as (_, ub_def).
 assert (Pr : tan lb <= y <= tan ub).
 split ; fourier.
 destruct (exists_myatan lb ub y lb_def ub_def lb_lt_ub Pr) as (x, atanx).
-assert (x_encad : tan lb < y < tan ub) by intuition.
-assert (f_eq_g : forall x, tan lb <= x -> x <= tan ub -> comp tan arctan x = id x).
-intuition. apply tanarctan.
-assert (g_wf:forall x : R, tan lb <= x -> x <= tan ub -> lb <= arctan x <= ub).
-intuition. rewrite <- (arctantan lb).
+assert (x_encad : open_interval (tan lb) (tan ub) y) by (unfold open_interval ; intuition).
+assert (f_eq_g : reciprocal_interval tan arctan (tan lb) (tan ub)).
+unfold reciprocal_interval ; intuition ; apply tanarctan.
+assert (g_wf:forall x : R, interval (tan lb) (tan ub) x -> interval lb ub (arctan x)).
+unfold interval ; intuition. rewrite <- (arctantan lb).
 apply arctan_increasing_le. assumption.
 split. assumption. eapply Rlt_trans. apply lb_lt_ub. assumption.
 rewrite <- (arctantan ub). 
 apply arctan_increasing_le. assumption.
 split. eapply Rlt_trans. apply lb_def. assumption. assumption.
-assert (f_incr:forall x y : R, lb <= x -> x < y -> y <= ub -> tan x < tan y).
-intros. apply tan_increasing2 ; intuition.
-eapply Rlt_le_trans. apply lb_def. assumption.
-eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
-assert (fderivable : forall a : R, lb <= a <= ub -> derivable_pt tan a).
-intros. apply derivable_pt_tan. intuition.
-eapply Rlt_le_trans. apply lb_def. assumption.
-eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
+assert (f_incr : strictly_increasing_interval tan lb ub).
+unfold strictly_increasing_interval ; intros. apply tan_increasing2 ; intuition.
+eapply Rlt_le_trans. apply lb_def. apply (proj1 H0).
+eapply Rle_lt_trans ; [| apply ub_def] ; apply (proj2 H2).
+assert (fderivable : derivable_interval tan lb ub).
+unfold derivable_interval ; intros. apply derivable_pt_tan. intuition.
+eapply Rlt_le_trans. apply lb_def. apply (proj1 H0).
+eapply Rle_lt_trans ; [| apply ub_def] ; apply (proj2 H0).
 apply derivable_pt_recip_interv with tan lb ub lb_lt_ub x_encad f_eq_g g_wf f_incr fderivable.
 destruct atanx as (atanx1, atanx2).
 unfold derive_pt. unfold proj1_sig.
-destruct derivable_pt_recip_interv_prelim1 as (x0, H10).
+destruct derivable_pt_reciprocal_interval_rev as (x0, H10).
 assert (PR : -PI/2 < x < PI/2).
 destruct atanx1 as (atanx11, atanx12).
 split. eapply Rlt_le_trans. apply lb_def. assumption.
@@ -799,15 +798,17 @@ simpl.
 rewrite arctanx in *.
 assert (x1 = x0). apply (uniqueness_limite tan (arctan y)).
 assumption. assumption.
-intuition. intuition. assumption.
-intros. rewrite <- tanarctan. intuition.
-intro H10.
-rewrite derive_pt_tan2 in H10. 
+intuition. intuition. unfold reciprocal_open_interval ; intros ; apply f_eq_g ;
+try (apply open_interval_interval ; assumption) ; intuition.
+left ; apply (proj1 H0).
+left ; apply (proj2 H0).
+intro Hf.
 assert (1 + tan (arctan y) ^ 2 > 0).
-apply plus_Rsqr_gt_0. fourier.
-intro H11.
-apply cos_eq_0_0 in H11.
-destruct H11 as (k, H11).
+apply plus_Rsqr_gt_0.
+rewrite derive_pt_tan2 in Hf.
+fourier.
+intro Hf2 ; apply cos_eq_0_0 in Hf2.
+destruct Hf2 as (k, H11).
 generalize (arctan_lt_PI2 y).
 generalize (arctan_lt_mPI2 y).
 intros H12 H14.

@@ -648,7 +648,8 @@ apply Rint_derive.
 Qed.
 
 Require Import Ranalysis1.
-Require Import MyRanalysis5.
+Require Import Ranalysis_def.
+Require Import Ranalysis5_clean.
 
 Lemma Rint_substitution f' g g' a b I:
   a <= b ->
@@ -669,12 +670,12 @@ destruct (continuity_ab_maj g a b Hab Hgcont) as [d Hd].
 assert (Hf'cont : forall y, g c <= y <= g d -> continuity_pt f' y).
  intros y Hy.
  destruct (total_order_T c d) as [[r|r]|r].
-  destruct (f_interv_is_interv g c d y r Hy) as [?[]].
-   intros; apply Hgcont; split.
+  destruct (continuity_interval_image_interval g c d y (Rlt_le _ _ r) Hy) as [?[]].
+   intros x x_encad eps ; apply Hgcont ; split ; unfold interval in *.
     apply Rle_trans with c; intuition.
     apply Rle_trans with d; intuition.
    subst.
-   apply Hcontf; split.
+   apply Hcontf; split ; unfold interval in *.
     apply Rle_trans with c; intuition.
     apply Rle_trans with d; intuition.
   
@@ -682,16 +683,16 @@ assert (Hf'cont : forall y, g c <= y <= g d -> continuity_pt f' y).
   replace y  with (g d) by intuition.
   intuition.
   
-  destruct (f_interv_is_interv (-g)%F d c (-y) r) as [?[]].
-   unfold opp_fct; intuition.
+  destruct (continuity_interval_image_interval (-g)%F d c (-y) (Rlt_le _ _ r)) as [?[]].
+   unfold opp_fct, interval; intuition.
    
-   intros; apply continuity_pt_opp; apply Hgcont; split.
+   intros x x_encad eps; apply continuity_pt_opp; apply Hgcont; split ; unfold interval in *.
     apply Rle_trans with d; intuition.
     apply Rle_trans with c; intuition.
    
    unfold opp_fct in * |-.
    replace y with (g x).
-    apply Hcontf; split.
+    apply Hcontf; split ; unfold interval in *.
      apply Rle_trans with d; intuition.
      apply Rle_trans with c; intuition.
     rewrite <- Ropp_involutive.
