@@ -334,7 +334,7 @@ field; repeat split.
 Qed.
 
 Lemma Stirling_subproof_tech_admitted : 
-  exists l : R, l <> 0 /\ (fun n => fact n) ~ (fun n => (n /(exp 0)) ^ n * sqrt n * l).
+  exists l : R, l <> 0 /\ (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l).
 Admitted.
 
 Lemma Wallis_quotient_lim2 l : 
