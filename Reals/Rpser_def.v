@@ -24,6 +24,7 @@ Require Export MyReals.
 Require Import Max.
 Require Import Tools.
 Require Import Fourier.
+Require Import Rsequence_base_facts.
 
 Open Local Scope R_scope.
 
@@ -94,6 +95,68 @@ intros An r r' r'_bd Rho.
   assumption.
   rewrite Rmult_1_l ; rewrite Rmult_comm ; apply HC ; exists i ; reflexivity.
   field ; apply pow_nonzero ; assumption.
+Qed.
+
+Lemma Cv_radius_weak_padding_pos_compat : forall (An : nat -> R) (r : R),
+     Cv_radius_weak An r -> forall N, Cv_radius_weak (fun n => An (n + N)%nat) r.
+Proof.
+intros An r Rho N.
+ destruct (Req_dec r 0) as [r_eq | r_neq].
+  rewrite r_eq ; exists (Rabs (An N)).
+  intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn ; unfold gt_abs_Pser ; destruct n.
+  simpl ; rewrite Rmult_1_r ; right ; reflexivity.
+  rewrite Rabs_mult, pow_i,
+  Rabs_R0, Rmult_0_r ; [apply Rabs_pos | intuition].
+ destruct Rho as [M HM].
+ exists (M * (/ Rabs r) ^ N)%R.
+ intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
+ unfold gt_abs_Pser ; simpl.
+ rewrite Rabs_mult ; apply Rle_trans with (Rabs (An (n + N)%nat) * Rabs (r ^ n) *
+ (Rabs r ^ N) * ((/Rabs r) ^ N))%R.
+ right ; repeat rewrite Rmult_assoc ; repeat apply Rmult_eq_compat_l.
+ rewrite <- Rpow_mult_distr, Rinv_r, pow1, Rmult_1_r ; [reflexivity |
+ apply Rabs_no_R0 ; assumption].
+ apply Rmult_le_compat_r.
+ apply pow_le ; left ; apply Rinv_0_lt_compat ; apply Rabs_pos_lt ; assumption.
+ rewrite Rmult_assoc, RPow_abs ; apply HM.
+ exists (n + N)%nat ; unfold gt_abs_Pser.
+ repeat rewrite Rabs_mult ; apply Rmult_eq_compat_l ;
+ rewrite <- Rabs_mult ; apply Rabs_eq_compat.
+ symmetry ; apply pow_add.
+Qed.
+
+Lemma Cv_radius_weak_padding_neg_compat : forall (An : nat -> R) (r : R) (N : nat),
+     Cv_radius_weak (fun n => An (n + N)%nat) r -> Cv_radius_weak An r.
+Proof.
+intros An r N Rho.
+ destruct Rho as [M HM].
+ destruct (Rseq_partial_bound (fun n => (An n) * r ^ n) N) as [M' HM'].
+ destruct (Req_dec r 0) as [r_eq | r_neq].
+ exists (Rabs (An 0%nat)) ; intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
+  unfold gt_abs_Pser ; destruct n.
+   simpl ; rewrite Rmult_1_r ; right ; reflexivity.
+   rewrite Rabs_mult, r_eq, pow_i, Rabs_R0,  Rmult_0_r ; [apply Rabs_pos | intuition].
+ exists (Rmax (M * Rabs (r ^ N)) M') ; intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
+ destruct (le_lt_dec n N) as [n_lb | n_ub].
+ apply Rle_trans with M' ; [apply HM' | apply RmaxLess2] ; assumption.
+ apply Rle_trans with (M * Rabs (r ^ N))%R ; [| apply RmaxLess1] ; unfold gt_abs_Pser.
+ apply Rle_trans with (Rabs (An n * r ^ n) * (/ Rabs (r ^ N)) * Rabs (r ^ N))%R.
+ right ; field ; apply Rabs_no_R0.
+ apply pow_nonzero ; assumption.
+  apply Rmult_le_compat_r ; [apply Rabs_pos |].
+  apply HM ; exists (n - N)%nat.
+  unfold gt_abs_Pser.
+  rewrite <- RPow_abs, Rinv_pow, <- Rabs_Rinv, RPow_abs, <- Rabs_mult,
+  <- Rinv_pow.
+  assert (Hrew : (n = n - N + N)%nat).
+   intuition.
+   repeat rewrite Rabs_mult ; rewrite Hrew at 1 ; rewrite Rmult_assoc ;
+   apply Rmult_eq_compat_l ; rewrite <- Rabs_mult ; apply Rabs_eq_compat.
+   rewrite Hrew at 1 ; rewrite pow_add, Rmult_assoc, Rinv_r, Rmult_1_r ;
+   [reflexivity | apply pow_nonzero ; assumption].
+   assumption.
+   assumption.
+   apply Rabs_no_R0 ; assumption.
 Qed.
 
 Lemma Cv_radius_weak_plus : forall (An Bn : nat -> R) (r1 r2 : R),
