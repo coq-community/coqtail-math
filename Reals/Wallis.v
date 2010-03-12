@@ -339,27 +339,27 @@ Admitted.
 
 Lemma Wallis_quotient_lim2 l : 
 l <> 0 ->
-  (fun n => fact n) ~ (fun n => (n /(exp 0)) ^ n * sqrt n * l) ->
+  (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l) ->
     Rseq_cv (fun n => W_odd n / W_even n) (l²/(2*PI)).
 Proof.
 intros l Hneq Hl.
 apply Rseq_cv_eq_compat with (fun n => (2*2 ^ (4*n) * (fact n) ^ 4)/(PI*fact (2 * n) * fact (S (2 * n)))).
   intro; rewrite Wallis_quotient; reflexivity.
-assert (H2n : (fun n : nat => fact (2*n)) ~ (fun n : nat => (2*n / exp 0) ^ (2*n) * sqrt (2*n) * l)).
+assert (H2n : (fun n : nat => fact (2*n)) ~ (fun n : nat => (2*n / exp 1) ^ (2*n) * sqrt (2*n) * l)).
   pose (mult 2) as db.
-  apply Rseq_equiv_eq_compat with (fun n => fact (db n)) (fun k => (fun n : nat => (n / exp 0) ^ n * sqrt n * l) (db k)).
+  apply Rseq_equiv_eq_compat with (fun n => fact (db n)) (fun k => (fun n : nat => (n / exp 1) ^ n * sqrt n * l) (db k)).
   intro n; unfold db; reflexivity.
   intro n; unfold db; rewrite mult_INR; reflexivity.
-  apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 0) ^ k * sqrt k * l)(phi := db).
+  apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l)(phi := db).
   assumption.
   apply extractor_mult_2.
 
-assert (H2n1 : (fun n : nat => fact (S(2*n))) ~ (fun n : nat => (S(2*n) / exp 0) ^ (S(2*n)) * sqrt (S(2*n)) * l)).
+assert (H2n1 : (fun n : nat => fact (S(2*n))) ~ (fun n : nat => (S(2*n) / exp 1) ^ (S(2*n)) * sqrt (S(2*n)) * l)).
   pose (fun n => S (mult 2 n)) as db.
-  apply Rseq_equiv_eq_compat with (fun n => fact (db n)) (fun k => (fun n : nat => (n / exp 0) ^ n * sqrt n * l) (db k)).
+  apply Rseq_equiv_eq_compat with (fun n => fact (db n)) (fun k => (fun n : nat => (n / exp 1) ^ n * sqrt n * l) (db k)).
   intro n; unfold db; reflexivity.
   intro n; unfold db; reflexivity.
-  apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 0) ^ k * sqrt k * l)(phi := db).
+  apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l)(phi := db).
   assumption.
   unfold db; apply extractor_comp.
   apply extractor_S.
@@ -373,17 +373,41 @@ apply Rseq_equiv_eq_compat with
 intro n; unfold Rseq_mult, Rseq_inv, Rdiv, Rseq_constant; ring.
 intro; reflexivity.
 apply Rseq_equiv_trans with 
-(2 * (fun n => 2 ^ (4 * n)) * ((fun n : nat => ((n / exp 0) ^ n * sqrt n * l)%R))*((fun n : nat => ((n / exp 0) ^ n * sqrt n * l)%R))*((fun n : nat => ((n / exp 0) ^ n * sqrt n * l)%R))*((fun n : nat => ((n / exp 0) ^ n * sqrt n * l)%R))*
-  / (PI * (fun n : nat => ((2 * n / exp 0) ^ (2 * n) * sqrt (2 * n) * l)%R) *  (fun n => (S (2 * n) / exp 0) ^ S (2 * n) * sqrt (S (2 * n)) * l)%R)).
+(2 * (fun n => 2 ^ (4 * n)) * ((fun n : nat => ((n / exp 1) ^ n * sqrt n * l)%R))*((fun n : nat => ((n / exp 1) ^ n * sqrt n * l)%R))*((fun n : nat => ((n / exp 1) ^ n * sqrt n * l)%R))*((fun n : nat => ((n / exp 1) ^ n * sqrt n * l)%R))*
+  / (PI * (fun n : nat => ((2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)%R) *  (fun n => (S (2 * n) / exp 1) ^ S (2 * n) * sqrt (S (2 * n)) * l)%R)).
 
 repeat apply Rseq_equiv_mult_compat;
   try apply Rseq_equiv_refl; try assumption.
-apply Rseq_equiv_inv_compat.
-intro n; unfold Rseq_mult, Rseq_constant.
-admit. (* repeat apply Rmult_integral_contrapositive_currified *)
+apply Rseq_equiv_inv_compat. (*TODO : 2eme subgoal sqrt 2* n <> 0 etait faux. Generalisation du lemme*)
+exists O. intros n Hn.
+unfold Rseq_mult, Rseq_constant.
+apply Rmult_integral_contrapositive ; split ; 
+[ apply Rmult_integral_contrapositive ; split ; 
+[ apply PI_neq0 | apply INR_fact_neq_0] | apply INR_fact_neq_0 ].
 
-intro n; unfold Rseq_mult, Rseq_constant.
-admit. (* repeat apply Rmult_integral_contrapositive_currified *)
+exists (S O). intros n Hn; unfold Rseq_mult, Rseq_constant.
+(* crade *)
+assert(H : {m | n = S m}). exists (pred n). intuition.
+destruct H as (m, Subst).
+rewrite Subst.
+(* fin crade *)
+apply Rmult_integral_contrapositive ; split ; 
+[ apply Rmult_integral_contrapositive ; split ; 
+[ apply PI_neq0 | apply Rmult_integral_contrapositive ; split ; 
+[ apply Rmult_integral_contrapositive ; split ; 
+[ (apply pow_nonzero ; unfold Rdiv ; apply Rmult_integral_contrapositive ; split ;
+[ apply Rmult_integral_contrapositive ; split ; 
+[ (intro ; fourier) | (apply not_0_INR ; intuition) ] | (apply Rinv_neq_0_compat ; generalize (exp_pos 1) ; intros ; intro ; fourier)])
+| (intro H ; apply sqrt_eq_0 in H ; [ (apply Rmult_integral in H ; destruct H as [H|H] ; [ fourier | (generalize H ; apply not_0_INR ; intuition) ])
+| apply Rmult_le_pos ; intuition ]) ]
+| apply Hneq ] ] | apply Rmult_integral_contrapositive ; split ; 
+[ apply Rmult_integral_contrapositive ; split ;
+[ (apply pow_nonzero ; unfold Rdiv ; apply Rmult_integral_contrapositive ; split ;
+[ apply not_0_INR ; intuition | (apply Rinv_neq_0_compat ; generalize (exp_pos 1) ; intros ; intro ; fourier) ])
+| (intro H ; apply sqrt_eq_0 in H ; [ (apply not_0_INR in H ; intuition )
+| apply pos_INR ])
+] | apply Hneq ] ].
+
 apply Rseq_equiv_mult_compat.
 apply Rseq_equiv_mult_compat.
 apply Rseq_equiv_refl.

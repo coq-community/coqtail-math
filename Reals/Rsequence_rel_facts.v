@@ -18,7 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
-
+Require Import Max.
 Require Import Reals.
 Require Import Rsequence.
 Require Import Rsequence_base_facts.
@@ -1012,14 +1012,23 @@ Qed.
 
 (**********)
 Lemma Rseq_equiv_inv_compat Un Vn : 
-  (forall n, Un n <> 0) -> (forall n, Vn n <>0) ->
+  {m | forall n, (n >= m)%nat -> Un n <> 0} -> 
+  {m | forall n, (n >= m)%nat -> Vn n <> 0} -> 
   Un ~ Vn -> (Rseq_inv Un) ~ (Rseq_inv Vn).
 Proof.
 intros Un Vn Upos Vpos H eps Heps.
 apply Rseq_equiv_sym in H.
 destruct (H eps Heps) as [N HN].
-exists N; intros n Hn.
+destruct Upos as (m1, Upos).
+destruct Vpos as (m2, Vpos).
+exists (max (max N m1) m2); intros n Hn.
 unfold Rseq_minus, Rseq_inv in *.
+assert (Hm1 : (n >= m1)%nat).
+ apply le_trans with (max (max N m1) m2). apply le_trans with (max N m1). intuition. intuition. intuition.
+assert (Hm2 : (n >= m2)%nat).
+ apply le_trans with (max (max N m1) m2). intuition. intuition.
+assert (HN1 : (n >= N)%nat).
+ apply le_trans with (max (max N m1) m2). apply le_trans with (max N m1). intuition. intuition. intuition.
 replace (/ Un n - / Vn n)%R with ((Vn n - Un n) */ (Un n * Vn n))%R by (field; auto).
 rewrite Rabs_mult.
 replace (Rabs (/Un n))%R with (Rabs (Vn n) * (Rabs (/ (Un n * Vn n))))%R.
