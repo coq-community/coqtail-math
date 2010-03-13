@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import Max.
 Require Import Reals.
 Require Import Rintegral.
 Require Import Rintegral_usual.
@@ -26,6 +27,7 @@ Require Import Rintegral_tactic.
 Require Import Fourier.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
+Require Import MyRfunctions.
 
 Open Local Scope R_scope.
 
@@ -337,6 +339,46 @@ Lemma Stirling_subproof_tech_admitted :
   exists l : R, l <> 0 /\ (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l).
 Admitted.
 
+(*TODO replacer et completer le replacement !!! *)
+Lemma Rseq_cv_eq_compat1 : forall Un Vn l,
+  {m | forall n, (n >= m)%nat -> Un n = Vn n} ->
+    Rseq_cv Un l -> Rseq_cv Vn l.
+Proof.
+intros Un Vn l Heq Hseq.
+intros eps Heps.
+destruct Heq as (m, Heq).
+destruct (Hseq eps Heps) as (N, Hseq2).
+exists (max N m).
+intros n Hn. 
+assert (Hm : (n >= m)%nat). apply le_trans with (max N m) ; intuition.
+unfold R_dist in *.
+rewrite <- (Heq n) ; intuition.
+apply Hseq2; intuition. apply le_trans with (max N m) ; intuition.
+Qed.
+
+Lemma sqrt_id : forall n : nat, (INR n <> 0)%R -> sqrt (2 * n) / (2 * n) = /sqrt (2 * n).
+Proof.
+intros n H1.
+rewrite <- (sqrt_sqrt (2 * n)) at 2.
+field.
+intro H. apply H1. apply Rmult_eq_reg_l with 2. rewrite Rmult_0_r. apply sqrt_eq_0 ; intuition.
+apply Rmult_le_pos ; intuition. intro ; fourier.
+apply Rmult_le_pos ; intuition.
+Qed.
+(* TODO à replacer *)
+Lemma Rseq_equiv_eq : forall Un Vn, Un == Vn -> Un ~ Vn.
+Proof.
+intros Un Vn Heq eps Heps.
+exists O. intros n HN.
+unfold "==" in Heq.
+unfold Rseq_constant, Rseq_minus, Rseq_plus.
+rewrite (Heq n).
+ring_simplify (Vn n - Vn n).
+rewrite Rabs_R0. apply Rmult_le_pos.
+intuition.
+apply Rabs_pos.
+Qed.
+
 Lemma Wallis_quotient_lim2 l : 
 l <> 0 ->
   (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l) ->
@@ -415,9 +457,175 @@ assumption.
 assumption.
 clear Hl H2n H2n1.
 apply Rseq_cv_equiv_constant.
+unfold Rdiv. 
+apply Rmult_integral_contrapositive ; split ;
+[ (intro H ; apply Rsqr_0_uniq in H ; intuition)
+| (rewrite Rinv_mult_distr ; 
+[ apply Rmult_integral_contrapositive ; split ; 
+[ (intro ; fourier) | (generalize PI_neq0 ; intro H0 ; apply Rinv_neq_0_compat ; intuition) ] 
+| (intro ; fourier) | apply PI_neq0])]. 
+
+(* TODO virer les Rseq_ *)
+unfold Rseq_constant, Rseq_mult, Rseq_div, Rseq_plus, Rseq_minus, Rseq_inv.
+(* Simplification of the expression ! *)
+apply Rseq_cv_eq_compat1 with 
+(fun n:nat => (sqrt (2 * n) / sqrt (S (2 * n))) * (Rsqr l / PI * exp 1) * ((2 * n) / S (2 * n)) ^ (S (2 * n)) * /2)%R.
+exists (S O). intros n Hn.
+(* need to have n <> 0 *)
+assert(H : {m | n = S m}). exists (pred n). intuition.
+destruct H as (m, Subst).
+(*rewrite Subst.*)
+(* Solving the simplification equation *)
+unfold Rseq_constant.
+unfold Rdiv.
+ring_simplify.
+replace (sqrt n ^ 4) with (n ^ 2) by (rewrite <- (sqrt_sqrt n) at 1 ; [ring | intuition]).
+repeat rewrite Rpow_mult_distr.
+repeat rewrite <- pow_mult.
+repeat rewrite Rinv_mult_distr.
+replace (2 ^ (4 * n))%R with (2 ^ (2 * n) * 2 ^ (2 * n))%R by (repeat rewrite pow_mult ; 
+rewrite <- Rpow_mult_distr ; replace (2 ^ 2 * 2 ^ 2)%R with (2 ^ 4)%R by (unfold pow ; ring) ; ring).
+rewrite (mult_comm n 4).
+replace (n ^ (4 * n))%R with (n ^ (2 * n) * n ^ (2 * n))%R by 
+(rewrite <- pow_add ; ring_simplify (2 * n + 2 * n)%nat ; ring).
+replace ((/exp 1) ^ (4 * n))%R with ((/exp 1) ^ (2 * n) * (/exp 1) ^ (2 * n))%R by 
+(rewrite <- pow_add ; ring_simplify (2 * n + 2 * n)%nat ; ring).
+repeat rewrite Rinv_pow. rewrite Rinv_involutive.
+rewrite <- tech_pow_Rmult with (exp 1) (2 * n)%nat.
+rewrite <- (Rinv_pow (exp 1) _).
+do 2 rewrite <- tech_pow_Rmult.
+replace (/sqrt (2 * n))%R with (sqrt (2 * n) / (2 * n))%R by (apply sqrt_id ; inversion Hn ; [intuition | apply not_0_INR ; intuition]).
+unfold Rsqr. unfold Rdiv.
+repeat rewrite <- Rinv_pow. field.
+(* TODO c'est bourrin...*)
+
+(* Solving the "<> 0" equations *)
+
+split. assumption.
+split. intro H. apply sqrt_eq_0 in H. apply not_0_INR in H. assumption.
+intuition.
+intuition.
+split. apply pow_nonzero. apply not_0_INR. intuition.
+split. apply not_0_INR. intuition.
+split. apply pow_nonzero. apply not_0_INR. intuition.
+split. apply pow_nonzero. intro. fourier.
+split. apply PI_neq0.
+apply pow_nonzero. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply not_0_INR. intuition.
+intro ; fourier. 
+apply not_0_INR. intuition. 
+intro. generalize (exp_pos 1) ; intros ; fourier.
+intro. generalize (exp_pos 1) ; intros ; fourier.
+apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply not_0_INR ; intuition.
+apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply not_0_INR ; intuition.
+intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR ; intuition.
+apply pos_INR.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR ; intuition.
+apply pos_INR.
+apply Hneq.
+apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
+intro ; fourier.
+apply not_0_INR. intuition.
+apply Rmult_le_pos. intuition.
+intuition.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
+intro ; fourier.
+apply not_0_INR. intuition.
+apply Rmult_le_pos. intuition. intuition.
+assumption.
+apply PI_neq0.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
+intro ; fourier.
+apply not_0_INR. intuition.
+apply Rmult_le_pos. intuition. intuition.
+assumption.
+apply Rmult_integral_contrapositive ; split.
+apply PI_neq0.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
+intro ; fourier.
+apply not_0_INR. intuition.
+apply Rmult_le_pos. intuition. intuition.
+assumption.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply Rmult_integral_contrapositive ; split.
+apply pow_nonzero. apply not_0_INR ; intuition.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR. intuition.
+apply pos_INR. assumption.
+
+(* End of "<> 0" *)
+
+(* end of simplification *)
+
+assert (Heq1 : (fun n : nat => (sqrt (2 * n))) ~ (fun n : nat => sqrt (S (2 * n)))%R ).
 admit.
-Admitted.
-    
+
+
+assert (Heq2 : Rseq_cv (fun n : nat => (2 * n / S (2 * n)) ^ S (2 * n)) (/exp 1)).
+admit.
+
+apply Rseq_equiv_cv_compat with (1 * (Rsqr l / PI * exp 1) * /exp 1 * /2).
+apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; intro ; intuition ].
+apply Rseq_equiv_mult_compat.
+apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; intro ; intuition ].
+admit. (*Heq2*)
+admit. (*Heq1*)
+
+apply Rseq_cv_eq_compat with (Rsqr l / (2 * PI)).
+intro. unfold Rseq_mult, Rseq_plus, Rseq_constant, Rseq_div, Rseq_inv.
+field. split. 
+intro. generalize (exp_pos 1) ; intros ; fourier.
+apply PI_neq0.
+intros eps Heps. exists O. intros n Hn.
+unfold R_dist. unfold Rseq_constant, Rseq_div, Rseq_inv, Rseq_mult.
+unfold Rdiv. rewrite Rminus_diag_eq.
+rewrite Rabs_R0. apply Heps.
+intuition.
+Qed.
 
 (* Lemma Stirling : (fun n => fact n) ... with 
  Rseq_cv_unique [Wallis_quotient_lim1 | Wallis_quotient_lim2 *)
