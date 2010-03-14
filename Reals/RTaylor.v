@@ -26,6 +26,7 @@ Require Export Rseries.
 Require Export Rpser_facts.
 Require Import Fourier.
 Require Import Rintegral.
+Require Import Tools.
 
 (* begin hide *)
 Lemma continuity_pt_eq_compat :
@@ -79,7 +80,64 @@ unfold Un; destruct n.
   rewrite Rinv_r; [fourier|intros Hc; fourier].
 Qed.
 
-Let sum x := sum_r Un 1 ln_minus_cv_radius x.
+Lemma sum_f_R0_Ropp_compat : forall An n, - sum_f_R0 An n = sum_f_R0 (-An)%Rseq n.
+Proof.
+intros An n ; induction n.
+ reflexivity.
+ simpl ; rewrite Ropp_plus_distr ; rewrite IHn ; reflexivity.
+Qed.
+
+Lemma ln_minus_finite_cv_radius : finite_cv_radius Un 1.
+Proof.
+ assert (Un_decr : Un_decreasing (- (fun n => Un (S n)))%Rseq).
+  assert (Hrew : forall n, Un (S n) = -/ INR (S n)).
+   intro ; reflexivity.
+   intro n ; unfold Rseq_opp ; repeat rewrite Hrew, Ropp_involutive.
+   apply Rle_Rinv ; intuition.
+  assert (Un_cv_0 : Un_cv (fun n : nat => - Un (S n)) 0).
+  replace (fun n : nat => Un (S n)) with (fun n => - / INR (S n)).
+  rewrite <- Ropp_involutive ;  do 2 apply Rseq_cv_opp_compat.
+  apply Rseq_cv_pos_infty_inv_compat.
+  intro M.
+  assert (lt_0_1 : (0 < 1)%nat) by auto ;
+  destruct (Rseq_poly_cv 1 lt_0_1 M) as [N HN] ;
+  exists N ; intros n n_gt_N ; apply Rlt_trans with (INR n).
+  rewrite <- pow_1 ; apply HN ; assumption.
+  intuition.
+  reflexivity.
+ destruct (alternated_series (fun n => - Un (S n)) Un_decr Un_cv_0) as [l Hl].
+
+ rewrite <- Rabs_R1.
+ rewrite <- Rabs_Ropp.
+ apply Rpser_finite_cv_radius_caracterization with l.
+ unfold Pser, infinite_sum.
+ intros eps eps_pos ; destruct (Hl eps eps_pos) as [N HN] ; exists (S N) ;
+ intros n n_lb ; unfold R_dist.
+ rewrite <- Rabs_Ropp.
+ rewrite Ropp_minus_distr.
+ unfold Rminus ; rewrite sum_f_R0_Ropp_compat.
+ apply Rle_lt_trans with (R_dist (sum_f_R0 (tg_alt (fun n0 : nat => - Un (S n0))) (pred n)) l).
+ right ; rewrite <- Rabs_Ropp ; unfold R_dist ; apply Rabs_eq_compat.
+ clear - n_lb; induction n ; unfold tg_alt.
+ inversion n_lb.
+ simpl pred.
+ clear ; induction n.
+  compute ; field.
+  rewrite tech5.
+  repeat rewrite Ropp_plus_distr in *.
+  rewrite <- Rplus_assoc.
+  rewrite IHn.
+  unfold Rminus ; rewrite tech5.
+  repeat rewrite Rplus_assoc ; apply Rplus_eq_compat_l.
+  rewrite Rplus_comm ; apply Rplus_eq_compat_r.
+  unfold Rseq_opp ;  simpl pow ;  ring.
+  apply HN ; intuition.
+
+admit.
+
+Qed.
+
+Let sum x := weaksum_r Un 1 ln_minus_cv_radius x.
 
 Lemma ln_minus_taylor_sum :
   forall x, Rabs x < 1 -> sum x = (ln (1 - x)).
@@ -93,7 +151,7 @@ assert (Hb : forall u, Rmin 0 x <= u <= Rmax 0 x -> -1 < u < 1).
     unfold Rmin, Rmax in Hul, Hur.
     destruct Rle_dec; split; fourier.
 pose (Hcv := ln_minus_cv_radius).
-pose (g := sum_r Un 1 Hcv).
+pose (g := weaksum_r Un 1 Hcv).
 pose (dg := sum_r_derive Un 1 Hcv).
 destruct Rint_derive2
   with (f := f) (a := 0) (b := x) (d := df) as [pr HI].
@@ -179,16 +237,16 @@ assert (Heq_fun : g x - g 0 = f x - f 0).
   eapply Rint_uniqueness.
     exists pr3; assumption.
     assumption.
-replace (ln (1 - x)) with (sum_r Un 1 Hcv x).
+replace (ln (1 - x)) with (weaksum_r Un 1 Hcv x).
   unfold sum, Hcv; reflexivity.
 unfold f, g, comp, fct_cte, id, minus_fct in Heq_fun; hnf in Heq_fun.
 replace (1 - 0) with 1 in Heq_fun by ring; rewrite ln_1 in Heq_fun.
 rewrite Rminus_0_r in Heq_fun.
-replace (sum_r Un 1 Hcv 0) with 0 in Heq_fun.
+replace (weaksum_r Un 1 Hcv 0) with 0 in Heq_fun.
 rewrite Rminus_0_r in Heq_fun; assumption.
 symmetry.
 eapply Rseq_cv_unique.
-apply sum_r_sums; rewrite Rabs_R0; fourier.
+apply weaksum_r_sums; rewrite Rabs_R0; fourier.
 intros eps Heps; exists 0%nat; intros n _.
 rewrite sum_eq_R0.
 rewrite R_dist_eq; assumption.
@@ -204,7 +262,7 @@ Lemma ln_minus_taylor :
 Proof.
 intros x Hx.
 rewrite <- ln_minus_taylor_sum; [|assumption].
-apply sum_r_sums; assumption.
+apply weaksum_r_sums; assumption.
 Qed.
 
 End ln_minus.
@@ -236,7 +294,7 @@ unfold Un; destruct n.
   rewrite Rinv_r; [fourier|intros Hc; fourier].
 Qed.
 
-Let sum x := sum_r Un 1 ln_plus_cv_radius x.
+Let sum x := weaksum_r Un 1 ln_plus_cv_radius x.
 
 Lemma ln_plus_taylor_sum :
   forall x, Rabs x < 1 -> sum x = (ln (1 + x)).
@@ -247,8 +305,8 @@ assert (Hmx : Rabs (- x) < 1).
 replace (1 + x) with (1 - (- x)) by ring.
 eapply trans_eq; [|apply ln_minus_taylor_sum; assumption].
 eapply Rseq_cv_unique.
-  apply sum_r_sums; assumption.
-eapply Rseq_cv_eq_compat; [|apply sum_r_sums; assumption].
+  apply weaksum_r_sums; assumption.
+eapply Rseq_cv_eq_compat; [|apply weaksum_r_sums; assumption].
 intros n; apply sum_eq; intros i Hi; unfold Un.
 destruct i; [field|].
 replace (- x) with (- 1 * x) by ring.
@@ -262,7 +320,7 @@ Lemma ln_plus_taylor :
 Proof.
 intros x Hx.
 rewrite <- ln_plus_taylor_sum; [|assumption].
-apply sum_r_sums; assumption.
+apply weaksum_r_sums; assumption.
 Qed.
 
 End ln_plus.

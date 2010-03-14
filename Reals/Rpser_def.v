@@ -56,6 +56,11 @@ Definition infinite_cv_radius (An : nat -> R) := forall (r : R), Cv_radius_weak 
 
 (** * Some lemmas manipulating the definitions *)
 
+Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
+      forall x, Rabs x < r -> Cv_radius_weak An x.
+Proof.
+Admitted.
+
 Lemma Cv_radius_weak_Rabs_compat : forall (An : nat -> R) (r : R), 
        Cv_radius_weak An r -> Cv_radius_weak (fun n => Rabs (An n)) r.
 Proof.
