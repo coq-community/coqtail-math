@@ -50,17 +50,49 @@ Definition Cv_radius_weak (An : nat -> R) (r:R) := has_ub (gt_abs_Pser An r).
 (** Cv radius definition *)
 
 Definition finite_cv_radius (An : nat -> R) (r:R) := 
-    is_lub (fun r0 => has_ub (gt_abs_Pser An r0) ) r.
+    (forall r', 0 <= r' < r -> Cv_radius_weak An r') /\
+    (forall r', r < r' -> ~ (Cv_radius_weak An r')).
 
 Definition infinite_cv_radius (An : nat -> R) := forall (r : R), Cv_radius_weak An r.
 
 (** * Some lemmas manipulating the definitions *)
 
+Lemma Cv_radius_weak_0 An : Cv_radius_weak An 0.
+Proof.
+intro An.
+exists (Rabs(An O)).
+intros x Hx.
+destruct Hx as [n Hn].
+rewrite Hn.
+unfold gt_abs_Pser.
+destruct n.
+ rewrite pow_O.
+  ring_simplify(An 0%nat * 1); apply Rle_refl.
+  
+ rewrite pow_i.
+ ring_simplify(An(S n)%nat * 0).
+ rewrite Rabs_R0; apply Rabs_pos.
+omega.
+Qed.
+
+Lemma finite_cv_radius_pos An r : finite_cv_radius An r -> 0 <= r.
+
+Proof.
+intros An r [_ Hf].
+ destruct(Rle_lt_dec 0 r).
+  trivial.
+destruct (Hf 0).
+trivial.
+apply Cv_radius_weak_0.
+Qed.
+(*
 Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
       forall x, Rabs x < r -> Cv_radius_weak An x.
 Proof.
-Admitted.
-
+intros An r [Hf _] x Hx.
+destruct (Hf (Rabs x)) as [Hr _].
+  split; [apply Rabs_pos | left; apply Hx].
+  *)
 Lemma Cv_radius_weak_Rabs_compat : forall (An : nat -> R) (r : R), 
        Cv_radius_weak An r -> Cv_radius_weak (fun n => Rabs (An n)) r.
 Proof.
@@ -249,3 +281,50 @@ intros An x l Hyp.
  unfold gt_Pser.
  apply Hyp.
 Qed.
+
+Lemma finite_cv_radius_le An r r' : 
+  finite_cv_radius An r -> Cv_radius_weak An r' -> r' <= r.
+Proof.
+intros An r r' [_ Hf] Hr'.
+ destruct(Rle_lt_dec r' r).
+  trivial.
+  apply False_ind; apply (Hf r' r0 Hr').
+Qed.
+
+Lemma finite_cv_radius_lub An r : 
+  finite_cv_radius An r -> is_lub (fun r' => Cv_radius_weak An r') r.
+Proof.
+intros An r H.
+split; intros r' Hr'.
+ apply finite_cv_radius_le with An; trivial.
+
+ destruct H as [H1 H2].
+ destruct (Rle_lt_dec r r').
+  trivial.
+
+  pose ((r+r')/2) as r1.
+  assert(r' < r1 < r).
+   assert(H : forall a, a = (a+a)/2) by (intro; field).
+   split; unfold r1; [rewrite (H r') at 1 | rewrite (H r) at 2];
+    apply Rmult_lt_compat_r; auto with *.
+
+destruct H as [H H'].
+destruct (Hr' r1).
+ apply H1; split.
+  apply Rle_trans with r'.
+   apply Hr', Cv_radius_weak_0; auto with *.
+auto with *.
+trivial.
+
+ apply False_ind, (Rlt_irrefl r'), Rlt_trans with r1; trivial.
+
+ apply False_ind, (Rlt_irrefl r').
+ rewrite <- H0 in *; trivial.
+Qed.
+
+(*
+Lemma finite_cv_radius_ex An r0 : 
+ ~ Cv_radius_weak An r0 -> {r | finite_cv_radius An r}.
+Proof.
+
+needs classical *)

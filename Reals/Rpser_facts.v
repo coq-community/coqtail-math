@@ -277,13 +277,11 @@ Proof.
 intros An r Pr x.
  case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
   assert (rho : Cv_radius_weak An (middle (Rabs x) r)).
-   apply finite_cv_radius_weakening with r.
-   assumption.
-   rewrite Rabs_right.
-   apply (proj2 (middle_is_in_the_middle _ _ x_bd)).
-   apply Rle_ge ; apply Rle_trans with (Rabs x).
+  apply Pr; split.
+  apply Rle_trans with (Rabs x).
    apply Rabs_pos.
    left ; apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
+   apply (proj2 (middle_is_in_the_middle _ _ x_bd)).
  apply (weaksum_r An (middle (Rabs x) r) rho x).
  exact 0.
 Defined.
@@ -519,21 +517,16 @@ Lemma Rpser_finite_cv_radius_caracterization (An : nat -> R) (x0 l : R) :
    Pser An x0 l -> (forall l : R, ~ Pser_abs An x0 l)  -> finite_cv_radius An (Rabs x0).
 Proof.
 intros An x0 l Hcv Hncv.
- split; intros x Hx.
- apply Rnot_lt_le ; intro Hxx0.
- assert (H : {l : R| Pser_abs An x0 l}).
- apply Rpser_abel with x.
- destruct Hx as (m, Hm) ; exists m ; intros x1 H1 ; apply Hm ;
- destruct H1 as (i, Hi) ; exists i.
- unfold gt_abs_Pser in Hi ; replace (Rabs (Rabs (An i) * x ^ i)) with
-       (Rabs ((An i) *x ^ i)) in Hi.
- assumption.
- repeat (rewrite Rabs_mult) ; rewrite Rabs_Rabsolu ; reflexivity.
- rewrite Rabs_Rabsolu ; assumption.
- destruct H as (l0, Hl0) ; apply Hncv with l0 ; exact Hl0.
- apply Hx ; apply Cv_radius_weak_le_compat with (r:=x0).
- rewrite Rabs_Rabsolu ; intuition.
- apply Rpser_bound_criteria with (l:=l) ; assumption.
+split; intros x Hx.
+
+ apply Cv_radius_weak_le_compat with x0.
+  rewrite Rabs_pos_eq with x; intuition.
+  apply (Rpser_bound_criteria _ _ l Hcv).
+  
+ intro Hf.
+ destruct (Rpser_abel2_prelim An x Hf x0 Hx) as [l' Hl'].
+ apply Hncv with l'.
+ admit.
 Qed.
 
 Lemma Rpser_infinite_cv_radius_caracterization An : (forall x, {l | Pser An x l}) ->
