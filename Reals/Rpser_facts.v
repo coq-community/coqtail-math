@@ -524,9 +524,10 @@ split; intros x Hx.
   apply (Rpser_bound_criteria _ _ l Hcv).
   
  intro Hf.
- destruct (Rpser_abel2_prelim An x Hf x0 Hx) as [l' Hl'].
+ destruct (Rpser_abel2_prelim An x Hf (Rabs x0)) as [l' Hl'].
+ rewrite Rabs_Rabsolu; trivial.
  apply Hncv with l'.
- admit.
+trivial.
 Qed.
 
 Lemma Rpser_infinite_cv_radius_caracterization An : (forall x, {l | Pser An x l}) ->
