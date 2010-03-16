@@ -27,6 +27,8 @@ Require Import Rintegral_tactic.
 Require Import Fourier.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
+Require Import Rpser_facts.
+Require Import RTaylor.
 Require Import MyRfunctions.
 Require Import Rsequence_tactics.
 
@@ -437,10 +439,24 @@ induction n.
  rewrite IHn. ring.
 Qed.
 
-(*TODO la c'est pas le bon lemme*)
 Lemma Rseq_equiv_ln : forall Un, Rseq_cv Un 0 -> (fun n => ln (1 + Un n)) ~ Un.
 Proof.
-admit.
+intros Un Hu.
+destruct (Hu 1) as [M HM]; [fourier|].
+apply Rseq_equiv_sym.
+intros eps Heps.
+assert (H1 : 0 < 1) by fourier.
+destruct (Rpser_little_O_partial_sum _ Un 1 1 H1 Hu ln_plus_cv_radius eps Heps) as [N HN].
+exists (Max.max M N); intros n Hn.
+unfold Rseq_minus; simpl.
+pattern Un at 2; replace (Un n) with (Un n ^ 1) by field.
+eapply Rle_trans; [right|apply HN].
+  simpl; rewrite ln_plus_taylor_sum.
+  rewrite Rabs_minus_sym.
+  apply f_equal; field.
+  replace (Un n) with (Un n - 0) by field; apply HM.
+  eapply le_trans; [apply Max.le_max_l|eassumption].
+eapply le_trans; [apply Max.le_max_r|eassumption].
 Qed.
 
 Lemma Rseq_cv_inv_INR_0_1 : Rseq_cv (fun n => - / (2 * INR n + 1))%R 0%R.

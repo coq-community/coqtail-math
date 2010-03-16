@@ -1283,4 +1283,19 @@ exists (Rabs (Ss 0) + 1); split.
       apply Hp2.
 Qed.
 
+Lemma Rpser_little_O_partial_sum :
+  forall N (H : 0 < r) (Hcv : Rseq_cv En 0) (pr : Cv_radius_weak Un r),
+    (fun p => weaksum_r Un r pr (En p) - sum_f_R0 (fun n => Un n * (En p) ^ n) N) = o((fun p => (En p) ^ N)).
+Proof.
+intros N H Hcv pr.
+eapply Rseq_big_O_little_O_trans; [apply Rpser_big_O_partial_sum; assumption|].
+intros eps Heps.
+destruct (Hcv eps Heps) as [M HM].
+exists M; intros n Hn.
+simpl pow; rewrite Rabs_mult.
+apply Rmult_le_compat_r; [apply Rabs_pos|].
+apply Rlt_le; replace (En n) with (En n - 0) by field.
+apply HM; assumption.
+Qed.
+
 End Taylor.
