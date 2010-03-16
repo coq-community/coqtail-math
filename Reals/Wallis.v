@@ -335,11 +335,7 @@ field; repeat split.
   rewrite pow_add.
   reflexivity.
 Qed.
-(*
-Lemma Stirling_subproof_tech_admitted : 
-  exists l : R, l <> 0 /\ (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l).
-Admitted.
-*)
+
 (*TODO replacer et completer le replacement !!! *)
 Lemma Rseq_cv_eq_compat1 : forall Un Vn l,
   {m | forall n, (n >= m)%nat -> Un n = Vn n} ->
@@ -440,6 +436,7 @@ induction n.
  rewrite Rmult_1_l. rewrite exp_ln ; [ | apply H].
  rewrite IHn. ring.
 Qed.
+
 (*TODO la c'est pas le bon lemme*)
 Lemma Rseq_equiv_ln : forall Un, Rseq_cv Un 0 -> (fun n => ln (1 + Un n)) ~ Un.
 Proof.
@@ -777,8 +774,3 @@ unfold Rdiv. rewrite Rminus_diag_eq.
 rewrite Rabs_R0. apply Heps.
 intuition.
 Qed.
-
-
-(* Lemma Stirling : (fun n => fact n) ... with 
- Rseq_cv_unique [Wallis_quotient_lim1 | Wallis_quotient_lim2 *)
-

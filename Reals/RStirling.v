@@ -28,6 +28,7 @@ Require Import Rpser_facts.
 Require Import Rintegral.
 Require Import RTaylor.
 Require Import Fourier.
+Require Import Wallis.
 
 Section De_Moivre.
 
@@ -135,7 +136,6 @@ Proof.
 intros d n H; unfold Qn.
 destruct n; [apply False_ind; omega|reflexivity].
 Qed.
-
 Lemma ln_taylor_3 : Sn = O(Qn 4).
 Proof.
 unfold Sn, Rn in *.
@@ -346,3 +346,52 @@ apply Rinv_0_lt_compat; assumption.
 Qed.
 
 End De_Moivre.
+
+Lemma exp_pow x n : (exp x) ^ n = exp (x*n).
+Proof.
+induction n.
+ ring_simplify.
+ rewrite Rmult_0_r, exp_0; reflexivity.
+
+ simpl pow.
+ replace (S n)%R with (n+1)%nat by omega.
+ rewrite plus_INR.
+ replace (INR 1) with R1 by trivial.
+ ring_simplify (x*(n + 1)).
+ rewrite exp_plus, IHn.
+ auto with *.
+Qed.
+ 
+Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt(2*PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
+Proof.
+destruct De_Moivre_equiv as [l Hl].
+assert(l²/(2*PI) = 1) as Heq.
+ eapply Rseq_cv_unique.
+  apply Wallis_quotient_lim2.
+  auto with *.
+  eapply Rseq_equiv_eq_compat with (Vn := fun n : nat => l * n ^ n * exp (- n) * sqrt n).
+   apply Rseq_eq_refl.
+   intro n.
+   rewrite exp_Ropp.
+   replace (exp n) with (exp (R1*n)) by auto with *.
+   rewrite <- (exp_pow 1 n).
+   unfold Rdiv; rewrite Rpow_mult_distr, Rinv_pow.
+    field.
+    assert(H := exp_pos 1); auto with *.
+  
+   trivial.
+   
+ apply Wallis_quotient_lim1.
+
+replace l with (sqrt(2*PI)) in Hl.
+apply Hl.
+
+
+assert(HPI := PI_RGT_0).
+apply sqrt_lem_1.
+fourier.
+auto with *.
+replace (l*l) with ((l² / (2*PI))* (2*PI)).
+rewrite Heq; ring.
+unfold Rdiv, Rsqr; field; auto with *.
+Qed.
