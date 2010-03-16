@@ -28,6 +28,7 @@ Require Import Fourier.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
 Require Import MyRfunctions.
+Require Import Rsequence_tactics.
 
 Open Local Scope R_scope.
 
@@ -334,11 +335,11 @@ field; repeat split.
   rewrite pow_add.
   reflexivity.
 Qed.
-
+(*
 Lemma Stirling_subproof_tech_admitted : 
   exists l : R, l <> 0 /\ (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l).
 Admitted.
-
+*)
 (*TODO replacer et completer le replacement !!! *)
 Lemma Rseq_cv_eq_compat1 : forall Un Vn l,
   {m | forall n, (n >= m)%nat -> Un n = Vn n} ->
@@ -365,18 +366,123 @@ intro H. apply H1. apply Rmult_eq_reg_l with 2. rewrite Rmult_0_r. apply sqrt_eq
 apply Rmult_le_pos ; intuition. intro ; fourier.
 apply Rmult_le_pos ; intuition.
 Qed.
-(* TODO à replacer *)
-Lemma Rseq_equiv_eq : forall Un Vn, Un == Vn -> Un ~ Vn.
+
+Lemma Rseq_equiv_eq : forall Un Vn, 
+  {m | forall n, (n >= m)%nat -> Un n = Vn n} -> Un ~ Vn.
 Proof.
 intros Un Vn Heq eps Heps.
-exists O. intros n HN.
-unfold "==" in Heq.
+destruct Heq as (N, Heq).
+exists N. intros n HN.
 unfold Rseq_constant, Rseq_minus, Rseq_plus.
 rewrite (Heq n).
 ring_simplify (Vn n - Vn n).
 rewrite Rabs_R0. apply Rmult_le_pos.
 intuition.
 apply Rabs_pos.
+assumption.
+Qed.
+
+Lemma DL_sqrt_1 : forall Un, Rseq_cv Un 0 -> (fun n => sqrt (1 + Un n) - 1) = o(1).
+Proof.
+intros Un Un0.
+intros eps Heps.
+destruct (Un0 eps Heps) as (N, HUn).
+assert (H01 : 0 < 1) by fourier.
+destruct (Un0 1 H01) as (N1, HUn1).
+exists (max N N1).
+intros n HNmax.
+unfold Rseq_constant. rewrite Rabs_R1. rewrite Rmult_1_r.
+apply Rle_trans with (Rabs (Un n)).
+apply sqrt_var_maj.
+unfold R_dist in *. left.
+assert (HN : (n >= N1)%nat). apply le_trans with (max N N1) ; intuition.
+generalize (HUn1 n HN) ; intros HU1.
+rewrite Rminus_0_r in HU1. assumption.
+left. 
+assert (HN : (n >= N)%nat). apply le_trans with (max N N1) ; intuition.
+generalize (HUn n HN) ; intros HU1.
+unfold R_dist in HU1.
+rewrite Rminus_0_r in HU1. assumption.
+Qed.
+
+Lemma Rseq_cv_inv_INR : Rseq_cv (fun n => /INR (n + 1)) 0.
+Proof.
+generalize RinvN_cv. intros useful.
+intros eps Heps.
+destruct (useful eps Heps) as (N, H).
+exists N.
+intros n Hn.
+generalize (H n Hn). intros H1.
+unfold pos in  H1. simpl in H1.
+rewrite plus_INR. apply H1.
+Qed.
+
+Lemma Rinv_plus : forall a b c : R, c <> 0 -> (a + b) / c = a / c + (b / c).
+Proof.
+intros a b c d.
+field ; apply d.
+Qed.
+
+Lemma Rinv_eq_1 : forall a, a <> 0 -> a / a = 1.
+Proof.
+intros.
+field ; assumption.
+Qed.
+
+Lemma pow_exp_ln : forall x n, 0 < x -> x ^ n = exp (n * ln x).
+Proof.
+intros x n H.
+induction n. 
+ simpl. rewrite Rmult_0_l. rewrite exp_0. reflexivity.
+ 
+ rewrite S_INR. rewrite Rmult_plus_distr_r.
+ rewrite <- tech_pow_Rmult. rewrite exp_plus.
+ rewrite Rmult_1_l. rewrite exp_ln ; [ | apply H].
+ rewrite IHn. ring.
+Qed.
+(*TODO la c'est pas le bon lemme*)
+Lemma Rseq_equiv_ln : forall Un, Rseq_cv Un 0 -> (fun n => ln (1 + Un n)) ~ Un.
+Proof.
+admit.
+Qed.
+
+Lemma Rseq_cv_inv_INR_0_1 : Rseq_cv (fun n => - / (2 * INR n + 1))%R 0%R.
+Proof.
+replace 0 with (-0)%R by intuition. apply Rseq_cv_opp_compat.
+generalize RinvN_cv. intros useful.
+intros eps Heps;
+destruct (Rseq_cv_inv_INR eps Heps) as (N, Hun).
+exists N. intros n Hn.
+generalize (Hun n Hn) ; intros Hun1.
+apply Rle_lt_trans with (/INR (n + 1))%R.
+ unfold R_dist. rewrite Rminus_0_r. rewrite Rabs_pos_eq.
+  apply Rle_Rinv.
+   generalize (pos_INR n) ; intros ; rewrite plus_INR ; intuition.
+   generalize (pos_INR n) ; intros ; fourier.
+   rewrite plus_INR. simpl. apply Rplus_le_compat_r. replace (INR n)%R with ((INR n ) * 1)%R by ring. rewrite Rmult_comm. apply Rmult_le_compat.
+    intuition.
+    apply pos_INR.
+    intuition.
+    intuition.
+ left. apply Rinv_0_lt_compat. generalize (pos_INR n) ; intros ; fourier.
+unfold R_dist in Hun1. rewrite Rminus_0_r in Hun1. rewrite Rabs_right in Hun1. apply Hun1.
+left. apply Rgt_lt. apply Rinv_0_lt_compat. intuition.
+Qed.
+
+Lemma Rseq_equiv_continuity : forall Un Vn l f, continuity_pt f l -> 
+  f l <> 0 -> Rseq_cv Un l -> Rseq_cv Vn l ->
+    (fun n : nat => f (Un n)) ~ (fun n : nat => f (Vn n)).
+Proof.
+intros Un Vn l f Hcont H0 Hun Hvn.
+apply Rseq_equiv_trans with (f l).
+ apply Rseq_cv_equiv_constant.
+  assumption.
+  apply Rseq_cv_continuity_compat ; [assumption | reg].
+
+ apply Rseq_equiv_sym. 
+ apply Rseq_cv_equiv_constant.
+  assumption.
+  apply Rseq_cv_continuity_compat ; [assumption | reg].
 Qed.
 
 Lemma Wallis_quotient_lim2 l : 
@@ -600,21 +706,66 @@ apply pos_INR. assumption.
 (* End of "<> 0" *)
 
 (* end of simplification *)
-
-assert (Heq1 : (fun n : nat => (sqrt (2 * n))) ~ (fun n : nat => sqrt (S (2 * n)))%R ).
-admit.
-
-
-assert (Heq2 : Rseq_cv (fun n : nat => (2 * n / S (2 * n)) ^ S (2 * n)) (/exp 1)).
-admit.
-
 apply Rseq_equiv_cv_compat with (1 * (Rsqr l / PI * exp 1) * /exp 1 * /2).
-apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; intro ; intuition ].
-apply Rseq_equiv_mult_compat.
-apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; intro ; intuition ].
-admit. (*Heq2*)
-admit. (*Heq1*)
-
+ apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; exists O ; intro ; intuition ].
+ apply Rseq_equiv_mult_compat.
+  apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; exists O ; intro ; intuition ].
+  pose (Un := (fun n => - / (2 * INR n + 1))%R).
+  assert (Hcv0 : Rseq_cv Un 0). unfold Un.
+   apply Rseq_cv_inv_INR_0_1.
+  intros eps Heps.
+  destruct (DL_sqrt_1 Un Hcv0 eps Heps) as (N, DL).
+  exists N.
+  intros n HN. generalize (DL n HN). intros DL1.
+  unfold Rseq_constant, Rseq_plus, Rseq_minus, Rseq_mult, Rseq_inv, Un in *.
+  rewrite <-sqrt_div ; [ | (apply Rmult_le_pos ; intuition) | intuition ].
+  rewrite S_INR. rewrite mult_INR. do 2 rewrite S_INR.
+  replace (2 * n)%R with ((2 * n + 1) - 1)%R by ring. rewrite Rplus_0_l.
+  unfold Rminus. rewrite Rinv_plus.
+   rewrite Rinv_eq_1. unfold Rdiv in *. rewrite Ropp_mult_distr_l_reverse. rewrite Rmult_1_l. rewrite Rabs_minus_sym in DL1. apply DL1.
+    generalize (pos_INR n) ; intuition ; fourier.
+    generalize (pos_INR n) ; intuition ; fourier.
+ apply Rseq_equiv_trans with (fun n : nat => exp ((2 * n + 1) * ln (1 - /(2 * INR n + 1)))).
+ pose (Un := (fun n:nat => - /(2 * (INR n) + 1))%R).
+ assert (Hcv0 : Rseq_cv Un 0).
+  apply Rseq_cv_inv_INR_0_1.
+ apply Rseq_equiv_trans with (fun n : nat => exp ((2 * n + 1) * (- / (2 * n + 1)))).
+  apply Rseq_equiv_eq. exists O. intros n Hn.
+  field_simplify ((2 * n + 1) * - / (2 * n + 1))%R. unfold Rseq_constant, Rseq_inv.
+   rewrite <- exp_Ropp. unfold Rdiv. rewrite Rinv_1. rewrite Rmult_1_r. reflexivity.
+   generalize (pos_INR n) ; intuition ; fourier.
+  apply Rseq_equiv_continuity with ((-1)).
+   reg.
+   generalize (exp_pos (-1)) ; intros l1 H1 ; fourier.
+   apply Rseq_cv_eq_compat with (-R1).
+   intros n. unfold Rseq_constant, Rseq_minus, Rseq_plus, Rseq_opp.
+   field. intros H1 ; generalize (pos_INR n) ; intros ; fourier.
+   intuition.
+   apply Rseq_equiv_cv_compat with 
+   (fun n => (2 * INR n + 1) * - / (2 * INR n + 1))%R.
+    apply Rseq_equiv_mult_compat.
+     apply Rseq_equiv_refl.
+     apply Rseq_equiv_sym. apply Rseq_equiv_ln.
+     apply Hcv0.
+    apply Rseq_cv_eq_compat with (-R1).
+    unfold Rseq_opp, Rseq_constant, Rseq_minus.
+    intros n. field. generalize (pos_INR n) ; intuition ; fourier.
+    intuition.
+ apply Rseq_equiv_eq. (*TODO pas assez general *)
+ exists 1%nat.
+ intros n Hn.
+ rewrite pow_exp_ln.
+  replace (2 * n)%R with ((2 * n + 1) - 1)%R by ring.
+  rewrite S_INR. rewrite mult_INR. repeat rewrite S_INR.
+  rewrite Rplus_0_l.
+  unfold Rminus. rewrite Rinv_plus. rewrite Rinv_eq_1.
+   ring_simplify (2 * n + 1 + -1 + 1)%R. unfold Rdiv. ring_simplify (1 + -1 * / (2 * n + 1))%R.
+   rewrite (Rplus_comm (- / (2 * n + 1)) _). reflexivity.
+   generalize (pos_INR n) ; intuition ; fourier.
+   generalize (pos_INR n) ; intuition ; fourier.
+   unfold Rdiv. apply Rmult_lt_0_compat. apply Rmult_lt_0_compat ; intuition.
+   apply Rinv_0_lt_compat.
+   rewrite S_INR. generalize (pos_INR n) ; intuition ; fourier.
 apply Rseq_cv_eq_compat with (Rsqr l / (2 * PI)).
 intro. unfold Rseq_mult, Rseq_plus, Rseq_constant, Rseq_div, Rseq_inv.
 field. split. 
@@ -626,6 +777,7 @@ unfold Rdiv. rewrite Rminus_diag_eq.
 rewrite Rabs_R0. apply Heps.
 intuition.
 Qed.
+
 
 (* Lemma Stirling : (fun n => fact n) ... with 
  Rseq_cv_unique [Wallis_quotient_lim1 | Wallis_quotient_lim2 *)
