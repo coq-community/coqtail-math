@@ -19,6 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+(** Proof of Stirling equivalence of factorial. *)
+
 Require Import Reals.
 Require Import Rsequence_facts.
 Require Import Rseries.
@@ -30,7 +32,10 @@ Require Import RTaylor.
 Require Import Fourier.
 Require Import Wallis.
 
+(** Partial result : De Moivre approximation. *)
+
 Section De_Moivre.
+(* begin hide *)
 
 Let Un n := (INR n) ^ n * exp (- (INR n)) * sqrt (INR n) / Rseq_fact n.
 
@@ -313,6 +318,7 @@ apply derivable_continuous_pt.
 apply derivable_exp.
 apply exp_pos.
 Qed.
+(* end hide *)
 
 Lemma De_Moivre_equiv : {C | Rseq_fact ~ (fun n => C * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)) & 0 < C}.
 Proof.
@@ -346,6 +352,7 @@ apply Rinv_0_lt_compat; assumption.
 Qed.
 
 End De_Moivre.
+(* begin hide *)
 
 Lemma exp_pow x n : (exp x) ^ n = exp (x*n).
 Proof.
@@ -361,8 +368,11 @@ induction n.
  rewrite exp_plus, IHn.
  auto with *.
 Qed.
- 
-Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt(2*PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
+(* end hide *)
+
+(** Final result : Stirling approximation. *)
+
+Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt (2 * PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
 Proof.
 destruct De_Moivre_equiv as [l Hl].
 assert(l²/(2*PI) = 1) as Heq.
@@ -385,7 +395,6 @@ assert(l²/(2*PI) = 1) as Heq.
 
 replace l with (sqrt(2*PI)) in Hl.
 apply Hl.
-
 
 assert(HPI := PI_RGT_0).
 apply sqrt_lem_1.
