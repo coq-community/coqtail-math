@@ -85,14 +85,7 @@ destruct (Hf 0).
 trivial.
 apply Cv_radius_weak_0.
 Qed.
-(*
-Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
-      forall x, Rabs x < r -> Cv_radius_weak An x.
-Proof.
-intros An r [Hf _] x Hx.
-destruct (Hf (Rabs x)) as [Hr _].
-  split; [apply Rabs_pos | left; apply Hx].
-  *)
+
 Lemma Cv_radius_weak_Rabs_compat : forall (An : nat -> R) (r : R), 
        Cv_radius_weak An r -> Cv_radius_weak (fun n => Rabs (An n)) r.
 Proof.
@@ -132,6 +125,16 @@ intros An r r' r'_bd Rho.
   assumption.
   rewrite Rmult_1_l ; rewrite Rmult_comm ; apply HC ; exists i ; reflexivity.
   field ; apply pow_nonzero ; assumption.
+Qed.
+
+
+Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
+      forall x, Rabs x < r -> Cv_radius_weak An x.
+Proof.
+intros An r [H_sup _] x Hx.
+ apply Cv_radius_weak_le_compat with (Rabs x).
+  rewrite Rabs_Rabsolu ; right ; reflexivity.
+  apply H_sup ; split ; [apply Rabs_pos | assumption].
 Qed.
 
 Lemma Cv_radius_weak_padding_pos_compat : forall (An : nat -> R) (r : R),

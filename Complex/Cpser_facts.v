@@ -180,39 +180,37 @@ intros An r Pr x x_bd.
 Qed.
    
 (** Abel's lemma : Normal convergence of the power serie *)
-(*
+
 Lemma Cpser_abel2_prelim : forall (An : nat -> C) (r : R), 
      Cv_radius_weak An r -> forall x, Cnorm x < r ->
      { l | Pser_norm An x l}.
 Proof.
 intros An r Rho x x_bd.
- assert (Rho' := Cv_radius_weak_Cnorm_compat An r Rho).
- pose (l := sum_r (fun n => Cnorm (An n)) r Rho' (Cnorm x)).
- assert (R : Rpser_def.Cv_radius_weak (fun n => Cnorm (An n)) r).
- pose (Rho'' := Rho') ; destruct Rho'' as [B HB] ; exists B ; intros u Hu ;
- destruct Hu as [n Hn] ; rewrite Hn ; unfold gt_abs_Pser ; unfold gt_norm_Pser in HB.
- apply Rle_trans with (Rabs (Cnorm (An n * r ^ n))).
- right ; apply Rabs_eq_compat ; rewrite Cnorm_Cmult ; apply Rmult_eq_compat_l.
- rewrite Cnorm_pow ; rewrite Cnorm_IRC_Rabs, Rabs_right.
- reflexivity.
- apply Rle_ge ; apply Rle_trans with (Cnorm x) ; [apply Cnorm_pos | left ; assumption].
- rewrite <- Cnorm_IRC_Rabs ; apply HB.
- exists n.
- apply Cnorm_eq_compat ; rewrite Cnorm_Cmult, Cnorm_pow.
- rewrite Cnorm_IRC_Rabs, Rabs_right, Cmult_IRC_Rmult, IRC_pow_compat.
- reflexivity.
- apply Rle_ge ; apply Rle_trans with (Cnorm x) ; [apply Cnorm_pos | left ; assumption].
- pose (l' := Rpser_facts.sum_r (fun n => Cnorm (An n)) r R (Cnorm x)).
- exists l'.
- rewrite <- Cnorm_invol, Cnorm_IRC_Rabs in x_bd.
- assert (H := Rpser_facts.sum_r_sums (fun n => Cnorm (An n))
- r R (Cnorm x) x_bd).
- intros eps eps_pos ; destruct (H eps eps_pos) as [N HN] ;
- exists N ; intros n n_lb ; simpl ; unfold C_dist.
- apply Rle_lt_trans with (
+ assert (Rho' : Rpser_def.Cv_radius_weak (fun n => Cnorm (An n)) r).
+  destruct Rho as [B HB] ; exists B ; intros u [n Hn] ; rewrite Hn ; apply HB ;
+  exists n ; unfold gt_abs_Pser, gt_norm_Pser.
+  rewrite Rabs_mult, Cnorm_Cmult, Rabs_Cnorm ; apply Rmult_eq_compat_l ;
+  rewrite IRC_pow_compat, Cnorm_IRC_Rabs ; reflexivity.
+ rewrite <- Rabs_Cnorm in x_bd ; pose (l := Rpser_facts.weaksum_r _ _ Rho' (Cnorm x)) ;
+ exists l ; unfold Pser_norm, Pser, infinite_sum.
+ assert (Hl := weaksum_r_sums _ _ Rho' (Cnorm x) x_bd) ;
+ unfold Rseries.Pser, Rfunctions.infinite_sum in Hl.
 
-Qed.
-*)
+ assert (Hrew : forall n, IRC (sum_f_R0 (fun n0 : nat => (Cnorm (An n0) * Cnorm x ^ n0)%R) n) =
+                  sum_f_C0 (fun n0 : nat => Cnorm (An n0) * Cnorm x ^ n0) n).
+ clear ; intro n ; induction n.
+  simpl ; rewrite Cmult_1_r, Rmult_1_r ; reflexivity.
+  simpl ; rewrite <- IHn.
+  rewrite Cadd_IRC_Rplus ; apply Cadd_eq_compat_l.
+  repeat (rewrite Cmult_IRC_Rmult ; apply Cmult_eq_compat_l).
+  rewrite IRC_pow_compat ; reflexivity.
+  intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ;
+  exists N ; intros n n_lb ; simpl ; unfold C_dist.
+  rewrite <- Hrew, <- Cminus_IRC_Rminus, Cnorm_IRC_Rabs ;
+  apply HN ; assumption.
+Qed.  
+
+
 Lemma Cpser_abel2 : forall (An : nat -> C) (r : R), 
      Cv_radius_weak An r -> forall r0 : posreal, r0 < r ->
      CVN_r (fun n x => gt_Pser An x n) r0.
@@ -435,27 +433,21 @@ intros An z l Hzl.
    rewrite Cnorm_pow, Cnorm_invol, <- Cnorm_pow, <- Cnorm_Cmult.
    apply Rle_trans with (Rmax 2 (Cnorm (An 0%nat) + 1)) ; [apply H1 | apply RmaxLess2] ; intuition.
 Qed.
-(*
+
 (** A sufficient condition for the radius of convergence*)
 Lemma Cpser_finite_cv_radius_caracterization (An : nat -> C) (z l : C) :
    Pser An z l -> (forall l' : R, ~ Pser_norm An z l')  -> finite_cv_radius An (Cnorm z).
 Proof.
 intros An z l Hcv Hncv.
- split; intros x Hx.
- apply Rnot_lt_le ; intro Hxx0.
- assert (H : {l : C | Pser_norm An z (Cnorm l)}).
+split; intros x Hx.
 
- destruct Hx as (m, Hm) ; exists m ; intros x1 H1 ; apply Hm ;
- destruct H1 as (i, Hi) ; exists i.
- unfold gt_abs_Pser in Hi ; replace (Rabs (Rabs (An i) * x ^ i)) with
-       (Rabs ((An i) *x ^ i)) in Hi.
+ apply Cv_radius_weak_le_compat with (Cnorm z).
+ rewrite Rabs_Cnorm ; rewrite Rabs_right ; intuition.
+
+  apply (Cpser_bound_criteria _ _ l Hcv).
+  
+ intro Hf.
+ destruct (Cpser_abel2_prelim An x Hf z) as [l' Hl'].
  assumption.
- repeat (rewrite Rabs_mult) ; rewrite Rabs_Rabsolu ; reflexivity.
- rewrite Rabs_Rabsolu ; assumption.
- destruct H as (l0, Hl0) ; apply Hncv with l0 ; exact Hl0.
- apply Hx ; apply Cv_radius_weak_le_compat with (r:=x0).
- rewrite Rabs_Rabsolu ; intuition.
- apply Rpser_bound_criteria with (l:=l) ; assumption.
-Qed.
-
-*)
+ apply Hncv with l' ; assumption.
+Qed. 

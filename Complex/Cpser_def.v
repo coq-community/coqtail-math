@@ -59,11 +59,31 @@ Definition Cv_radius_weak (An : nat -> C) (r:R) := has_ub (gt_norm_Pser An (IRC 
 (** Cv radius definition *)
 
 Definition finite_cv_radius (An : nat -> C) (r:R) := 
-    is_lub (fun r0 => has_ub (gt_norm_Pser An (IRC r0))) r.
+    (forall r', 0 <= r' < r -> Cv_radius_weak An r') /\
+    (forall r', r < r' -> ~ (Cv_radius_weak An r')).
 
 Definition infinite_cv_radius (An : nat -> C) := forall (r : R), Cv_radius_weak An r.
 
 (** * Some lemmas manipulating the definitions *)
+
+Lemma Cv_radius_weak_0 An : Cv_radius_weak An 0.
+Proof.
+intro An ; exists (Cnorm (An O)) ; intros x [n Hn] ; rewrite Hn ;
+ unfold gt_norm_Pser ; destruct n.
+  rewrite Cpow_0 ; right ; apply Cnorm_eq_compat ; intuition.
+  rewrite IRC_pow_compat, pow_i, Cmult_0_r, Cnorm_C0 ; [apply Cnorm_pos | intuition].
+Qed.
+
+Lemma finite_cv_radius_pos An r : finite_cv_radius An r -> 0 <= r.
+
+Proof.
+intros An r [_ Hf].
+ destruct(Rle_lt_dec 0 r).
+  trivial.
+destruct (Hf 0).
+trivial.
+apply Cv_radius_weak_0.
+Qed.
 
 Lemma Cv_radius_weak_Cnorm_compat : forall (An : nat -> C) (r : R), 
        Cv_radius_weak An r -> Cv_radius_weak (fun n => Cnorm (An n)) r.
@@ -115,6 +135,15 @@ intros An r r' r'_bd Rho.
   field.
   rewrite IRC_pow_compat ; apply IRC_neq_0_compat ;
   apply pow_nonzero ; assumption.
+Qed.
+
+Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
+      forall x, Rabs x < r -> Cv_radius_weak An x.
+Proof.
+intros An r [H_sup _] x Hx.
+ apply Cv_radius_weak_le_compat with (Rabs x).
+  rewrite Rabs_Rabsolu ; right ; reflexivity.
+  apply H_sup ; split ; [apply Rabs_pos | assumption].
 Qed.
 
 Lemma Cv_radius_weak_padding_pos_compat : forall (An : nat -> C) (r : R),

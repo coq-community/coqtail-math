@@ -26,7 +26,6 @@ Require Export Rseries.
 Require Export Rpser_facts.
 Require Import Fourier.
 Require Import Rintegral.
-Require Import Tools.
 
 (* begin hide *)
 Lemma continuity_pt_eq_compat :
