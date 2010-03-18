@@ -526,7 +526,7 @@ Qed.
 
 (**********)
 Lemma Rseq_cv_pos_minus_neg_infty :
-  Rseq_cv_pos_infty Un -> Rseq_cv_neg_infty Vn -> Rseq_cv_pos_infty (Un -Vn).
+  Rseq_cv_pos_infty Un -> Rseq_cv_neg_infty Vn -> Rseq_cv_pos_infty (Un - Vn).
 Proof.
 intros Hl Hf M.
 destruct (Hl M) as [N HN].
@@ -543,7 +543,7 @@ Qed.
 
 (**********)
 Lemma Rseq_cv_neg_minus_pos_infty :
-  Rseq_cv_neg_infty Un -> Rseq_cv_pos_infty Vn -> Rseq_cv_neg_infty (Un -Vn).
+  Rseq_cv_neg_infty Un -> Rseq_cv_pos_infty Vn -> Rseq_cv_neg_infty (Un - Vn).
 Proof.
 intros Hl Hf M.
 destruct (Hl M) as [N HN].
@@ -1060,7 +1060,7 @@ Qed.
 (**********)
 Lemma Rseq_cv_0_inv_compat :
   Rseq_cv Un 0 -> Rseq_neq_0 Un ->
-    Rseq_cv_pos_infty (| /Un|).
+    Rseq_cv_pos_infty (|/ Un|).
 Proof.
 intros Hcv He M.
 pose (Mp := Rmax 1 M).

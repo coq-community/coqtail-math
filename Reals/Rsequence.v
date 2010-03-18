@@ -29,9 +29,11 @@ Open Local Scope Rseq_scope.
 
 Definition Rseq := nat -> R.
 
+Bind Scope Rseq_scope with Rseq.
+
 Implicit Type n : nat.
 Implicit Type r : R.
-Implicit Type An Bn : Rseq.
+Implicit Type Un Vn : Rseq.
 
 (** * Morphism of functions on R to sequences. *)
 
@@ -39,19 +41,19 @@ Definition Rseq_constant r := (fun n => r).
 
 Coercion Rseq_constant : R >-> Funclass.
 
-Definition Rseq_plus An Bn n := An n + Bn n.
-Definition Rseq_mult An Bn n := An n * Bn n.
-Definition Rseq_opp An n := Ropp (An n).
-Definition Rseq_inv An n := Rinv (An n).
+Definition Rseq_plus Un Vn n := Un n + Vn n.
+Definition Rseq_mult Un Vn n := Un n * Vn n.
+Definition Rseq_opp Un n := Ropp (Un n).
+Definition Rseq_inv Un n := Rinv (Un n).
 
 Infix "+" := Rseq_plus : Rseq_scope.
 Infix "*" := Rseq_mult : Rseq_scope.
 Notation "- u" := (Rseq_opp u) : Rseq_scope.
 Notation "/ u" := (Rseq_inv u) : Rseq_scope.
 
-Definition Rseq_minus An Bn n := An n - Bn n.
-Definition Rseq_div An Bn n := An n / Bn n.
-Definition Rseq_abs An n := Rabs (An n).
+Definition Rseq_minus Un Vn n := Un n - Vn n.
+Definition Rseq_div Un Vn n := Un n / Vn n.
+Definition Rseq_abs Un n := Rabs (Un n).
 
 Notation "'|' Un '|'" := (Rseq_abs Un) (at level 39, format "'|' Un '|'") : Rseq_scope.
 Infix "-" := Rseq_minus : Rseq_scope.
@@ -62,8 +64,6 @@ Infix "/" := Rseq_div : Rseq_scope.
 Definition Rseq_eq (Un Vn : Rseq) := forall n, Un n = Vn n.
 
 Infix "==" := Rseq_eq (at level 70, no associativity) : Rseq_scope.
-
-Arguments Scope Rseq_eq [Rseq_scope Rseq_scope].
 
 (** * Various properties. *)
 
@@ -91,7 +91,7 @@ Definition Rseq_bound Un M := forall n, Rabs (Un n) <= M.
 
 Definition Rseq_le Un Vn := forall n, Un n <= Vn n.
 
-Definition Rseq_shift (Un:Rseq) n := Un (S n).
+Definition Rseq_shift Un n := Un (S n).
 
 (** * Convergence of sequences. *)
 
@@ -121,10 +121,6 @@ Definition Rseq_equiv Un Vn := Rseq_little_O (Un - Vn) Un.
 Notation "Un = 'O' ( Vn )" := (Rseq_big_O Un Vn) (at level 39, format "Un  =  'O' ( Vn )") : Rseq_scope.
 Notation "Un = 'o' ( Vn )" := (Rseq_little_O Un Vn) (at level 40, format "Un  =  'o' ( Vn )") : Rseq_scope.
 Notation "Un ~ Vn" := (Rseq_equiv Un Vn) (at level 5) : Rseq_scope.
-
-Arguments Scope Rseq_big_O [Rseq_scope Rseq_scope].
-Arguments Scope Rseq_little_O [Rseq_scope Rseq_scope].
-Arguments Scope Rseq_equiv [Rseq_scope Rseq_scope].
 
 (** * Usual sequences. *)
 
