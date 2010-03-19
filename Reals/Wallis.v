@@ -715,11 +715,13 @@ apply pow_nonzero. apply not_0_INR ; intuition.
 apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
 intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR. intuition.
 apply pos_INR. assumption.
-
 (* End of "<> 0" *)
 
 (* end of simplification *)
-apply Rseq_equiv_cv_compat with (1 * (Rsqr l / PI * exp 1) * /exp 1 * /2).
+
+eapply Rseq_equiv_cv_compat.
+  2: reflexivity.
+ symmetry; instantiate (1 := (1 * (Rsqr l / PI * exp 1) * /exp 1 * /2)).
  apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; exists O ; intro ; intuition ].
  apply Rseq_equiv_mult_compat.
   apply Rseq_equiv_mult_compat ; [ | apply Rseq_equiv_eq ; exists O ; intro ; intuition ].
@@ -754,8 +756,9 @@ apply Rseq_equiv_cv_compat with (1 * (Rsqr l / PI * exp 1) * /exp 1 * /2).
    intros n. unfold Rseq_constant, Rseq_minus, Rseq_plus, Rseq_opp.
    field. intros H1 ; generalize (pos_INR n) ; intros ; fourier.
    intuition.
-   apply Rseq_equiv_cv_compat with 
-   (fun n => (2 * INR n + 1) * - / (2 * INR n + 1))%R.
+   eapply Rseq_equiv_cv_compat.
+     2: reflexivity.
+    symmetry; instantiate (1 := (fun n => (2 * INR n + 1) * - / (2 * INR n + 1))%R).
     apply Rseq_equiv_mult_compat.
      apply Rseq_equiv_refl.
      apply Rseq_equiv_sym. apply Rseq_equiv_ln.

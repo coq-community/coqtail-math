@@ -20,31 +20,29 @@ USA.
 *)
 Require Import Max.
 Require Import Reals.
+Require Export Setoid Morphisms.
 Require Import Rsequence.
 Require Import Rsequence_base_facts.
 Require Import Rsequence_cv_facts.
 Require Import Fourier.
+
 Open Scope R_scope.
 Open Scope Rseq_scope.
 
 (** * Big-O, little-O and equivalence relations. *)
 
-Section Rseq_rel.
-
-Variable Un Vn Wn Xn : nat -> R.
-
 (** Big-O is reflexive and transitive. *)
 
 (**********)
-Lemma Rseq_big_O_refl : Un = O(Un).
+Lemma Rseq_big_O_refl : forall Un, Un = O(Un).
 Proof.
 exists 1; split; [|exists 0%nat; intros n H]; fourier.
 Qed.
 
 (**********)
-Lemma Rseq_big_O_trans : Un = O(Vn) -> Vn = O(Wn) -> Un = O(Wn).
+Lemma Rseq_big_O_trans : forall Un Vn Wn, Un = O(Vn) -> Vn = O(Wn) -> Un = O(Wn).
 Proof.
-intros Hu Hv.
+intros Un Vn Wn Hu Hv.
 destruct Hu as [Mu [HMu Hu]];
 destruct Hv as [Mv [HMv Hv]].
 exists (Mu * Mv)%R; split.
@@ -61,12 +59,20 @@ apply Rge_le; assumption.
 apply (Hv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
 Qed.
 
+(**********)
+Instance Rseq_big_O_PreOrder : PreOrder Rseq_big_O.
+Proof.
+split.
+  exact Rseq_big_O_refl.
+  exact Rseq_big_O_trans.
+Qed.
+
 (** Little-O is transitive. *)
 
 (**********)
-Lemma Rseq_little_O_trans : Un = o(Vn) -> Vn = o(Wn) -> Un = o(Wn).
+Lemma Rseq_little_O_trans : forall Un Vn Wn, Un = o(Vn) -> Vn = o(Wn) -> Un = o(Wn).
 Proof.
-intros Hu Hv eps Heps.
+intros Un Vn Wn Hu Hv eps Heps.
 destruct (Hu 1) as [Nu HNu]; [fourier|].
 destruct (Hv eps) as [Nv Hnv]; [assumption|].
 exists (Max.max Nu Nv).
@@ -78,12 +84,18 @@ apply (Hnv n).
 eapply le_trans; [apply Max.le_max_r|eexact Hn].
 Qed.
 
+(**********)
+Instance Rseq_little_O_Transitive : Transitive Rseq_little_O.
+Proof.
+exact Rseq_little_O_trans.
+Qed.
+
 (** Equivalence is an equivalence relation. *)
 
 (**********)
-Lemma Rseq_equiv_refl : Un ~ Un.
+Lemma Rseq_equiv_refl : forall Un, Un ~ Un.
 Proof.
-intros eps Heps.
+intros Un eps Heps.
 exists 0%nat; intros n Hn.
 unfold Rseq_minus; unfold Rminus.
 rewrite Rplus_opp_r; rewrite Rabs_R0.
@@ -93,9 +105,9 @@ apply Rabs_pos.
 Qed.
 
 (**********)
-Lemma Rseq_equiv_sym : Un ~ Vn -> Vn ~ Un.
+Lemma Rseq_equiv_sym : forall Un Vn, Un ~ Vn -> Vn ~ Un.
 Proof.
-intros H eps Heps.
+intros Un Vn H eps Heps.
 pose (eps' := (eps / (1 + eps))%R).
 assert (Heps' : eps' > 0).
 apply Rmult_gt_0_compat; [assumption|apply Rinv_0_lt_compat; fourier].
@@ -127,9 +139,9 @@ apply Rabs_triang.
 Qed.
 
 (**********)
-Lemma Rseq_equiv_trans : Un ~ Vn -> Vn ~ Wn -> Un ~ Wn.
+Lemma Rseq_equiv_trans : forall Un Vn Wn, Un ~ Vn -> Vn ~ Wn -> Un ~ Wn.
 Proof.
-intros Hu Hv eps Heps.
+intros Un Vn Wn Hu Hv eps Heps.
 pose (eps' := Rmin 1 (eps / 3)).
 assert (Heps' : 0 < eps').
 compute; destruct Rle_dec; fourier.
@@ -164,12 +176,21 @@ eapply Rle_trans; [eexact Heps2|apply Rmin_r].
 apply Rmult_le_compat_r; [apply Rabs_pos|apply Rmin_r].
 Qed.
 
+(**********)
+Instance Rseq_equiv_Equivalence : Equivalence Rseq_equiv.
+Proof.
+split.
+  exact Rseq_equiv_refl.
+  exact Rseq_equiv_sym.
+  exact Rseq_equiv_trans.
+Qed.
+
 (** Big-O contains little-O and equivalence. *)
 
 (**********)
-Lemma Rseq_little_O_big_O_incl : Un = o(Vn) -> Un = O(Vn).
+Lemma Rseq_little_O_big_O_incl : forall Un Vn, Un = o(Vn) -> Un = O(Vn).
 Proof.
-intros H.
+intros Un Vn H.
 destruct (H 1) as [N HN]; [fourier|].
 exists 1; split; [fourier|].
 exists N; intros n Hn.
@@ -177,9 +198,9 @@ apply HN; assumption.
 Qed.
 
 (**********)
-Lemma Rseq_equiv_big_O_incl : Un ~ Vn -> Un = O(Vn).
+Lemma Rseq_equiv_big_O_incl : forall Un Vn, Un ~ Vn -> Un = O(Vn).
 Proof.
-intros H.
+intros Un Vn H.
 apply Rseq_equiv_sym in H.
 destruct (H 1) as [N HN]; [fourier|].
 exists 2; split; [fourier|].
@@ -194,9 +215,9 @@ Qed.
 (** Compatibility of relations. *)
 
 (**********)
-Lemma Rseq_big_O_little_O_trans : Un = O(Vn) -> Vn = o(Wn) -> Un = o(Wn).
+Lemma Rseq_big_O_little_O_trans : forall Un Vn Wn, Un = O(Vn) -> Vn = o(Wn) -> Un = o(Wn).
 Proof.
-intros HO Ho eps Heps.
+intros Un Vn Wn HO Ho eps Heps.
 destruct HO as [M [HM [NO HNO]]].
 assert (Hm : Rmax 1 M > 0).
 eapply Rlt_le_trans; [apply Rlt_0_1|apply RmaxLess1].
@@ -220,9 +241,9 @@ apply Rabs_pos.
 Qed.
 
 (**********)
-Lemma Rseq_little_O_big_O_trans : Un = o(Vn) -> Vn = O(Wn) -> Un = o(Wn).
+Lemma Rseq_little_O_big_O_trans : forall Un Vn Wn, Un = o(Vn) -> Vn = O(Wn) -> Un = o(Wn).
 Proof.
-intros Hu Hv eps Heps.
+intros Un Vn Wn Hu Hv eps Heps.
 destruct Hv as [M [HM [NO HNO]]].
 destruct (Hu (eps * / Rmax 1 M)%R) as [No HNo].
 apply Rmult_gt_0_compat; [fourier|].
@@ -248,9 +269,9 @@ eapply Rlt_le_trans; [apply Rlt_0_1|apply RmaxLess1].
 Qed.
 
 (**********)
-Lemma Rseq_equiv_big_O_compat_l : Un ~ Vn -> Un = O(Wn) -> Vn = O(Wn).
+Lemma Rseq_equiv_big_O_compat_l : forall Un Vn Wn, Un ~ Vn -> Un = O(Wn) -> Vn = O(Wn).
 Proof.
-intros He HO.
+intros Un Vn Wn He HO.
 destruct HO as [M [HM [NO HNO]]].
 destruct (He 1) as [Ne HNe]; [fourier|].
 exists (2 * M)%R; split; [fourier|].
@@ -268,9 +289,9 @@ apply HNO; eapply le_trans; [apply Max.le_max_r|eexact Hn].
 Qed.
 
 (**********)
-Lemma Rseq_equiv_big_O_compat_r : Un ~ Vn -> Wn = O(Un) -> Wn = O(Vn).
+Lemma Rseq_equiv_big_O_compat_r : forall Un Vn Wn, Un ~ Vn -> Wn = O(Un) -> Wn = O(Vn).
 Proof.
-intros He HO.
+intros Un Vn Wn He HO.
 apply Rseq_equiv_sym in He.
 destruct HO as [M [HM [NO HNO]]].
 destruct (He 1) as [Ne HNe]; [fourier|].
@@ -290,9 +311,9 @@ rewrite Rmult_1_l; apply Rle_refl.
 Qed.
 
 (**********)
-Lemma Rseq_equiv_little_O_compat_l : Un ~ Vn -> Un = o(Wn) -> Vn = o(Wn).
+Lemma Rseq_equiv_little_O_compat_l : forall Un Vn Wn, Un ~ Vn -> Un = o(Wn) -> Vn = o(Wn).
 Proof.
-intros He Ho eps Heps.
+intros Un Vn Wn He Ho eps Heps.
 pose (eps' := Rmin 1 eps).
 assert (Heps' : eps' > 0).
 unfold eps'; unfold Rmin; destruct Rle_dec; fourier.
@@ -324,8 +345,8 @@ apply Rmult_le_compat_r; [fourier|apply Rmin_r].
 Qed.
 
 (**********)
-Lemma Rseq_equiv_little_O_compat_r : Un ~ Vn -> Wn = o(Un) -> Wn = o(Vn).
-intros He Ho eps Heps.
+Lemma Rseq_equiv_little_O_compat_r : forall Un Vn Wn, Un ~ Vn -> Wn = o(Un) -> Wn = o(Vn).
+intros Un Vn Wn He Ho eps Heps.
 apply Rseq_equiv_sym in He.
 pose (eps1 := (eps / (2 + eps))%R).
 pose (eps2 := (eps / 2)%R).
@@ -358,8 +379,6 @@ apply HNe; eapply le_trans; [apply Max.le_max_r|eexact Hn].
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 unfold eps2; fourier.
 Qed.
-
-End Rseq_rel.
 
 (** * Big-O and common operations. *)
 
@@ -817,39 +836,42 @@ End Rseq_little_O_pos_infty.
 
 Section Rseq_equiv_cv.
 
+(**********)
+Instance Rseq_equiv_cv_compat : Morphism (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
+Proof.
+assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
+  intros Un Vn l Heq H eps Heps.
+  destruct (Rseq_cv_bound Un l H) as [M [HM Hb]].
+  destruct (H (eps / 2))%R as [Ncv HNcv]; [fourier|].
+  destruct (Heq (eps / 2 * /(M + 1)))%R as [Neq HNeq].
+  repeat apply Rmult_gt_0_compat; try (assumption || fourier).
+  apply Rinv_0_lt_compat; fourier.
+  exists (Max.max Ncv Neq); intros n Hn.
+  unfold R_dist.
+  replace (Vn n - l)%R
+    with ((Vn n - Un n) + (Un n - l))%R by field. 
+  eapply Rle_lt_trans; [apply Rabs_triang|].
+  replace eps with (eps / 2 + eps / 2)%R by field.
+  apply Rplus_lt_compat.
+  rewrite Rabs_minus_sym.
+  eapply Rle_lt_trans.
+  apply HNeq; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+  rewrite <- Rmult_1_r; rewrite Rmult_assoc.
+  apply Rmult_lt_compat_l; [fourier|].
+  apply Rmult_lt_reg_l with (r := (M + 1)%R); [fourier|].
+  rewrite <- Rmult_assoc; rewrite Rmult_1_r.
+  rewrite Rinv_r; [|apply Rgt_not_eq; fourier].
+  rewrite Rmult_1_l.
+  pattern (Rabs (Un n)); rewrite <- Rplus_0_r.
+  apply Rplus_le_lt_compat; [apply Hb|fourier].
+  apply HNcv; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+intros Un Vn Heq l l' Hl; subst l'.
+split; apply Hcompat; auto; symmetry; auto.
+Qed.
+
 Variable Un Vn : nat -> R.
 Variable l : R.
 Hypothesis Heq : Un ~ Vn.
-
-(**********)
-Lemma Rseq_equiv_cv_compat : Rseq_cv Un l -> Rseq_cv Vn l.
-Proof.
-intros H eps Heps.
-destruct (Rseq_cv_bound Un l H) as [M [HM Hb]].
-destruct (H (eps / 2))%R as [Ncv HNcv]; [fourier|].
-destruct (Heq (eps / 2 * /(M + 1)))%R as [Neq HNeq].
-repeat apply Rmult_gt_0_compat; try (assumption || fourier).
-apply Rinv_0_lt_compat; fourier.
-exists (Max.max Ncv Neq); intros n Hn.
-unfold R_dist.
-replace (Vn n - l)%R
-  with ((Vn n - Un n) + (Un n - l))%R by field. 
-eapply Rle_lt_trans; [apply Rabs_triang|].
-replace eps with (eps / 2 + eps / 2)%R by field.
-apply Rplus_lt_compat.
-rewrite Rabs_minus_sym.
-eapply Rle_lt_trans.
-apply HNeq; eapply le_trans; [apply Max.le_max_r|eexact Hn].
-rewrite <- Rmult_1_r; rewrite Rmult_assoc.
-apply Rmult_lt_compat_l; [fourier|].
-apply Rmult_lt_reg_l with (r := (M + 1)%R); [fourier|].
-rewrite <- Rmult_assoc; rewrite Rmult_1_r.
-rewrite Rinv_r; [|apply Rgt_not_eq; fourier].
-rewrite Rmult_1_l.
-pattern (Rabs (Un n)); rewrite <- Rplus_0_r.
-apply Rplus_le_lt_compat; [apply Hb|fourier].
-apply HNcv; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-Qed.
 
 (**********)
 Lemma Rseq_equiv_cv_pos_infty_compat : Rseq_cv_pos_infty Un -> Rseq_cv_pos_infty Vn.
@@ -990,7 +1012,6 @@ rewrite Rabs_Ropp.
 left; apply HN; assumption.
 Qed.
 
-
 (**********)
 Lemma Rseq_equiv_1 Un Vn : (forall n, Vn n <> 0) -> (Rseq_div Un  Vn) ~ 1 -> Un ~ Vn.
 Proof.
@@ -1040,4 +1061,3 @@ rewrite <- Rabs_mult.
 replace (Vn n * / (Un n * Vn n))%R with (/ Un n)%R by (field; auto);
   reflexivity.
 Qed.
-
