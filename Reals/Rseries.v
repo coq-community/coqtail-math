@@ -26,7 +26,10 @@ Require Import Rsequence.
 Open Local Scope R_scope.
 Open Local Scope Rseq_scope.
 
+Implicit Type Un : Rseq.
+
 (** * Convergence of series *)
+
 Definition Rser_cv Un l := Rseq_cv (sum_f_R0 Un) l.
 
 Definition Rser_abs_cv Un l := Rseq_cv (sum_f_R0 (|Un|)) l.

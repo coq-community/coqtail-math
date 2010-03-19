@@ -110,7 +110,7 @@ Qed.
 (** Substracting odd terms *)
 
 Lemma remove_odds Un l : {lu | Rser_cv Un lu} ->
-  Rser_cv (evens Un) l -> Rser_cv (Un - (odds Un))%Rseq l.
+  Rser_cv (evens Un) l -> Rser_cv (Un - (odds Un)) l.
 Proof.
 intros Un lo [lu Hu] Ho.
 replace lo with (lu - (lu - lo)) by ring.
@@ -130,7 +130,7 @@ Qed.
 (** Substracting even terms *)
 
 Lemma remove_evens Un l : {lu | Rser_cv Un lu} ->
-  Rser_cv (odds Un) l -> Rser_cv (Un - evens Un)%Rseq l.
+  Rser_cv (odds Un) l -> Rser_cv (Un - evens Un) l.
 Proof.
 intros Un lo [lu Hu] Ho.
 replace lo with (lu - (lu - lo)) by ring.
@@ -555,7 +555,7 @@ eapply Rseq_cv_eq_compat.
  intro; trivial.
 Qed.
 
-Lemma An_squared_cv : Rseq_cv (An * An)%Rseq (PI ^ 2 / 4).
+Lemma An_squared_cv : Rseq_cv (An * An) (PI ^ 2 / 4).
 Proof.
 replace (PI ^ 2 / 4) with ((PI / 2) * (PI / 2)) by field.
 apply Rseq_cv_mult_compat; apply An_cv.
@@ -1661,7 +1661,7 @@ Qed.
 
 (** Final result about sums *)
 
-Lemma An_squared_Bn_cv : Rseq_cv (An * An - Bn)%Rseq 0.
+Lemma An_squared_Bn_cv : Rseq_cv (An * An - Bn) 0.
 Proof.
 intros e epos.
 destruct (abound_cv e epos) as [N H].
