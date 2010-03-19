@@ -33,6 +33,9 @@ Require Import Cmet.
 Require Import Cnorm.
 Require Import Cprop_base.
 
+Require Import Canalysis_def.
+Require Import Canalysis_deriv.
+
 Open Local Scope C_scope.
 
 Lemma Rseq_norm_abs_Cre : 
@@ -162,21 +165,58 @@ Qed.
 
 (** Definition of the sum of a power serie (0 outside the cv-disc) and proof that it's really the sum *)
 
-Definition sum_r (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) : C -> C.
+Definition weaksum_r (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) : C -> C.
 Proof.
 intros An r Rho x.
  case (Rlt_le_dec (Cnorm x) r) ; intro x_bd.
- destruct (Cpser_abel _ _ Rho _ x_bd) as [y _] ; exact y.
+ elim (Cpser_abel _ _ Rho _ x_bd) ; intros y Hy ; exact y.
  exact 0.
 Defined.
 
-Lemma sum_r_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (x : C),
-      Cnorm x < r -> Pser An x (sum_r An r Pr x).
+Lemma weaksum_r_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (x : C),
+      Cnorm x < r -> Pser An x (weaksum_r An r Pr x).
 Proof.
 intros An r Pr x x_bd.
- unfold sum_r ; case (Rlt_le_dec (Cnorm x) r) ; intro s.
+ unfold weaksum_r ; case (Rlt_le_dec (Cnorm x) r) ; intro s.
  destruct (Cpser_abel An r Pr x s) as (l,Hl) ; simpl ; assumption.
  apply False_ind ; fourier.
+Qed.
+
+Definition sum_r (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) : C -> C.
+Proof.
+intros An r Pr x.
+ case (Rlt_le_dec (Cnorm x) r) ; intro x_bd.
+  assert (rho : Cv_radius_weak An (middle (Cnorm x) r)).
+  apply Pr; split.
+  apply Rle_trans with (Cnorm x).
+   apply Cnorm_pos.
+   left ; apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
+   apply (proj2 (middle_is_in_the_middle _ _ x_bd)).
+ apply (weaksum_r An (middle (Cnorm x) r) rho x).
+ exact 0.
+Defined.
+
+Lemma sum_r_sums : forall  (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
+      forall x, Cnorm x < r -> Pser An x (sum_r An r Pr x).
+Proof.
+intros An r Pr x x_ub.
+ unfold sum_r ; destruct (Rlt_le_dec (Cnorm x) r) as [x_bd | x_nbd].
+ apply weaksum_r_sums.
+ apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
+  apply False_ind ; fourier.
+Qed.
+
+Definition sum (An : nat -> C) (Pr : infinite_cv_radius An) : C -> C.
+Proof.
+intros An Pr r.
+ apply (weaksum_r An (Cnorm r +1) (Pr (Cnorm r + 1)%R) r).
+Defined.
+
+Lemma sum_sums : forall  (An : nat -> C) (Pr : infinite_cv_radius An),
+      forall x, Pser An x (sum An Pr x).
+Proof.
+intros An Pr x.
+ apply weaksum_r_sums ; intuition.
 Qed.
    
 (** Abel's lemma : Normal convergence of the power serie *)
@@ -193,7 +233,7 @@ intros An r Rho x x_bd.
   rewrite IRC_pow_compat, Cnorm_IRC_Rabs ; reflexivity.
  rewrite <- Rabs_Cnorm in x_bd ; pose (l := Rpser_facts.weaksum_r _ _ Rho' (Cnorm x)) ;
  exists l ; unfold Pser_norm, Pser, infinite_sum.
- assert (Hl := weaksum_r_sums _ _ Rho' (Cnorm x) x_bd) ;
+ assert (Hl := Rpser_facts.weaksum_r_sums _ _ Rho' (Cnorm x) x_bd) ;
  unfold Rseries.Pser, Rfunctions.infinite_sum in Hl.
 
  assert (Hrew : forall n, IRC (sum_f_R0 (fun n0 : nat => (Cnorm (An n0) * Cnorm x ^ n0)%R) n) =
@@ -232,8 +272,8 @@ intros An r Pr r0 r0_ub.
  rewrite Cnorm_IRC_Rabs, Rabs_Rabsolu ; assumption.
  assert (Pr' := Cv_radius_weak_Cnorm_compat _ _ Pr).
  exists (gt_abs_Pser (fun n => Cnorm (An n)) ((a+r)/2)) ;
- exists (sum_r (fun n => Cnorm (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
- assert (H := sum_r_sums (fun n => Cnorm (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
+ exists (weaksum_r (fun n => Cnorm (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
+ assert (H := weaksum_r_sums (fun n => Cnorm (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
  assert (Main := Pser_Cseqcv_link _ _ _ H).
  intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ; exists N.
   assert (Hrew : forall k, IRC (Cnorm (gt_abs_Pser (fun n => Cnorm (An n)) ((a + r) / 2) k))
@@ -450,4 +490,92 @@ split; intros x Hx.
  destruct (Cpser_abel2_prelim An x Hf z) as [l' Hl'].
  assumption.
  apply Hncv with l' ; assumption.
-Qed. 
+Qed.
+
+Lemma Rpser_infinite_cv_radius_caracterization An : (forall x, {l | Pser An x l}) ->
+     infinite_cv_radius An.
+Proof.
+intros An weaksum r ; destruct (weaksum r) as (l, Hl).
+ assert (H := Cpser_bound_criteria An r l Hl).
+ rewrite Cnorm_IRC_Rabs in H.
+ apply Cv_radius_weak_le_compat with (Rabs r).
+ rewrite Rabs_Rabsolu ; right ; reflexivity.
+ assumption.
+Qed.
+
+
+Lemma Cv_radius_weak_derivable_compat : forall An r,
+         Cv_radius_weak An r -> forall r', Rabs r' < Rabs r ->
+         Cv_radius_weak (An_deriv An) r'.
+Proof.
+intros An r rho r' r'_bd.
+ assert (Rabsr_pos : 0 < Rabs r).
+  apply Rle_lt_trans with (Rabs r') ; [apply Rabs_pos | assumption].
+ assert (x_lt_1 : Rabs (r'/ r) < 1).
+  unfold Rdiv ; rewrite Rabs_mult ; rewrite Rabs_Rinv.
+  replace 1 with (Rabs r *  / Rabs r)%R.
+  apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+  apply Rinv_r ; apply Rgt_not_eq ; assumption.
+  intro Hf ; rewrite Hf, Rabs_R0 in Rabsr_pos ; apply (Rlt_irrefl _ Rabsr_pos).
+  destruct rho as (B,HB).
+  case (Req_or_neq r') ; intro r'_lb.
+  exists (Cnorm (An 1%nat)) ; intros x Hx ; destruct Hx as (i, Hi) ;
+ rewrite Hi ; unfold gt_norm_Pser, An_deriv.
+ destruct i.
+ simpl ; rewrite Cmult_1_l, Cmult_1_r ; apply Rle_refl.
+ rewrite r'_lb ; rewrite IRC_pow_compat, pow_i ; [| intuition] ;
+ repeat rewrite Cmult_0_r, Cnorm_C0 ; apply Cnorm_pos.
+ assert (Rabsr'_pos : 0 < Rabs r') by (apply Rabs_pos_lt ; assumption). 
+ destruct (Rpser_cv_speed_pow_id (r' / r) x_lt_1 (Rabs r') Rabsr'_pos) as (N, HN).
+ destruct (Rseq_partial_bound (gt_norm_Pser (An_deriv An) r') N) as (B2, HB2).
+ exists (Rmax B B2) ; intros x Hx ; destruct Hx as (i, Hi) ;
+ rewrite Hi ; unfold gt_norm_Pser in * ; case (le_lt_dec i N) ; intro H.
+ apply Rle_trans with B2 ; [rewrite <- Rabs_Cnorm ; apply HB2 | apply RmaxLess2] ;
+ assumption.
+ apply Rle_trans with (Cnorm (/r' * (INC (S i) * (r' / r) ^ S i) * An (S i) * r ^ S i)).
+ right ; apply Cnorm_eq_compat ; unfold An_deriv ; field_simplify.
+ unfold Cdiv ; repeat (rewrite Cmult_assoc) ; repeat (apply Cmult_eq_compat_l).
+  rewrite Cpow_mul_distr_l.
+ rewrite Cinv_1 ; rewrite Cmult_1_r.
+ rewrite Cmult_assoc.
+ replace ((/ r) ^ S i * (r ^ S i * / r')) with (/ r').
+ simpl ; field ; auto with complex.
+ assert (r_neq : r <> 0).
+  intro Hf ; rewrite Hf, Rabs_R0 in Rabsr_pos ; elim (Rlt_irrefl _ Rabsr_pos).
+ rewrite <- Cpow_inv.
+ rewrite <- Cmult_assoc.
+ field ; split.
+ auto with complex.
+ apply Cpow_neq_compat ; auto with complex.
+  auto with complex.
+ auto with complex.
+ apply Rle_trans with (Cnorm (/ r' * (INC (S i) * (r' / r) ^ S i)) * B)%R.
+ rewrite Cmult_assoc, Cnorm_Cmult ; apply Rmult_le_compat_l ;
+ [apply Cnorm_pos |] ; apply HB ; exists (S i) ; reflexivity.
+ apply Rle_trans with (1*B)%R ; [| rewrite Rmult_1_l ; apply RmaxLess1].
+ apply Rmult_le_compat_r.
+ apply Rle_trans with (Cnorm (An 0%nat * r ^ 0)) ; [apply Cnorm_pos |] ;
+ apply HB ; exists 0%nat ; reflexivity.
+ rewrite Cnorm_Cmult ; apply Rle_trans with (Cnorm (/r') * Cnorm r')%R.
+ apply Rmult_le_compat_l.
+ apply Cnorm_pos.
+ apply Rle_trans with (Cnorm ((INC (S i) * (r' / r) ^ S i) - 0)).
+ right ; rewrite Cminus_0_r ; reflexivity.
+ apply Rle_trans with (R_dist (INR (S i) * (r' / r) ^ S i) 0)%R.
+ right ; unfold R_dist ; rewrite <- Cnorm_IRC_Rabs ; apply Cnorm_eq_compat.
+ rewrite Cminus_IRC_Rminus ; unfold Rminus ; apply Cadd_eq_compat_r.
+ rewrite Cmult_IRC_Rmult, IRC_INR_INC ; apply Cmult_eq_compat_l.
+ rewrite <- IRC_pow_compat, Cdiv_IRC_Rdiv.
+ reflexivity.
+  intro Hf ; rewrite Hf, Rabs_R0 in Rabsr_pos ; elim (Rlt_irrefl _ Rabsr_pos).
+  rewrite Cnorm_IRC_Rabs ; left ; apply HN ; intuition.
+ rewrite <- Cnorm_Cmult ; rewrite Cinv_l ; [| auto with complex] ; rewrite Cnorm_C1 ; right ; trivial.
+Qed.
+
+
+(** Derivability of partial sums *)
+
+Definition Cpser_partial_sum_derive An n x := match n with
+     | 0%nat => C0
+     | S _      => sum_f_C0 (gt_Pser (An_deriv An) x) (pred n)
+end.
