@@ -42,7 +42,7 @@ Definition Rser_cv_neg_infty Un := Rseq_cv_neg_infty (sum_f_R0 Un).
 
 Definition Rser_bound_max Un M := forall n, sum_f_R0 Un n <= M.
 
-Definition Rser_bound_min Un m := forall n, m <= sum_f_R0 Un n.
+(*Definition Rser_bound_min Un m := forall n, m <= sum_f_R0 Un n.*)
 
 Definition Rser_bound Un M := forall n, Rabs (sum_f_R0 Un n) <= M.
 

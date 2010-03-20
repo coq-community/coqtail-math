@@ -29,6 +29,7 @@ Require Import R_sqr.
 Require Import MyRfunctions.
 Open Local Scope R_scope.
 
+(* begin hide *)
 (* TODO place me *)
 
 Lemma Rmin_def a b: a <= b -> Rmin a b = a.
@@ -70,13 +71,17 @@ case (Rle_dec a b); intro H.
 apply H2.
 Qed.
 
+(* end hide *)
+
+(** * Definition of the integral of f between a and b using Riemann_integrable *)
+
 Definition Rint f a b I := exists pr : Riemann_integrable f a b, RiemannInt pr = I.
 
 (** * Common results on integrals *)
 
 Section Rint_facts.
 
-(** * The integral from a to b is the opposite of the integral from b to a *)
+(** The integral from a to b is the opposite of the integral from b to a *)
 
 Lemma Rint_reverse f a b x : Rint f a b  x <-> Rint f b a (-x).
 Proof.
@@ -192,6 +197,8 @@ pose proof RiemannInt_P14 a b c as pr.
 exists pr.
 apply RiemannInt_P15.
 Qed.
+
+(** The value of the integral is unique *)
 
 Lemma Rint_uniqueness f a b x y : Rint f a b x -> Rint f a b y -> x = y.
 Proof.
@@ -331,7 +338,7 @@ apply RiemannInt_P19.
 apply Heq.
 Qed.
 
-(** * A positive function has positive growing integral *)
+(** A positive function has positive growing integral *)
 
 Lemma Rint_pos f a b x : 
   a <= b -> (forall u, a <= u <= b -> 0 <= f u) -> Rint f a b x -> 0 <= x.
@@ -348,7 +355,9 @@ apply Hf.
 Qed.
 
 
-(** * Inequality between integral of the absolute value and absolute value of the integral *)
+(** Inequality between integral of the absolute value and 
+ absolute value of the integral *)
+
 Lemma Rint_abs_le_int f a b x : 
   a <= b -> Rint f a b x -> 
     exists y, Rint (fun u => Rabs (f u)) a b y /\ Rabs x <= y.
@@ -471,6 +480,7 @@ pose proof (Rint_pos _ _ _ _ (proj1 Hacb) Hacpos HY) as H.
 Qed.
 
 (** A non negative function with null integral in a non trivial segment is null on it *)
+
 Lemma Rint_continuous_pos_eq_0 f a b :
   a < b ->
     (forall x, a <= x <= b -> continuity_pt f x) ->
@@ -484,6 +494,7 @@ pose proof Rint_continuous_gt_0 _ _ _ _ 0 Hab Hx Hcont Hpos Hcase Hint as pr.
 exact (False_ind _ (Rlt_irrefl 0 pr)).
 Qed.
 
+(* begin hide *)
 (* TODO : move and rename *)
 Lemma Rsqr_eq_0_reg : forall a, a * a = 0 -> a = 0.
 Proof.
@@ -494,12 +505,16 @@ destruct (total_order_T a 0) as [[|]|]; subst; trivial;
  apply Rmult_lt_0_compat; fourier.
 Qed.
 
+(* end hide *)
+
+(** Cauchy-Schwarz's theorem for integrals *)
+
 Lemma Rint_Cauchy_Schwarz f g a b x y z :
   a <= b -> 
     (forall x, a <= x <= b -> continuity_pt f x) ->
       (forall x, a <= x <= b -> continuity_pt g x) ->
       Rint (f * f)%F a b x -> Rint (g * g)%F a b y -> Rint (f * g)%F a b z ->
-      z² <= x * y.
+      z^2 <= x * y.
 Proof.
 intros f g a b x y z Hle Hfc Hgc Hf Hg Hfg.
 assert (H0 : {y = 0} + {y <> 0}).
@@ -529,8 +544,9 @@ assert (Hz : z = 0).
   replace 0 with (0 * (b - a)) by ring.
   apply Rint_constant.
 subst y; subst z.
-  unfold Rsqr; repeat rewrite Rmult_0_r.
-  apply Rle_refl.
+  repeat rewrite Rmult_0_r.
+  rewrite pow_ne_zero; auto with *.
+ (* apply Rle_refl. *)
 assert (Hy : 0 <= y).
   eapply Rint_pos with (f := (g * g)%F).
     eexact Hle.
@@ -556,10 +572,12 @@ assert (Hcs : 0 <= x - z² / y).
 apply Rle_ge in Hcs; apply Rminus_ge in Hcs; apply Rge_le in Hcs.
 apply Rmult_le_compat_r with (r := y) in Hcs; [|assumption].
 replace (z² / y * y) with z² in Hcs by (field; assumption).
-exact Hcs.
+unfold Rsqr in Hcs.
+ring_simplify in Hcs.
+apply Hcs.
 Qed.
 
-(** * Integral a derivative *)
+(** Fundamental theorem of real analysis *)
 
 Lemma Rint_derive f a b d : 
   a <= b -> 
@@ -591,32 +609,7 @@ apply <- Rint_reverse; replace (- (f b - f a)) with (f a - f b) by ring.
 apply Rint_derive; assumption.
 Qed.
 
-Lemma Rint_derive3 f a b d :
-  a <= b ->
-  (forall x, a < x < b -> derivable_pt_abs f x (d x)) ->
-  (Riemann_integrable d a b) ->
-  Rint d a b (f b - f a).
-Proof.
-intros f a b d Hab Hder Hint.
-exists Hint.
-admit.
-Qed.
-
-Lemma Rint_derive4 f a b d :
-  (forall x, Rmin a b < x < Rmax a b -> derivable_pt_abs f x (d x)) ->
-  (Riemann_integrable d a b) ->
-  Rint d a b (f b - f a).
-Proof.
-intros f a b d Hder Hint.
-destruct (Rle_dec a b) as [n|n].
- rewrite Rmin_def, Rmax_def in *; try assumption.
-apply Rint_derive3; assumption.
-apply Rnot_le_lt, Rlt_le in n.
-  rewrite Rmin_comm, Rmax_comm, Rmin_def, Rmax_def  in *; try assumption.
-apply <- Rint_reverse; replace (- (f b - f a)) with (f a - f b) by ring.
-apply Rint_derive3; auto.
-apply RiemannInt_P1; auto.
-Qed.
+(** Integration by parts *)
 
 Lemma Rint_parts f g a b f' g' Ifg' If'g :
 a <= b ->
@@ -647,212 +640,59 @@ apply Rint_derive.
     exists (g' x); apply Hderg; intuition.
 Qed.
 
-Require Import Ranalysis1.
-Require Import Ranalysis_def.
-Require Import Ranalysis5_clean.
+(** Variable change theorem *)
 
-Lemma Rint_substitution f' g g' a b I:
-  a <= b ->
-  (forall x, a <= x <= b -> continuity_pt f' (g x)) ->
+Lemma Rint_substitution f g g' a b I:
+  a <= b -> (forall x, a <= x <= b -> g a <= g x <= g b) ->
+  (forall x, g a <= x <= g b -> continuity_pt f x) ->
   (forall x, a <= x <= b -> derivable_pt_lim g x (g' x)) ->
   (forall x, a <= x <= b -> continuity_pt g' x) ->
-  Rint (fun x => f' (g x) * g' x) a b I ->
-  Rint f' (g a) (g b) I.
+  Rint (fun x => f (g x) * g' x) a b I ->
+  Rint f (g a) (g b) I.
 Proof.
-intros f' g g' a b I Hab Hcontf Hder Hcontg' HI.
-assert (Hgcont : forall x : R, a <= x <= b -> continuity_pt g x).
- intros x Haxb.
- apply derivable_continuous_pt.
- exists (g' x); apply Hder; auto. 
-destruct (continuity_ab_min g a b Hab Hgcont) as [c Hc].
-destruct (continuity_ab_maj g a b Hab Hgcont) as [d Hd].
+intros f g g' a b I Hab Habgab Hcontf Hder Hcontg' HI.
+ destruct (Habgab a) as [_ Hgab]; auto with *.
 
-assert (Hf'cont : forall y, g c <= y <= g d -> continuity_pt f' y).
- intros y Hy.
- destruct (total_order_T c d) as [[r|r]|r].
-  destruct (continuity_interval_image_interval g c d y (Rlt_le _ _ r) Hy) as [?[]].
-   intros x x_encad eps ; apply Hgcont ; split ; unfold interval in *.
-    apply Rle_trans with c; intuition.
-    apply Rle_trans with d; intuition.
-   subst.
-   apply Hcontf; split ; unfold interval in *.
-    apply Rle_trans with c; intuition.
-    apply Rle_trans with d; intuition.
-  
-  subst.
-  replace y  with (g d) by intuition.
-  intuition.
-  
-  destruct (continuity_interval_image_interval (-g)%F d c (-y) (Rlt_le _ _ r)) as [?[]].
-   unfold opp_fct, interval; intuition.
-   
-   intros x x_encad eps; apply continuity_pt_opp; apply Hgcont; split ; unfold interval in *.
-    apply Rle_trans with d; intuition.
-    apply Rle_trans with c; intuition.
-   
-   unfold opp_fct in * |-.
-   replace y with (g x).
-    apply Hcontf; split ; unfold interval in *.
-     apply Rle_trans with d; intuition.
-     apply Rle_trans with c; intuition.
-    rewrite <- Ropp_involutive.
-    rewrite <- Ropp_involutive with (g x).
-    auto with *.
+assert (Hpr : forall x : R, g a <= x -> x <= g b -> Riemann_integrable f (g a) x).
+ intros.
+ apply continuity_implies_RiemannInt; trivial.
+ intros; apply Hcontf; split.
+ tauto.
+ apply Rle_trans with x; intuition; trivial.
 
-assert (Hgcgd : g c <= g d) by (apply Rle_trans with (g a); intuition).
+pose (primitive Hgab (FTC_P1 Hgab Hcontf)) as F.
 
-pose (primitive Hgcgd (FTC_P1 Hgcgd Hf'cont)) as f.
-assert (Hff' : forall y : R, g c <= y <= g d -> derivable_pt_abs f y (f' y)) by admit. 
-assert (Hff_ : forall y : R, g c <  y <  g d -> derivable_pt_abs f y (f' y)). 
- intros y H.
- apply (@RiemannInt_P27 f' (g c) (g d) y Hgcgd Hf'cont H).
+assert(Hfab : Riemann_integrable f (g a) (g b)).
+ apply Hpr; auto with *.
 
-replace I with (f (g b) - f (g a)).
- apply (Rint_derive2 f (g a) (g b) f').
- intros x [Hxi Hxs].
- apply Hff'; split.
-  eapply Rle_trans; [|apply Hxi]; apply Rmin_ge; intuition.
-  eapply Rle_trans; [apply Hxs|]; apply Rmax_le; intuition.
- intros x [Hxi Hxs].
- apply Hf'cont; split.
-  eapply Rle_trans; [|apply Hxi]; apply Rmin_ge; intuition.
-  eapply Rle_trans; [apply Hxs|]; apply Rmax_le; intuition.
+assert(HF := RiemannInt_P20 Hgab (FTC_P1 Hgab Hcontf) Hfab).
+
+assert(Heq : Rint f (g a) (g b) (F(g b) - (F(g a)))).
+ unfold F; rewrite <- HF.
+ apply Rint_RiemannInt_link.
+replace I with (comp F g b - comp F g a).
+apply Heq.
+
+symmetry.
+eapply Rint_uniqueness.
+ apply HI.
+
+ apply Rint_derive.
+  trivial.
+  intros.
+  apply derivable_pt_lim_comp.
+   auto.
+   apply RiemannInt_P28; auto.
  
- assert (Hfog : forall x, a <= x <= b -> {z | derivable_pt_lim (comp f g) x z}).
-  intros x Haxb.
-  exists (f' (g x) * g' x).
-  apply derivable_pt_lim_comp; auto.
-  apply Hff'; intuition.
- assert (Efog' : exists fog', forall x, a <= x <= b -> derivable_pt_lim (comp f g) x (fog' x)).
-  pose (fun x => match (Rle_dec a x, Rle_dec x b) with
-    | (left Hax, left Hxb) => let (x,H) := (Hfog x (conj Hax Hxb)) in x
-    | (_, _) => 0
-  end) as foo.
-  exists foo.
-  intros x Haxb.
-  unfold foo. case (Rle_dec a x) ; case (Rle_dec x b).
-     intros Hxb Hax.
-     destruct (Hfog x (conj Hax Hxb)).
-     assumption.
-     
-     intros H1 H2.
-     destruct H1. intuition.
-     
-     intros H1 H2.
-     destruct H2. intuition.
-     
-     intros H1 H2.
-     destruct H1. intuition.
- destruct Efog' as (fog', Hfog').
- 
- symmetry.
- eapply (Rint_uniqueness _ _ _ _ _ HI).
-  replace (f (g a)) with (comp f g a) by trivial.
-  replace (f (g b)) with (comp f g b) by trivial.
-  assert (EQ : forall x, a <= x <= b -> f' (g x) * g' x = fog' x).
-   intros x Haxb.
-   eapply uniqueness_limite.
-    apply derivable_pt_lim_comp.
-     apply Hder; auto.
-     apply Hff'; intuition.
-    apply Hfog'; auto.
-  eapply (Rint_eq_compat) with fog'.
-   intros x H; apply EQ.
-   rewrite Rmin_def in H; rewrite Rmax_def in H; auto.
-   
-   apply Rint_derive3; auto.
-    intros.
-    apply Hfog'.
-    intuition.
-   assert (Hconteq : forall x, a <= x <= b -> continuity_pt (fun x => f' (g x) * g' x) x).
-    intros x Haxb.
-    reg; auto.
-   
-   (*apply Rint_derive; auto.
-   assert (Hconteq : forall x, a <= x <= b -> continuity_pt (fun x => f' (g x) * g' x) x).
-    intros x Haxb.
-    reg; auto.*)
-   
-   (*
-   intros x Haxb e epos.
-   destruct (Hconteq x Haxb e epos) as [alp Halp].
-   exists alp; intuition.
-   repeat rewrite <- EQ; intuition.
-   intuition.
-   intuition.
-   *)
-   admit.
+ intros.
+ apply continuity_pt_mult.
+  apply continuity_pt_comp.
+   apply derivable_continuous_pt.
+   exists (g' x); apply Hder; apply H.
+
+  auto.
+
+auto.
 Qed.
 
 End Rint_props.
-(*
-   pose proof derivable_pt_lim_comp g f x (g' x) (f (g x)).
-
-   pose proof derivable_pt_lim_comp g f x (g' x) (f (g x)).
- 
-
- pose proof derivable_pt_comp f g.
-
-  
- assert (forall x, a <= x <= b -> f (g x) * g' x = F (g x)).
-  intros x Haxb.
-  pose proof Hder x Haxb as Hgder.
-  pose proof Hcontg' x Haxb as Hg'cont.
-  pose proof derivable_pt_lim_comp g F x (g' x) (f (g x)) Hgder.
-
-  forall f1 f2 (x l1 l2:R),
-    derivable_pt_lim f1 x l1 ->
-    derivable_pt_lim f2 (f1 x) l2 -> derivable_pt_lim (f2 o f1) x (l2 * l1).
-
-
- 
-Admitted.
-
-
-Lemma Rint_substitution f g g' a b x:
-a <= b ->
-  (*(forall x, Rmin (g a) (g b) <= x <= Rmax (g a) (g b) -> continuity_pt f x) ->*)
-  (forall x, a <= x <= b -> continuity_pt f (g x)) ->
-  (forall x, a <= x <= b -> derivable_pt_lim g x (g' x)) ->
-  (forall x, a <= x <= b -> continuity_pt g' x) ->
-  Rint (fun x => f (g x) * g' x) a b x ->
-  Rint f (g a) (g b) x.
-Proof.
-intros f g g' a b I Hab Hcontf Hder Hcontg' HI.
-destruct (Rle_dec (g a) (g b)) as [Hcase | Hcase].
- (*rewrite Rmax_def with (1 := Hcase) in Hcontf;
- rewrite Rmin_def with (1 := Hcase) in Hcontf.*)
- pose (primitive Hcase (FTC_P1 Hcase Hcontf)) as F.
- 
- assert (HFf : forall x : R, g a <= x <= g b -> derivable_pt_abs F x (f x)) by admit. 
- assert (HFf': forall x : R, g a <  x <  g b -> derivable_pt_abs F x (f x)).
-  intros x Hgaxgb.
-  apply (@RiemannInt_P27 f (g a) (g b) x Hcase Hcontf Hgaxgb).
- 
- replace I with (F (g b) - F (g a)).
-  apply (Rint_derive F (g a) (g b) f Hcase HFf Hcontf).
-  
-  symmetry.
-  eapply (Rint_uniqueness _ _ _ _ _ HI).
-  replace (F (g a)) with (comp F g a) by trivial.
-  replace (F (g b)) with (comp F g b) by trivial.
-  eapply (Rint_eq_compat).
-   
-  
- assert (forall x, a <= x <= b -> f (g x) * g' x = F (g x)).
-  intros x Haxb.
-  pose proof Hder x Haxb as Hgder.
-  pose proof Hcontg' x Haxb as Hg'cont.
-  pose proof derivable_pt_lim_comp g F x (g' x) (f (g x)) Hgder.
-
-  forall f1 f2 (x l1 l2:R),
-    derivable_pt_lim f1 x l1 ->
-    derivable_pt_lim f2 (f1 x) l2 -> derivable_pt_lim (f2 o f1) x (l2 * l1).
-
-
- 
-Admitted.
-End Rint_props.
-
-
-*)

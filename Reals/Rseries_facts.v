@@ -37,7 +37,7 @@ Proof.
 intros Un lu1 lu2 H H'.
 apply Rseq_cv_unique with (sum_f_R0 Un); assumption.
 Qed.
-
+(* begin hide *)
 (*TODO*)
 (* simplification lemma : to put at the right place *)
 Lemma Rplus_le_simpl_l : forall a b, 0<= b -> a <= a+b.
@@ -55,7 +55,7 @@ replace a with (0+a)%R by intuition ; rewrite Rplus_0_l at 2.
 apply Rplus_le_compat_r.
 exact Hb.
 Qed.
-
+(* end hide *)
 
 (** * Properties about positive term series *)
 
@@ -73,7 +73,7 @@ apply Un_pos.
 Qed.
 
 (* reciprocal : sum_incr : rename *)
-(** Positive term series caracterization *)
+(** Positive term series convergence caracterization *)
 
 Lemma Rser_pos_bound_cv M: Rser_bound_max Un M -> { l | Rser_cv Un l }.
 Proof.
@@ -121,7 +121,23 @@ Qed.
 
 End Classical_facts.
 
-(** Compatibility between convergence and common operations *)
+
+(** * Extensionnal equality compatibility *)
+
+Lemma Rsum_eq_compat Un Vn : Un == Vn -> sum_f_R0 Un == sum_f_R0 Vn.
+Proof.
+intros Un Vn H n.
+induction n; simpl; rewrite (H _); [|rewrite IHn]; reflexivity.
+Qed.
+
+Lemma Rser_cv_eq_compat Un Vn l : Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
+Proof.
+intros Un Vn l H n.
+apply Rseq_cv_eq_compat with (sum_f_R0 Un); [apply Rsum_eq_compat | ]; assumption.
+Qed.
+
+
+(** * Compatibility between convergence and common operations *)
 
 Section Rser_operations.
 
@@ -172,20 +188,6 @@ trivial.
 apply Rseq_cv_minus_compat.
 apply H.
 apply H0.
-Qed.
-
-(** * Extensionnal equality compatibility *)
-
-Lemma Rsum_eq_compat Un Vn : Un == Vn -> sum_f_R0 Un == sum_f_R0 Vn.
-Proof.
-intros Un Vn H n.
-induction n; simpl; rewrite (H _); [|rewrite IHn]; reflexivity.
-Qed.
-
-Lemma Rser_cv_eq_compat Un Vn l : Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
-Proof.
-intros Un Vn l H n.
-apply Rseq_cv_eq_compat with (sum_f_R0 Un); [apply Rsum_eq_compat | ]; assumption.
 Qed.
 
 (*Lemma Rser_cv_sig_eq_compat Un Vn : Un == Vn -> { l | Rser_cv Un l } -> { l | Rser_cv Vn l }.
