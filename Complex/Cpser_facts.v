@@ -35,6 +35,7 @@ Require Import Cprop_base.
 
 Require Import Canalysis_def.
 Require Import Canalysis_deriv.
+Require Import Canalysis_basic_facts.
 
 Open Local Scope C_scope.
 
@@ -579,3 +580,34 @@ Definition Cpser_partial_sum_derive An n x := match n with
      | 0%nat => C0
      | S _      => sum_f_C0 (gt_Pser (An_deriv An) x) (pred n)
 end.
+
+
+Lemma Cpser_derive_finite_sum : forall An n x,
+       derivable_pt_lim (fun x => sum_f_C0 (gt_Pser An x) n) x (Cpser_partial_sum_derive An n x).
+Proof.
+intros An n x ;
+ unfold Cpser_partial_sum_derive, gt_Pser, An_deriv ;
+ apply (derivable_pt_lim_partial_sum An x n).
+Qed.
+
+(** Sum of the formal derivative *)
+
+Definition weaksum_r_derive (An : nat -> C) (r : R) (Rho : Cv_radius_weak An r) (z : C) : C.
+Proof.
+intros An r Rho z ; case (Rlt_le_dec (Cnorm z) r) ; intro z_bd.
+ pose (r' := middle (Cnorm z)  (Rabs r)).
+ assert (r_pos : Rabs r = r).
+  apply Rabs_right ; left ; apply Rle_lt_trans with (Cnorm z) ;
+  [apply Cnorm_pos | assumption].
+ assert (r'_bd : Rabs r' < Rabs r).
+  assert (H := proj2 (middle_is_in_the_middle _ _ z_bd)).
+  rewrite <- r_pos in H.
+  apply Rle_lt_trans with r'.
+  right ; apply Rabs_right ; apply Rle_ge ; apply Rle_trans with (Cnorm z) ;
+  rewrite <- r_pos in z_bd ;  [apply Cnorm_pos | left ;
+  apply (proj1 (middle_is_in_the_middle _ _ z_bd))].
+  apply H.
+ apply (weaksum_r (An_deriv An) r'
+      (Cv_radius_weak_derivable_compat An r Rho r' r'_bd) z).
+apply C0.
+Defined.

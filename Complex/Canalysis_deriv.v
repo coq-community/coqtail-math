@@ -291,7 +291,7 @@ Qed.
 (** *                    Main rules                             *)
 (****************************************************************)
 
-Lemma derivable_pt_lim_plus : forall f1 f2 x l1 l2,
+Lemma derivable_pt_lim_add : forall f1 f2 x l1 l2,
     derivable_pt_lim f1 x l1 -> derivable_pt_lim f2 x l2 ->
     derivable_pt_lim (f1 + f2) x (l1 + l2).
 Proof.
@@ -474,14 +474,18 @@ Proof.
   elim H6; intros; assumption.
 Qed.
 
-Lemma derivable_pt_plus : forall f1 f2 (x:C),
+(***********************************)
+(** * derivable_pt compatibility lemmas *)
+(***********************************)
+
+Lemma derivable_pt_add : forall f1 f2 (x:C),
     derivable_pt f1 x -> derivable_pt f2 x -> derivable_pt (f1 + f2) x.
 Proof.
   unfold derivable_pt in |- *; intros f1 f2 x X X0.
   elim X; intros.
   elim X0; intros.
   exists (x0 + x1).
-  apply derivable_pt_lim_plus; assumption.
+  apply derivable_pt_lim_add; assumption.
 Qed.
 
 Lemma derivable_pt_opp : forall f (x:C), derivable_pt f x -> derivable_pt (- f) x.
@@ -533,6 +537,49 @@ Proof.
   unfold derivable_pt in |- *; intro.
   exists 1.
   apply derivable_pt_lim_id.
+Qed.
+
+(***********************************)
+(** * derivable compatibility lemmas *)
+(***********************************)
+
+Lemma derivable_add : forall f1 f2,
+    derivable f1 -> derivable f2 -> derivable (f1 + f2).
+Proof.
+intros f1 f2 Hf1 Hf2 z ; apply derivable_pt_add ; intuition.
+Qed.
+
+Lemma derivable_opp : forall f, derivable f -> derivable (- f).
+Proof.
+intros f1 Hf1 z ; apply derivable_pt_opp ; intuition.
+Qed.
+
+Lemma derivable_minus : forall f1 f2,
+    derivable f1 -> derivable f2 -> derivable (f1 - f2).
+Proof.
+intros f1 f2 Hf1 Hf2 z ; apply derivable_pt_minus ; intuition.
+Qed.
+
+Lemma derivable_mult : forall f1 f2,
+    derivable f1 -> derivable f2 -> derivable (f1 * f2).
+Proof.
+intros f1 f2 Hf1 Hf2 z ; apply derivable_pt_mult ; intuition.
+Qed.
+
+Lemma derivable_const : forall a, derivable (fct_cte a).
+Proof.
+ intros a z ; apply derivable_pt_const.
+Qed.
+
+Lemma derivable_scal : forall f a, derivable f ->
+ derivable (mult_real_fct a f).
+Proof.
+ intros f a Hf z ; apply derivable_pt_scal ; intuition.
+Qed.
+
+Lemma derivable_id : derivable id.
+Proof.
+intro z ; apply derivable_pt_id.
 Qed.
 
 (***********************************)
