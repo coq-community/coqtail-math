@@ -367,7 +367,17 @@ End CantorDiagonal.
 
 (** * R is uncountable. *)
 
-Theorem R_uncountable : forall (f : nat -> R), { l : R | forall n, l <> f n }.
+Theorem R_uncountable_strong :
+  forall (f : nat -> R) (x y : R), x < y -> {l : R | forall n, l <> f n & x <= l <= y}.
+Proof.
+intros f x y H.
+pose (lf := l x y H f).
+exists lf.
+  intros n Hc; destruct (l_not_in_Rn x y H f n); unfold Rn; auto.
+  apply l_in_segment.
+Qed.
+
+Theorem R_uncountable : forall (f : nat -> R), {l : R | forall n, l <> f n}.
 Proof.
 apply (segment_uncountable 0 1); fourier.
 Qed.

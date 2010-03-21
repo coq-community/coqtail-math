@@ -20,32 +20,48 @@ USA.
 *)
 
 Require Import Rsequence.
+Require Import Morphisms Setoid.
 Require Import Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
 
-(** * Extensionnal equality. *)
+(** ** Extensionnal equality. *)
 
-Section Rseq_eq.
+(** * Extensional equality is an equivalence relation. *)
 
+(**********)
 Lemma Rseq_eq_refl : forall Un, Un == Un.
 Proof.
 intros Un n; reflexivity.
 Qed.
 
+(**********)
 Lemma Rseq_eq_sym : forall Un Vn, Un == Vn -> Vn == Un.
 Proof.
 intros Un Vn Heq n.
 symmetry; apply Heq.
 Qed.
 
+(**********)
 Lemma Rseq_eq_trans : forall Un Vn Wn, Un == Vn -> Vn == Wn -> Un == Wn.
 Proof.
 intros Un Vn Wn Heq1 Heq2 n.
 transitivity (Vn n); [apply Heq1|apply Heq2].
 Qed.
 
+(**********)
+Instance Rseq_eq_Equivalence : Equivalence Rseq_eq.
+Proof.
+split.
+  exact Rseq_eq_refl.
+  exact Rseq_eq_sym.
+  exact Rseq_eq_trans.
+Qed.
+
+(** * Compatibility of extensional equality with convergence. *)
+
+(**********)
 Lemma Rseq_cv_eq_compat :
   forall Un Vn l, Un == Vn -> Rseq_cv Un l -> Rseq_cv Vn l.
 Proof.
@@ -57,6 +73,7 @@ rewrite <- (Heq n).
 apply HN; assumption.
 Qed.
 
+(**********)
 Lemma Rseq_cv_pos_infty_eq_compat :
   forall Un Vn, Un == Vn -> Rseq_cv_pos_infty Un -> Rseq_cv_pos_infty Vn.
 Proof.
@@ -68,6 +85,7 @@ rewrite <- (Heq n).
 apply HN; assumption.
 Qed.
 
+(**********)
 Lemma Rseq_cv_neg_infty_eq_compat :
   forall Un Vn, Un == Vn -> Rseq_cv_neg_infty Un -> Rseq_cv_neg_infty Vn.
 Proof.
@@ -78,8 +96,10 @@ exists N; intros n Hn.
 rewrite <- (Heq n).
 apply HN; assumption.
 Qed.
-End Rseq_eq.
 
+(** * Compatibility of extensional equality with Laudau relations. *)
+
+(**********)
 Lemma Rseq_big_O_eq_compat :
   forall Un Vn Wn Xn, Un == Wn -> Vn == Xn ->
     Un = O(Vn) -> Wn = O(Xn).
@@ -93,6 +113,7 @@ exists M; split.
   apply HN; assumption.
 Qed.
 
+(**********)
 Lemma Rseq_little_O_eq_compat :
   forall Un Vn Wn Xn, Un == Wn -> Vn == Xn ->
     Un = o(Vn) -> Wn = o(Xn).
@@ -105,6 +126,7 @@ rewrite <- Huw; rewrite <- Hvx.
 apply HN; assumption.
 Qed.
 
+(**********)
 Lemma Rseq_equiv_eq_compat : 
   forall Un Vn Wn Xn, Un == Wn -> Vn == Xn ->
     Un ~ Vn -> Wn ~ Xn.
@@ -118,7 +140,7 @@ rewrite <- Huw; rewrite <- Hvx.
 apply HN; apply Hn.
 Qed.
 
-(** * Partial sequences. *)
+(** ** Partial sequences. *)
 
 Section Rseq_partial.
 
@@ -167,9 +189,7 @@ Qed.
 
 End Rseq_partial.
 
-(** * Asymptotic properties. *)
-
-Section Rseq_asymptotic.
+(** ** Asymptotic properties. *)
 
 (**********)
 Definition Rseq_asymptotic P :=
@@ -181,7 +201,7 @@ Definition Rseq_asymptotic2 P :=
   forall (Q : Rseq -> Rseq -> Prop) Un Vn,
     (forall Wn Xn, Q Wn Xn -> P Wn Xn) -> Rseq_eventually2 Q Un Vn -> P Un Vn.
 
-(** Convergence is asymptotic. *)
+(** * Convergence is asymptotic. *)
 
 (**********)
 Lemma Rseq_cv_asymptotic : forall l, Rseq_asymptotic (fun Un => Rseq_cv Un l).
@@ -250,7 +270,7 @@ destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; omega.
 Qed.
 
-(** Landau relations are asymptotic. *)
+(** * Landau relations are asymptotic. *)
 
 (**********)
 Lemma Rseq_big_O_asymptotic : Rseq_asymptotic2 Rseq_big_O.
@@ -270,6 +290,7 @@ destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; omega.
 Qed.
 
+(**********)
 Lemma Rseq_little_O_asymptotic : Rseq_asymptotic2 Rseq_little_O.
 Proof.
 intros Q Un Vn HQ He.
@@ -286,6 +307,7 @@ destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; omega.
 Qed.
 
+(**********)
 Lemma Rseq_equiv_asymptotic : Rseq_asymptotic2 Rseq_equiv.
 Proof.
 intros Q Un Vn HQ He.
@@ -302,5 +324,3 @@ destruct Hn0 as [n0 Hn0].
 unfold Rseq_minus in HN.
 rewrite Hn0; apply HN; omega.
 Qed.
-
-End Rseq_asymptotic.

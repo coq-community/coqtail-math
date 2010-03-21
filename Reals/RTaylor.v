@@ -50,7 +50,9 @@ apply Rlt_le_trans with (Rmin alp1 alp2).
 Qed.
 (* end hide *)
 
-(** * Taylor series of ln *)
+(** ** Taylor series of ln *)
+
+(** * Taylor series of ln (1 - x) *)
 
 Section ln_minus.
 
@@ -78,6 +80,7 @@ unfold Un; destruct n.
   apply (Rmult_le_reg_l (INR (S n))); [fourier|].
   rewrite Rinv_r; [fourier|intros Hc; fourier].
 Qed.
+(* begin hide *)
 
 Lemma sum_f_R0_Ropp_compat : forall An n, - sum_f_R0 An n = sum_f_R0 (-An)%Rseq n.
 Proof.
@@ -85,6 +88,7 @@ intros An n ; induction n.
  reflexivity.
  simpl ; rewrite Ropp_plus_distr ; rewrite IHn ; reflexivity.
 Qed.
+(* end hide *)
 
 Lemma ln_minus_finite_cv_radius : finite_cv_radius Un 1.
 Proof.
@@ -181,15 +185,17 @@ assert (Heq : forall u, -1 < u < 1 -> dg u = df u).
   assert (Hser2 := GP_infinite u Habs).
   eapply Rseq_cv_unique.
     apply Hser1.
-    unfold An_deriv.
-    eapply Rseq_cv_eq_compat; [|apply Rseq_cv_opp_compat; apply Hser2].
-    unfold Rseq_opp; intros n; induction n.
-      simpl; field.
-      simpl sum_f_R0 at 1; rewrite Ropp_plus_distr.
-      rewrite IHn.
-      simpl; apply Rplus_eq_compat_l; destruct n.
-        field.
-        field; assert (H := pos_INR (S n)); intros Hc; fourier.
+    assert (Hrw : - sum_f_R0 (fun n => 1 * u ^ n) ==
+      sum_f_R0 (fun n => An_deriv Un n * u ^ n)).
+      unfold An_deriv.
+      unfold Rseq_opp; intros n; induction n.
+        simpl; field.
+        simpl sum_f_R0 at 1; rewrite Ropp_plus_distr.
+        rewrite IHn.
+        simpl; apply Rplus_eq_compat_l; destruct n.
+          field.
+          field; assert (H := pos_INR (S n)); intros Hc; fourier.
+    eapply Rseq_cv_eq_compat; [apply Hrw|apply Rseq_cv_opp_compat; apply Hser2].
 edestruct Rint_eq_compat
   with (f := df) (g := dg) (a := 0) (b := x) as [pr2 HI2].
   intros u Hu.
@@ -265,6 +271,8 @@ apply weaksum_r_sums; assumption.
 Qed.
 
 End ln_minus.
+
+(** * Taylor series of ln (1 + x) *)
 
 Section ln_plus.
 

@@ -379,18 +379,20 @@ assert(l²/(2*PI) = 1) as Heq.
  eapply Rseq_cv_unique.
   apply Wallis_quotient_lim2.
   auto with *.
-  eapply Rseq_equiv_eq_compat with (Vn := fun n : nat => l * n ^ n * exp (- n) * sqrt n).
-   apply Rseq_eq_refl.
+  assert (Hrw : (fun n => l * n ^ n * exp (- n) * sqrt n) == (fun n => ((n / exp 1) ^ n * sqrt n * l))).
    intro n.
    rewrite exp_Ropp.
    replace (exp n) with (exp (R1*n)) by auto with *.
    rewrite <- (exp_pow 1 n).
    unfold Rdiv; rewrite Rpow_mult_distr, Rinv_pow.
     field.
-    assert(H := exp_pos 1); auto with *.
-  
+    assert (H := exp_pos 1); auto with *.
+  eapply Rseq_equiv_eq_compat.
+   apply Rseq_eq_refl.
+   apply Hrw.
+
    trivial.
-   
+
  apply Wallis_quotient_lim1.
 
 replace l with (sqrt(2*PI)) in Hl.

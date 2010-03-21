@@ -508,9 +508,11 @@ apply Rseq_cv_eq_compat with (fun n => (2*2 ^ (4*n) * (fact n) ^ 4)/(PI*fact (2 
   intro; rewrite Wallis_quotient; reflexivity.
 assert (H2n : (fun n : nat => fact (2*n)) ~ (fun n : nat => (2*n / exp 1) ^ (2*n) * sqrt (2*n) * l)).
   pose (mult 2) as db.
-  apply Rseq_equiv_eq_compat with (fun n => fact (db n)) (fun k => (fun n : nat => (n / exp 1) ^ n * sqrt n * l) (db k)).
-  intro n; unfold db; reflexivity.
-  intro n; unfold db; rewrite mult_INR; reflexivity.
+  assert (Hrw1 : (fun n => fact (db n)) == (fun n => fact (2 * n))).
+    intro n; unfold db; reflexivity.
+  assert (Hrw2 : (fun n => (db n / exp 1) ^ db n * sqrt (db n) * l) == (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
+    intro n; unfold db; rewrite mult_INR; reflexivity.
+  eapply Rseq_equiv_eq_compat; [eassumption|eassumption|].
   apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l)(phi := db).
   assumption.
   apply extractor_mult_2.
