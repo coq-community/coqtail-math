@@ -26,10 +26,16 @@ Require Import Rsequence_facts.
 Require Import Fourier.
 Open Scope nat_scope.
 
-Definition extractor (phi : nat -> nat) := forall n, phi n < phi (S n).
+Definition is_extractor (phi : nat -> nat) := forall n, phi n < phi (S n).
 
-Definition subsequence X (un vn : nat -> X) :=
-  {phi | extractor phi & forall n, un n = vn (phi n)}.
+Definition extractor := {phi | is_extractor phi}.
+
+Definition extracted {X : Type} (phi : extractor) (Un : nat -> X) n := Un ((proj1_sig phi) n).
+
+Notation "Un · phi" := (extracted phi Un) (at level 40, left associativity) : Rseq_scope.
+
+Definition subsequence {X : Type} (Un Vn : nat -> X) :=
+  {phi | forall n, Un n = (Vn · phi) n}.
 
 (** Properties on nat -> nat sequences *)
 
@@ -86,50 +92,50 @@ destruct (le_le_S_dec x y).
 Qed.
 
 (** Properties on extractors *)
-Lemma Rsubseq_n_le_extractor_n : forall phi n, extractor phi -> n <= phi n.
+Lemma Rsubseq_n_le_extractor_n : forall phi n, is_extractor phi -> n <= phi n.
 Proof.
-intros phi n ephi.
+intros phi n Hphi.
 induction n.
  apply le_O_n.
  
  eapply le_trans with (S (phi n)).
  apply (le_n_S _ _ IHn).
- apply ephi.
+ apply Hphi.
 Qed.
 
 (** Convergence compatible with subsequence *)
-Lemma Rseq_subseq_cv_compat : forall un vn l, subsequence _ un vn -> Rseq_cv vn l -> Rseq_cv un l.
+Lemma Rseq_subseq_cv_compat : forall Un Vn l, subsequence Un Vn -> Rseq_cv Vn l -> Rseq_cv Un l.
 Proof.
-intros un vn l subuv vncv eps epspos.
-destruct (vncv eps epspos) as [N H].
-exists N.
-intros n nN.
-destruct subuv as [phi exphi phiun].
-rewrite phiun.
-apply H.
+intros Un Vn l Hsub Hcv eps Heps.
+destruct (Hcv eps Heps) as [N HN].
+exists N; intros n Hn.
+destruct Hsub as [phi Hphi].
+unfold extracted in *; simpl in Hphi.
+rewrite Hphi.
+apply HN.
 apply le_trans with n.
- apply nN.
- apply Rsubseq_n_le_extractor_n; assumption.
+ apply Hn.
+ apply Rsubseq_n_le_extractor_n; destruct phi; auto.
 Qed.
 
 (** Divergence compatible with subsequence *)
-Lemma Rseq_subseq_cv_pos_infty_compat : forall un vn, subsequence _ un vn ->  
-  Rseq_cv_pos_infty vn -> Rseq_cv_pos_infty un. 
+Lemma Rseq_subseq_cv_pos_infty_compat :
+  forall Un Vn, subsequence Un Vn ->  
+    Rseq_cv_pos_infty Vn -> Rseq_cv_pos_infty Un. 
 Proof. 
-intros un vn subuv vncv M. 
-destruct (vncv M) as [N H]. 
-exists N. 
-intros n nN. 
-destruct subuv as [phi exphi phiun]. 
-rewrite phiun. 
-apply H. 
-apply le_trans with n. 
- apply nN. 
- apply Rsubseq_n_le_extractor_n; assumption. 
+intros Un Vn Hsub Hdv M.
+destruct (Hdv M) as [N HN].
+exists N; intros n Hn.
+destruct Hsub as [phi Hphi].
+rewrite Hphi.
+apply HN.
+apply le_trans with n.
+ apply Hn.
+ apply Rsubseq_n_le_extractor_n; destruct phi; auto. 
 Qed.
 
 (** An extractor defines a partition of N *)
-Lemma Rseq_extractor_partition : forall phi, extractor phi -> 
+Lemma Rseq_extractor_partition : forall phi, is_extractor phi -> 
   forall n, phi 0 <= n -> exists p, phi p <= n < phi (S p).
 Proof.
 intros phi ephi.
@@ -160,7 +166,7 @@ Qed.
 (** Composition of extractors *)
 
 Lemma extractor_comp phi1 phi2 :
-  extractor phi1 -> extractor phi2 -> extractor (fun n => phi1 (phi2 n)).
+  is_extractor phi1 -> is_extractor phi2 -> is_extractor (fun n => phi1 (phi2 n)).
 Proof.
 intros phi1 phi2 H1 H2 n.
 apply nat_seq_strict_growing_trans; trivial.
@@ -169,20 +175,20 @@ Qed.
 (** Common extractors *)
 Definition Rseq_iter_S k := plus k.
 
-Lemma extractor_S : extractor S.
+Lemma extractor_S : is_extractor S.
 Proof.
 intro n.
 constructor.
 Qed.
 
-Lemma extractor_Rseq_iter_S k : extractor (Rseq_iter_S k).
+Lemma extractor_Rseq_iter_S k : is_extractor (Rseq_iter_S k).
 Proof.
 intros k n. 
 unfold Rseq_iter_S.
 apply plus_lt_compat_l; constructor.
 Qed.
 
-Lemma extractor_mult_2 : extractor (mult 2).
+Lemma extractor_mult_2 : is_extractor (mult 2).
 Proof.
 intros n; omega.
 Qed.
@@ -212,20 +218,21 @@ assert (forall x y, x <= y -> Rabs (x - y) = y - x).
 Qed.
 (* end hide *)
 
-Lemma Rseq_subseq_growing_cv_compat : forall un vn l, subsequence _ un vn -> Rseq_cv un l ->
-  Rseq_growing vn -> Rseq_cv vn l.
+Lemma Rseq_subseq_growing_cv_compat :
+  forall Un Vn l, subsequence Un Vn -> Rseq_cv Un l -> Rseq_growing Vn -> Rseq_cv Vn l.
 Proof.
-intros un vn l [phi ephi phiun] uncv vngrow eps epspos.
+intros un vn l [phi ephi] uncv vngrow eps epspos.
+destruct phi as [phi Hphi]; unfold extracted in *; simpl in *.
 assert (spliteps : (eps / 3 > 0)%R) by fourier.
 destruct (uncv (eps / 3) spliteps) as [Nu Hu].
 exists (phi Nu).
 intros n nNu.
-destruct (Rseq_extractor_partition phi ephi n) as [N Hpart].
+destruct (Rseq_extractor_partition phi Hphi n) as [N Hpart].
  apply le_trans with (phi Nu).
   apply nat_seq_growing_trans.
    intros x.
    apply lt_le_weak.
-   apply ephi.
+   apply Hphi.
    
    apply le_O_n.
   
@@ -236,15 +243,15 @@ destruct (Rseq_extractor_partition phi ephi n) as [N Hpart].
    exact goal.
    
    destruct Hpart as [HNn HnSN].
-   pose proof (nat_seq_growing_trans phi (fun x => lt_le_weak _ _ (ephi _)) Nu (S N) Hinv).
+   pose proof (nat_seq_growing_trans phi (fun x => lt_le_weak _ _ (Hphi _)) Nu (S N) Hinv).
    pose proof (le_trans _ _ _ H nNu).
    pose proof (lt_le_trans _ _ _ HnSN H).
    intuition.
  
  pose proof (Hu N HNuN) as Hun.
  pose proof (Hu (S N) (le_S _ _ HNuN)) as Husn.
- rewrite phiun in Hun.
- rewrite phiun in Husn.
+ rewrite ephi in Hun.
+ rewrite ephi in Husn.
  assert (vn (phi N) <= vn n <= vn (phi (S N)))%R.
   split; apply (Rseq_growing_trans _ vngrow); intuition.
  rewrite R_dist_sym in Husn.
@@ -270,9 +277,10 @@ Corollary Rseq_even_growing_compat : forall un l, Rseq_growing un ->
 Proof.
 intros.
 apply Rseq_subseq_growing_cv_compat with (fun i : nat => un (2 * i)%nat).
- exists (mult 2).
-  intros n; omega.
-  reflexivity.
+ assert (Hex : is_extractor (mult 2)).
+   intros n; omega.
+ pose (phi := exist _ (mult 2) Hex).
+ exists phi; reflexivity.
  assumption.
  assumption.
 Qed.
@@ -285,10 +293,10 @@ Variables Un Vn : nat -> R.
 (** Subsequence and big-O. *)
 
 (**********)
-Lemma Rseq_big_O_subseq_compat phi : 
-  (Un = O (Vn)) -> extractor phi -> (fun n => Un (phi n)) = O(fun n => Vn (phi n)).
+Lemma Rseq_big_O_subseq_compat : 
+  forall phi, Un = O (Vn) -> (Un · phi) = O(Vn · phi).
 Proof.
-intros phi Heq Hphi.
+intros phi Heq.
 destruct Heq as [N [HN [N0 HN0]]].
 exists N; split.
 assumption.
@@ -296,16 +304,16 @@ exists N0; intros n Hn.
 apply HN0.
 apply le_trans with n.
 assumption.
-apply Rsubseq_n_le_extractor_n; assumption.
+apply Rsubseq_n_le_extractor_n; destruct phi; assumption.
 Qed.
 
 (** Subsequence and little-O. *)
 
 (**********)
-Lemma Rseq_little_O_subseq_compat phi : 
-  (Un = o (Vn)) -> extractor phi -> (fun n => Un (phi n)) = o(fun n => Vn (phi n)).
+Lemma Rseq_little_O_subseq_compat : 
+  forall phi, Un = o (Vn) -> (Un · phi) = o(Vn · phi).
 Proof.
-intros phi Heq Hphi.
+intros [phi Hphi] Heq.
 intros eps Heps.
 destruct (Heq eps Heps) as [N HN].
 exists N.
@@ -313,16 +321,16 @@ intros n Hn; unfold Rseq_minus.
 apply HN.
 apply le_trans with (phi N).
 apply Rsubseq_n_le_extractor_n; assumption.
-apply nat_seq_growing_trans;auto with *.
+apply nat_seq_growing_trans; auto with *.
 Qed.
 
 (** Subsequence and equivalence. *)
 
 (**********)
-Lemma Rseq_equiv_subseq_compat phi : 
-  (Un ~ Vn) -> extractor phi -> (fun n => Un (phi n)) ~ (fun n => Vn (phi n)).
+Lemma Rseq_equiv_subseq_compat : 
+  forall phi, Un ~ Vn -> (Un · phi) ~ (Vn · phi).
 Proof.
-intros phi Heq Hphi.
+intros [phi Hphi] Heq.
 intros eps Heps.
 destruct (Heq eps Heps) as [N HN].
 exists N.

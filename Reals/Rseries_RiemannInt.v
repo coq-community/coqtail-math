@@ -316,8 +316,9 @@ unfold plus_fct, fct_cte, id, inv_fct.
     apply Rseq_cv_pos_infty_eq_compat with (fun n : nat => ln (S (S n))).
     apply Heq2.
     apply Rseq_subseq_cv_pos_infty_compat with (fun n => ln n).
-    exists (fun n => S (S n)).
-    constructor.
+    assert (Hex : is_extractor (fun n => (S (S n)))).
+      constructor.
+    exists (exist _ _ Hex).
     trivial.
   apply Rseq_ln_cv.
   assert(Heq1 : (sum_f_R0 (fun n : nat => (/ (id + fct_cte 1))%F (INR n))) ==

@@ -231,15 +231,13 @@ Section Rser_partition.
 
 (** If a gt-positive series converges on an extractor, then it converges *)
 
-Lemma Rser_cv_growing_subseq_compat Un : forall phi l, extractor phi -> 0 <= Un ->
-  Rseq_cv (fun n => (sum_f_R0 Un (phi n))) l ->
-  Rser_cv Un l.
+Lemma Rser_cv_growing_subseq_compat Un :
+  forall (phi : extractor) l, 0 <= Un ->
+    Rseq_cv ((sum_f_R0 Un) · phi) l -> Rser_cv Un l.
 Proof.
 intros Un phi l ephi Unpos Uncv.
-apply Rseq_subseq_growing_cv_compat with (fun n => (sum_f_R0 Un (phi n))).
- exists phi.
-  assumption.
-  reflexivity.
+apply Rseq_subseq_growing_cv_compat with ((sum_f_R0 Un) · phi).
+ exists phi; reflexivity.
   assumption.
  intro; apply Rplus_le_simpl_l; assumption.
 Qed.
@@ -251,8 +249,9 @@ Lemma Rser_cv_growing_even_compat Un : forall l, 0 <= Un ->
   Rser_cv Un l.
 Proof.
 intros Un phi l Unpos.
-apply Rser_cv_growing_subseq_compat with (mult 2).
- intros n; omega.
+assert (Hex : is_extractor (mult 2)).
+  intros n; omega.
+apply Rser_cv_growing_subseq_compat with (exist _ (mult 2) Hex).
  assumption.
  assumption.
 Qed.
@@ -1408,8 +1407,9 @@ intro n; split.
  
  apply Rseq_cv_pos_infty_inv_compat.
  apply Rseq_subseq_cv_pos_infty_compat with INR.
-  exists (fun i => S (S i)); intro.
-   omega.
+  assert (Hex : is_extractor (fun i => S (S i))).
+    intros n; omega.
+  exists (exist _ (fun i => S (S i)) Hex).
    trivial.
   
   eapply Rseq_cv_pos_infty_eq_compat.

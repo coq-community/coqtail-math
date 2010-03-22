@@ -118,12 +118,12 @@ apply Rser_cv_minus_compat; try assumption.
 apply Rseq_cv_eq_compat with ((fun n => sum_f_R0 Un (S (2 * n))) - sum_f_R0 (evens Un))%Rseq.
  intro n; rewrite (sum_odd_even_split); trivial.
  apply Rseq_cv_minus_compat.
- 
- eapply Rseq_subseq_cv_compat.
-  exists (fun i => S (2 * i)); [ intro n; omega | ].
-  
+
+ eapply Rseq_subseq_cv_compat; [|apply Hu].
+  assert (Hex : is_extractor (fun i => S (2 * i))).
+    intros n; omega.
+  exists (exist _ _ Hex).
   reflexivity.
-  assumption.
   assumption.
 Qed.
 
@@ -141,12 +141,12 @@ apply Rseq_cv_eq_compat with ((fun n => sum_f_R0 Un (S (2 * n))) - sum_f_R0 (odd
  rewrite (sum_odd_even_split); trivial.
  
  apply Rseq_cv_minus_compat.
-  eapply Rseq_subseq_cv_compat.
-   exists (fun i => S (2 * i)); [ intro n; omega | ].
+  eapply Rseq_subseq_cv_compat; [|apply Hu].
+   assert (Hex : is_extractor (fun i => S (2 * i))).
+     intros n; omega.
+   exists (exist _ _ Hex).
    
    reflexivity.
-   
-  assumption.
   
   assumption.
 Qed.

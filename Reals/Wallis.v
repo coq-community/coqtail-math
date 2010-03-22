@@ -506,27 +506,29 @@ Proof.
 intros l Hneq Hl.
 apply Rseq_cv_eq_compat with (fun n => (2*2 ^ (4*n) * (fact n) ^ 4)/(PI*fact (2 * n) * fact (S (2 * n)))).
   intro; rewrite Wallis_quotient; reflexivity.
-assert (H2n : (fun n : nat => fact (2*n)) ~ (fun n : nat => (2*n / exp 1) ^ (2*n) * sqrt (2*n) * l)).
-  pose (mult 2) as db.
-  assert (Hrw1 : (fun n => fact (db n)) == (fun n => fact (2 * n))).
-    intro n; unfold db; reflexivity.
-  assert (Hrw2 : (fun n => (db n / exp 1) ^ db n * sqrt (db n) * l) == (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
-    intro n; unfold db; rewrite mult_INR; reflexivity.
+assert (H2n : (fun n => fact (2 * n)) ~ (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
+  assert (Hex : is_extractor (mult 2)).
+    intros n; omega.
+  pose (exist _ _ Hex) as db.
+  assert (Hrw1 : fact · db == (fun n => fact (2 * n))).
+    intros n; reflexivity.
+  assert (Hrw2 : (fun n => (n / exp 1) ^ n * sqrt n * l) · db == (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
+    intros n; unfold extracted. simpl.
+    repeat rewrite plus_INR; simpl.
+    replace (n + (n + 0)) with (2 * n) by field.
+    reflexivity.
   eapply Rseq_equiv_eq_compat; [eassumption|eassumption|].
-  apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l)(phi := db).
+  apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l) (phi := db).
   assumption.
-  apply extractor_mult_2.
-
 assert (H2n1 : (fun n : nat => fact (S(2*n))) ~ (fun n : nat => (S(2*n) / exp 1) ^ (S(2*n)) * sqrt (S(2*n)) * l)).
-  pose (fun n => S (mult 2 n)) as db.
-  apply Rseq_equiv_eq_compat with (fun n => fact (db n)) (fun k => (fun n : nat => (n / exp 1) ^ n * sqrt n * l) (db k)).
-  intro n; unfold db; reflexivity.
-  intro n; unfold db; reflexivity.
+  assert (Hex : is_extractor (fun n => S (mult 2 n))).
+    intros n; omega.
+  pose (exist _ _ Hex) as db.
+  apply Rseq_equiv_eq_compat with (fact · db) ((fun n : nat => (n / exp 1) ^ n * sqrt n * l) · db).
+    intro n; unfold db; reflexivity.
+    intro n; unfold db; reflexivity.
   apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l)(phi := db).
   assumption.
-  unfold db; apply extractor_comp.
-  apply extractor_S.
-  apply extractor_mult_2.
   
 apply Rseq_equiv_cv_constant.
 Open Local Scope Rseq_scope.
