@@ -30,39 +30,45 @@ Open Scope C_scope.
 
 (** * Finite sum of (nat -> C) sequences *)
 
-Fixpoint sum_f_C0 (f : nat -> C) (n : nat) : C := match n with
+Fixpoint sum_f_C0 (f : nat -> C) (n : nat) : C := 
+match n with
      | 0%nat => f 0%nat
      | S n' => sum_f_C0 f n' + f n
 end.
 
 Section sum_f_C0_lemmas.
 
-(** Sequence properties *)
+(** *** Finite sum properties *)
 
 Lemma sum_f_C0_simpl : forall (n : nat) (f : nat -> C), 
-sum_f_C0 f (S n) = sum_f_C0 f n + f (S n).
+  sum_f_C0 f (S n) = sum_f_C0 f n + f (S n).
 Proof.
 intros.
 reflexivity.
 Qed.
 
 Lemma sum_f_C0_eq_seq : forall (n : nat) (f g : nat -> C),
-        (forall m : nat, (m <= n)%nat -> f m = g m) -> 
-	sum_f_C0 f n = sum_f_C0 g n.
+  (forall m : nat, (m <= n)%nat -> f m = g m) -> 
+    sum_f_C0 f n = sum_f_C0 g n.
 Proof.
 intros n f g H.
 induction n.
-simpl. apply H. intuition.
-simpl. rewrite IHn. rewrite H with (S n). reflexivity. intuition. intros m H2. apply H. intuition. 
+ simpl. apply H. intuition.
+ 
+ simpl. rewrite IHn. 
+  rewrite H with (S n) ; intuition. 
+
+  intros m H2. apply H. intuition. 
 Qed.
 
 Lemma sum_f_C0_reindex : forall (n : nat) (f : nat -> C),  
-	(f O) + sum_f_C0 (fun k : nat => f (S k)) n  = sum_f_C0 f (S n).
+  (f O) + sum_f_C0 (fun k : nat => f (S k)) n  = sum_f_C0 f (S n).
 Proof.
 intros n f.
 induction n.
-simpl. ring.
-simpl. rewrite <- Cadd_assoc. rewrite IHn. simpl. ring.
+ simpl. ring.
+
+ simpl. rewrite <- Cadd_assoc. rewrite IHn. simpl. ring.
 Qed.
 
 Definition q_pow_i (q : C) (n : nat) : C := q ^ n.

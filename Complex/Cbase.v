@@ -94,11 +94,11 @@ Lemma C0_neq_R0_neq : forall z, z <> 0 <-> (Cre z <> 0%R \/ Cim z <> 0%R).
 Proof.
 intro z ; split ; intro H.
  destruct z as (a,b) ; case (Req_or_neq a) ; case (Req_or_neq b) ; intros Ha Hb.
- elim H ; rewrite Ha, Hb ; reflexivity.
- right ; intuition.
- left ; intuition.
- left ; intuition.
- intro Hf ; destruct H ; apply H ; rewrite Hf ; intuition.
+  elim H ; rewrite Ha, Hb ; reflexivity.
+  right ; intuition.
+  left ; intuition.
+  left ; intuition.
+  intro Hf ; destruct H ; apply H ; rewrite Hf ; intuition.
 Qed.
 Hint Resolve C0_neq_R0_neq : complex.
 
@@ -114,16 +114,16 @@ intro z ; unfold Cmodcarre ; split ; intro Hrew.
  destruct (proj2 (Ceq z 0) Hrew) as (H1, H2) ; destruct z as (r1,r2);
  simpl in * ; rewrite H1 ; rewrite H2 ; field.
  apply (proj1 (Ceq _ _)) ; split.
- apply Rsqr_0_uniq.
- apply Rplus_eq_0_l with ((Cim z)²)%R ; [apply Rle_0_sqr | apply Rle_0_sqr |].
- unfold Rsqr.
+  apply Rsqr_0_uniq.
+  apply Rplus_eq_0_l with ((Cim z)²)%R ; [apply Rle_0_sqr | apply Rle_0_sqr |].
+  unfold Rsqr.
   assumption.
   destruct z as (a,b) ; intuition. simpl in *.
  apply Rsqr_0_uniq.
  apply Rplus_eq_0_l with ((a)²)%R ; [apply Rle_0_sqr | apply Rle_0_sqr |].
  unfold Rsqr.
-rewrite Rplus_comm.
-assumption.
+ rewrite Rplus_comm.
+ assumption.
 Qed.
 Hint Resolve C0_norm_R0 : complex.
 
@@ -224,7 +224,7 @@ CusingR.
 Qed.
 Hint Resolve Cadd_opp_l : complex.
 
-(** Opposé *)
+(** Opposite *)
 
 Lemma Copp_invol : forall z, --z = z.
 Proof.
@@ -232,7 +232,7 @@ CusingR.
 Qed.
 Hint Resolve Copp_invol : complex.
 
-(** Soustraction *)
+(** Minus *)
 
 Lemma Cminus_plus_distr : forall z z', - (z + z') = -z - z'.
 Proof.
@@ -265,14 +265,26 @@ CusingR_f.
 Qed.
 Hint Resolve Cmult_assoc : complex.
 
+Lemma Cmult_1_l : forall z : C, 1 * z = z .
+Proof.
+CusingR_f.
+Qed.
+Hint Resolve Cmult_1_l : complex.
+
+Lemma Cmult_1_r : forall z : C, z * 1= z .
+Proof.
+CusingR_f.
+Qed.
+Hint Resolve Cmult_1_r : complex.
+
 Lemma Cinv_rew : forall a b : R, (a +i b) <> 0 -> /(a +i b) = (/ (a^2 + b^2)) `* (a +i - b)%R.
 Proof.
 intros a b ; simpl.
  destruct (C0_norm_R0 (a, b)).
- CusingR_f.
- intuition.
- intuition.
+ CusingR_f ; intuition.
 Qed.
+
+(** Division/Inverse *)
 
 Lemma Cinv_l : forall z : C, z <> C0 -> / z * z = 1.
 Proof.
@@ -300,24 +312,6 @@ intros ; rewrite Cmult_comm ; apply Cinv_l ; assumption.
 Qed.
 Hint Resolve Cinv_r : complex.
 
-Lemma Cmult_1_l : forall z : C, 1 * z = z .
-Proof.
-CusingR_f.
-Qed.
-Hint Resolve Cmult_1_l : complex.
-
-Lemma Cmult_1_r : forall z : C, z * 1= z .
-Proof.
-CusingR_f.
-Qed.
-Hint Resolve Cmult_1_r : complex.
-
-Lemma C1_neq_C0 : 1 <> 0.
-Proof.
-intro H ; apply (proj2 (Ceq _ _)) in H ; destruct H as (H, H0); compute in H ;
- apply R1_neq_R0 ; assumption.
-Qed.
-Hint Resolve C1_neq_C0 : complex.
 
 (** Distributivity *)
 
@@ -332,6 +326,15 @@ Proof.
 CusingR_f.
 Qed.
 Hint Resolve Cmult_add_distr_r : complex.
+
+(** 1 <> 0 *)
+Lemma C1_neq_C0 : 1 <> 0.
+Proof.
+intro H ; apply (proj2 (Ceq _ _)) in H ; destruct H as (H, H0); compute in H ;
+ apply R1_neq_R0 ; assumption.
+Qed.
+Hint Resolve C1_neq_C0 : complex.
+
 
 (** * R Vector Space Lemmas *)
 
@@ -361,7 +364,7 @@ CusingR.
 Qed.
 
 
-(** * Other properties *)
+(** * Other properties (Cconj) *)
 Lemma Cadd_conj : forall z : C, z + Cconj z = (C1 + C1) * (Cre z +i 0%R).
 Proof.
 CusingR_f.
@@ -386,7 +389,8 @@ exists (a +i b).
 intuition.
 Qed.
 
-
+(* begin hide *)
+(* This tactic may help (not sure) *)
 Ltac RusingC a b := 
  let z := fresh "z" in
  let H := fresh "H" in 
@@ -395,13 +399,4 @@ Ltac RusingC a b :=
    destruct (Cexist_rep_complex a b) as (z, H) ; destruct H as (H1, H2) ;
    try (rewrite <- H1 in * ; rewrite <- H2 in *); 
    clear H1 ; clear H2 ; clear a ; clear b ; intuition.
-
-(*
-Lemma gne : forall a b : R, (a,b) <> 0 -> (a*a + b*b <> 0)%R.
-Proof.
-intros a b H.
-RusingC a b.
- destruct (C0_norm_R0 z).
- intuition.
-Qed.
-*)
+(* end hide *)

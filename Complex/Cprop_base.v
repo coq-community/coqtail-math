@@ -28,11 +28,11 @@ Require Import Cpow.
 Lemma Ceq_dec : forall z1 z2 : C, {z1 = z2} + {z1 <> z2}.
 Proof.
 intros z1 z2 ; destruct z1 as (r1, r2) ; destruct z2 as (r3, r4).
- destruct Req_or_neq with (r1- r3)%R; destruct Req_or_neq with (r2 - r4)%R.
-    left; CusingR.
-   right ; intro Habs ; apply Ceq in Habs ; destruct Habs ; auto with real.
+destruct Req_or_neq with (r1- r3)%R; destruct Req_or_neq with (r2 - r4)%R.
+   left; CusingR.
   right ; intro Habs ; apply Ceq in Habs ; destruct Habs ; auto with real.
  right ; intro Habs ; apply Ceq in Habs ; destruct Habs ; auto with real.
+right ; intro Habs ; apply Ceq in Habs ; destruct Habs ; auto with real.
 Qed.
 
 Lemma Ceq_or_neq_C0 : forall z, {z = 0} + {z <> 0}.
@@ -84,7 +84,7 @@ CusingR_rec; simpl.
 reflexivity.
 Qed.
 
-(** * Relations with equalities (auto inside) *)
+(** *** Compatibility of functions with equalities (Hint database) *)
 
 Lemma Ceq_dec_prop : forall z1 z2 : C, z1 = z2 \/ z1 <> z2.
 Proof.
@@ -92,16 +92,7 @@ intros z1 z2 ; case (Ceq_dec z1 z2) ; intro H ; [left | right] ; assumption.
 Qed.
 Hint Resolve Ceq_dec_prop: complex.
 
-Lemma Cadd_ne : forall z, z + 0 = z /\ 0 + z = z.
-Proof.
-intros.
-rewrite Cadd_0_r.
-rewrite Cadd_0_l.
-split ; reflexivity.  
-Qed.
-Hint Resolve Cadd_ne: complex.
-
-Hint Resolve (f_equal (A:=C)): complex.
+(** * IRC *)
 
 Lemma eq_IRC_compat : forall (r r' : R), IRC r = IRC r' -> (r = r')%R.
 Proof.
@@ -114,11 +105,18 @@ intros ; subst ; reflexivity.
 Qed.
 Hint Resolve IRC_eq_compat: complex.
 
-Lemma Cnorm_eq_compat : forall z z', z = z' -> Cnorm z = Cnorm z'.
+(** * Addition *)
+
+Lemma Cadd_ne : forall z, z + 0 = z /\ 0 + z = z.
 Proof.
-intros ; subst ; reflexivity.
+intros.
+rewrite Cadd_0_r.
+rewrite Cadd_0_l.
+split ; reflexivity.  
 Qed.
-Hint Resolve Cnorm_eq_compat: complex.
+Hint Resolve Cadd_ne: complex.
+
+Hint Resolve (f_equal (A:=C)): complex.
 
 Lemma Cadd_eq_compat_l : forall z z1 z2, z1 = z2 -> z + z1 = z + z2.
 Proof.
@@ -159,6 +157,8 @@ rewrite H.
 apply Cadd_comm.
 Qed.
 Hint Resolve Cadd_eq_reg_r : complex.
+
+(** * Multiplication *)
 
 Lemma Cmult_0_r : forall z, z * 0 = 0.
 Proof.
@@ -325,7 +325,7 @@ Proof.
 CusingR_f.
 Qed.
 
-(** ** Substraction *)
+(** * Minus *)
 
 Lemma Cminus_0_r : forall z : C, z - 0 = z.
 Proof.
@@ -493,7 +493,7 @@ intros z n z_neq ; induction n.
  simpl ; apply Cmult_integral_contrapositive_currified ; assumption.
 Qed.
 
-(** ** Injection from [R] to [C]*)
+(** * Injection from [R] to [C]*)
 
 Lemma IRC_neq_compat : forall r s, r <> s -> IRC r <> IRC s.
 Proof.
@@ -508,7 +508,7 @@ intros r r_neq_0 ; replace 0 with (IRC 0%R) by intuition ;
  apply IRC_neq_compat ; assumption.
 Qed.
 
-(** ** Injection from [N] to [C]*)
+(** * Injection from [N] to [C]*)
 
 Lemma S_INC : forall n:nat, INC (S n) = INC n + 1.
 Proof.
@@ -591,6 +591,14 @@ rewrite Cim_add_distr.
 rewrite <- IHn.
 intuition.
 Qed.
+
+(** * Cnorm *)
+
+Lemma Cnorm_eq_compat : forall z z', z = z' -> Cnorm z = Cnorm z'.
+Proof.
+intros ; subst ; reflexivity.
+Qed.
+Hint Resolve Cnorm_eq_compat: complex.
 
 Lemma Cmodcarre_pos : forall r r1 : R, 0 <= r * r + r1 * r1.
 Proof.
@@ -714,6 +722,8 @@ left. apply Cnorm_lt_INC. intuition.
 Qed.
 Hint Resolve Cnorm_le_INC : complex.
 
+(** * INC/Cre/Cim *)
+
 Lemma INC_not_0 : forall n:nat, INC n <> 0 -> n <> 0%nat.
 Proof.
 induction n ; intuition.
@@ -754,28 +764,28 @@ Qed.
 Hint Resolve not_INC: complex.
 
 Lemma Cre_let_1 : forall  (f g : R -> R) (c : R * R), 
-Cre (let (a, b) := c in (f a +i g b)) = f (Cre c).
+  Cre (let (a, b) := c in (f a +i g b)) = f (Cre c).
 Proof.
 intros.
 destruct c. simpl. reflexivity.
 Qed.
 
 Lemma Cim_let_1 : forall  (f g : R -> R) (c : R * R), 
-Cim (let (a, b) := c in (f a +i g b)) = g (Cim c).
+  Cim (let (a, b) := c in (f a +i g b)) = g (Cim c).
 Proof.
 intros.
 destruct c. simpl. reflexivity.
 Qed.
 
 Lemma Cre_let_2 : forall  (f g : R -> R -> R) (c : R * R), 
-Cre (let (a, b) := c in (f a b +i g a b)) = f (Cre c) (Cim c).
+  Cre (let (a, b) := c in (f a b +i g a b)) = f (Cre c) (Cim c).
 Proof.
 intros.
 destruct c. simpl. reflexivity.
 Qed.
 
 Lemma Cim_let_2 : forall  (f g : R -> R -> R) (c : R * R), 
-Cim (let (a, b) := c in (f a b +i g a b)) = g (Cre c) (Cim c).
+  Cim (let (a, b) := c in (f a b +i g a b)) = g (Cre c) (Cim c).
 Proof.
 intros.
 destruct c. simpl. reflexivity.
@@ -814,7 +824,6 @@ rewrite H. unfold Rdiv. rewrite Rmult_0_l.
 reflexivity.
 Qed.
 
-
 Lemma Cim_INC : forall n, Cim (INC n) = 0%R.
 Proof.
 intros n.
@@ -832,7 +841,6 @@ reflexivity.
 rewrite S_INC. rewrite <- Cre_add_compat.
 rewrite IHn. rewrite S_INR. reflexivity. 
 Qed.
-
 
 Lemma Cim_inv_INC : forall n, Cim (/ INC n) = 0%R.
 Proof.
@@ -860,7 +868,7 @@ field. apply not_0_INR. exact Hn.
 Qed.
 
 
-(** Compatibility of IRC and real/complex lemma *)
+(** * Compatibility of IRC and real/complex lemma *)
 
 Lemma Cadd_IRC_compat_l : forall (r a b : R), r + (a +i b) = ((r + a)%R +i b).
 Proof.
@@ -926,7 +934,7 @@ CusingR_f ; assumption.
 Qed.
 Hint Resolve Cdiv_IRC_Rdiv : complex.
 
-(** Compatibility of Cconj with Cmodcarre*)
+(** * Compatibility of Cconj with Cmodcarre*)
 
 Lemma Cmod_conj_compat : forall z, Cre (z * Cconj z) = ((Cnorm z) ^ 2)%R
                                                            /\ Cim ( z * Cconj z) = 0%R.
@@ -941,7 +949,7 @@ apply Cmodcarre_pos.
 apply Cmodcarre_pos.
 Qed.
 
-(** Compatibility of pow and Cpow*)
+(** * Compatibility of pow and Cpow*)
 
 Lemma Cpow_Cre_Cim_0 : forall r n, Cre ((r +i 0%R) ^ n) = (r ^ n)%R /\ Cim ((r +i 0%R) ^ n) = 0%R.
 Proof.
@@ -1046,6 +1054,9 @@ rewrite Rdef_pow_add.
 simpl. ring.
 Qed.
 
+(** Tactic CpowR which destructs a nat into 4 nat (4*k + 1 etc). Then, it rewrites the power
+that can be simpler *)
+
 Ltac CpowR a := 
 let H := fresh "H" in let n := fresh "n" in
 (destruct (nat_4_dec a) as (n, H);  
@@ -1055,7 +1066,9 @@ destruct H as [H|[H| [H|H]]] ; rewrite <- H ;
 | repeat (rewrite Cpow_Cre_4_2||rewrite Cpow_Cim_4_2)
 | repeat (rewrite Cpow_Cre_4_3||rewrite Cpow_Cim_4_3)]).
 
-(** Tactic RpowR destroy minus with pow (change its place) *)
+(* begin hide *)
+(* Tactic RpowR destroy minus with pow *)
+(* Move these lemmas *)
 
 Lemma Rpow_2_0 : forall x n,  ((-x) ^ (2 * n) = x ^ (2 * n))%R.
 Proof.
@@ -1081,3 +1094,4 @@ Ltac RpowR a :=
   destruct H as [H|H] ; rewrite H ; 
   [repeat rewrite Rpow_2_0|repeat rewrite Rpow_2_1].
 
+(* end hide *)

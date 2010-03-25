@@ -59,13 +59,13 @@ Proof.
 intros z n m.
 induction n.
  auto with complex.
-replace (z ^ (S n + m)%nat) with (z * z ^ (n+m)%nat).
- rewrite IHn. replace (z ^ S n) with (z * (z ^ n)).
-  auto with complex.
- destruct n ; simpl ; auto with complex.
-replace (S n + m)%nat with (S (n + m))%nat.
- destruct n; destruct m ; simpl ; auto with complex.
-simpl ; reflexivity.
+ replace (z ^ (S n + m)%nat) with (z * z ^ (n+m)%nat).
+  rewrite IHn. replace (z ^ S n) with (z * (z ^ n)).
+   auto with complex.
+  destruct n ; simpl ; auto with complex.
+ replace (S n + m)%nat with (S (n + m))%nat.
+  destruct n; destruct m ; simpl ; auto with complex.
+  simpl ; reflexivity.
 Qed.
 
 Lemma Cpow_mul : forall z n m, z ^ (n * m) = (z ^ n) ^ m.

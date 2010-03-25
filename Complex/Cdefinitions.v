@@ -39,6 +39,8 @@ Bind Scope C_scope with C.
 
 Open Scope C_scope.
 
+(** ** Basic definitions and notations *)
+
 Definition C0 := R_R_to_C 0 0.
 Definition C1 := R_R_to_C 1 0.
 Definition Ci := R_R_to_C 0 1.
