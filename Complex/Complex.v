@@ -19,6 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+(** This file requires the most basic facts on Complex (Cnorm, Cpow, ring/field ...)*)
+
 Require Export Cbase.
 Require Export Cnorm.
 Require Export Cpow.

@@ -32,6 +32,8 @@ Require Import Cfunctions.
 
 Open Scope C_scope.
 
+(** Definition of the distance in C *)
+
 Definition C_dist a b := Cnorm (a - b).
 
 Lemma C_dist_pos : forall a b, C_dist a b >= 0.
@@ -68,6 +70,8 @@ Proof.
 intros ; apply (proj2 (C_dist_refl _ _)) ; assumption.
 Qed.
 
+(** C metric space *)
+
 Definition C_met : Metric_Space :=
  Build_Metric_Space C C_dist C_dist_pos C_dist_sym C_dist_refl C_dist_tri.
 
@@ -88,6 +92,8 @@ Definition Dgf (Df Dg:C -> Prop) (f:C->C) (z:C) := Df z /\ Dg (f z).
 
 Definition adhDa (D:C -> Prop) (a:C) : Prop := forall alp:R, alp > 0 ->
   exists x, D x /\ C_dist x a < alp.
+
+(** Compatibility of limit with operators *)
 
 (*********)
 Lemma single_limit : forall f D l l' x,
