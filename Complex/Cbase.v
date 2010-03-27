@@ -136,6 +136,16 @@ Hint Resolve HC0_norm_R0 : complex.
 
 (** Cre / Cim compatibility with simple operators *)
 
+Lemma Cre_simpl : forall (a b : R), Cre (a +i b) = a.
+Proof.
+intros ; reflexivity.
+Qed.
+
+Lemma Cim_simpl : forall (a b : R), Cim (a +i b) = b.
+Proof.
+intros ; reflexivity.
+Qed.
+
 Lemma Cre_opp_compat : forall z, (- Cre z = Cre (-z))%R.
 Proof.
 intro z ; destruct z ; reflexivity.
@@ -234,23 +244,23 @@ Hint Resolve Copp_invol : complex.
 
 (** Minus *)
 
-Lemma Cminus_plus_distr : forall z z', - (z + z') = -z - z'.
+Lemma Copp_add_distr : forall z z', - (z + z') = -z - z'.
 Proof.
 CusingR_f.
 Qed.
-Hint Resolve Cminus_plus_distr : complex.
+Hint Resolve Copp_add_distr : complex.
 
-Lemma Cminus_minus_distr : forall z z', - (z - z') = - z + z'.
+Lemma Copp_minus_distr : forall z z', - (z - z') = - z + z'.
 Proof.
 CusingR_f.
 Qed.
-Hint Resolve Cminus_minus_distr : complex.
+Hint Resolve Copp_minus_distr : complex.
 
-Lemma Cminus_sym : forall z z', (z - z') = - (z' - z).
+Lemma Cminus_antisym : forall z z', (z - z') = - (z' - z).
 Proof.
 CusingR_f.
 Qed.
-Hint Resolve Cminus_sym : complex.
+Hint Resolve Cminus_antisym : complex.
 
 (**  Multiplication. *)
 Lemma Cmult_comm : forall z1 z2 : C, z1 * z2 = z2 * z1.

@@ -51,6 +51,24 @@ replace (0 * 0 + 0 * 0)%R with 0%R by ring.
 exact sqrt_0.
 Qed.
 
+Lemma Cnorm_Cre_simpl : forall (a : R), Cnorm (a, R0) = Rabs a.
+Proof.
+intros ; unfold Cnorm, Cmodcarre ; simpl.
+rewrite Rmult_0_r, Rplus_0_r ; apply sqrt_Rsqr_abs.
+Qed.
+
+Lemma Cnorm_Cim_simpl : forall (a : R), Cnorm (R0, a) = Rabs a.
+Proof.
+intros ; unfold Cnorm, Cmodcarre ; simpl.
+rewrite Rmult_0_l, Rplus_0_l ; apply sqrt_Rsqr_abs.
+Qed.
+
+Lemma Cnorm_comm : forall (a b : R), Cnorm (a, b) = Cnorm (b, a).
+Proof.
+intros ; unfold Cnorm, Cmodcarre.
+simpl ; rewrite Rplus_comm ; reflexivity.
+Qed.
+
 Lemma Cnorm_gt_not_eq : forall z, Cnorm z > 0 -> z <> 0.
 Proof.
 intros z Hz Hrew ; apply (Rlt_irrefl 0) ;
@@ -99,7 +117,7 @@ Qed.
 
 Lemma Cnorm_minus_sym : forall z1 z2, Cnorm (z1 - z2) = Cnorm (z2 - z1).
 Proof.
-intros ; rewrite Cminus_sym ; rewrite Cnorm_opp ; reflexivity.
+intros ; rewrite Cminus_antisym ; rewrite Cnorm_opp ; reflexivity.
 Qed.
 
 Lemma Cnorm_mult : forall lambda : R, forall z : C,

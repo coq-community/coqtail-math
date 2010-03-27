@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import Ranalysis_def.
 Require Import Canalysis_def.
 Require Import Canalysis_diff.
 Require Import Cprop_base.
@@ -672,3 +673,18 @@ intro H.
    assumption.
    apply Main3 ; apply H ; apply Main2.
 Qed.
+
+(** * MVT (weak version : the strong one is false when f has complex values *)
+(* see http://planetmath.org/encyclopedia/ProofOfComplexMeanValueTheorem.html for the proof *)
+
+Theorem MVT_Cre : forall (f : C -> C) (z h : C)
+    (f_deriv : forall (t : R), interval 0 1 t -> derivable_pt f (z + t*h)), h <> 0 ->
+    { u : R & { u_in_I : interval 0 1 u | Cre ((f (z + h) - f z) / h) = Cre (derive_pt f (z + u * h) (f_deriv u u_in_I)) }}.
+Proof.
+Admitted.
+
+Theorem MVT_Cim : forall (f : C -> C) (z h : C)
+    (f_deriv : forall (t : R), interval 0 1 t -> derivable_pt f (z + t*h)), h <> 0 ->
+    { u : R & { u_in_I : interval 0 1 u  | Cim ((f (z + h) - f z) / h) = Cim (derive_pt f (z + u * h) (f_deriv u u_in_I)) }}.
+Proof.
+Admitted.

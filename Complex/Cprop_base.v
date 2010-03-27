@@ -405,6 +405,11 @@ Proof.
 CusingR_f.
 Qed.
 
+Lemma Cmult_minus_distr_r : forall z1 z2 z3 : C, (z2 - z3) * z1 = z2 * z1 - z3 * z1.
+Proof.
+intros ; rewrite Cmult_comm, Cmult_minus_distr_l ; ring.
+Qed.
+
 (** * Inversion *)
 
 Lemma Cinv_1 : /1 = 1.
@@ -867,6 +872,21 @@ repeat rewrite Cre_INC_INR.
 field. apply not_0_INR. exact Hn.
 Qed.
 
+(** * Cneq results*)
+
+Lemma Cadd_neq_compat_l : forall z z', z' <> 0 -> z + z' <> z.
+Proof.
+intros z z' z'_neq Hf ; apply z'_neq.
+ assert (H := Cadd_eq_compat_l (- z) _ _ Hf).
+ rewrite <- Cadd_assoc, Cadd_opp_l, Cadd_0_l in H ;
+ assumption.
+Qed.
+
+Lemma Cadd_neq_compat_r : forall z z', z' <> 0 -> z' + z <> z.
+Proof.
+intros z z' z'_neq ; rewrite Cadd_comm ;
+ apply Cadd_neq_compat_l ; assumption.
+Qed.
 
 (** * Compatibility of IRC and real/complex lemma *)
 

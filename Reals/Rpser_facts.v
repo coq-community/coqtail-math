@@ -55,26 +55,6 @@ intros q m k q_neq_1.
  unfold q_pow_i ; replace (k + S m)%nat with (S (k + m))%nat by intuition ; simpl ; reflexivity.
 Qed.
 
-Definition middle x y := (x+y)/2.
-
-Lemma middle_identity : forall x, middle x x = x.
-Proof.
-intros ; unfold middle ; field.
-Qed.
-
-Lemma middle_is_in_the_middle : forall x y, x < y -> x < middle x y < y.
-Proof.
-intros x y x_lt_y ; split.
- apply Rle_lt_trans with (middle x x).
- right ; symmetry ; apply middle_identity.
- unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
- apply Rplus_lt_compat_l ; assumption.
- apply Rlt_le_trans with (middle y y).
- unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
- apply Rplus_lt_compat_r ; assumption.
- right ; apply middle_identity.
-Qed.
-
 (** * Abel's lemma : convergence of the power serie inside the cv-disc *)
 
 Lemma Cauchy_crit_partial_sum : forall (An : nat -> R) (r : R), 
