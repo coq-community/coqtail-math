@@ -95,6 +95,16 @@ elim Rho ; intros m Hm ; exists m ; unfold gt_norm_Pser, gt_abs_Pser ; intros a 
  exists u ; unfold gt_norm_Pser ; rewrite IRC_pow_compat ; reflexivity.
 Qed.
 
+Lemma Cv_radius_weak_Cnorm_compat2 : forall (An : nat -> C) (r : R), 
+       Cv_radius_weak An r -> Rpser_def.Cv_radius_weak (fun n => Cnorm (An n)) r.
+Proof.
+intros An r Rho.
+elim Rho ; intros m Hm ; exists m ; unfold gt_norm_Pser, gt_abs_Pser ; intros a Ha ;
+ unfold EUn in Ha ; elim Ha ; intros u Hu ; rewrite Hu ; rewrite Rabs_mult ;
+ do 2 rewrite <- Cnorm_IRC_Rabs ; rewrite Cnorm_invol, <- Cnorm_Cmult ; apply Hm.
+ exists u ; unfold gt_norm_Pser ; rewrite IRC_pow_compat ; reflexivity.
+Qed.
+
 Lemma Cv_radius_weak_le_compat : forall (An : nat -> C) (r r' : R),
        Rabs r' <= Rabs r -> Cv_radius_weak An r -> Cv_radius_weak An r'.
 Proof.

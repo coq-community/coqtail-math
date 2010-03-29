@@ -20,6 +20,7 @@ USA.
 *)
 
 Require Export Reals.
+Require Import Rsequence.
 Require Export MyReals.
 Require Import Max.
 Require Import Tools.
@@ -276,9 +277,9 @@ Qed.
 
 (** Pser and Un_cv are linked. See "tech12" for the reciprocal lemma *)
 
-Lemma Pser_Uncv_link : forall (An : nat -> R) (x l : R),
+Lemma Pser_Rseqcv_link : forall (An : nat -> R) (x l : R),
        Pser An x l ->
-       Un_cv (fun N : nat => sum_f_R0 (gt_Pser An x) N) l.
+       Rseq_cv (fun N : nat => sum_f_R0 (gt_Pser An x) N) l.
 Proof.
 intros An x l Hyp.
  unfold gt_Pser.

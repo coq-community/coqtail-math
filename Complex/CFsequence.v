@@ -21,6 +21,7 @@ USA.
 
 (** Common definitions of real functions sequences. *)
 Require Import Cbase.
+Require Import Cfunctions.
 Require Import Csequence.
 Require Import Canalysis_def.
 
@@ -59,3 +60,5 @@ Definition CFseq_cv_boule fn f (c : C) (r : posreal) := forall x,  Boule c r x -
 Definition CFseq_cvu fn f (x : C) (r : posreal) := forall eps : R, 0 < eps ->
         exists N : nat, forall n (y : C), (N <= n)%nat -> Boule x r y ->
         C_dist (fn n y) (f y) < eps.
+
+Definition CFpartial_sum (fn : nat -> C) N := sum_f_C0 fn N.

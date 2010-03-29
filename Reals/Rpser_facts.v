@@ -322,7 +322,7 @@ intros An r Pr r0 r0_ub.
  assert (Pr' := Cv_radius_weak_Rabs_compat _ _ Pr).
  exists (gt_abs_Pser An ((a+r)/2)) ; exists (weaksum_r (fun n => Rabs (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
  assert (H := weaksum_r_sums (fun n => Rabs (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
- assert (Main := Pser_Uncv_link _ _ _ H). 
+ assert (Main := Pser_Rseqcv_link _ _ _ H). 
  intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ; exists N.
   assert (Hrew : forall k, Rabs (gt_abs_Pser An ((a + r) / 2) k) = gt_Pser (fun n0 : nat => Rabs (An n0)) (Rabs ((a + r) / 2)) k).
    intro k ; unfold gt_abs_Pser, gt_Pser ; rewrite Rabs_Rabsolu ; rewrite Rabs_mult ; rewrite RPow_abs ; reflexivity.
@@ -951,7 +951,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
      rewrite Rabs_right with r ; [assumption | apply Rle_ge ;
      apply Rle_trans with (Rabs x) ; [apply Rabs_pos | intuition]].
     assert (T2_temp := sum_r_derive_sums An r rho y y_bd3).
-    assert (T2 := Pser_Uncv_link _ _ _ T2_temp) ; clear T2_temp.
+    assert (T2 := Pser_Rseqcv_link _ _ _ T2_temp) ; clear T2_temp.
     assert (Hrew : (fun N : nat => sum_f_R0 (gt_Pser (An_deriv An) y) N)
     = (fun N : nat => SP (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n) N y)).
      unfold SP ; reflexivity.

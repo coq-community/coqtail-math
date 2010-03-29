@@ -36,8 +36,6 @@ match n with
      | S n' => sum_f_C0 f n' + f n
 end.
 
-Section sum_f_C0_lemmas.
-
 (** *** Finite sum properties *)
 
 Lemma sum_f_C0_simpl : forall (n : nat) (f : nat -> C), 
@@ -147,70 +145,65 @@ Qed.
 
 (** Compatibility with the operators *)
 
-Variables f g : nat -> C.
-Variable N : nat.
-
-Lemma sum_f_C0_add_compat :
+Lemma sum_f_C0_add_compat : forall (f g : nat -> C) (N : nat),
      sum_f_C0 (fun n => f n + g n) N = sum_f_C0 f N + sum_f_C0 g N.
 Proof.
 induction N.
  reflexivity.
- simpl ; rewrite IHn ; ring.
+ simpl ; rewrite IHN ; ring.
 Qed.
 
-Lemma sum_f_C0_opp_compat :
+Lemma sum_f_C0_opp_compat : forall (f : nat -> C) (N : nat),
      sum_f_C0 (fun n => - f n) N = - sum_f_C0 f N.
 Proof.
 induction N.
  reflexivity.
- simpl ; rewrite IHn ; ring.
+ simpl ; rewrite IHN ; ring.
 Qed.
 
-Lemma sum_f_C0_minus_compat :
+Lemma sum_f_C0_minus_compat : forall (f g : nat -> C) (N : nat),
      sum_f_C0 (fun n => f n - g n) N = sum_f_C0 f N - sum_f_C0 g N.
 Proof.
 induction N.
  reflexivity.
- simpl ; rewrite IHn ; ring.
+ simpl ; rewrite IHN ; ring.
 Qed.
 
 (** Compatibility with the projectors *)
 
-Lemma sum_f_C0_Cre_compat :
+Lemma sum_f_C0_Cre_compat : forall (f : nat -> C) (N : nat),
      sum_f_R0 (fun n => Cre (f n)) N = Cre (sum_f_C0 f N).
 Proof.
 induction N.
  reflexivity.
- simpl ; rewrite IHn ; rewrite Cre_add_compat ; reflexivity.
+ simpl ; rewrite IHN ; rewrite Cre_add_compat ; reflexivity.
 Qed.
 
-Lemma sum_f_C0_Cim_compat :
+Lemma sum_f_C0_Cim_compat : forall (f : nat -> C) (N : nat),
      sum_f_R0 (fun n => Cim (f n)) N = Cim (sum_f_C0 f N).
 Proof.
 induction N.
  reflexivity.
- simpl ; rewrite IHn ; rewrite Cim_add_compat ; reflexivity.
+ simpl ; rewrite IHN ; rewrite Cim_add_compat ; reflexivity.
 Qed.
 
-Lemma sum_f_C0_Cnorm_compat : 
+Lemma sum_f_C0_Cnorm_compat : forall (f : nat -> C) (N : nat),
       Cnorm (sum_f_C0 f N) <= sum_f_R0 (fun n => Cnorm (f n)) N.
 Proof.
 induction N.
 right. reflexivity.
 simpl. eapply Rle_trans. apply Cnorm_triang.
-apply Rplus_le_compat. apply IHn. right. reflexivity.
+apply Rplus_le_compat. apply IHN. right. reflexivity.
 Qed.
 
 (** Simple upper bound on the sum *)
 
-Lemma sum_f_C0_triang :
+Lemma sum_f_C0_triang : forall (f : nat -> C) (N : nat),
      Cnorm (sum_f_C0 f N) <= sum_f_R0 (fun n => Cnorm (f n)) N.
 Proof.
 induction N ; simpl.
  intuition.
- apply Rle_trans with (Cnorm (sum_f_C0 f n) + Cnorm (f (S n)))%R.
+ apply Rle_trans with (Cnorm (sum_f_C0 f N) + Cnorm (f (S N)))%R.
  apply Cnorm_triang.
  apply Rplus_le_compat_r ; assumption.
 Qed.
-
-End sum_f_C0_lemmas.

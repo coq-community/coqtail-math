@@ -26,6 +26,7 @@ Require Export Cbase.
 Require Import Ctacfield.
 Require Import Cnorm.
 Require Import Cprop_base.
+Require Import Rsequence.
 Require Import Csequence.
 Require Import Csequence_facts.
 Require Import Cfunctions.
@@ -81,8 +82,8 @@ Definition limit1_in (f:C->C) (D:C -> Prop) (l z:C) : Prop :=
 Definition Boule (c : C) (r : posreal) (x : C) := dist C_met c x < r.
 
 Definition CVN_r (fn : nat -> C -> C) (r : posreal) := {An : nat -> C & 
-	{l : C |
-	Cseq_cv (fun n : nat => sum_f_C0 (fun k : nat => Cnorm (An k)) n) l /\
+	{l : R |
+	Rseq_cv (fun n : nat => sum_f_R0 (fun k : nat => Cnorm (An k)) n) l /\
 	(forall (n : nat) (y : C), Boule 0 r y -> Cnorm (fn n y) <= Cnorm (An n))}}.
 
 (*********)

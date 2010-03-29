@@ -391,7 +391,7 @@ Proof.
   elim (H3 eps H); intros N0 H4.
   exists N0; intros.
   apply Rle_lt_trans with (Rabs (sum_f_R0 (fun k:nat => Rabs (An k)) n - s)).
-  rewrite <- (Rabs_Ropp (sum_f_R0 (fun k:nat => Rabs (An k)) n - s));
+  rewrite <- (Rabs_Ropp (sum_f_R0 (fun k:nat => Rabs (An k)) n - s)).
     rewrite Ropp_minus_distr';
       rewrite (Rabs_right (s - sum_f_R0 (fun k:nat => Rabs (An k)) n)).
   eapply sum_maj1.

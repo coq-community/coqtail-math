@@ -90,6 +90,11 @@ Proof.
 intros ; unfold middle ; field.
 Qed.
 
+Lemma middle_comm : forall x y, middle x y = middle y x.
+Proof.
+intros ; unfold middle ; field.
+Qed.
+
 Lemma middle_is_in_the_middle : forall x y, x < y -> x < middle x y < y.
 Proof.
 intros x y x_lt_y ; split.
@@ -112,6 +117,44 @@ intros lb ub x y x_in_I y_in_I.
  unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
  replace ub with ((ub + ub) * /2) by field.
  unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
+Qed.
+
+Lemma middle_lt_lt_pos : forall x y, 0 < x -> 0 < y -> 0 < middle x y.
+Proof.
+intros x y x_pos y_pos ; unfold middle, Rdiv ;
+ apply Rlt_mult_inv_pos ; fourier.
+Qed.
+
+Lemma middle_le_lt_pos : forall x y, 0 <= x -> 0 < y -> 0 < middle x y.
+Proof.
+intros x y x_pos y_pos ; unfold middle, Rdiv ;
+ apply Rlt_mult_inv_pos ; fourier.
+Qed.
+
+Lemma middle_lt_le_pos : forall x y, 0 < x -> 0 <= y -> 0 < middle x y.
+Proof.
+intros x y x_pos y_pos ; rewrite middle_comm ;
+ apply middle_le_lt_pos ; assumption.
+Qed.
+
+Lemma middle_lt_lt_neg : forall x y, x < 0 -> y < 0 -> middle x y < 0.
+Proof.
+intros x y x_neg y_neg ; unfold middle, Rdiv ;
+ replace 0 with ((x + y) * 0) by ring ;
+ apply Rmult_lt_gt_compat_neg_l ; fourier.
+Qed.
+
+Lemma middle_le_lt_neg : forall x y, x <= 0 -> y < 0 -> middle x y < 0.
+Proof.
+intros x y x_pos y_pos ; unfold middle, Rdiv ;
+  replace 0 with ((x + y) * 0) by ring ;
+ apply Rmult_lt_gt_compat_neg_l ; fourier.
+Qed.
+
+Lemma middle_lt_le_neg : forall x y, x < 0 -> y <= 0 -> middle x y < 0.
+Proof.
+intros x y x_neg y_neg ; rewrite middle_comm ;
+ apply middle_le_lt_neg ; assumption.
 Qed.
 
 Lemma interval_l : forall lb ub, lb <= ub -> interval lb ub lb.

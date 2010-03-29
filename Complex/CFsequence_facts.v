@@ -21,10 +21,16 @@ USA.
 
 (** Properties of real functions sequences. *)
 
+Require Import Rsequence.
 Require Import Ranalysis_def.
+Require Import Rsequence_cv_facts.
+Require Import Rsequence_tactics.
 Require Import MyRIneq.
 Require Import Canalysis_def.
 Require Import Canalysis_deriv.
+Require Import Cfunctions.
+Require Import Csequence.
+Require Import Csequence_facts.
 Require Import CFsequence.
 Require Import Cnorm.
 Require Import Cprop_base.
@@ -273,4 +279,262 @@ apply Rmult_lt_compat_r ; [rewrite <- Cnorm_inv ; [apply Cnorm_pos_lt ;
  apply Cinv_neq_0_compat |] |] ; assumption.
 
  right ; field ; apply Cnorm_no_R0 ; assumption.
+Qed.
+
+
+Definition SFL_interv (fn:nat -> C -> C) (r:posreal)
+  (cv : forall z : C, Boule 0 r z -> {l:C | Cseq_cv (fun N:nat => CFpartial_sum (fun n => fn n z) N) l }) (y:C) : C.
+Proof.
+intros fn r cv z.
+ destruct (Rlt_le_dec (Cnorm (0 - z)) r) as [z_bd | z_lb].
+ unfold Boule in cv ; simpl in cv ; unfold C_dist in cv ;
+ destruct (cv _ z_bd) as (l, _) ; apply l.
+ exact 0.
+Defined.
+
+Lemma SFL_interv_right : forall fn r cv y, Boule 0 r y ->
+     Cseq_cv (fun N:nat => CFpartial_sum (fun n => fn n y) N) (SFL_interv fn r cv y).
+Proof.
+intros fn r cv z z_bd ; unfold SFL_interv ;
+ destruct (Rlt_le_dec (Cnorm (0 - z)) r) as [z_bd2 | z_lb].
+ destruct (cv z z_bd2) as [l Hl] ; assumption.
+ assert (Hf : Cnorm (0 - z) < Cnorm (0 - z)).
+  apply Rlt_le_trans with r ; unfold Boule in * ; assumption.
+ elim (Rlt_irrefl _ Hf).
+Qed.
+
+Lemma Rlt_minus_exchange : forall a b c, a - b < c -> a - c < b.
+Proof.
+intros a b c H ; fourier.
+Qed.
+
+Lemma Rlt_plus_exchange : forall a b c,  a - b < c  -> a < b + c.
+Proof.
+intros a b c H ; fourier.
+Qed.
+
+Lemma Rseq_limit_comparizon : forall (An Bn : nat -> R) (a b : R),
+      (forall n, An n <= Bn n) ->
+       Rseq_cv An a -> Rseq_cv Bn b ->
+       a <= b.
+Proof.
+Admitted.
+
+Lemma sum_cv_maj : forall (An : nat -> R) (fn : nat -> C -> C) (z l1 : C) (l2 : R),
+       Cseq_cv (fun n : nat => CFpartial_sum (fun n => fn n z) n) l1 ->
+       Rseq_cv (fun n : nat => sum_f_R0 An n) l2 ->
+       (forall n : nat, Cnorm (fn n z) <= An n) -> Cnorm l1 <= l2.
+Proof.
+intros An fn z l1 l2 fn_cv An_cv fn_bd.
+ destruct (Rle_lt_dec (Cnorm l1) l2) as [H | Hf].
+  assumption.
+  pose (eps := ((Cnorm l1 - l2) / 4)%R) ;
+  assert (eps_pos : 0 < eps).
+   unfold eps, Rdiv ; apply Rlt_mult_inv_pos ; fourier.
+  destruct (fn_cv _ eps_pos) as [Nfn Hfn] ;
+  destruct (An_cv _ eps_pos) as [NAn HAn].
+  pose (N := max Nfn NAn).
+  assert (Main : Cnorm l1 - eps < l2 + eps).
+   apply Rlt_trans with (Cnorm (CFpartial_sum (fun n : nat => fn n z) N)).
+   apply Rlt_minus_exchange ; apply Rle_lt_trans with (Cnorm (CFpartial_sum (fun n : nat => fn n z) N - l1)) ;
+   [apply Cnorm_triang_rev_r | apply Hfn ;  apply le_max_l].
+   apply Rle_lt_trans with (Rabs (sum_f_R0 An N)).
+   apply Rle_trans with (sum_f_R0 (fun n => Cnorm (fn n z)) N).
+   unfold CFpartial_sum ; apply sum_f_C0_triang.
+   clear - fn_bd ; induction N.
+   simpl ; rewrite Rabs_right ; [| apply Rle_ge ; apply Rle_trans with (Cnorm (fn O z)) ;
+   [apply Cnorm_pos |] ] ; apply fn_bd.
+   simpl ; rewrite Rabs_right.
+   apply Rle_trans with (Rplus (sum_f_R0 An N) (Cnorm (fn (S N) z))) ;
+   [apply Rplus_le_compat_r ; rewrite <- Rabs_right ; [apply IHN |] |
+   apply Rplus_le_compat_l ; apply fn_bd].
+   apply Rle_ge ; apply cond_pos_sum.
+   intro n ; apply Rle_trans with (Cnorm (fn n z)) ; [apply Cnorm_pos | apply fn_bd].
+   rewrite <- tech5 ; apply Rle_ge ; apply cond_pos_sum.
+   intro n ; apply Rle_trans with (Cnorm (fn n z)) ; [apply Cnorm_pos | apply fn_bd].
+   apply Rlt_plus_exchange.
+   apply Rle_lt_trans with (R_dist (sum_f_R0 An N) l2).
+   apply Rle_trans with (Rminus (Rabs (sum_f_R0 An N)) (Rabs l2)).
+   replace (Rabs l2) with l2.
+   right ; reflexivity.
+   symmetry ; apply Rabs_right.
+   apply Rle_ge ; apply Rseq_limit_comparizon with (fun _ => R0)  (fun n : nat => sum_f_R0 An n).
+   intros n ; apply cond_pos_sum ; intro n' ; apply Rle_trans with (Cnorm (fn n' z)) ;
+   [apply Cnorm_pos | apply fn_bd].
+   intros ; exists O ; intros ; simpl ; unfold R_dist ; rewrite Rminus_0_r, Rabs_R0 ; assumption.
+   assumption.
+   unfold R_dist ; apply Rabs_triang_inv.
+   apply HAn ; apply le_max_r.
+   assert (Cnorm l1 < Cnorm l1).
+   apply Rlt_trans with (l2 + 2 * eps)%R.
+   fourier.
+   unfold eps.
+   apply Rle_lt_trans with ((Cnorm l1 + l2) / 2)%R.
+   right ; field.
+   rewrite Rplus_comm ; apply (middle_is_in_the_middle _ _ Hf).
+   elim (Rlt_irrefl _ H).
+Qed.
+
+Definition Csigma f low high := sum_f_C0 (fun n : nat => f (low + n)%nat) (high - low).
+
+Lemma   Csigma_split : forall (f : nat -> C) (low high k : nat),
+       (low <= k)%nat ->  (k < high)%nat ->
+       Csigma f low high = (Csigma f low k + Csigma f (S k) high).
+Proof.
+intros f low high k l_le_k k_lt_h.
+ unfold Csigma.
+ apply (proj1 (Ceq _ _)) ; split.
+ rewrite <- Cre_add_compat ; do 3 rewrite <- sum_f_C0_Cre_compat.
+ assert (H := sigma_split (fun n => Cre (f n))  l_le_k k_lt_h) ;
+ unfold sigma in H ; assumption.
+ rewrite <- Cim_add_compat ; do 3 rewrite <- sum_f_C0_Cim_compat.
+ assert (H := sigma_split (fun n => Cim (f n))  l_le_k k_lt_h) ;
+ unfold sigma in H ; assumption.
+Qed.
+
+Lemma sum_maj1 : forall (fn : nat -> C -> C) (An : nat -> R) (x l1: C) (l2 : R) (N : nat),
+       Cseq_cv (fun n : nat => CFpartial_sum (fun n => fn n x) n) l1 ->
+       Rseq_cv (fun n : nat => sum_f_R0 An n) l2 ->
+       (forall n : nat, Cnorm (fn n x) <= An n) ->
+       Cnorm (l1 - CFpartial_sum (fun n => fn n x) N) <= l2 - sum_f_R0 An N.
+Proof.
+  intros fn An x l1 l2 N fn_cv An_cv fn_bd ;
+    cut { l:C | Cseq_cv (fun n => sum_f_C0 (fun l => fn (S N + l)%nat x) n) l }.
+  intro X;
+    cut { l:R | Rseq_cv (fun n => sum_f_R0 (fun l => An (S N + l)%nat) n) l }.
+  intro X0; elim X; intros l1N H2.
+  elim X0; intros l2N H3.
+  cut (l1 - CFpartial_sum (fun n => fn n x) N = l1N).
+  intro Temp; cut (Rminus l2 (sum_f_R0 An N) = l2N).
+  intro Temp2; rewrite Temp, Temp2.
+  apply sum_cv_maj with (fun n => An (S N + n)%nat) (fun I => fn (S N + I)%nat) x.
+  assumption.
+  assumption.
+  intro n ; apply fn_bd.
+  symmetry ; eapply Rseq_cv_unique.
+  apply H3.
+  unfold Rseq_cv in An_cv |-* ; intros eps eps_pos ; destruct (An_cv _ eps_pos)
+  as [N' HN'] ; exists N' ; intros n n_lb.
+  unfold R_dist ; 
+    replace (sum_f_R0 (fun l:nat => An (S N + l)%nat) n - (l2 - sum_f_R0 An N))%R
+    with (sum_f_R0 An N + sum_f_R0 (fun l:nat => An (S N + l)%nat) n - l2)%R;
+      [| ring ].
+  replace (sum_f_R0 An N + sum_f_R0 (fun l:nat => An (S N + l)%nat) n)%R with
+  (sum_f_R0 An (S (N + n)))%R.
+  apply HN' ; intuition.
+  assert (N_pos : (0 <= N)%nat) by intuition.
+  assert (N_ub : (N < S (N + n))%nat) by intuition.
+  intros; assert (H := sigma_split An N_pos N_ub) ; unfold sigma in H.
+  do 2 rewrite <- minus_n_O in H.
+  replace (sum_f_R0 An (S (N + n))) with
+  (sum_f_R0 (fun k:nat => An (0 + k)%nat) (S (N + n))).
+  replace (sum_f_R0 An N) with (sum_f_R0 (fun k:nat => An (0 + k)%nat) N).
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  rewrite Hrew in H.
+  apply H.
+  apply sum_eq; intros ;  reflexivity.
+  apply sum_eq; intros ;  reflexivity.
+  symmetry ; eapply Cseq_cv_unique.
+  apply H2.
+  unfold Rseq_cv in fn_cv |-* ; intros eps eps_pos ; destruct (fn_cv _ eps_pos)
+  as [N' HN'] ; exists N' ; intros n n_lb.
+  unfold R_dist ; 
+    replace (sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n - (l1 -  CFpartial_sum (fun n0 : nat => fn n0 x) N))
+    with ((CFpartial_sum (fun n0 : nat => fn n0 x) N + sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n) - l1);
+      [| ring ].
+      replace ((CFpartial_sum (fun n0 : nat => fn n0 x) N + sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n))
+      with (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)%nat).
+  apply HN' ; intuition.
+  assert (N_pos : (0 <= N)%nat) by intuition.
+  assert (N_ub : (N < S (N + n))%nat) by intuition.
+  intros; assert (H := Csigma_split (fun n => fn n x) O (S (N + n)) N N_pos N_ub) ; unfold Csigma in H.
+  do 2 rewrite <- minus_n_O in H.
+  replace (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)) with
+  (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) (S (N + n))).
+  replace (CFpartial_sum (fun n0 : nat => fn n0 x) N) with (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) N).
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  rewrite Hrew in H.
+  apply H.
+  unfold CFpartial_sum ; apply sum_f_C0_eq_seq ; intros ;  reflexivity.
+  unfold CFpartial_sum ; apply sum_f_C0_eq_seq ; intros ;  reflexivity.
+
+  exists (l2 - sum_f_R0 An N)%R.
+   unfold Rseq_cv in An_cv |-* ; intros eps eps_pos ; destruct (An_cv _ eps_pos)
+  as [N' HN'] ; exists N' ; intros n n_lb.
+  unfold R_dist ; 
+    replace (sum_f_R0 (fun l:nat => An (S N + l)%nat) n - (l2 - sum_f_R0 An N))%R
+    with (sum_f_R0 An N + sum_f_R0 (fun l:nat => An (S N + l)%nat) n - l2)%R;
+      [| ring ].
+  replace (sum_f_R0 An N + sum_f_R0 (fun l:nat => An (S N + l)%nat) n)%R with
+  (sum_f_R0 An (S (N + n)))%R.
+  apply HN' ; intuition.
+  assert (N_pos : (0 <= N)%nat) by intuition.
+  assert (N_ub : (N < S (N + n))%nat) by intuition.
+  intros; assert (H := sigma_split An N_pos N_ub) ; unfold sigma in H.
+  do 2 rewrite <- minus_n_O in H.
+  replace (sum_f_R0 An (S (N + n))) with
+  (sum_f_R0 (fun k:nat => An (0 + k)%nat) (S (N + n))).
+  replace (sum_f_R0 An N) with (sum_f_R0 (fun k:nat => An (0 + k)%nat) N).
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  rewrite Hrew in H.
+  apply H.
+  apply sum_eq; intros ;  reflexivity.
+  apply sum_eq; intros ;  reflexivity.
+
+  exists (l1 - CFpartial_sum (fun n => fn n x) N).
+
+ intros eps eps_pos ; destruct (fn_cv _ eps_pos) as [N' HN'] ; exists N' ; intros n n_lb.
+
+    replace (sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n - (l1 -  CFpartial_sum (fun n0 : nat => fn n0 x) N))
+    with ((CFpartial_sum (fun n0 : nat => fn n0 x) N + sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n) - l1);
+      [| ring ].
+      replace ((CFpartial_sum (fun n0 : nat => fn n0 x) N + sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n))
+      with (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)%nat).
+  apply HN' ; intuition.
+  assert (N_pos : (0 <= N)%nat) by intuition.
+  assert (N_ub : (N < S (N + n))%nat) by intuition.
+  intros; assert (H := Csigma_split (fun n => fn n x) O (S (N + n)) N N_pos N_ub) ; unfold Csigma in H.
+  do 2 rewrite <- minus_n_O in H.
+  replace (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)) with
+  (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) (S (N + n))).
+  replace (CFpartial_sum (fun n0 : nat => fn n0 x) N) with (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) N).
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  rewrite Hrew in H.
+  apply H.
+  unfold CFpartial_sum ; apply sum_f_C0_eq_seq ; intros ;  reflexivity.
+  unfold CFpartial_sum ; apply sum_f_C0_eq_seq ; intros ;  reflexivity.
+Qed.
+
+Lemma CVN_CVU_boule :forall (fn : nat -> C -> C) (r : posreal)
+       (cv : forall z : C,  Boule 0 r z -> {l : C | Cseq_cv (fun N : nat => CFpartial_sum (fun n => fn n z) N) l}),
+       CVN_r fn r ->
+       CFseq_cvu (fun N  z => CFpartial_sum (fun n => fn n z) N) (SFL_interv fn r cv) 0 r.
+Proof.
+intros fn r cv cvn eps eps_pos.
+
+ destruct cvn as [An [l [sum_cv fn_bd]]] ;
+ destruct (sum_cv eps eps_pos) as [N HN] ;
+ exists N ; intros n y n_lb y_bd.
+ unfold SFL_interv.
+ destruct (Rlt_le_dec (Cnorm (0 - y)) r) as [y_bd2 | y_lb].
+
+  destruct (cv y y_bd2) as [l2 Hl2] ; unfold C_dist.
+
+ apply Rle_lt_trans with (Rabs (sum_f_R0 (fun k => Cnorm (An k)) n - l)).
+  rewrite <- (Rabs_Ropp (sum_f_R0 (fun k:nat => Cnorm (An k)) n - l));
+    rewrite Ropp_minus_distr';
+      rewrite (Rabs_right (l - sum_f_R0 (fun k:nat => Cnorm (An k)) n)).
+  rewrite Cnorm_minus_sym ; eapply sum_maj1.
+  apply Hl2.
+  apply sum_cv.
+  intros ; apply fn_bd ; assumption.
+  apply Rge_minus ; apply Rle_ge ; apply sum_incr.
+  assumption.
+  intros ; apply Cnorm_pos.
+  unfold R_dist in HN ; apply HN ; assumption.
+
+unfold Boule in y_bd ; simpl in y_bd ; unfold C_dist in y_bd.
+ assert (Hf : Cnorm (0 - y) < Cnorm (0 - y)).
+  apply Rlt_le_trans with r ; assumption.
+ destruct (Rlt_irrefl _ Hf).
 Qed.
