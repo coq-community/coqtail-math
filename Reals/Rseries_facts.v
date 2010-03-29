@@ -1444,54 +1444,6 @@ apply Rser_pos_maj_cv_shift with (fun i => / INR (S i) ^ 2).
 apply Rser_cv_square_inv.
 Qed.
 
-
-(** * Rser_rem Rser compatibility with le lt... *)
-Lemma Rseq_le_limit : forall Un Vn lu lv,
-(forall k : nat, Un k < Vn k) -> Rseq_cv Un lu -> Rseq_cv Vn lv ->
-(forall k : nat, Un k - lu < 0) -> (forall k : nat, Vn k - lv < 0) ->
-lu <= lv.
-Proof.
-intros Un Vn lu lv Hlt Hcvlu Hcvlv H1 H2.
-unfold Rseq_cv in *.
-destruct (Req_dec lu lv) as [H3|H3].
- intuition.
- 
- pose (eps := (lv - lu)%R).
- destruct (Rtotal_order eps 0) as [H|[H|H]].
-  assert (Heps : -eps > 0). intuition.
-  destruct (Hcvlu (-eps)%R Heps) as (N1, Hcvlu1).
-  destruct (Hcvlv (-eps)%R Heps) as (N2, Hcvlv2).
-  clear Hcvlv Hcvlu H.
-  assert (H : {n | n >= (max N1 N2)}%nat). exists (max N1 N2). intuition.
-  destruct H as (n, Hn).
-  assert (Hn1 :  (n >= N1)%nat). apply le_trans with (max N1 N2) ; intuition.
-  assert (Hn2 :  (n >= N2)%nat). apply le_trans with (max N1 N2) ; intuition.
-  generalize (Hcvlu1 n Hn1). generalize (Hcvlv2 n Hn2). intros Hcvlv Hcvlu.
-  unfold R_dist, Rabs in *.
-  destruct (Rcase_abs (Vn n - lv)) as [He|He] ; [|generalize (H2 n) ; intros ; fourier].
-  destruct (Rcase_abs (Un n - lu)) as [He1|He1] ; [|generalize (H1 n) ; intros ; fourier].
-  unfold eps in *.
-  assert (Un n - lv > 0). fourier.
-  assert (lv > Vn n). fourier.
-  assert (Un n > Vn n). fourier. generalize (Hlt n) ; intros. fourier.
-
-  unfold eps in *. destruct H3 ; intuition. 
-
-  destruct (Hcvlu eps H) as (N1, Hcvlu1).
-  destruct (Hcvlv eps H) as (N2, Hcvlv2).
-  clear Hcvlv Hcvlu.
-  assert (H4 : {n | n >= (max N1 N2)}%nat). exists (max N1 N2). intuition.
-  destruct H4 as (n, Hn).
-  assert (Hn1 :  (n >= N1)%nat). apply le_trans with (max N1 N2) ; intuition.
-  assert (Hn2 :  (n >= N2)%nat). apply le_trans with (max N1 N2) ; intuition.
-  generalize (Hcvlu1 n Hn1). generalize (Hcvlv2 n Hn2). intros Hcvlv Hcvlu.
-  clear Hcvlu1 Hcvlv2.
-  unfold R_dist in *. unfold Rabs in *.
-  destruct (Rcase_abs (Vn n - lv)) as [He|He] ; [|generalize (H2 n) ; intros ; fourier].
-  destruct (Rcase_abs (Un n - lu)) as [He1|He1] ; [|generalize (H1 n) ; intros ; fourier].
-  unfold eps in *.
-  left. apply Rlt_trans with (Vn n) ; fourier.
-Qed.
 (*TODO to move and rename *)
 Lemma sum_lt : forall Un Vn n, (forall k, Un k < Vn k) ->  
 sum_f_R0 Un n < sum_f_R0 Vn n.

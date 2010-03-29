@@ -313,34 +313,6 @@ Proof.
 intros a b c H ; fourier.
 Qed.
 
-Lemma Rseq_positive_limit : forall (An : nat -> R) (a : R),
-      (forall n, 0 <= An n) ->
-       Rseq_cv An a ->
-       0 <= a.
-Proof.
-intros An a Hpos Ha.
-apply Rnot_lt_le; intro Na.
-destruct (Ha (Ropp (Rdiv a 2))) as [N HN]; [fourier | ].
-pose proof (HN N (le_n N)).
-generalize dependent H.
-unfold R_dist, Rabs.
-pose proof Hpos N as Hposn.
-destruct (Rcase_abs (An N - a)); intro; fourier.
-Qed.
-
-Lemma Rseq_limit_comparizon : forall (An Bn : nat -> R) (a b : R),
-      (forall n, An n <= Bn n) ->
-       Rseq_cv An a -> Rseq_cv Bn b ->
-       a <= b.
-Proof.
-intros An Bn a b Hcomp Ha Hb.
-assert (0 <= b - a).
- apply Rseq_positive_limit with (fun n => (Bn n - An n)%R).
-  intro n; pose proof Hcomp n; try fourier.
-  apply Rseq_cv_minus_compat; auto.
- fourier.
-Qed.
-
 Lemma sum_cv_maj : forall (An : nat -> R) (fn : nat -> C -> C) (z l1 : C) (l2 : R),
        Cseq_cv (fun n : nat => CFpartial_sum (fun n => fn n z) n) l1 ->
        Rseq_cv (fun n : nat => sum_f_R0 An n) l2 ->

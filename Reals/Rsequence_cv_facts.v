@@ -1160,6 +1160,40 @@ eapply Rle_lt_trans.
   apply HNu; eapply le_trans; [apply Max.le_max_l|eassumption].
 Qed.
 
+(** * Limit of non negative terms *)
+
+(**********)
+Lemma Rseq_positive_limit : forall (An : nat -> R) (a : R),
+      (forall n, 0 <= An n) ->
+       Rseq_cv An a ->
+       0 <= a.
+Proof.
+intros An a Hpos Ha.
+apply Rnot_lt_le; intro Na.
+destruct (Ha (Ropp (Rdiv a 2))) as [N HN]; [fourier | ].
+pose proof (HN N (le_n N)).
+generalize dependent H.
+unfold R_dist, Rabs.
+pose proof Hpos N as Hposn.
+destruct (Rcase_abs (An N - a)); intro; fourier.
+Qed.
+
+(** * Compatibility of Rle with the limit *)
+
+(**********)
+Lemma Rseq_limit_comparizon : forall (An Bn : nat -> R) (a b : R),
+      (forall n, An n <= Bn n) ->
+       Rseq_cv An a -> Rseq_cv Bn b ->
+       a <= b.
+Proof.
+intros An Bn a b Hcomp Ha Hb.
+assert (0 <= b - a).
+ apply Rseq_positive_limit with (fun n => (Bn n - An n)%R).
+  intro n; pose proof Hcomp n; fourier.
+  apply Rseq_cv_minus_compat; auto.
+ fourier.
+Qed.
+
 End Rseq_cv_others.
 
 (* begin hide *)
