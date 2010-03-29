@@ -39,11 +39,6 @@ with recinject t := match t with
   | ?b ?a = ?c ?a => recinject (b = c)
   | ?b = ?c => solve_with_eq b c
 end.
-
-Ltac skip_INR :=
- repeat (try rewrite plus_INR; rewrite mult_INR);
- try reflexivity.
-
 (* end hide *)
 
 (* Better S_INR *)
@@ -258,9 +253,8 @@ unfold PI_tg.
 unfold pi_tg2.
 rewrite pow_1_odd.
 rewrite pow_1_even.
-assert (R1 : INR ((2 * (2 * n) + 1)%nat) = 2 * (2 * (INR n)) + 1) by skip_INR.
-assert (R2 : INR ((2 * S (2 * n) + 1)%nat) = 2 * (1 + (2 * (INR n))) + 1) by
-  (skip_INR; rewrite plus_1_S with (mult 2 n); skip_INR).
+assert (R1 : INR ((2 * (2 * n) + 1)%nat) = 2 * (2 * (INR n)) + 1) by INR_solve.
+assert (R2 : INR ((2 * S (2 * n) + 1)%nat) = 2 * (1 + (2 * (INR n))) + 1) by INR_solve.
 rewrite R1.
 rewrite R2.
 field.
@@ -1700,7 +1694,6 @@ intro n.
 unfold bntg, bnz.
 destruct n.
  simpl; field.
- 
  
  rewrite <- INR_IZR_INZ.
  field.
