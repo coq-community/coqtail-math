@@ -1,24 +1,31 @@
-body {
-	background-color: #FFFFCC;
-	font-family: Verdana, sans-serif;
-	font-size: 12px;
-}
+body { padding: 0px 0px;
+       margin: 0px 0px; 
+       background-color: white }
 
-#main li {
-/*display:inline; uncomment for compact view */
-padding-right:5px;
-}
+#page { display: block;
+        padding: 0px;
+        margin: 0px;
+        padding-bottom: 10px; }
 
-#main ul {
-	list-style-type: square;
-}
+#header { display: block;
+          position: relative;
+          padding: 0;
+          margin: 0;
+          vertical-align: middle;
+          border-bottom-style: solid;
+          border-width: thin }
+
+#header h1 { padding: 0; 
+             margin: 0;}
+
 
 /* Contenu */
 
 #main{ display: block;
        padding: 10px;
        overflow: hidden;
-}
+       font-size: 100%;
+       line-height: 100% }
 
 #main  a.idref:visited {color : #416DFF; text-decoration : none; }
 #main  a.idref:link {color : #416DFF; text-decoration : none; }
@@ -33,17 +40,18 @@ padding-right:5px;
 #main .keyword { color : #cf1d1d }
 #main { color: black }
 
-#main .section { 
-	font-size : 175%
-}
+#main .section { background-color:#90bdff;
+                 font-size : 175% }
 
-#main .doc { margin: 10px;
-             padding: 5px;
-				     line-height: 100%;
+#main .doc { margin: 0px;
+             padding: 10px;
+             font-family: sans-serif;
+             font-size: 100%;
+	     line-height: 100%;
              font-weight:bold;
-             background-color: #FFFF99; 
-             border: 1px solid #FFCC33;
-}
+             color: black;
+             background-color: #90bdff;
+             border-style: plain}
 
 .inlinecode { 
     display: inline;
@@ -60,13 +68,12 @@ padding-right:5px;
 
 /* Pied de page */
 
-#footer { font-size: 90%
-}
+#footer { font-size: 65%;
+          font-family: sans-serif; }
 
+#footer a:visited { color: blue; }
 #footer a:link { text-decoration: none; 
                  color: #888888; }
-
-/* mots clefs */
 
 .id { display: inline; }
 
@@ -120,4 +127,35 @@ padding-right:5px;
 
 .id[type="keyword"] { 
  color : #cf1d1d;
+/*     color: black; */
+}
+
+body {
+	background-color: #FFFFCC;
+	margin-left: 10px;
+}
+
+#main .doc {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 50px;
+  background: none;
+	background-color: #FFFF99;
+  border: 1px solid #FFCC33;
+  padding: 5px;
+}
+
+#main .section {
+	background: none;
+	margin: 10px;
+	color: #123456;
+	padding: 0px;
+}
+
+.code {
+  margin-left: 50px;
+}
+
+#footer {
+  margin-top: 50px;
 }
