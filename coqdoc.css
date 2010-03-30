@@ -1,0 +1,125 @@
+body {
+	background-color: #FFFFCC;
+	font-family: Verdana, sans-serif;
+	font-size: 12px;
+}
+
+#main li {
+/*display:inline; uncomment for compact view */
+padding-right:5px;
+}
+
+#main ul {
+	margin:10;
+	padding:10;
+	list-style-type: square;
+}
+
+/* Contenu */
+
+#main{ display: block;
+       padding: 10px;
+       overflow: hidden;
+}
+
+#main  a.idref:visited {color : #416DFF; text-decoration : none; }
+#main  a.idref:link {color : #416DFF; text-decoration : none; }
+#main  a.idref:hover {text-decoration : none; }
+#main  a.idref:active {text-decoration : none; }
+
+#main  a.modref:visited {color : #416DFF; text-decoration : none; }
+#main  a.modref:link {color : #416DFF; text-decoration : none; }
+#main  a.modref:hover {text-decoration : none; }
+#main  a.modref:active {text-decoration : none; }
+
+#main .keyword { color : #cf1d1d }
+#main { color: black }
+
+#main .section { 
+	font-size : 175%
+}
+
+#main .doc { margin: 10px;
+             padding: 5px;
+				     line-height: 100%;
+             font-weight:bold;
+             background-color: #FFFF99; 
+             border: 1px solid #FFCC33;
+}
+
+.inlinecode { 
+    display: inline;
+    font-family: monospace } 
+
+.comment { 
+    display: inline;
+    font-family: monospace;
+    color: red; } 
+
+.code { 
+    display: block;
+    font-family: monospace } 
+
+/* Pied de page */
+
+#footer { font-size: 90%
+}
+
+#footer a:link { text-decoration: none; 
+                 color: #888888; }
+
+/* mots clefs */
+
+.id { display: inline; }
+
+.id[type="constructor"] { 
+    color: rgb(60%,0%,0%);
+}
+
+.id[type="var"] { 
+    color: rgb(40%,0%,40%);
+}
+
+.id[type="variable"] { 
+    color: rgb(40%,0%,40%);
+}
+
+.id[type="definition"] { 
+    color: rgb(0%,40%,0%);
+}
+
+.id[type="abbreviation"] { 
+    color: rgb(0%,40%,0%);
+}
+
+.id[type="lemma"] { 
+    color: rgb(0%,40%,0%);
+}
+
+.id[type="instance"] { 
+    color: rgb(0%,40%,0%);
+}
+
+.id[type="projection"] { 
+    color: rgb(0%,40%,0%);
+}
+
+.id[type="method"] { 
+    color: rgb(0%,40%,0%);
+}
+
+.id[type="inductive"] { 
+    color: rgb(0%,0%,80%);
+}
+
+.id[type="record"] { 
+    color: rgb(0%,0%,80%);
+}
+
+.id[type="class"] { 
+    color: rgb(0%,0%,80%);
+}
+
+.id[type="keyword"] { 
+ color : #cf1d1d;
+}
