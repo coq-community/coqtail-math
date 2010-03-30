@@ -117,6 +117,26 @@ replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
 intuition.
 Qed.
 
+Lemma Rseq_cv_pos_infty_shift_compat Un : Rseq_cv_pos_infty (Rseq_shift Un) -> Rseq_cv_pos_infty Un.
+Proof.
+intros Un H M.
+destruct (H M) as [N Hu].
+exists (S N); intros n nSN.
+destruct n; [inversion nSN | ].
+replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
+intuition.
+Qed.
+
+Lemma Rseq_cv_neg_infty_shift_compat Un : Rseq_cv_neg_infty (Rseq_shift Un) -> Rseq_cv_neg_infty Un.
+Proof.
+intros Un H M.
+destruct (H M) as [N Hu].
+exists (S N); intros n nSN.
+destruct n; [inversion nSN | ].
+replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
+intuition.
+Qed.
+
 Lemma Rseq_cv_shift_compat_reciprocal Un l : Rseq_cv Un l -> Rseq_cv (Rseq_shift Un) l.
 Proof.
 intros Un l H eps epspos.
@@ -126,6 +146,27 @@ unfold Rseq_shift.
 apply Hu.
 intuition.
 Qed.
+
+Lemma Rseq_cv_pos_infty_shift_compat_reciprocal Un : Rseq_cv_pos_infty Un -> Rseq_cv_pos_infty (Rseq_shift Un).
+Proof.
+intros Un H M.
+destruct (H M) as [N Hu].
+exists N; intros n nSN.
+unfold Rseq_shift.
+apply Hu.
+intuition.
+Qed.
+
+Lemma Rseq_cv_neg_infty_shift_compat_reciprocal Un : Rseq_cv_neg_infty Un -> Rseq_cv_neg_infty (Rseq_shift Un).
+Proof.
+intros Un H M.
+destruct (H M) as [N Hu].
+exists N; intros n nSN.
+unfold Rseq_shift.
+apply Hu.
+intuition.
+Qed.
+
 
 (** * Results which need classical *)
 

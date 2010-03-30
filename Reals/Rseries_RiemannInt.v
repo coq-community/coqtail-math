@@ -31,7 +31,9 @@ Require Import Rintegral.
 
 Open Local Scope R_scope.
 
-Coercion INR : nat >-> R.
+Section Rseries_RiemannInt.
+
+Local Coercion INR : nat >-> R.
 
 (* begin hide *)
 Lemma Rle_minus' : forall a b, b <= a -> 0 <= a - b. intros; fourier. Save.
@@ -173,7 +175,7 @@ Proof.
 apply Rser_pos_bound_cv with (f 0).
  intro n.
  destruct (Rint_constant (f n) n (S n)) as [ pr int]. 
- replace ( f n * (S n -n)) with ( f n) in int by (rewrite S_INR; ring).
+ replace (f n * (S n -n)) with (f n) in int by (rewrite S_INR; ring).
  rewrite <- int.
  apply Rle_minus'.
  apply RiemannInt_P19; [intuition|].
@@ -190,7 +192,7 @@ apply Rser_pos_bound_cv with (f 0).
  apply sum_Rle.
   intros i ni.
   destruct (Rint_constant (f i) i (S i)) as [ pr int]. 
-   replace ( f i * (S i -i)) with ( f i) in int by (rewrite S_INR; ring).
+   replace (f i * (S i -i)) with (f i) in int by (rewrite S_INR; ring).
   rewrite <- int.
   rewrite <- RiemannInt_minus with _ _ _ _ _ _ (Rser_RiemannInt_link_general_term_integrable i); [|intuition].
   rewrite RiemannInt_P15.
@@ -336,4 +338,5 @@ Qed.
 
 End Applications.
 
+End Rseries_RiemannInt.
 

@@ -354,7 +354,7 @@ Qed.
 End De_Moivre.
 (* begin hide *)
 
-Lemma exp_pow x n : (exp x) ^ n = exp (x*n).
+Lemma exp_pow x n : (exp x) ^ n = exp (x* (INR n)).
 Proof.
 induction n.
  ring_simplify.
@@ -364,13 +364,17 @@ induction n.
  replace (S n)%R with (n+1)%nat by omega.
  rewrite plus_INR.
  replace (INR 1) with R1 by trivial.
- ring_simplify (x*(n + 1)).
+ ring_simplify (x * (INR n + 1)).
  rewrite exp_plus, IHn.
  auto with *.
 Qed.
 (* end hide *)
 
 (** Final result : Stirling approximation. *)
+
+Section Stirling.
+
+Local Coercion INR : nat >-> R.
 
 Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt (2 * PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
 Proof.
@@ -379,7 +383,7 @@ assert(l²/(2*PI) = 1) as Heq.
  eapply Rseq_cv_unique.
   apply Wallis_quotient_lim2.
   auto with *.
-  assert (Hrw : (fun n => l * n ^ n * exp (- n) * sqrt n) == (fun n => ((n / exp 1) ^ n * sqrt n * l))).
+  assert (Hrw : (fun n => l * n ^ n * exp (-n) * sqrt n) == (fun n => ((n / exp 1) ^ n * sqrt n * l))).
    intro n.
    rewrite exp_Ropp.
    replace (exp n) with (exp (R1*n)) by auto with *.
@@ -406,3 +410,5 @@ replace (l*l) with ((l² / (2*PI))* (2*PI)).
 rewrite Heq; ring.
 unfold Rdiv, Rsqr; field; auto with *.
 Qed.
+
+End Stirling.

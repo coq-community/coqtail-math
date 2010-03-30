@@ -26,6 +26,9 @@ Require Export Rseries.
 Require Export Rpser_facts.
 Require Import Fourier.
 Require Import Rintegral.
+Require Import Rseries_facts.
+Require Import Rseries_RiemannInt.
+Require Import Rsequence_subsequence.
 
 (* begin hide *)
 Lemma continuity_pt_eq_compat :
@@ -136,8 +139,42 @@ Proof.
   unfold Rseq_opp ;  simpl pow ;  ring.
   apply HN ; intuition.
 
-admit.
-
+ unfold Pser_abs, Pser.
+ rewrite Rabs_Ropp; rewrite Rabs_R1.
+ intros M Hconv.
+ pose (fun n => match n with O => 0 | S _ => / INR n end) as An.
+ apply Rseq_cv_not_infty with (sum_f_R0 An); split.
+  exists M.
+  refine (Rser_cv_eq_compat _ An M _ Hconv).
+  intros [|n].
+   simpl; rewrite Rabs_R0; ring.
+   
+   unfold Un, An.
+   rewrite Rabs_Ropp.
+   rewrite Rabs_pos_eq; [ | apply Rlt_le; apply Rinv_0_lt_compat; INR_solve].
+   rewrite pow1.
+   ring.
+ 
+ apply Rseq_cv_pos_infty_shift_compat.
+ eapply Rseq_cv_pos_infty_eq_compat.
+  2:eapply Rseq_equiv_cv_pos_infty_compat.
+   2:apply Rseq_equiv_sym.
+   2:apply harmonic_series_equiv.
+  
+  intro n; unfold Rseq_shift.
+   induction n.
+    simpl; ring.
+    
+    rewrite tech5.
+    rewrite IHn.
+    reflexivity.
+   
+   apply Rseq_subseq_cv_pos_infty_compat with (fun n => ln (INR n)).
+    exists (exist _ _ (extractor_Rseq_iter_S 2)).
+    unfold "·", is_extractor.
+    reflexivity.
+    
+    apply Rseq_ln_cv.
 Qed.
 
 Let sum x := weaksum_r Un 1 ln_minus_cv_radius x.

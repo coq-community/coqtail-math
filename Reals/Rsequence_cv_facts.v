@@ -1181,7 +1181,7 @@ Qed.
 (** * Compatibility of Rle with the limit *)
 
 (**********)
-Lemma Rseq_limit_comparizon : forall (An Bn : nat -> R) (a b : R),
+Lemma Rseq_limit_comparison : forall (An Bn : nat -> R) (a b : R),
       (forall n, An n <= Bn n) ->
        Rseq_cv An a -> Rseq_cv Bn b ->
        a <= b.

@@ -34,7 +34,9 @@ Require Import Rsequence_tactics.
 
 Open Local Scope R_scope.
 
-Coercion INR : nat >-> R.
+Section Wallis.
+
+Local Coercion INR : nat >-> R.
 
 Definition sin_n n := fun x => pow (sin x) n.
 
@@ -797,3 +799,5 @@ unfold Rdiv. rewrite Rminus_diag_eq.
 rewrite Rabs_R0. apply Heps.
 intuition.
 Qed.
+
+End Wallis.
