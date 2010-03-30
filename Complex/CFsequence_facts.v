@@ -531,3 +531,45 @@ unfold Boule in y_bd ; simpl in y_bd ; unfold C_dist in y_bd.
   apply Rlt_le_trans with r ; assumption.
  destruct (Rlt_irrefl _ Hf).
 Qed.
+
+Lemma CVU_continuity_boule :forall (fn : nat -> C -> C) (f : C -> C) (c : C) (r : posreal),
+       CFseq_cvu fn f c r ->
+       (forall n z, Boule c r z -> continuity_pt (fn n) z) ->
+       forall z, Boule c r z -> continuity_pt f z.
+Proof.
+intros fn f c r fn_cvu fn_cont z z_in.
+ intros eps eps_pos ; assert (eps_3_pos : 0 < (eps / 3)%R) by fourier ;
+ destruct (fn_cvu _ eps_3_pos) as [N HN] ;
+ destruct (fn_cont N z z_in _ eps_3_pos) as [delta1 [delta1_pos Hdelta]].
+ pose (delta := Rmin delta1 ((r - Cnorm (c - z))/2)) ;
+ assert (delta_pos : 0 < delta).
+  unfold delta ; apply Rmin_pos.
+  assumption.
+  unfold Rdiv ; apply Rlt_mult_inv_pos ; [apply Rlt_Rminus ; apply z_in | fourier].
+  exists delta ; split ; [assumption | intros x [_  Hx]].
+  simpl ; unfold C_dist.
+  apply Rle_lt_trans with (Cnorm (f x - fn N x) + Cnorm (fn N x - fn N z) + Cnorm (fn N z  - f z))%R.
+  replace (f x - f z)%C with ((f x - fn N x) + (fn N x - fn N z) + (fn N z - f z))%C by ring.
+  apply Rle_trans with (Cnorm ((f x - fn N x) + (fn N x - fn N z)) + Cnorm (fn N z - f z))%R ;
+  [| apply Rplus_le_compat_r] ;  apply Cnorm_triang.
+  apply Rlt_trans with (Cnorm (f x - fn N x) + Cnorm (fn N x - fn N z) + (eps/3))%R.
+  apply Rplus_lt_compat_l ; apply HN ; trivial.
+  apply Rlt_trans with (eps/3 + Cnorm (fn N x - fn N z) + eps / 3)%R.
+  do 2 apply Rplus_lt_compat_r ; rewrite Cnorm_minus_sym ; apply HN ; trivial.
+ unfold Boule in * ; simpl in * ; unfold C_dist in *.
+ replace (c - x)%C with ((c - z) + - (x - z))%C by ring.
+ apply Rle_lt_trans with (Cnorm (c - z) + Cnorm (- (x - z)))%R ;
+ [apply Cnorm_triang | rewrite Cnorm_opp].
+ apply Rlt_trans with (Cnorm (c - z) + delta)%R ;
+ [apply Rplus_lt_compat_l ; assumption |].
+ apply Rle_lt_trans with (Cnorm (c - z) +  (r - Cnorm (c - z))/2)%R ;
+ [apply Rplus_le_compat_l ; apply Rmin_r |].
+ field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
+ apply (middle_is_in_the_middle _ _ z_in).
+ destruct (Ceq_dec x z) as [eq | neq].
+ subst ; unfold Cminus ; rewrite Cadd_opp_r, Cnorm_C0 ; fourier.
+ apply Rlt_le_trans with (eps/3 + eps/3 + eps/3)%R ; [| right ; field].
+ apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l ; simpl in Hdelta ; apply Hdelta ; split.
+ unfold Cderiv.D_x, no_cond ; split ; auto.
+ apply Rlt_le_trans with delta ; [apply Hx | unfold delta ; apply Rmin_l].
+Qed.

@@ -38,6 +38,7 @@ Require Import Cnorm.
 Require Import Cprop_base.
 
 Require Import Canalysis_def.
+Require Import Canalysis_cont.
 Require Import Canalysis_deriv.
 Require Import Canalysis_basic_facts.
 
@@ -636,6 +637,8 @@ intros An r rho z z_bd.
  pose (r' := mkposreal midd midd_pos).
  assert (z_bd' : Cnorm z < midd).
   apply (middle_is_in_the_middle _ _ z_bd).
+ assert (r'_ub : r' < r).
+  apply (proj2 (middle_is_in_the_middle _ _ z_bd)).
 
  pose (fn := fun N z => sum_f_C0 (gt_Pser An z) N) ;
  pose (fn' := fun N z => Cpser_partial_sum_derive An N z) ;
@@ -654,14 +657,72 @@ intros An r rho z z_bd.
    assert (a_bd : Cnorm a < r).
     unfold Boule in a_in ; simpl in a_in ; unfold C_dist in a_in ;
     rewrite Cnorm_minus_sym, Cminus_0_r in a_in.
-    apply Rlt_trans with midd ; [assumption | apply (middle_is_in_the_middle _ _ z_bd)].
+    apply Rlt_trans with midd ; assumption.
   assert (H := weaksum_r_sums An r rho a a_bd).
   intros eps eps_pos ; destruct (H eps eps_pos) as [N HN] ; exists N ;
   intros n n_lb ; unfold fn, f ; simpl in HN ; unfold C_dist in HN.
   apply HN ; assumption.
 
- assert (fn'_cvu := CVN_CVU_boule (fun n z => gt_Pser (An_deriv An) z n) r').
+assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
+                    CFpartial_sum (fun n : nat => (fun (n0 : nat) (z0 : C) =>
+                        gt_Pser (An_deriv An) z0 n0) n z) N) l}).
+  intros a a_in.
+   exists (weaksum_r_derive An r rho a).
+   apply Pser_Cseqcv_link ; apply weaksum_r_derive_sums.
+   apply Rlt_trans with r' ; [unfold Boule in a_in ; simpl in a_in ; unfold C_dist in a_in ;
+   rewrite Cminus_0_l, Cnorm_opp in a_in ; apply a_in | assumption].
 
- assert (H := CFseq_cvu_derivable fn fn' f g z 0 r' z_in fn_deriv fn_cv).
+  assert (r''_comp : Rabs (middle r' r) < Rabs r).
+  rewrite Rabs_right ; [rewrite Rabs_right |].
+  apply (proj2 (middle_is_in_the_middle _ _ r'_ub)).
+  left ; assumption.
+  left ; apply middle_le_lt_pos.
+  left ; unfold r' ; apply middle_le_lt_pos ; [apply Cnorm_pos | assumption].
+  assumption.
 
-Admitted.
+  assert (rho_An' := Cv_radius_weak_derivable_compat An r rho (middle r' r) r''_comp).
+  assert (cvn_r : CVN_r (fun (n : nat) (z : C) => gt_Pser (An_deriv An) z n) r').
+   apply Cpser_abel2 with (middle r' r).
+   assumption.
+   apply (proj1 (middle_is_in_the_middle _ _  r'_ub)).
+ assert (fn'_cvu := CVN_CVU_boule (fun n z => gt_Pser (An_deriv An) z n) r' cv cvn_r).
+ assert (fn'_cvu2 : CFseq_cvu fn' g 0 r').
+ unfold fn', g.
+ intros eps eps_pos ; destruct (fn'_cvu _ eps_pos) as [N HN] ; exists (S N) ;
+ clear fn'_cvu fn_deriv rho_An' ; intros n y n_lb y_bd.
+ assert (H : n = S (pred n)) by intuition ; rewrite H ; clear H ; simpl.
+ unfold CFseq_cvu, SFL_interv, CFpartial_sum in HN.
+ assert (predn_lb : (N <= pred n)%nat) by intuition.
+ assert (Temp := HN (pred n) y predn_lb y_bd).
+ destruct (Rlt_le_dec (Cnorm (0 - y)) r') as [H | Hf].
+ destruct (cv y H) as [l Hl].
+ assert (Hrew : l = weaksum_r_derive An r rho y).
+  eapply Cseq_cv_unique ; [apply Hl |] ;
+  apply Pser_Cseqcv_link ; apply weaksum_r_derive_sums.
+  apply Rlt_trans with r' ; [rewrite Cminus_0_l, Cnorm_opp in H |] ;
+  assumption.
+  rewrite <- Hrew ; assumption.
+  clear - y_bd Hf ; assert (Hf2 : Cnorm (0 - y) < Cnorm (0 - y)) by
+  (apply Rlt_le_trans with r' ; assumption) ; elim (Rlt_irrefl _ Hf2).
+
+ assert (g_cont : (forall x : C, Boule 0 r' x -> continuity_pt g x)).
+  intros a a_in ; apply CVU_continuity_boule with fn' 0 r'.
+  apply fn'_cvu2.
+  intros N y y_in ; unfold fn'.
+  unfold Cpser_partial_sum_derive ; induction N.
+  apply continuity_pt_const ; unfold constant ; intros ; trivial.
+  destruct N ; simpl ; [unfold gt_Pser, An_deriv |].
+  intros eps eps_pos ; exists R1 ; split ; [apply Rlt_0_1 |] ; intros x [_ Hx] ;
+  simpl ; unfold C_dist ; repeat rewrite Cpow_0.
+  unfold Cminus ; rewrite Cadd_opp_r, Cnorm_C0 ; assumption.
+  apply continuity_pt_add ; [assumption |].
+  unfold gt_Pser.
+  apply continuity_pt_mult.
+  apply continuity_pt_const.
+  intros r1 r2 ; unfold An_deriv ; reflexivity.
+  apply derivable_continuous ; apply derivable_Cpow.
+  assumption.
+
+ assert (H := CFseq_cvu_derivable fn fn' f g z 0 r' z_in fn_deriv fn_cv fn'_cvu2 g_cont).
+ assumption.
+Qed.
