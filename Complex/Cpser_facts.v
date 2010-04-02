@@ -723,6 +723,5 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
   apply derivable_continuous ; apply derivable_Cpow.
   assumption.
 
- assert (H := CFseq_cvu_derivable fn fn' f g z 0 r' z_in fn_deriv fn_cv fn'_cvu2 g_cont).
- assumption.
+ exact (CFseq_cvu_derivable fn fn' f g z 0 r' z_in fn_deriv fn_cv fn'_cvu2 g_cont).
 Qed.

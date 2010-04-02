@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import MyRIneq.
 Require Import Ranalysis_def.
 Require Import Canalysis_def.
 Require Import Canalysis_diff.
@@ -475,6 +476,7 @@ Proof.
   elim H6; intros; assumption.
 Qed.
 
+
 (***********************************)
 (** * derivable_pt compatibility lemmas *)
 (***********************************)
@@ -679,12 +681,141 @@ Qed.
 
 Theorem MVT_Cre : forall (f : C -> C) (z h : C)
     (f_deriv : forall (t : R), interval 0 1 t -> derivable_pt f (z + t*h)), h <> 0 ->
-    { u : R & { u_in_I : interval 0 1 u | Cre ((f (z + h) - f z) / h) = Cre (derive_pt f (z + u * h) (f_deriv u u_in_I)) }}.
+    exists u : R, exists u_in_I : interval 0 1 u, Cre ((f (z + h) - f z) / h) = Cre (derive_pt f (z + u * h) (f_deriv u u_in_I)).
 Proof.
-Admitted.
+intros f z h f_deriv h_neq.
+ pose (H := fun (t : R) => Cre ((f (z + t*h) - f z) / h)).
+ assert (H0_0 : (H 0 = 0)%R).
+  unfold H ; unfold Cminus, Cdiv ; rewrite Cmult_0_l, Cadd_0_r, Cadd_opp_r, Cmult_0_l ; reflexivity.
+ assert (H1_d : H R1  = Cre ((f (z + h) - f z) / h)).
+  unfold H ; rewrite Cmult_1_l ; reflexivity.
+ assert (H_deriv : forall (t:R) (t_in : interval 0 1 t),
+                    Ranalysis1.derivable_pt_lim H t (Cre (derive_pt f (z + t * h) (f_deriv t t_in)))).
+  intros t t_in ; destruct (f_deriv t t_in) as [f' Hf'] ;
+  intros eps eps_pos ; destruct (Hf' _ eps_pos) as [delta Hdelta].
+  pose (delta' := (delta / Cnorm h)%R) ; assert (delta'_pos : 0 < delta').
+   unfold delta', Rdiv ; apply Rlt_mult_inv_pos ; [destruct delta | apply Cnorm_pos_lt] ;
+   assumption.
+  exists (mkposreal delta' delta'_pos)  ; intros u u_neq u_bd.
+
+ replace (H (t + u)%R - H t)%R with (Cre ((f (z + (t+u)%R * h) - f (z + t*h)) / h)).
+ apply Rle_lt_trans with (Rabs (Cre ((f (z + (t + u)%R * h) - f (z + t * h)) / h - u * f') / u)).
+ right ; apply Rabs_eq_compat.
+ rewrite <- Cre_minus_compat.
+ unfold Rminus, Rdiv ; rewrite Rmult_plus_distr_r.
+ rewrite Cre_mult_compat_l ; replace (- (u * Cre f') * / u)%R with (- Cre f')%R by (field ; assumption).
+ reflexivity.
+ apply Rle_lt_trans with (Rabs (Cre (u * ((f (z + (t + u)%R * h) - f (z + t * h)) / (u * h) - f')) / u)).
+ right ; unfold Rdiv ; apply Rabs_eq_compat ; apply Rmult_eq_compat_r ; apply Cre_eq_compat ;
+ field ; split ; [| apply IRC_neq_compat] ; assumption.
+ apply Rle_lt_trans with (Cnorm ((f (z + t * h + u * h) - f (z + t * h)) / (u * h) - f')).
+ rewrite Cre_mult_compat_l, Cadd_IRC_Rplus, Cmult_add_distr_r, <- Cadd_assoc.
+ replace (u * Cre ((f (z + t * h + u * h)%C - f (z + t * h)%C) / (u * h) - f') / u)%R with
+                    (Cre ((f (z + t * h + u * h) - f (z + t * h)) / (u * h) - f')) by (field ; assumption).
+  apply Cre_le_Cnorm.
+  apply Hdelta.
+  apply Cmult_integral_contrapositive_currified ; [apply IRC_neq_compat |] ; assumption.
+  apply Rlt_le_trans with (delta' * Cnorm h)%R.
+  rewrite Cnorm_Cmult ; apply Rmult_lt_compat_r ; [apply Cnorm_pos_lt ; assumption |] ;
+  rewrite Cnorm_IRC_Rabs ; apply u_bd.
+  unfold delta' ; right ; field ; apply Cnorm_no_R0 ; assumption.
+  unfold H, Cdiv ; rewrite Cre_minus_compat ; apply Cre_eq_compat ; field ; assumption.
+
+ assert (H_deriv2 : derivable_open_interval H 0 1).
+  intros a a_in ; exists (Cre (derive_pt f (z + a * h) (f_deriv a (open_interval_interval _ _ _ a_in)))) ;
+  apply H_deriv ; apply open_interval_interval ; assumption.
+
+ assert (id_deriv : derivable_open_interval Ranalysis1.id 0 1).
+  intros a a_in ; apply Ranalysis1.derivable_pt_id.
+
+ assert (H_cont : forall c : R, 0 <= c <= 1 -> Ranalysis1.continuity_pt H c).
+  apply derivable_continuous_interval ; intros a a_in ;
+  exists (Cre (derive_pt f (z + a * h) (f_deriv a a_in))) ;
+  apply H_deriv ; assumption.
+ assert (id_cont : forall c : R, 0 <= c <= 1 -> Ranalysis1.continuity_pt Ranalysis1.id c).
+  intros ; apply Ranalysis1.derivable_continuous ; apply Ranalysis1.derivable_id.
+
+  destruct (MVT H (Ranalysis1.id) 0 1 H_deriv2 id_deriv Rlt_0_1 H_cont id_cont) as [c [c_in Hc]] ;
+  exists c ; exists (open_interval_interval _ _ _ c_in).
+  assert (Hrew := Rminus_0_r (H R1)) ; rewrite <- H0_0 in Hrew.
+  rewrite <- H1_d, <- Hrew ; clear Hrew.
+
+  rewrite (Ranalysis1.derive_pt_eq_0 _ _ _ (H_deriv2 c c_in)
+  (H_deriv c (open_interval_interval _ _ _ c_in))) in Hc.
+  unfold Ranalysis1.id in Hc ; rewrite Rminus_0_r, Rmult_1_l in Hc.
+  rewrite Hc.
+  
+  fold Ranalysis1.id ; rewrite (Ranalysis1.derive_pt_eq_0 _ _ _ (id_deriv c c_in)
+  (Ranalysis1.derivable_pt_lim_id c)), Rmult_1_r ; reflexivity.
+Qed.
+
 
 Theorem MVT_Cim : forall (f : C -> C) (z h : C)
     (f_deriv : forall (t : R), interval 0 1 t -> derivable_pt f (z + t*h)), h <> 0 ->
-    { u : R & { u_in_I : interval 0 1 u  | Cim ((f (z + h) - f z) / h) = Cim (derive_pt f (z + u * h) (f_deriv u u_in_I)) }}.
+    exists u : R, exists u_in_I : interval 0 1 u, Cim ((f (z + h) - f z) / h) = Cim (derive_pt f (z + u * h) (f_deriv u u_in_I)).
 Proof.
-Admitted.
+intros f z h f_deriv h_neq.
+ pose (H := fun (t : R) => Cim ((f (z + t*h) - f z) / h)).
+ assert (H0_0 : (H 0 = 0)%R).
+  unfold H ; unfold Cminus, Cdiv ; rewrite Cmult_0_l, Cadd_0_r, Cadd_opp_r, Cmult_0_l ; reflexivity.
+ assert (H1_d : H R1  = Cim ((f (z + h) - f z) / h)).
+  unfold H ; rewrite Cmult_1_l ; reflexivity.
+ assert (H_deriv : forall (t:R) (t_in : interval 0 1 t),
+                    Ranalysis1.derivable_pt_lim H t (Cim (derive_pt f (z + t * h) (f_deriv t t_in)))).
+  intros t t_in ; destruct (f_deriv t t_in) as [f' Hf'] ;
+  intros eps eps_pos ; destruct (Hf' _ eps_pos) as [delta Hdelta].
+  pose (delta' := (delta / Cnorm h)%R) ; assert (delta'_pos : 0 < delta').
+   unfold delta', Rdiv ; apply Rlt_mult_inv_pos ; [destruct delta | apply Cnorm_pos_lt] ;
+   assumption.
+  exists (mkposreal delta' delta'_pos)  ; intros u u_neq u_bd.
+
+ replace (H (t + u)%R - H t)%R with (Cim ((f (z + (t+u)%R * h) - f (z + t*h)) / h)).
+ apply Rle_lt_trans with (Rabs (Cim ((f (z + (t + u)%R * h) - f (z + t * h)) / h - u * f') / u)).
+ right ; apply Rabs_eq_compat.
+ rewrite <- Cim_minus_compat.
+ unfold Rminus, Rdiv ; rewrite Rmult_plus_distr_r.
+ rewrite Cim_mult_compat_l ; replace (- (u * Cim f') * / u)%R with (- Cim f')%R by (field ; assumption).
+ reflexivity.
+ apply Rle_lt_trans with (Rabs (Cim (u * ((f (z + (t + u)%R * h) - f (z + t * h)) / (u * h) - f')) / u)).
+ right ; unfold Rdiv ; apply Rabs_eq_compat ; apply Rmult_eq_compat_r ; apply Cim_eq_compat ;
+ field ; split ; [| apply IRC_neq_compat] ; assumption.
+ apply Rle_lt_trans with (Cnorm ((f (z + t * h + u * h) - f (z + t * h)) / (u * h) - f')).
+ rewrite Cim_mult_compat_l, Cadd_IRC_Rplus, Cmult_add_distr_r, <- Cadd_assoc.
+ replace (u * Cim ((f (z + t * h + u * h)%C - f (z + t * h)%C) / (u * h) - f') / u)%R with
+                    (Cim ((f (z + t * h + u * h) - f (z + t * h)) / (u * h) - f')) by (field ; assumption).
+  apply Cim_le_Cnorm.
+  apply Hdelta.
+  apply Cmult_integral_contrapositive_currified ; [apply IRC_neq_compat |] ; assumption.
+  apply Rlt_le_trans with (delta' * Cnorm h)%R.
+  rewrite Cnorm_Cmult ; apply Rmult_lt_compat_r ; [apply Cnorm_pos_lt ; assumption |] ;
+  rewrite Cnorm_IRC_Rabs ; apply u_bd.
+  unfold delta' ; right ; field ; apply Cnorm_no_R0 ; assumption.
+  unfold H, Cdiv ; rewrite Cim_minus_compat ; apply Cim_eq_compat ; field ; assumption.
+
+ assert (H_deriv2 : derivable_open_interval H 0 1).
+  intros a a_in ; exists (Cim (derive_pt f (z + a * h) (f_deriv a (open_interval_interval _ _ _ a_in)))) ;
+  apply H_deriv ; apply open_interval_interval ; assumption.
+
+ assert (id_deriv : derivable_open_interval Ranalysis1.id 0 1).
+  intros a a_in ; apply Ranalysis1.derivable_pt_id.
+
+ assert (H_cont : forall c : R, 0 <= c <= 1 -> Ranalysis1.continuity_pt H c).
+  apply derivable_continuous_interval ; intros a a_in ;
+  exists (Cim (derive_pt f (z + a * h) (f_deriv a a_in))) ;
+  apply H_deriv ; assumption.
+ assert (id_cont : forall c : R, 0 <= c <= 1 -> Ranalysis1.continuity_pt Ranalysis1.id c).
+  intros ; apply Ranalysis1.derivable_continuous ; apply Ranalysis1.derivable_id.
+
+  destruct (MVT H (Ranalysis1.id) 0 1 H_deriv2 id_deriv Rlt_0_1 H_cont id_cont) as [c [c_in Hc]] ;
+  exists c ; exists (open_interval_interval _ _ _ c_in).
+  assert (Hrew := Rminus_0_r (H R1)) ; rewrite <- H0_0 in Hrew.
+  rewrite <- H1_d, <- Hrew ; clear Hrew.
+
+  rewrite (Ranalysis1.derive_pt_eq_0 _ _ _ (H_deriv2 c c_in)
+  (H_deriv c (open_interval_interval _ _ _ c_in))) in Hc.
+  unfold Ranalysis1.id in Hc ; rewrite Rminus_0_r, Rmult_1_l in Hc.
+  rewrite Hc.
+  
+  fold Ranalysis1.id ; rewrite (Ranalysis1.derive_pt_eq_0 _ _ _ (id_deriv c c_in)
+  (Ranalysis1.derivable_pt_lim_id c)), Rmult_1_r ; reflexivity.
+Qed.
