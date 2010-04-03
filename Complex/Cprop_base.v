@@ -954,6 +954,12 @@ CusingR_f ; assumption.
 Qed.
 Hint Resolve Cdiv_IRC_Rdiv : complex.
 
+Lemma Cinv_IRC_Rinv : forall (b : R), b <> 0%R -> IRC (/ b) = / b.
+Proof.
+intros.
+CusingR_f ; assumption.
+Qed.
+Hint Resolve Cinv_IRC_Rinv : complex.
 (** * Compatibility of Cconj with Cmodcarre*)
 
 Lemma Cmod_conj_compat : forall z, Cre (z * Cconj z) = ((Cnorm z) ^ 2)%R

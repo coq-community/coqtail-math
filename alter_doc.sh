@@ -28,21 +28,16 @@ if [ -f index.html ]
 then
 	rm index.html
 	
-	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n<link href="index.css" rel="stylesheet" type="text/css"/>\n<title>Documentation | Coqtail (r' > list
-
+	echo '<h2>Documentation (r' >> list
 	echo $rev >> list
-	echo ')</title>\n</head>\n<body>\n<h1>Documentation (r' >> list
-	echo $rev >> list
-	echo ')</h1><div id="main">' >> list
+	echo ')</h2><div id="main">' >> list
 	for i in `ls *.html | sed 's/\..*//' | uniq`
 	do
 		echo "<h2 class=\"doc\">$i</h2>" >> list
 		echo "<ul>" >> list
-		ls $i*.html | sed 's/^\(.*\)\.\(.*\).html$/<li><a href="\1.\2.html">\2<\/a><\/li>/' >> list
+		ls $i*.html | sed 's/^\(.*\)\.\(.*\).html$/<li><a href="main.php?page=3&amp;doc=\1.\2">\2<\/a><\/li>/' >> list
 		echo "</ul>" >> list
 	done
-	echo '\n</div>\n</body>\n</html>' >> list
 	mv list index.html
 	cp ../coqdoc.css .
 	cp ../index.css .

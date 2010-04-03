@@ -85,6 +85,24 @@ trivial.
 apply Cv_radius_weak_0.
 Qed.
 
+Lemma Cv_radius_weak_Cnorm_compat_rev : forall (An : nat -> C) (r : R), 
+       Cv_radius_weak (fun n => Cnorm (An n)) r -> Cv_radius_weak An r.
+Proof.
+intros An r [M HM] ; exists M.
+ intros x [n Hn] ; rewrite Hn.
+ unfold gt_norm_Pser ; rewrite Cnorm_Cmult, <- Cnorm_invol, <- Cnorm_Cmult ;
+ apply HM ; exists n ; reflexivity.
+Qed.
+
+Lemma Cv_radius_weak_Cnorm_compat_rev2 : forall (An : nat -> C) (r : R), 
+       Rpser_def.Cv_radius_weak (fun n => Cnorm (An n)) r -> Cv_radius_weak An r.
+Proof.
+intros An r [M HM] ; apply Cv_radius_weak_Cnorm_compat_rev ;
+ exists M ; intros x [n Hn] ; rewrite Hn ; unfold gt_norm_Pser.
+ rewrite Cnorm_Cmult, IRC_pow_compat ; do 2 rewrite Cnorm_IRC_Rabs ;
+ rewrite <- Rabs_mult  ; apply HM ; exists n ; reflexivity.
+Qed.  
+
 Lemma Cv_radius_weak_Cnorm_compat : forall (An : nat -> C) (r : R), 
        Cv_radius_weak An r -> Cv_radius_weak (fun n => Cnorm (An n)) r.
 Proof.
