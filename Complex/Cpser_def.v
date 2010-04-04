@@ -316,3 +316,26 @@ Lemma Pser_Cseqcv_link (An : nat -> C) (x l : C) :
 Proof.
 intros An x l H ; apply H.
 Qed.
+
+Lemma Pser_unique : forall (An : nat -> C) (x l1 l2 : C),
+          Pser An x l1 -> Pser An x l2 -> l1 = l2.
+Proof.
+intros An x l1 l2 Hl1 Hl2.
+ assert (T1 := Pser_Cseqcv_link _ _ _ Hl1) ;
+ assert (T2 := Pser_Cseqcv_link _ _ _ Hl2) ;
+ eapply Cseq_cv_unique ; eassumption.
+Qed.
+
+Lemma Pser_unique_extentionality : forall (An Bn : nat -> C) (x l1 l2 : C),
+	(forall n, An n = Bn n) ->
+        Pser An x l1 -> Pser Bn x l2 -> l1 = l2.
+Proof.
+intros An Bn x l1 l2 An_eq_Bn Hl1 Hl2.
+ assert (T1 := Pser_Cseqcv_link _ _ _ Hl1) ;
+ assert (T2 := Pser_Cseqcv_link _ _ _ Hl2).
+ assert (T3 : forall (n : nat), sum_f_C0 (fun n => (gt_Pser An x) n) n
+                  = sum_f_C0 (fun n => (gt_Pser Bn x) n) n).
+  intro n ; apply (sum_f_C0_eq_seq) ; intros ; unfold gt_Pser ; rewrite An_eq_Bn ; reflexivity.
+ assert (T4 := Cseq_cv_eq_compat _ _ _ T3 T1).
+ eapply Cseq_cv_unique ; eassumption.
+Qed.

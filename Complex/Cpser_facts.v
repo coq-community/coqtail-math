@@ -188,6 +188,25 @@ intros An r Pr x x_bd.
  apply False_ind ; fourier.
 Qed.
 
+Lemma weaksum_r_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (x : C),
+     Cnorm x < r -> weaksum_r An r Pr1 x = weaksum_r An r Pr2 x.
+Proof.
+intros An r Pr1 Pr2 x x_bd ;
+ assert (T1 := weaksum_r_sums _ _ Pr1 _ x_bd) ;
+ assert (T2 := weaksum_r_sums _ _ Pr2 _ x_bd) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma weaksum_r_unique_strong : forall (An : nat -> C) (r1 r2 : R) (Pr1 : Cv_radius_weak An r1)
+     (Pr2 : Cv_radius_weak An r2) (x : C), Cnorm x < r1 -> Cnorm x < r2 ->
+     weaksum_r An r1 Pr1 x = weaksum_r An r2 Pr2 x.
+Proof.
+intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2.
+  assert (T1 := weaksum_r_sums _ _ Pr1 _ x_bd1) ;
+  assert (T2 := weaksum_r_sums _ _ Pr2 _ x_bd2) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
 Definition sum_r (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) : C -> C.
 Proof.
 intros An r Pr x.
@@ -212,6 +231,25 @@ intros An r Pr x x_ub.
   apply False_ind ; fourier.
 Qed.
 
+Lemma sum_r_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : finite_cv_radius An r) (x : C),
+     Cnorm x < r -> sum_r An r Pr1 x = sum_r An r Pr2 x.
+Proof.
+intros An r Pr1 Pr2 x x_bd ;
+ assert (T1 := sum_r_sums _ _ Pr1 _ x_bd) ;
+ assert (T2 := sum_r_sums _ _ Pr2 _ x_bd) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_r_unique_strong : forall (An : nat -> C) (r1 r2 : R) (Pr1 : finite_cv_radius An r1)
+     (Pr2 : finite_cv_radius An r2) (x : C), Cnorm x < r1 -> Cnorm x < r2 ->
+     sum_r An r1 Pr1 x = sum_r An r2 Pr2 x.
+Proof.
+intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2 ;
+ assert (T1 := sum_r_sums _ _ Pr1 _ x_bd1) ;
+ assert (T2 := sum_r_sums _ _ Pr2 _ x_bd2) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
 Definition sum (An : nat -> C) (Pr : infinite_cv_radius An) : C -> C.
 Proof.
 intros An Pr r.
@@ -223,6 +261,15 @@ Lemma sum_sums : forall  (An : nat -> C) (Pr : infinite_cv_radius An),
 Proof.
 intros An Pr x.
  apply weaksum_r_sums ; intuition.
+Qed.
+
+Lemma sum_unique : forall (An : nat -> C) (Pr1 Pr2 : infinite_cv_radius An) (x : C),
+      sum An Pr1 x = sum An Pr2 x.
+Proof.
+intros An Pr1 Pr2 x ;
+ assert (T1 := sum_sums  _ Pr1 x) ;
+ assert (T2 := sum_sums  _ Pr2 x) ;
+ eapply Pser_unique ; eassumption.
 Qed.
    
 (** Abel's lemma : Normal convergence of the power serie *)
@@ -615,6 +662,24 @@ intros An r Rho z ; case (Rlt_le_dec (Cnorm z) r) ; intro z_bd.
 apply C0.
 Defined.
 
+Definition sum_r_derive (An : nat -> C) (r : R) (Rho : finite_cv_radius An r) (z : C) : C.
+Proof.
+intros An r Rho z.
+ destruct (Rlt_le_dec (Cnorm z) r) as [z_bd | z_gt].
+ assert (H : 0 <= middle (Cnorm z) r < r).
+  split.
+  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Cnorm z) ; [| assumption]] ;
+  apply Cnorm_pos.
+  apply (middle_is_in_the_middle _ _ z_bd).
+ apply (weaksum_r_derive _ _ (proj1 Rho (middle (Cnorm z) r) H) z).
+ apply 0.
+Defined.
+
+Definition sum_derive (An : nat -> C) (Rho : infinite_cv_radius An) (z : C) : C.
+Proof.
+ intros An Rho z ; apply (weaksum_r_derive _ _ (Rho (Cnorm z + 1)%R) z).
+Defined.
+
 Lemma weaksum_r_derive_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (z : C),
       Cnorm z < r -> Pser (An_deriv An) z (weaksum_r_derive An r Pr z).
 Proof.
@@ -627,7 +692,50 @@ intros An r Pr z z_bd.
  elim (Rlt_irrefl _ H).
 Qed.
 
-Lemma derivable_pt_lim_weaksum (An:nat->C) (r:R) (Pr : Cv_radius_weak An r) : forall z,
+Lemma weaksum_r_derive_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (z : C),
+      Cnorm z < r -> weaksum_r_derive An r Pr1 z = weaksum_r_derive An r Pr2 z .
+Proof.
+intros An r Pr1 Pr2 z z_bd ;
+ assert (T1 := weaksum_r_derive_sums _ _ Pr1 _ z_bd) ;
+ assert (T2 := weaksum_r_derive_sums _ _ Pr2 _ z_bd).
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_r_derive_sums : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) (z : C),
+      Cnorm z < r -> Pser (An_deriv An) z (sum_r_derive An r Pr z).
+Proof.
+intros An r Pr z z_bd ; unfold sum_r_derive ;
+ destruct (Rlt_le_dec (Cnorm z) r) as [z_bd2 | Hf].
+ apply weaksum_r_derive_sums ; apply (middle_is_in_the_middle _ _ z_bd).
+ assert (F : r < r) by (apply Rle_lt_trans with (Cnorm z) ; assumption) ;
+ destruct (Rlt_irrefl _ F).
+Qed.
+
+Lemma sum_r_derive_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : finite_cv_radius An r) (z : C),
+      Cnorm z < r -> sum_r_derive An r Pr1 z = sum_r_derive An r Pr2 z .
+Proof.
+intros An r Pr1 Pr2 z z_bd ;
+ assert (T1 := sum_r_derive_sums _ _ Pr1 _ z_bd) ;
+ assert (T2 := sum_r_derive_sums _ _ Pr2 _ z_bd).
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_derive_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An) (z : C),
+      Pser (An_deriv An) z (sum_derive An Pr z).
+Proof.
+intros An Pr z ; unfold sum_derive ; apply weaksum_r_derive_sums ; intuition.
+Qed.
+
+Lemma sum_derive_unique : forall (An : nat -> C) (Pr1 Pr2 : infinite_cv_radius An) (z : C),
+      sum_derive An Pr1 z = sum_derive An Pr2 z .
+Proof.
+intros An Pr1 Pr2 z ;
+ assert (T1 := sum_derive_sums _ Pr1 z) ;
+ assert (T2 := sum_derive_sums _ Pr2 z).
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma derivable_pt_lim_weaksum_r (An:nat->C) (r:R) (Pr : Cv_radius_weak An r) : forall z,
       Cnorm z < r -> derivable_pt_lim (weaksum_r An r Pr) z (weaksum_r_derive An r Pr z).
 Proof.
 intros An r rho z z_bd.
@@ -724,4 +832,97 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
   assumption.
 
  exact (CFseq_cvu_derivable fn fn' f g z 0 r' z_in fn_deriv fn_cv fn'_cvu2 g_cont).
+Qed.
+
+Lemma derivable_pt_lim_sum_r (An:nat->C) (r:R) (Pr : finite_cv_radius An r) : forall z,
+      Cnorm z < r -> derivable_pt_lim (sum_r An r Pr) z (sum_r_derive An r Pr z).
+Proof.
+intros An r Pr z z_bd eps eps_pos. 
+ assert (H : 0 <= middle (Cnorm z) r < r).
+  split.
+  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Cnorm z) ; [| assumption]] ;
+  apply Cnorm_pos.
+  apply (middle_is_in_the_middle _ _ z_bd).
+ destruct (derivable_pt_lim_weaksum_r _ _ (proj1 Pr (middle (Cnorm z) r) H) _
+ (proj1 (middle_is_in_the_middle _ _ z_bd)) _ eps_pos) as [delta Hdelta].
+ pose (delta' := Rmin delta (((middle (Cnorm z) r) - Cnorm z) / 2)%R) ;
+ assert (delta'_pos : 0 < delta').
+  apply Rmin_pos.
+   apply delta.
+   apply ub_lt_2_pos with (middle (Cnorm z) (middle (Cnorm z) r)) ;
+   apply (middle_is_in_the_middle _ _ (proj1 (middle_is_in_the_middle _ _ z_bd))).
+  exists (mkposreal delta' delta'_pos) ; intros h h_neq h_bd.
+
+ replace (sum_r An r Pr (z + h)) with (weaksum_r An (middle (Cnorm z) r)
+               (proj1 Pr (middle (Cnorm z) r) H) (z + h)).
+ replace (sum_r An r Pr z) with (weaksum_r An (middle (Cnorm z) r)
+               (proj1 Pr (middle (Cnorm z) r) H) z).
+ replace (sum_r_derive An r Pr z) with (weaksum_r_derive An (middle (Cnorm z) r)
+              (proj1 Pr (middle (Cnorm z) r) H) z).
+ apply Hdelta ; [assumption | apply Rlt_le_trans with delta'] ;
+ [assumption | apply Rmin_l].
+
+ unfold sum_r_derive ; destruct (Rlt_le_dec (Cnorm z) r) as [z_bd2 | Hf].
+ apply weaksum_r_derive_unique ; apply (middle_is_in_the_middle _ _ z_bd).
+ assert (F : r < r) by (apply Rle_lt_trans with (Cnorm z) ; assumption) ;
+ destruct (Rlt_irrefl _ F).
+
+ unfold sum_r ; destruct (Rlt_le_dec (Cnorm z) r) as [z_bd2 | Hf].
+ apply weaksum_r_unique ; apply (middle_is_in_the_middle _ _ z_bd).
+ assert (F : r < r) by (apply Rle_lt_trans with (Cnorm z) ; assumption) ;
+ destruct (Rlt_irrefl _ F).
+
+ unfold sum_r ; destruct (Rlt_le_dec (Cnorm (z + h)) r) as [z_bd2 | Hf].
+ apply weaksum_r_unique_strong.
+ apply Rle_lt_trans with (Cnorm z + Cnorm h)%R.
+ apply Cnorm_triang.
+ apply Rlt_le_trans with (Cnorm z + ((middle (Cnorm z) r - Cnorm z) / 2))%R.
+ apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ; [assumption | apply Rmin_r].
+ unfold Rminus ; field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
+ left ; do 2 eapply middle_is_in_the_middle ; assumption.
+ eapply middle_is_in_the_middle ; assumption.
+ assert (F : r < r).
+  apply Rlt_trans with (middle (Cnorm z) r).
+  apply Rle_lt_trans with (Cnorm (z + h)).
+  assumption.
+  apply Rle_lt_trans with (Cnorm z + Cnorm h)%R.
+  apply Cnorm_triang.
+  apply Rlt_trans with (Cnorm z + ((middle (Cnorm z) r - Cnorm z) / 2))%R.
+  apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ; [intuition | apply Rmin_r].
+  unfold middle ; field_simplify.
+  apply Rlt_le_trans with ((2 * Cnorm z + r + r) / 4)%R.
+  unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |].
+  apply Rplus_lt_compat_r.
+  apply Rle_lt_trans with (2 * Cnorm z + Cnorm z)%R.
+  right ; ring.
+  apply Rplus_lt_compat_l ; assumption.
+  right ; field.
+  eapply middle_is_in_the_middle ; assumption.
+  destruct (Rlt_irrefl _ F).
+Qed.
+
+Lemma derivable_pt_lim_sum (An:nat->C) (Pr : infinite_cv_radius An) : forall z,
+      derivable_pt_lim (sum An Pr) z (sum_derive An Pr z).
+Proof.
+intros An Pr z eps eps_pos. 
+ assert (H : 0 <= Cnorm z < Cnorm z + 1).
+  split ; [apply Cnorm_pos |] ; intuition.
+ destruct (derivable_pt_lim_weaksum_r _ _ (Pr (Cnorm z + 1)%R) z (proj2 H) _ eps_pos) as [delta Hdelta].
+
+ pose (delta' := Rmin delta 1) ; assert (delta'_pos : 0 < delta').
+  apply Rmin_pos ; [apply delta | apply Rlt_0_1].
+ exists (mkposreal _ delta'_pos) ; intros h h_neq h_bd.
+
+ replace (sum An Pr (z + h)) with (weaksum_r An (Cnorm z + 1) (Pr (Cnorm z + 1)%R) (z + h)).
+ apply Hdelta.
+ assumption.
+ apply Rlt_le_trans with delta' ; [assumption | apply Rmin_l].
+
+ unfold sum.
+ apply weaksum_r_unique_strong.
+ apply Rle_lt_trans with (Cnorm z + Cnorm h)%R.
+ apply Cnorm_triang.
+ apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ;
+ [intuition | apply Rmin_r].
+ intuition.
 Qed.

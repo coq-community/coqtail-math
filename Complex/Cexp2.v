@@ -32,6 +32,8 @@ Require Import Cpser_facts.
 
 Open Scope C_scope.
 
+(** * Definition and manipulation of the general term of the power serie of the exponential *)
+
 Definition exp_seq (n : nat) := / INC (fact n).
 
 Lemma exp_seq_neq : forall n : nat, exp_seq n <> 0.
@@ -50,6 +52,17 @@ intros n ; unfold exp_seq.
    [reflexivity |] | |] |] ;
    apply not_0_INC ; auto ;  apply fact_neq_0.
 Qed.
+
+Lemma Deriv_exp_seq_simpl : forall n, An_deriv exp_seq n = exp_seq n.
+Proof.
+intro n ; unfold exp_seq, An_deriv.
+ replace (fact (S n))%nat with ((S n) * fact n)%nat by reflexivity.
+ rewrite mult_INC, Cinv_mult_distr, <- Cmult_assoc, Cinv_r, Cmult_1_l ;
+ [reflexivity | | |] ; replace C0 with (INC O) by reflexivity ; apply not_INC ;
+ try apply fact_neq_0 ; intuition.
+Qed.
+
+(** * This power serie has a radius of convergence that is infinite *)
 
 Lemma exp_infinite_cv_radius : infinite_cv_radius exp_seq.
 Proof.
@@ -78,3 +91,19 @@ unfold M ; rewrite Rinv_involutive ; [| apply Rgt_not_eq ; apply Rplus_le_lt_0_c
 Qed.
 
 Definition Cexp (z : C) := sum  _ exp_infinite_cv_radius z.
+
+Definition Deriv_Cexp (z : C) := sum_derive _ exp_infinite_cv_radius z.
+
+
+(** * The exponential is its own derivative *)
+
+Lemma Cexp_eq_Deriv_Cexp : forall z, Cexp z = Deriv_Cexp z.
+Proof.
+intro z.
+ assert (T1 := sum_sums _ exp_infinite_cv_radius z) ;
+ assert (T2 := sum_derive_sums _ exp_infinite_cv_radius z).
+ symmetry ; eapply Pser_unique_extentionality.
+ apply Deriv_exp_seq_simpl.
+ apply T2.
+ apply T1.
+Qed.
