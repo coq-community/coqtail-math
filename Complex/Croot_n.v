@@ -108,8 +108,8 @@ rewrite <- Rsqr_abs. replace (Rsqr a) with (a * a)%R by intuition.
 replace (a * a)%R with ((a * a) + 0)%R by intuition. 
 rewrite Rplus_assoc. apply Rplus_le_compat_l. 
 replace (0 + b * b)%R with (Rsqr b) by intuition.
-intuition. apply (Cmodcarre_pos a b). apply sqrt_positivity.
-apply (Cmodcarre_pos a b).
+intuition. apply (Cnorm_sqr_pos a b). apply sqrt_positivity.
+apply (Cnorm_sqr_pos a b).
 Qed.
 
 Lemma Croot_sqrt_pos_plus : forall a b : R, 0 <= (sqrt (a * a + b * b) + a) / 2.
@@ -125,8 +125,8 @@ rewrite <- Rsqr_abs. replace (Rsqr a) with (a * a)%R by intuition.
 replace (a * a)%R with ((a * a) + 0)%R by intuition. 
 rewrite Rplus_assoc. apply Rplus_le_compat_l. 
 replace (0 + b * b)%R with (Rsqr b) by intuition.
-intuition. apply (Cmodcarre_pos a b). apply sqrt_positivity.
-apply (Cmodcarre_pos a b).
+intuition. apply (Cnorm_sqr_pos a b). apply sqrt_positivity.
+apply (Cnorm_sqr_pos a b).
 Qed.
 
 Lemma sqrt_square2 : forall a : R, (a >= 0 -> (sqrt a) ^ 2 = a)%R.
@@ -157,7 +157,7 @@ replace (sqrt (/2 * /2))%R with (/2)%R by (rewrite sqrt_square ; try reflexivity
 replace (b ^ 2)%R with (-b * -b)%R by ring. rewrite sqrt_square. 
 field. fourier. 
 replace (b ^ 2)%R with (Rsqr b) by (simpl ; rewrite Rmult_1_r ; intuition).
-intuition. fourier. apply Rle_ge . apply (Cmodcarre_pos a b).
+intuition. fourier. apply Rle_ge . apply (Cnorm_sqr_pos a b).
 apply Croot_sqrt_pos_plus. apply Croot_sqrt_pos.
 (* case b >= 0 *)
 exists (sqrt ( (sqrt ( a * a + b * b) + a)/2),
@@ -178,7 +178,7 @@ replace (sqrt (/2 * /2))%R with (/2)%R by (rewrite sqrt_square ; try reflexivity
 replace (b ^ 2)%R with (b * b)%R by ring. rewrite sqrt_square. 
 field. fourier.  
 replace (b ^ 2)%R with (Rsqr b) by (simpl ; rewrite Rmult_1_r ; intuition).
-intuition. fourier. apply Rle_ge . apply (Cmodcarre_pos a b).
+intuition. fourier. apply Rle_ge . apply (Cnorm_sqr_pos a b).
 apply Croot_sqrt_pos_plus. apply Croot_sqrt_pos.
 Qed.
 
@@ -193,7 +193,7 @@ simpl. apply H. intuition.
 simpl. rewrite IHn. rewrite H with (S n). reflexivity. intuition. intros m H2. apply H. intuition. 
 Qed.
 
-Lemma Cmodcarre_real : forall r9 r10, 
+Lemma Cnorm_sqr_real : forall r9 r10, 
 (r9 +i r10) <> 0 ->
 ((r9 + r9) * (r9 + r9) + (r10 + r10) * (r10 + r10))%R <> 0%R.
 Proof.

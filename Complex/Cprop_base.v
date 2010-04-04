@@ -605,12 +605,12 @@ intros ; subst ; reflexivity.
 Qed.
 Hint Resolve Cnorm_eq_compat: complex.
 
-Lemma Cmodcarre_pos : forall r r1 : R, 0 <= r * r + r1 * r1.
+Lemma Cnorm_sqr_pos : forall r r1 : R, 0 <= r * r + r1 * r1.
 Proof.
 intros. apply Rplus_le_le_0_compat ; apply Rle_0_sqr. 
 Qed.
 
-Lemma Cmodcarre_pos_lt : forall r r1 : R, (r,r1) <> 0 -> 0 < r * r + r1 * r1.
+Lemma Cnorm_sqr_pos_lt : forall r r1 : R, (r,r1) <> 0 -> 0 < r * r + r1 * r1.
 Proof.
 intros r r1 z_neq_0.
  case (proj1 (C0_neq_R0_neq _) z_neq_0) ; simpl ; intro H.
@@ -631,8 +631,8 @@ rewrite S_INC.
 destruct (INC n).
 simpl in *.
 apply sqrt_lt_1.
-   apply Cmodcarre_pos. apply Cmodcarre_pos.
- unfold Cmodcarre. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
+   apply Cnorm_sqr_pos. apply Cnorm_sqr_pos.
+ unfold Cnorm_sqr. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
  rewrite <- H1. ring_simplify. apply Rplus_le_lt_0_compat.
  replace R0 with (2*0)%R by ring.
  apply Rmult_le_compat_l. fourier. assumption. fourier.
@@ -642,8 +642,8 @@ generalize (Cre_INC_pos m). generalize (Cim_INC_0 m).
 intros H1 H2.
 destruct (INC m). simpl in *.
 apply sqrt_lt_1.
-   apply Cmodcarre_pos. apply Cmodcarre_pos. 
-unfold Cmodcarre. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
+   apply Cnorm_sqr_pos. apply Cnorm_sqr_pos. 
+unfold Cnorm_sqr. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
 rewrite <- H1. ring_simplify. apply Rplus_le_lt_0_compat.
 replace R0 with (2*0)%R by ring.
 apply Rmult_le_compat_l. fourier. assumption. fourier.
@@ -662,10 +662,10 @@ rewrite S_INC.
 generalize (Cre_INC_pos n). generalize (Cim_INC_0 n).
 intros H2 H3.
 destruct (INC n); simpl in *.
-rewrite <- sqrt_1. apply sqrt_lt_1. fourier. apply Cmodcarre_pos.
-unfold Cmodcarre ; simpl.
+rewrite <- sqrt_1. apply sqrt_lt_1. fourier. apply Cnorm_sqr_pos.
+unfold Cnorm_sqr ; simpl.
 rewrite <- H2.
-apply Rminus_gt. unfold Cmodcarre. ring_simplify.
+apply Rminus_gt. unfold Cnorm_sqr. ring_simplify.
 unfold Rminus ; rewrite Rplus_assoc ; apply Rplus_le_lt_0_compat.
 apply Rmult_le_pos ; [| rewrite Rmult_1_r] ; assumption.
  replace R0 with  (4*0)%R by ring.  fourier.
@@ -679,20 +679,20 @@ double induction n m.
   intros n1 H1 H2. destruct n1. intuition. constructor. assert (Hind : (0<S n1 -> 1 <= S n1)%nat). intuition.
   apply Hind. apply H1. rewrite S_INC. 
   generalize (Cre_INC_pos n1). generalize (Cim_INC_0 n1). intros Hu Hs.
-  destruct (INC n1). simpl in *. apply sqrt_lt_1. unfold Cmodcarre. simpl. apply Cmodcarre_pos.
-   unfold Cmodcarre. apply Cmodcarre_pos.
-   unfold Cmodcarre. simpl. rewrite <- Hu. ring_simplify. apply Rplus_le_lt_0_compat. apply Rplus_le_le_0_compat.
+  destruct (INC n1). simpl in *. apply sqrt_lt_1. unfold Cnorm_sqr. simpl. apply Cnorm_sqr_pos.
+   unfold Cnorm_sqr. apply Cnorm_sqr_pos.
+   unfold Cnorm_sqr. simpl. rewrite <- Hu. ring_simplify. apply Rplus_le_lt_0_compat. apply Rplus_le_le_0_compat.
     replace (r^2)%R with (Rsqr r) by (compute; ring). apply Rle_0_sqr.
    replace R0 with (2*0)%R by ring.
    apply Rmult_le_compat_l. fourier. assumption. fourier.
  intros n0 H1 H2. rewrite S_INC in H2. 
  generalize (Cre_INC_pos n0). generalize (Cim_INC_0 n0). intros Hu Hs.
- destruct (INC n0). simpl in *. apply sqrt_lt_0 in H2. unfold Cmodcarre in *. simpl in *. rewrite <- Hu in H2. 
+ destruct (INC n0). simpl in *. apply sqrt_lt_0 in H2. unfold Cnorm_sqr in *. simpl in *. rewrite <- Hu in H2. 
    ring_simplify in H2. assert (H : 0<= (Rsqr (r+1))%R). apply Rle_0_sqr. destruct H. compute in H. ring_simplify in H.
     assert (H0 : (forall x: R, x > 0 -> x < 0 -> False)). intros. fourier. assert (Habs : ((0 < r ^ 2 + 2 * r + 1) ->  (r ^ 2 + 2 * r + 1 < 0)->False)%R).
      apply H0. destruct Habs ; assumption.
    rewrite H in H2. compute in H2. ring_simplify in H2. fourier.
-  apply Cmodcarre_pos. unfold Cmodcarre. simpl. apply Cmodcarre_pos.
+  apply Cnorm_sqr_pos. unfold Cnorm_sqr. simpl. apply Cnorm_sqr_pos.
 intros n0 H1 n1 H3 H4.
 assert (H : (n1<n0 -> S n1 < S n0)%nat). intuition.
 apply H.
@@ -701,19 +701,19 @@ do 2 rewrite S_INC in H4.
 generalize (Cre_INC_pos n0). generalize (Cim_INC_0 n0). intros Hu Hs.
 generalize (Cre_INC_pos n1). generalize (Cim_INC_0 n1). intros Hu1 Hs1.
 destruct (INC n0) ; destruct (INC n1). simpl in *. apply sqrt_lt_1. apply sqrt_lt_0 in H4.
-    apply Cmodcarre_pos.
-   apply Cmodcarre_pos.
-  apply Cmodcarre_pos.
- apply Cmodcarre_pos.
+    apply Cnorm_sqr_pos.
+   apply Cnorm_sqr_pos.
+  apply Cnorm_sqr_pos.
+ apply Cnorm_sqr_pos.
 rewrite <- Hu in *. rewrite <- Hu1 in *. apply sqrt_lt_0 in H4. ring_simplify in H4.
-  unfold Cmodcarre in *. simpl in *. ring_simplify in H4. ring_simplify.
+  unfold Cnorm_sqr in *. simpl in *. ring_simplify in H4. ring_simplify.
   generalize H4.
   replace (r1 ^ 2 + 2 * r1 + 1)%R with (Rsqr (r1 + 1))%R by (compute; ring).
   replace (r ^ 2 + 2 * r + 1)%R with (Rsqr (r + 1))%R by (compute; ring).
   replace ( r1 ^ 2)%R with (Rsqr r1) by (compute ; ring).
   replace ( r ^ 2)%R with (Rsqr r) by (compute ; ring).
 intro H5. apply Rsqr_incrst_0 in H5. apply Rsqr_incrst_1. fourier.
-exact Hs1. exact Hs. fourier. fourier. apply Cmodcarre_pos. apply Cmodcarre_pos. 
+exact Hs1. exact Hs. fourier. fourier. apply Cnorm_sqr_pos. apply Cnorm_sqr_pos. 
 Qed.
 Hint Resolve Cnorm_INC_lt: complex.
 
@@ -960,7 +960,7 @@ intros.
 CusingR_f ; assumption.
 Qed.
 Hint Resolve Cinv_IRC_Rinv : complex.
-(** * Compatibility of Cconj with Cmodcarre*)
+(** * Compatibility of Cconj with Cnorm_sqr*)
 
 Lemma Cmod_conj_compat : forall z, Cre (z * Cconj z) = ((Cnorm z) ^ 2)%R
                                                            /\ Cim ( z * Cconj z) = 0%R.
@@ -969,10 +969,10 @@ intros z.
  split ; CusingR1.
 unfold Cnorm. rewrite Rmult_1_r. rewrite <- sqrt_mult.
 rewrite sqrt_square.
-unfold Cmodcarre. simpl. ring.
-apply Cmodcarre_pos.
-apply Cmodcarre_pos.
-apply Cmodcarre_pos.
+unfold Cnorm_sqr. simpl. ring.
+apply Cnorm_sqr_pos.
+apply Cnorm_sqr_pos.
+apply Cnorm_sqr_pos.
 Qed.
 
 (** * Compatibility of pow and Cpow*)

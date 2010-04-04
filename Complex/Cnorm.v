@@ -46,26 +46,26 @@ Qed.
 
 Lemma Cnorm_C0 : Cnorm 0 = 0%R.
 Proof.
-unfold Cnorm, Cmodcarre ; simpl.
+unfold Cnorm, Cnorm_sqr ; simpl.
 replace (0 * 0 + 0 * 0)%R with 0%R by ring.
 exact sqrt_0.
 Qed.
 
 Lemma Cnorm_Cre_simpl : forall (a : R), Cnorm (a, R0) = Rabs a.
 Proof.
-intros ; unfold Cnorm, Cmodcarre ; simpl.
+intros ; unfold Cnorm, Cnorm_sqr ; simpl.
 rewrite Rmult_0_r, Rplus_0_r ; apply sqrt_Rsqr_abs.
 Qed.
 
 Lemma Cnorm_Cim_simpl : forall (a : R), Cnorm (R0, a) = Rabs a.
 Proof.
-intros ; unfold Cnorm, Cmodcarre ; simpl.
+intros ; unfold Cnorm, Cnorm_sqr ; simpl.
 rewrite Rmult_0_l, Rplus_0_l ; apply sqrt_Rsqr_abs.
 Qed.
 
 Lemma Cnorm_comm : forall (a b : R), Cnorm (a, b) = Cnorm (b, a).
 Proof.
-intros ; unfold Cnorm, Cmodcarre.
+intros ; unfold Cnorm, Cnorm_sqr.
 simpl ; rewrite Rplus_comm ; reflexivity.
 Qed.
 
@@ -85,7 +85,7 @@ Qed.
 
 Lemma Cnorm_IRC_Rabs : forall x:R, Cnorm (IRC x) = Rabs x.
 Proof.
-intro x ; unfold Cnorm, Cmodcarre ; simpl ; rewrite Rmult_0_r ;
+intro x ; unfold Cnorm, Cnorm_sqr ; simpl ; rewrite Rmult_0_r ;
  rewrite Rplus_0_r ; apply sqrt_Rsqr_abs.
 Qed.
 
@@ -104,13 +104,13 @@ Qed.
 
 Lemma Cnorm_conj_compat : forall z, Cnorm (Cconj z) = Cnorm z.
 Proof.
-intros z ; unfold Cconj, Cnorm, Cmodcarre ; simpl ; destruct z ;
+intros z ; unfold Cconj, Cnorm, Cnorm_sqr ; simpl ; destruct z ;
  rewrite Rmult_opp_opp ; reflexivity.
 Qed.
 
 Lemma Cnorm_opp : forall z, Cnorm (-z) = Cnorm z.
 Proof.
-intros z ; unfold Cnorm, Cmodcarre ; destruct z as (a,b).
+intros z ; unfold Cnorm, Cnorm_sqr ; destruct z as (a,b).
 simpl ; replace (a * a + b * b)%R with (- a * - a + - b * - b)%R by field ;
  reflexivity.
 Qed.
@@ -123,7 +123,7 @@ Qed.
 Lemma Cnorm_mult : forall lambda : R, forall z : C,
   Cnorm (lambda `* z) = ((Rabs lambda) * (Cnorm z))%R.
 Proof.
-intros lambda z ; destruct z as (r1, r2) ; unfold Cnorm ; unfold Cmodcarre ; simpl.
+intros lambda z ; destruct z as (r1, r2) ; unfold Cnorm ; unfold Cnorm_sqr ; simpl.
 replace (lambda * r1 * (lambda * r1) + lambda * r2 * (lambda * r2))%R with
   (lambda^2 * (r1 * r1 + r2 * r2))%R by ring.
 rewrite sqrt_mult ; assert (sqrt (lambda ^ 2) = Rabs lambda)%R as H0.
@@ -137,7 +137,7 @@ Qed.
 
 Lemma Cnorm_Cmult : forall z1 z2, Cnorm (z1 * z2) = (Cnorm z1 * Cnorm z2)%R.
 Proof.
-intros z1 z2 ; destruct z1 as (a,b) ; destruct z2 as (c,d) ; unfold Cnorm ; unfold Cmodcarre ; simpl.
+intros z1 z2 ; destruct z1 as (a,b) ; destruct z2 as (c,d) ; unfold Cnorm ; unfold Cnorm_sqr ; simpl.
   replace ((a * c - b * d) * (a * c - b * d) + (a * d + b * c) * (a * d + b * c))%R
 with ((a * a + b * b) * (c * c + d * d))%R by field.
 apply sqrt_mult ; apply Rplus_le_le_0_compat ; apply Rle_0_sqr.
@@ -157,7 +157,7 @@ Qed.
 
 Lemma Cnorm_inv : forall z, z <> 0 -> Cnorm (/z) = (/(Cnorm z))%R.
 Proof.
-intros z Hz ; unfold Cnorm, Cmodcarre ; destruct z as (a,b).
+intros z Hz ; unfold Cnorm, Cnorm_sqr ; destruct z as (a,b).
 simpl.
 replace ((a / (a * a + b * b) * (a / (a * a + b * b)) +
   - b / (a * a + b * b) * (- b / (a * a + b * b))))%R with
@@ -182,7 +182,7 @@ Qed.
 (** * Triangle Inequality *)
 
 Lemma Cnorm_triang : forall z1 z2 : C, Cnorm (z1 + z2) <= (Cnorm z1 + Cnorm z2)%R.
-destruct z1 as (r0, r1) ; destruct z2 as (r2, r3) ; simpl ; apply Rsqr_incr_0. unfold Cnorm. unfold Cmodcarre. simpl.
+destruct z1 as (r0, r1) ; destruct z2 as (r2, r3) ; simpl ; apply Rsqr_incr_0. unfold Cnorm. unfold Cnorm_sqr. simpl.
  rewrite Rsqr_plus ; repeat (rewrite Rsqr_sqrt) ; [| apply Rplus_le_le_0_compat ;
  apply Rle_0_sqr | apply Rplus_le_le_0_compat ; apply Rle_0_sqr |].
  assert (H : 0 <= (r0 * r3 - r1 * r2) * (r0 * r3 - r1 * r2)) by (apply Rle_0_sqr).
@@ -256,7 +256,7 @@ Qed.
 
 Lemma Cre_le_Cnorm : forall z, Rabs (Cre z) <= Cnorm z.
 Proof.
-intro z ; unfold Cre, Cnorm, Cmodcarre ; destruct z.
+intro z ; unfold Cre, Cnorm, Cnorm_sqr ; destruct z.
 assert (Hrew : forall r, (r*r = r²)%R).
  intro a ; reflexivity.
  rewrite <- sqrt_Rsqr_abs.
@@ -270,7 +270,7 @@ Qed.
 
 Lemma Cim_le_Cnorm : forall z, Rabs (Cim z) <= Cnorm z.
 Proof.
-intro z ; unfold Cim, Cnorm, Cmodcarre ; destruct z.
+intro z ; unfold Cim, Cnorm, Cnorm_sqr ; destruct z.
 assert (Hrew : forall r, (r*r = r²)%R).
  intro a ; reflexivity.
  rewrite <- sqrt_Rsqr_abs.
@@ -284,7 +284,7 @@ Qed.
 
 Lemma Cnorm_le_Cre_Cim : forall z, Cnorm z <= Rabs (Cre z) + Rabs (Cim z).
 Proof.
-intro z ; unfold Cnorm, Cmodcarre ; destruct z as (a,b) ; simpl.
+intro z ; unfold Cnorm, Cnorm_sqr ; destruct z as (a,b) ; simpl.
 rewrite <- sqrt_square.
  apply sqrt_le_1.
   apply Rplus_le_le_0_compat ; apply Rle_0_sqr.

@@ -545,7 +545,7 @@ apply Rseq_equiv_trans with
 
 repeat apply Rseq_equiv_mult_compat;
   try apply Rseq_equiv_refl; try assumption.
-apply Rseq_equiv_inv_compat. (*TODO : 2eme subgoal sqrt 2* n <> 0 etait faux. Generalisation du lemme*)
+apply Rseq_equiv_inv_compat.
 exists O. intros n Hn.
 unfold Rseq_mult, Rseq_constant.
 apply Rmult_integral_contrapositive ; split ; 
@@ -590,7 +590,6 @@ apply Rmult_integral_contrapositive ; split ;
 [ (intro ; fourier) | (generalize PI_neq0 ; intro H0 ; apply Rinv_neq_0_compat ; intuition) ] 
 | (intro ; fourier) | apply PI_neq0])]. 
 
-(* TODO virer les Rseq_ *)
 unfold Rseq_constant, Rseq_mult, Rseq_div, Rseq_plus, Rseq_minus, Rseq_inv.
 (* Simplification of the expression ! *)
 apply Rseq_cv_eq_compat1 with 
@@ -599,7 +598,6 @@ exists (S O). intros n Hn.
 (* need to have n <> 0 *)
 assert(H : {m | n = S m}). exists (pred n). intuition.
 destruct H as (m, Subst).
-(*rewrite Subst.*)
 (* Solving the simplification equation *)
 unfold Rseq_constant.
 unfold Rdiv.
@@ -773,7 +771,7 @@ eapply Rseq_equiv_cv_compat.
     unfold Rseq_opp, Rseq_constant, Rseq_minus.
     intros n. field. generalize (pos_INR n) ; intuition ; fourier.
     intuition.
- apply Rseq_equiv_eq. (*TODO pas assez general *)
+ apply Rseq_equiv_eq.
  exists 1%nat.
  intros n Hn.
  rewrite pow_exp_ln.

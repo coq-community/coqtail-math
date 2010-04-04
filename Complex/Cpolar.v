@@ -43,7 +43,7 @@ exists (arctan(Cim (a +i b) / Cre (a +i b))).
 simpl. CusingR_simpl.
 (* Real*) 
 rewrite arctancos. unfold Cnorm.
-unfold Cmodcarre. replace (1 + (b/a) ^ 2)%R with ((a^2 + b^2) /a^2)%R. simpl.
+unfold Cnorm_sqr. replace (1 + (b/a) ^ 2)%R with ((a^2 + b^2) /a^2)%R. simpl.
 Focus 2. field. assumption.
 rewrite Ropp_mult_distr_l_reverse. unfold Rdiv. rewrite Rmult_1_l.
 repeat rewrite Rmult_1_r.
@@ -59,13 +59,13 @@ simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
 intro H10. apply HC0_norm_R0 with (a +i b) in H10. rewrite <- Ceq in H10.
 simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
 apply Rinv_neq_0_compat. intro H10. apply Rmult_integral in H10. intuition.
-apply Cmodcarre_pos. apply Rlt_mult_inv_pos.
+apply Cnorm_sqr_pos. apply Rlt_mult_inv_pos.
 replace 0%R with (0 + 0)%R by auto with real. apply Rplus_lt_le_compat.
 replace (a*a)%R with (-a * -a)%R by ring. apply Rmult_lt_0_compat ; fourier.
 replace (b*b)%R with (Rsqr b)%R by (unfold Rsqr ; ring).
 auto with real.  replace (a*a)%R with (-a * -a)%R by ring. apply Rmult_lt_0_compat ; fourier.
 (*Imaginary*)
-rewrite arctansin. unfold Cnorm. unfold Cmodcarre.
+rewrite arctansin. unfold Cnorm. unfold Cnorm_sqr.
 replace (1 + (b/a) ^ 2)%R with ((a^2 + b^2) /a^2)%R. simpl.
 repeat rewrite Rmult_1_r. rewrite sqrt_div. 
 unfold Rdiv. rewrite Rinv_mult_distr. rewrite Rinv_involutive.
@@ -77,18 +77,18 @@ rewrite sqrt_square. reflexivity. intuition.
 split. intro H10. apply sqrt_eq_0 in H10. 
 apply HC0_norm_R0 with (a +i b) in H10. rewrite <- Ceq in H10.
 simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
-apply Cmodcarre_pos. intro H10. rewrite H10 in H1. fourier.
+apply Cnorm_sqr_pos. intro H10. rewrite H10 in H1. fourier.
 intro H10. apply sqrt_eq_0 in H10. apply Rmult_integral in H10.
 destruct H10 as [H10|H10] ; rewrite H10 in H1 ; fourier.
 replace (a*a)%R with (Rsqr a)%R by (unfold Rsqr ; ring). auto with real.
 intro H10. apply sqrt_eq_0 in H10. 
 apply HC0_norm_R0 with (a +i b) in H10. rewrite <- Ceq in H10.
 simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
-apply Cmodcarre_pos. apply Rinv_neq_0_compat.
+apply Cnorm_sqr_pos. apply Rinv_neq_0_compat.
 intro H10. apply sqrt_eq_0 in H10. apply Rmult_integral in H10.
 destruct H10 as [H10|H10] ; rewrite H10 in H1 ; fourier.
 replace (a*a)%R with (Rsqr a)%R by (unfold Rsqr ; ring). auto with real.
-apply Cmodcarre_pos. 
+apply Cnorm_sqr_pos. 
 replace (a * a)%R with (-a * -a)%R by ring. apply Rmult_lt_0_compat ; fourier.
 field. intro H10. rewrite H10 in H1. fourier.
 (* a = 0*)
@@ -98,20 +98,20 @@ destruct (total_order_T b 0%R) as [[H2|H2]|H2] ; rewrite H1.
 exists (3*(PI/2))%R.
 rewrite cos_3PI2.
 rewrite sin_3PI2.
-unfold Cnorm. unfold Cmodcarre.
+unfold Cnorm. unfold Cnorm_sqr.
 CusingR_simpl ; simpl. ring.
 ring_simplify. rewrite Rmult_0_l. rewrite Rplus_0_l.
 replace (b * b)%R with (-b * -b)%R. rewrite sqrt_square. ring.
 fourier. ring.
 (* b = 0 *)
 rewrite H2. exists 0%R.
-unfold Cnorm. unfold Cmodcarre. simpl. CusingR_simpl;
+unfold Cnorm. unfold Cnorm_sqr. simpl. CusingR_simpl;
 rewrite Rmult_0_l ; rewrite Rplus_0_l ; rewrite sqrt_0 ; ring.
 (* b> 0*)
 exists (PI/2)%R.
 rewrite cos_PI2.
 rewrite sin_PI2.
-unfold Cnorm. unfold Cmodcarre.
+unfold Cnorm. unfold Cnorm_sqr.
 CusingR_simpl ; simpl. ring. 
 ring_simplify. rewrite Rmult_0_l. rewrite Rplus_0_l.
 rewrite sqrt_square. reflexivity. fourier.
@@ -121,7 +121,7 @@ exists (arctan(Cim (a +i b) / Cre (a +i b))).
 simpl. CusingR_simpl.
 (* Real*) 
 rewrite arctancos. unfold Cnorm.
-unfold Cmodcarre. replace (1 + (b/a) ^ 2)%R with ((a^2 + b^2) /a^2)%R. simpl.
+unfold Cnorm_sqr. replace (1 + (b/a) ^ 2)%R with ((a^2 + b^2) /a^2)%R. simpl.
 Focus 2. field. assumption.
 unfold Rdiv. rewrite Rmult_1_l.
 repeat rewrite Rmult_1_r.
@@ -136,13 +136,13 @@ simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
 intro H10. apply HC0_norm_R0 with (a +i b) in H10. rewrite <- Ceq in H10.
 simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
 apply Rinv_neq_0_compat. intro H10. apply Rmult_integral in H10. intuition.
-apply Cmodcarre_pos. apply Rlt_mult_inv_pos.
+apply Cnorm_sqr_pos. apply Rlt_mult_inv_pos.
 replace 0%R with (0 + 0)%R by auto with real. apply Rplus_lt_le_compat. 
 apply Rmult_lt_0_compat ; fourier.
 replace (b*b)%R with (Rsqr b)%R by (unfold Rsqr ; ring).
 auto with real. apply Rmult_lt_0_compat ; fourier.
 (*Imaginary*)
-rewrite arctansin. unfold Cnorm. unfold Cmodcarre.
+rewrite arctansin. unfold Cnorm. unfold Cnorm_sqr.
 replace (1 + (b/a) ^ 2)%R with ((a^2 + b^2) /a^2)%R. simpl.
 repeat rewrite Rmult_1_r. rewrite sqrt_div. 
 unfold Rdiv. rewrite Rinv_mult_distr. rewrite Rinv_involutive.
@@ -152,18 +152,18 @@ rewrite sqrt_square. reflexivity. intuition.
 split. intro H10. apply sqrt_eq_0 in H10. 
 apply HC0_norm_R0 with (a +i b) in H10. rewrite <- Ceq in H10.
 simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
-apply Cmodcarre_pos. intro H10. rewrite H10 in H1. fourier.
+apply Cnorm_sqr_pos. intro H10. rewrite H10 in H1. fourier.
 intro H10. apply sqrt_eq_0 in H10. apply Rmult_integral in H10.
 destruct H10 as [H10|H10] ; rewrite H10 in H1 ; fourier.
 replace (a*a)%R with (Rsqr a)%R by (unfold Rsqr ; ring). auto with real.
 intro H10. apply sqrt_eq_0 in H10. 
 apply HC0_norm_R0 with (a +i b) in H10. rewrite <- Ceq in H10.
 simpl in H10 ; destruct H10 as [H10 H11]. rewrite H10 in H1. fourier.
-apply Cmodcarre_pos. apply Rinv_neq_0_compat.
+apply Cnorm_sqr_pos. apply Rinv_neq_0_compat.
 intro H10. apply sqrt_eq_0 in H10. apply Rmult_integral in H10.
 destruct H10 as [H10|H10] ; rewrite H10 in H1 ; fourier.
 replace (a*a)%R with (Rsqr a)%R by (unfold Rsqr ; ring). auto with real.
-apply Cmodcarre_pos.  apply Rmult_lt_0_compat ; fourier.
+apply Cnorm_sqr_pos.  apply Rmult_lt_0_compat ; fourier.
 field. intro H10. rewrite H10 in H1. fourier.
 Qed.
 

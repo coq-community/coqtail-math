@@ -616,41 +616,41 @@ intro H.
   right ; apply Cnorm_eq_compat ; apply (proj1 (Ceq _ _)) ; split ; simpl ; ring.
   rewrite <- Rmult_plus_distr_l ; unfold Cdiv ; rewrite Cmult_IRC_Rmult ;
   repeat rewrite Cnorm_Cmult.
-  apply Rlt_le_trans with (eps * Cmodcarre (x, y) * (/ Cnorm (x, y)) ^ 2)%R. 
+  apply Rlt_le_trans with (eps * Cnorm_sqr (x, y) * (/ Cnorm (x, y)) ^ 2)%R. 
   simpl ; repeat rewrite Rmult_1_r ; rewrite <- Rmult_assoc, Cnorm_inv.
   apply Rmult_lt_compat_r.
   apply Rinv_0_lt_compat ; apply Cnorm_pos_lt ; assumption.
-  replace (Cmodcarre (x, y))%R with (Cnorm (x * x + y * y)%R).
+  replace (Cnorm_sqr (x, y))%R with (Cnorm (x * x + y * y)%R).
   apply Rlt_le_trans with (eps * / Cnorm (x, y)* Cnorm (x * x + y * y)%R)%R.
   apply Rmult_lt_compat_r.
   apply Cnorm_pos_lt ; intro Hf ; apply v_neq.
   apply HC0_norm_R0.
-  unfold Cmodcarre ; simpl.
+  unfold Cnorm_sqr ; simpl.
   destruct (proj2 (Ceq _ _) Hf) as [Hf' _] ; apply Hf'.
   rewrite Cnorm_IRC_Rabs ; apply h_bd.
   right ; field.
   apply Cnorm_no_R0 ; assumption.
-  unfold Cmodcarre ; rewrite Cnorm_IRC_Rabs, Rabs_right ; [reflexivity |].
-  apply Rle_ge ; apply Cmodcarre_pos.
+  unfold Cnorm_sqr ; rewrite Cnorm_IRC_Rabs, Rabs_right ; [reflexivity |].
+  apply Rle_ge ; apply Cnorm_sqr_pos.
   assumption.
   right ; rewrite <- Rmult_1_r, Rmult_assoc ; apply Rmult_eq_compat_l.
-  unfold Cnorm, Cmodcarre.
+  unfold Cnorm, Cnorm_sqr.
   simpl.
   rewrite Rmult_1_r, <- Rinv_mult_distr, sqrt_sqrt, Rinv_r.
   reflexivity.
   apply Rgt_not_eq.
-  apply Cmodcarre_pos_lt ; assumption.
-  apply Cmodcarre_pos.
-  apply Rgt_not_eq ; apply sqrt_lt_R0 ; apply Cmodcarre_pos_lt ; assumption.
-  apply Rgt_not_eq ; apply sqrt_lt_R0 ; apply Cmodcarre_pos_lt ; assumption.
- assert (Main2 : fully_differentiable_pt Cmodcarre 1).
-  intros v ; unfold Cmodcarre ; destruct v as [x y] ; exists (2 * x / (x, y)) ;
+  apply Cnorm_sqr_pos_lt ; assumption.
+  apply Cnorm_sqr_pos.
+  apply Rgt_not_eq ; apply sqrt_lt_R0 ; apply Cnorm_sqr_pos_lt ; assumption.
+  apply Rgt_not_eq ; apply sqrt_lt_R0 ; apply Cnorm_sqr_pos_lt ; assumption.
+ assert (Main2 : fully_differentiable_pt Cnorm_sqr 1).
+  intros v ; unfold Cnorm_sqr ; destruct v as [x y] ; exists (2 * x / (x, y)) ;
   apply Main.
- assert (Main3 : derivable_pt Cmodcarre C1 -> False).
+ assert (Main3 : derivable_pt Cnorm_sqr C1 -> False).
    intros [l Hl].
-   assert (H1 := derivable_differentiable_pt_abs Cmodcarre 1 l Hl (0,1)%R).
+   assert (H1 := derivable_differentiable_pt_abs Cnorm_sqr 1 l Hl (0,1)%R).
    assert (H1' := Main R0 R1).
-   assert (H2 := derivable_differentiable_pt_abs Cmodcarre 1 l Hl (1,0)%R).
+   assert (H2 := derivable_differentiable_pt_abs Cnorm_sqr 1 l Hl (1,0)%R).
    assert (H2' := Main R1 R0).
    unfold differentiable_pt_abs in *.
    assert (H1_neq : (R0, R1) <> 0).

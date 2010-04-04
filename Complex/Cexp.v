@@ -91,7 +91,7 @@ unfold R_dist in *.
 assert ( H4 :( forall n,
  (sum_f_R0 (fun j : nat => (/ INR (fact j) * Cnorm z ^ j)%R) n)
 =(sum_f_R0 (fun n0 : nat => Cnorm (/ INR (fact n0) * z ^ n0)) n))).
-induction n0. simpl. unfold Cnorm. unfold Cmodcarre.
+induction n0. simpl. unfold Cnorm. unfold Cnorm_sqr.
 repeat rewrite Cinv_l. simpl.
 repeat rewrite Rinv_l. replace (sqrt(1 * 1 + 0 * 0)) with 1.
 reflexivity.
@@ -179,7 +179,7 @@ Cnorm (l1)) <=
 Cnorm (sum_f_C0 (fun j : nat => / INR (fact j) * (a +i  0) ^ j) n - l1) ).
 apply Cnorm_triang_rev.
 eapply Rle_lt_trans. Focus 2. apply H3. 
-unfold Cnorm. unfold Cmodcarre.
+unfold Cnorm. unfold Cnorm_sqr.
 rewrite <- Cre_minus_compat.
 rewrite <- Cim_minus_compat.
 rewrite H6. 
@@ -221,7 +221,7 @@ destruct H2 as (N, H2). exists N. intros n Hn. assert (H2n: (2* n >= N)%nat) by 
 generalize (H2 (2*n)%nat H2n).
 intros H3.
 unfold Cmet.C_dist in H3. unfold R_dist.
-unfold Cnorm in H3. unfold Cmodcarre in H3.
+unfold Cnorm in H3. unfold Cnorm_sqr in H3.
 rewrite <- Cre_minus_compat in H3.
 rewrite <- sum_f_C0_Cre_compat in H3.
 assert (H6 : forall n, (sum_f_R0 (fun n : nat => Cre (/ INR (fact n) * (0 +i  a) ^ n)) (2* n)
@@ -270,7 +270,7 @@ assumption.
 intuition.
 destruct (Rle_0_sqr (Cim (sum_f_C0 (fun j : nat => / INR (fact j) * (0 +i  a) ^ j) (2 * n) - l))).
 unfold Rsqr in *. fourier. intuition.
-apply Cmodcarre_pos. apply sqrt_positivity. apply Cmodcarre_pos.
+apply Cnorm_sqr_pos. apply sqrt_positivity. apply Cnorm_sqr_pos.
 intuition.
 unfold expc.
 destruct (exist_expc (0 +i  a)) as (l, H).
@@ -297,7 +297,7 @@ destruct H2 as (N, H2). exists N. intros n Hn. assert (HS2n: (S (2* n) >= N)%nat
 generalize (H2 (S (2*n))%nat HS2n).
 intros H3.
 unfold Cmet.C_dist in H3. unfold R_dist.
-unfold Cnorm in H3. unfold Cmodcarre in H3.
+unfold Cnorm in H3. unfold Cnorm_sqr in H3.
 rewrite <- Cim_minus_compat in H3.
 rewrite <- sum_f_C0_Cim_compat in H3.
 assert (H6 : forall n, (sum_f_R0 (fun n : nat => Cim (/ INR (fact n) * (0 +i  a) ^ n)) (S (2* n))
@@ -355,7 +355,7 @@ assumption.
 generalize (Rle_0_sqr (Cre
   (sum_f_C0 (fun j : nat => / INR (fact j) * (0 +i  a) ^ j) (S (2 * n)) - l))).
 intuition.
-apply Cmodcarre_pos. apply sqrt_positivity. apply Cmodcarre_pos.
+apply Cnorm_sqr_pos. apply sqrt_positivity. apply Cnorm_sqr_pos.
 apply Rmult_le_pos. apply Rabs_pos. left. assumption.
 assumption. apply Rinv_neq_0_compat. assumption.
 rewrite H11 in *.
@@ -373,7 +373,7 @@ generalize (H eps Heps). intros H2.
 destruct H2 as (N, H2). exists N. intros n Hn.
 generalize (H2 n Hn). intros H3.
 unfold Cmet.C_dist in H3. unfold R_dist.
-unfold Cnorm in H3. unfold Cmodcarre in H3.
+unfold Cnorm in H3. unfold Cnorm_sqr in H3.
 rewrite <- Cim_minus_compat in H3.
 rewrite <- sum_f_C0_Cim_compat in H3.
 apply Rsqr_incrst_1 in H3. 
@@ -398,8 +398,8 @@ rewrite IHn0. ring. apply fact_neq_0. apply fact_neq_0.
 rewrite <- H42. unfold Rabs at 2 in H3. destruct (Rcase_abs eps) as [H20|[H20|H20]].
 fourier. intuition. fourier.
 generalize (Rle_0_sqr (Cre (sum_f_C0 (fun j : nat => / INR (fact j) * (0 +i  0) ^ j) n - l))).
-intuition. apply Cmodcarre_pos.
-apply sqrt_positivity. apply Cmodcarre_pos.
+intuition. apply Cnorm_sqr_pos.
+apply sqrt_positivity. apply Cnorm_sqr_pos.
 intuition.
 Qed.
 

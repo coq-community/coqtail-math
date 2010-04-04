@@ -71,11 +71,11 @@ Definition Cinv (z1 : C) : C :=
 Definition Cconj (z1 : C) : C :=
   R_R_to_C (Cre z1) (-Cim z1).
 
-Definition Cmodcarre (z1 : C) : R := 
+Definition Cnorm_sqr (z1 : C) : R := 
   (Cre z1 * Cre z1 + Cim z1 * Cim z1).
 
 Definition Cnorm (z1 : C) : R := 
-  (sqrt (Cmodcarre z1)).
+  (sqrt (Cnorm_sqr z1)).
 
 Definition Cscal (lambda : R) (z : C) : C := 
   R_R_to_C (lambda * Cre z) (lambda * Cim z).
