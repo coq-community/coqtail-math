@@ -23,7 +23,7 @@ USA.
 
 Require Export Reals.
 Require Export Rsequence.
-Require Export Rseries.
+Require Export Rseries_def.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
 Require Import Fourier.

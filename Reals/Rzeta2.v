@@ -22,7 +22,7 @@ USA.
 Require Import Reals.
 Require Import Fourier.
 Require Import Rsequence_facts.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Rseries_facts.
 Require Import Rsequence_subsequence.
 

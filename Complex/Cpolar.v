@@ -22,7 +22,7 @@ USA.
 
 Require Import Rtrigo.
 Require Import AltSeries.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Ratan.
 Require Import Cpow_plus.
 Require Export Complex.

@@ -21,7 +21,7 @@ USA.
 
 (** Properties involving series and integrals *)
 Require Import Reals.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Rseries_facts.
 Require Import RiemannInt.
 Require Import Fourier.

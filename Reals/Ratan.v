@@ -26,7 +26,7 @@ Require Import Fourier.
 Require Import Ranalysis.
 Require Import Rfunctions.
 Require Import AltSeries.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import SeqProp.
 Require Import Ranalysis_def.
 Require Import Ranalysis5_clean.

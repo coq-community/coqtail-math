@@ -21,7 +21,7 @@ USA.
 
 Require Import Cpser_def.
 Require Import Cpser_facts.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Rsequence.
 Require Import Rsequence_facts.
 Require Import Rseries_facts.

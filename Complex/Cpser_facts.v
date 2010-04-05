@@ -24,7 +24,7 @@ Require Import Rpser_def.
 Require Import Rpser_facts.
 Require Import Rsequence.
 Require Import Rsequence_facts.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Rseries_facts.
 Require Import Tools.
 

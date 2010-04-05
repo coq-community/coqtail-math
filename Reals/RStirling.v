@@ -23,7 +23,7 @@ USA.
 
 Require Import Reals.
 Require Import Rsequence_facts.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Rseries_facts.
 Require Import Rpser_def.
 Require Import Rpser_facts.

@@ -23,7 +23,7 @@ Require Import Rbase.
 Require Import Rsequence.
 Require Import Ranalysis.
 Require Import Rfunctions.
-Require Import Rseries.
+Require Import Rseries_def.
 Require Import Fourier.
 Require Import RiemannInt.
 Require Import SeqProp.
