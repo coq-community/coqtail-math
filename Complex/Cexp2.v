@@ -27,8 +27,10 @@ Require Import MyRIneq.
 
 Require Import Cprop_base.
 Require Import Csequence.
+Require Import Csequence_facts.
 Require Import Cpser_def.
 Require Import Cpser_facts.
+Require Import Canalysis_def.
 
 Open Scope C_scope.
 
@@ -106,4 +108,42 @@ intro z.
  apply Deriv_exp_seq_simpl.
  apply T2.
  apply T1.
+Qed.
+
+Lemma derivable_pt_lim_Cexp : forall z, derivable_pt_lim Cexp z (Cexp z).
+Proof.
+intro z ; rewrite Cexp_eq_Deriv_Cexp ;
+ apply derivable_pt_lim_sum.
+Qed.
+
+(** ** Euler's Formula*)
+
+Lemma Cexp_exp_compat : forall a : R, exp (a) = Cre (Cexp (a +i 0))
+/\ Cim (Cexp (a +i 0)) = 0%R.
+Proof.
+intros a ; unfold exp, Cexp ; destruct (exist_exp a) as (l, H).
+ pose (l1 := sum exp_seq exp_infinite_cv_radius (a +i  0)) ;
+ assert (H1 := sum_sums _ exp_infinite_cv_radius (a +i 0)) ;
+ replace (sum exp_seq exp_infinite_cv_radius (a +i  0)) with l1 in * by reflexivity.
+simpl.
+
+split.
+apply (Rseq_cv_unique (sum_f_R0 (fun j : nat => (/ INR (fact j) * a ^ j)%R))).
+ apply H.
+  apply Rseq_cv_eq_compat with (fun n => Cre (sum_f_C0 (fun j : nat => / INC (fact j) * (a +i  0) ^ j) n)).
+   intro n ; induction n.
+  simpl ; field.
+  rewrite sum_f_C0_simpl, tech5, <- Cre_add_compat, IHn ;
+  apply Rplus_eq_compat_l.
+  rewrite Cre_mul, Cpow_Cim_0, Cpow_Cre_0, Rmult_0_r, Rminus_0_r.
+  rewrite INC_inv_Cre_INR ; [reflexivity | apply fact_neq_0].
+ apply (Cseq_Rseq_Rseq_equiv _ _) ; apply Pser_Cseqcv_link ; unfold exp_seq in H1 ; apply H1.
+
+ apply (Rseq_cv_unique (fun n => Cim (sum_f_C0 (fun j : nat => / INC (fact j) * (a +i  0) ^ j) n))).
+  apply (Cseq_Rseq_Rseq_equiv _ _) ; apply Pser_Cseqcv_link ; unfold exp_seq in H1 ; apply H1.
+  apply (Rseq_cv_eq_compat R0) ; [| apply Rseq_constant_cv].
+  intro n ; induction n ; unfold Rseq_constant in *.
+  simpl ; field.
+  rewrite sum_f_C0_simpl, <- Cim_add_compat, <- IHn, Cim_mul, Cpow_Cim_0,
+  Cpow_Cre_0, INC_inv_Cim_INR ; [ring | apply fact_neq_0].
 Qed.
