@@ -25,13 +25,14 @@ Require Export Reals.
 Require Export Rsequence.
 Require Export Rseries_def.
 Require Import Rsequence_facts.
-Require Import Rsequence_subsequence.
+Require Export Rsequence_subsequence.
 Require Import Fourier.
 Require Import Max.
 Open Scope R_scope.
 Open Scope Rseq_scope.
 (** printing ~	~ *)
 (** Uniqueness of the limit. *)
+
 Lemma Rser_cv_unique : forall Un lu1 lu2, Rser_cv Un lu1 -> Rser_cv Un lu2 -> lu1 = lu2.
 Proof.
 intros Un lu1 lu2 H H'.
@@ -233,10 +234,10 @@ Section Rser_partition.
 
 Lemma Rser_cv_growing_subseq_compat Un :
   forall (phi : extractor) l, 0 <= Un ->
-    Rseq_cv ((sum_f_R0 Un) · phi) l -> Rser_cv Un l.
+    Rseq_cv ((sum_f_R0 Un) ⋅ phi)%Rseq l -> Rser_cv Un l.
 Proof.
 intros Un phi l ephi Unpos Uncv.
-apply Rseq_subseq_growing_cv_compat with ((sum_f_R0 Un) · phi).
+apply Rseq_subseq_growing_cv_compat with ((sum_f_R0 Un) ⋅ phi).
  exists phi; reflexivity.
   assumption.
  intro; apply Rplus_le_simpl_l; assumption.

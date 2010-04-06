@@ -512,9 +512,9 @@ assert (H2n : (fun n => fact (2 * n)) ~ (fun n => (2 * n / exp 1) ^ (2 * n) * sq
   assert (Hex : is_extractor (mult 2)).
     intros n; omega.
   pose (exist _ _ Hex) as db.
-  assert (Hrw1 : fact · db == (fun n => fact (2 * n))).
+  assert (Hrw1 : extracted db fact == (fun n => fact (2 * n))).
     intros n; reflexivity.
-  assert (Hrw2 : (fun n => (n / exp 1) ^ n * sqrt n * l) · db == (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
+  assert (Hrw2 : extracted db (fun n => (n / exp 1) ^ n * sqrt n * l) == (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
     intros n; unfold extracted. simpl.
     repeat rewrite plus_INR; simpl.
     replace (n + (n + 0)) with (2 * n) by field.
@@ -526,7 +526,7 @@ assert (H2n1 : (fun n : nat => fact (S(2*n))) ~ (fun n : nat => (S(2*n) / exp 1)
   assert (Hex : is_extractor (fun n => S (mult 2 n))).
     intros n; omega.
   pose (exist _ _ Hex) as db.
-  apply Rseq_equiv_eq_compat with (fact · db) ((fun n : nat => (n / exp 1) ^ n * sqrt n * l) · db).
+  apply Rseq_equiv_eq_compat with (extracted db fact) (extracted db (fun n : nat => (n / exp 1) ^ n * sqrt n * l)).
     intro n; unfold db; reflexivity.
     intro n; unfold db; reflexivity.
   apply Rseq_equiv_subseq_compat with (Un := fact) (Vn := fun k : nat => (k / exp 1) ^ k * sqrt k * l)(phi := db).

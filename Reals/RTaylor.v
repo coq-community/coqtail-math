@@ -171,7 +171,7 @@ Proof.
    
    apply Rseq_subseq_cv_pos_infty_compat with (fun n => ln (INR n)).
     exists (exist _ _ (extractor_Rseq_iter_S 2)).
-    unfold "·", is_extractor.
+    unfold extracted, is_extractor.
     reflexivity.
     
     apply Rseq_ln_cv.
