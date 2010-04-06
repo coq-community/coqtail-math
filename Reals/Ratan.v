@@ -29,7 +29,7 @@ Require Import AltSeries.
 Require Import Rseries_def.
 Require Import SeqProp.
 Require Import Ranalysis_def.
-Require Import Ranalysis5_clean.
+Require Import Ranalysis5.
 Require Import RIVT.
 Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
