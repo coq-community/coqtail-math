@@ -31,7 +31,7 @@ Require Import Fourier.
 Open Scope R_scope.
 Open Scope Rseq_scope.
 
-
+(** printing ~	~ *)
 Lemma Rseq_growing_constructive_limit (Un : nat -> R) : Rseq_growing Un -> (exists l, Rseq_cv Un l) -> {l | Rseq_cv Un l}.
 Proof.
 intros Un Hg Hl.

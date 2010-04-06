@@ -30,7 +30,7 @@ Require Import Rsequence_subsequence.
 Require Import Rintegral.
 
 Open Local Scope R_scope.
-
+(** printing ~	~ *)
 Section Rseries_RiemannInt.
 
 Local Coercion INR : nat >-> R.

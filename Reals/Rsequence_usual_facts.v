@@ -25,7 +25,7 @@ Require Import Rsequence_base_facts.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_rel_facts.
 Require Import Fourier.
-
+(** printing ~	~ *)
 (** * Convergence of usual sequences. *)
 
 (** Convergence of polynomials. *)

@@ -25,7 +25,7 @@ Require Import Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
-
+(** printing ~	~ *)
 (** * Convergence compatibility. *)
 
 Section Rseq_cv.

@@ -27,7 +27,7 @@ Require Export Reals.
 Require Import Fourier.
 
 Open Local Scope Rseq_scope.
-
+(** printing ~	~ *)
 (** * A tactic that constructs the limit of a sequence and the proof that this
  limit is exact *)
 

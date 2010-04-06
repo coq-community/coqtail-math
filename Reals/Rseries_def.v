@@ -27,7 +27,7 @@ Open Local Scope R_scope.
 Open Local Scope Rseq_scope.
 
 Implicit Type Un : Rseq.
-
+(** printing ~	~ *)
 (** * Convergence of series *)
 
 Definition Rser_cv Un l := Rseq_cv (sum_f_R0 Un) l.

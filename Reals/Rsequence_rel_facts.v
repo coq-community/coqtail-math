@@ -28,7 +28,7 @@ Require Import Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
-
+(** printing ~	~ *)
 (** * Big-O, little-O and equivalence relations. *)
 
 (** Big-O is reflexive and transitive. *)

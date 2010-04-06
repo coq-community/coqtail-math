@@ -25,17 +25,19 @@ Require Import Rsequence_facts.
 
 Require Import Fourier.
 Open Scope nat_scope.
-
+(** printing ~	~ *)
 Definition is_extractor (phi : nat -> nat) := forall n, phi n < phi (S n).
 
 Definition extractor := {phi | is_extractor phi}.
 
 Definition extracted {X : Type} (phi : extractor) (Un : nat -> X) n := Un ((proj1_sig phi) n).
 
-Notation "Un · phi" := (extracted phi Un) (at level 40, left associativity) : Rseq_scope.
+(** printing ⋅ #&bull;# *)
+Notation "Un ⋅ phi" := (extracted phi Un) (at level 40, left associativity) : Rseq_scope.
+
 
 Definition subsequence {X : Type} (Un Vn : nat -> X) :=
-  {phi | forall n, Un n = (Vn · phi) n}.
+  {phi | forall n, Un n = (Vn ⋅ phi) n}.
 
 (** Properties on nat -> nat sequences *)
 
@@ -294,7 +296,7 @@ Variables Un Vn : nat -> R.
 
 (**********)
 Lemma Rseq_big_O_subseq_compat : 
-  forall phi, Un = O (Vn) -> (Un · phi) = O(Vn · phi).
+  forall phi, Un = O (Vn) -> (Un ⋅ phi) = O(Vn ⋅ phi).
 Proof.
 intros phi Heq.
 destruct Heq as [N [HN [N0 HN0]]].
@@ -311,7 +313,7 @@ Qed.
 
 (**********)
 Lemma Rseq_little_O_subseq_compat : 
-  forall phi, Un = o (Vn) -> (Un · phi) = o(Vn · phi).
+  forall phi, Un = o (Vn) -> (Un ⋅ phi) = o(Vn ⋅ phi).
 Proof.
 intros [phi Hphi] Heq.
 intros eps Heps.
@@ -328,7 +330,7 @@ Qed.
 
 (**********)
 Lemma Rseq_equiv_subseq_compat : 
-  forall phi, Un ~ Vn -> (Un · phi) ~ (Vn · phi).
+  forall phi, Un ~ Vn -> (Un ⋅ phi) ~ (Vn ⋅ phi).
 Proof.
 intros [phi Hphi] Heq.
 intros eps Heps.

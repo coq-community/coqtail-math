@@ -30,8 +30,8 @@ Require Import Fourier.
 Require Import Max.
 Open Scope R_scope.
 Open Scope Rseq_scope.
-
-(** * Uniqueness of limit. *)
+(** printing ~	~ *)
+(** Uniqueness of the limit. *)
 Lemma Rser_cv_unique : forall Un lu1 lu2, Rser_cv Un lu1 -> Rser_cv Un lu2 -> lu1 = lu2.
 Proof.
 intros Un lu1 lu2 H H'.

@@ -121,7 +121,7 @@ Definition Rseq_equiv Un Vn := Rseq_little_O (Un - Vn) Un.
 Notation "Un = 'O' ( Vn )" := (Rseq_big_O Un Vn) (at level 39, format "Un  =  'O' ( Vn )") : Rseq_scope.
 Notation "Un = 'o' ( Vn )" := (Rseq_little_O Un Vn) (at level 40, format "Un  =  'o' ( Vn )") : Rseq_scope.
 Notation "Un ~ Vn" := (Rseq_equiv Un Vn) (at level 5) : Rseq_scope.
-
+(** printing ~	~ *)
 (** * Usual sequences. *)
 
 Definition Rseq_poly d n := (INR n) ^ d.
