@@ -639,12 +639,12 @@ intros n z Hn.
 destruct (polar z) as [r [theta Hrt]].
 destruct Hrt as [Hrpos [Htheta Hpol]].
 rewrite Cmult_IRC_compat_l in Hpol.
-rewrite euler_formula in Hpol.
+rewrite <- Cexp_trigo_compat in Hpol.
 destruct (exist_root_n_pos r n Hrpos) as (root_real, Hreal).
 apply Hn.
-exists ( root_real * expc((0 +i theta ) / INC n)).
+exists ( root_real * Cexp ((0 +i theta ) / INC n)).
 rewrite Cpow_mul_distr_l.
-rewrite IRC_pow_compat. rewrite Hreal. rewrite <- expc_mult.
+rewrite IRC_pow_compat. rewrite Hreal. rewrite <- Cexp_mult.
 field_simplify (INC n * ((0 +i  theta) / INC n)).
 unfold Cdiv. rewrite Cinv_1. rewrite Cmult_1_r.
 apply Hpol. 
