@@ -136,7 +136,7 @@ simpl. rewrite Rmult_1_r. apply sqrt_sqrt. intuition.
 Qed.
 (* end hide *)
 
-Lemma Croot_pol_2 : forall z : C, exists z1, z1 ^ 2 = z.
+Lemma Croot_pol_2 : forall z : C, {z1 | z1 ^ 2 = z}.
 Proof.
 intros. 
 destruct z as (a, b).
