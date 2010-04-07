@@ -23,13 +23,14 @@
 
 rev=`svn info --xml | grep revision= | sed 's/.*revision="\([0-9]*\)".*$/\1/' | head -n 1`
 mkdir -p doc
+cp coqdoc.css index.css doc/
 cd doc
 if [ -f index.html ]
 then
 	rm index.html
 	
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n<html xmlns="http://www.w3.org/1999/xhtml">\n<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n<link href="coqdoc.css" rel="stylesheet" type="text/css"/>\n<title>Documentation | Coqtail (r' > list
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n<link href="coqdoc.css" rel="stylesheet" type="text/css"/>\n<link href="index.css" rel="stylesheet" type="text/css"/>\n<title>Documentation | Coqtail (r' > list
 
 	echo $rev >> list
 	echo ')</title>\n</head>\n<body>\n<h1>Documentation (r' >> list
