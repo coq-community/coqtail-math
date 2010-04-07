@@ -31,7 +31,6 @@ Require Import MyRIneq.
 Require Import Ranalysis_def.
 Require Import RIVT.
 
-
 Local Open Scope R_scope.
 
 (* begin hide *)

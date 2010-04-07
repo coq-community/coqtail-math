@@ -23,7 +23,6 @@ Require Export Reals.
 Require Import Rsequence.
 Require Export MyReals.
 Require Import Max.
-Require Import Tools.
 Require Import Fourier.
 Require Import Rsequence_base_facts.
 
@@ -77,7 +76,6 @@ omega.
 Qed.
 
 Lemma finite_cv_radius_pos An r : finite_cv_radius An r -> 0 <= r.
-
 Proof.
 intros An r [_ Hf].
  destruct(Rle_lt_dec 0 r).
@@ -96,6 +94,30 @@ elim Rho ; intros m Hm ; exists m ; unfold gt_abs_Pser ; intros a Ha ;
  rewrite Rabs_Rabsolu ; rewrite <- Rabs_mult ; apply Hm ; exists i ; unfold gt_abs_Pser ;
  reflexivity.
 Qed.
+
+Lemma pow_lt_compat : forall x y, 0 < x -> x < y ->
+  forall n, (1 <= n)%nat -> x ^ n < y ^ n.
+Proof.
+intros x y x_pos x_lt_y n n_lb.
+ induction n.
+ apply False_ind ; intuition.
+ destruct n.
+ simpl ; repeat (rewrite Rmult_1_r) ; assumption.
+ assert (Hrew : forall a n, a ^ S (S n) = a * a ^ S n).
+  intros a m ; simpl ; reflexivity.
+ repeat (rewrite Hrew) ; apply Rmult_gt_0_lt_compat ; [apply pow_lt | | | apply IHn] ; intuition.
+ apply Rlt_trans with x ; assumption.
+Qed.
+
+Lemma pow_le_compat : forall x y, 0 <= x -> x <= y ->
+  forall n, x ^ n <= y ^ n.
+Proof.
+intros x y x_pos x_lt_y n.
+ induction n.
+ simpl ; apply Req_le ; reflexivity.
+ simpl ; apply Rmult_le_compat ; [| apply pow_le | |] ; assumption.
+Qed.
+
 
 Lemma Cv_radius_weak_le_compat : forall (An : nat -> R) (r r' : R),
        Rabs r' <= Rabs r -> Cv_radius_weak An r -> Cv_radius_weak An r'.

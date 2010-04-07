@@ -19,8 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Tools.
-
 Require Import Rsequence.
 Require Import Rsequence_facts.
 Require Import Rsequence_cv_facts.
@@ -194,6 +192,14 @@ intros a n ; induction n.
  rewrite Cre_mul.
  replace (Cre (0 +i a)) with R0 by reflexivity.
  repeat rewrite IHn ; simpl ; ring.
+Qed.
+
+Lemma n_modulo_2 : forall n:nat, {p | (n = 2 * p)%nat} + {p | n = S (2 * p)}.
+Proof.
+intro n ; induction n.
+ left ; exists 0%nat ; intuition.
+ case IHn ; intro H ; destruct H as (p,Hp) ;
+ [right ; exists p | left ; exists (S p)] ; intuition.
 Qed.
 
 Lemma Cexp_trigo_compat : forall a, Cexp (0 +i a) = cos a +i sin a.

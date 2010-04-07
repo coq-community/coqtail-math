@@ -19,8 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-(* TODO Puisqu'on en fait sans se soucier de la compatibilite du makefile...*)
-
 Require Import Rlimit.
 Require Export Cbase.
 Require Import Ctacfield.

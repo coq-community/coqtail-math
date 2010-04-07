@@ -26,7 +26,7 @@ Require Import Rsequence.
 Require Import Rsequence_facts.
 Require Import Rseries_def.
 Require Import Rseries_facts.
-Require Import Tools.
+Require Import RFsequence_facts.
 
 Require Import Cpser_def.
 Require Import CFsequence.

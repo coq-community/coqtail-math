@@ -21,7 +21,6 @@ USA.
 
 Require Export Reals.
 Require Export Rpser_def.
-Require Import Tools.
 Require Import Fourier.
 Require Import Max.
 Require Import Min.
@@ -195,7 +194,7 @@ assert (Rabsx_r_lt_1 : Rabs x / r < 1).
   apply Rgt_minus ; rewrite <- Hrew_abs ; assumption.
   elim (pow_lt_1_zero (x/r) Rabsx_r_lt_1 (eps / (4 * M) * (1 - (Rabs x / r))) y_pos) ; intros N HN ;
   exists N ; intros n m n_lb m_lb.
-  case (Neq_or_neq m n) ; intro s.
+  case (eq_nat_dec m n); intro s.
   rewrite s ; rewrite R_dist_eq ; assumption.
   apply Rle_lt_trans with ((Rabs x / r) ^ S (min m n) * (M * 2 / (1 - Rabs x / r))).
   apply HM ; intuition.

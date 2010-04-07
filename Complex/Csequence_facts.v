@@ -21,7 +21,6 @@ USA.
 
 Require Import MyReals.
 Require Import Max.
-Require Import Tools.
 Require Import Rsequence.
 Require Import Rsequence_facts.
 Require Import Rsequence_base_facts.

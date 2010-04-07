@@ -27,7 +27,6 @@ Require Import Max.
 Require Import Csequence.
 Require Import Csequence_facts.
 Require Import Cprop_base.
-Require Import Tools.
 
 Open Scope C_scope.
 
