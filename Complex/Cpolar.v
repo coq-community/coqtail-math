@@ -31,8 +31,6 @@ Open Scope R_scope.
 
 (** ** Every complex number has polar coordinate *) 
 
-(* TODO on fait tout le temps la meme chose *)
-
 Lemma polar1 : forall z : C, Cre z <> 0%R -> { r : R & { theta : R | (r * cos (theta) +i r * sin (theta)) = z}}%R.
 Proof.
 intros. destruct z as (a,b).
