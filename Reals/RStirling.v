@@ -378,9 +378,9 @@ Local Coercion INR : nat >-> R.
 Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt (2 * PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
 Proof.
 destruct De_Moivre_equiv as [l Hl].
-assert(l²/(2*PI) = 1) as Heq.
+assert(l^2/(2*PI) = 1) as Heq.
  eapply Rseq_cv_unique.
-  apply Wallis_quotient_lim2.
+ apply Wallis_quotient_lim2.
   auto with *.
   assert (Hrw : (fun n => l * n ^ n * exp (-n) * sqrt n) == (fun n => ((n / exp 1) ^ n * sqrt n * l))).
    intro n.
@@ -405,7 +405,7 @@ assert(HPI := PI_RGT_0).
 apply sqrt_lem_1.
 fourier.
 auto with *.
-replace (l*l) with ((l² / (2*PI))* (2*PI)).
+replace (l*l) with ((l^2 / (2*PI))* (2*PI)).
 rewrite Heq; ring.
 unfold Rdiv, Rsqr; field; auto with *.
 Qed.

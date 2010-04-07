@@ -50,8 +50,8 @@ intros x Hx; apply continuity_pt_comp.
   apply derivable_continuous; apply derivable_pow.
 Qed.
 
-Definition W_even n := ((PI/2)*(fact (2 * n))/(2 ^ (2 * n) * (fact n) ² )).
-Definition W_odd n := ((2^(2*n) * (fact n) ²)/(fact (S (2 * n)))).
+Definition W_even n := ((PI/2)*(fact (2 * n))/(2 ^ (2 * n) * (fact n) ^2 )).
+Definition W_odd n := ((2^(2*n) * (fact n) ^2)/(fact (S (2 * n)))).
 
 Lemma Wallis_0 : Rint (sin_n 0)  0 (PI/2) (PI/2).
 Proof.
@@ -111,8 +111,9 @@ eapply Rint_parts with (f' := fun x => ((S n) * sin x ^ n)* cos x) (g' := sin).
   intros.
   unfold mult_fct, opp_fct.
   rewrite Rmult_assoc.
-  replace (cos x * - cos x) with (-(1 - (sin x)²)).
+  replace (cos x * - cos x) with (-(1 - (sin x)^2)).
   unfold Rsqr; simpl; ring.
+  replace ((sin x) ^ 2) with ((sin x)²) by (unfold Rsqr; ring).
   rewrite <- (cos2 x); unfold Rsqr; ring.
   apply Rint_scalar_mult_compat_l.
   apply Rint_minus; trivial.
@@ -148,8 +149,8 @@ apply Rint_eq_compat with (sin_n (S (S (2 *  n)))).
   replace (S (n + S (n + 0))) with (S (S (n + (n + 0)))) by auto;
   reflexivity.
 
-replace (PI / 2 * fact (2 * S n) / (2 ^ (2 * S n) * (fact (S n)) ²)) with
-  ((PI / 2 * fact (2 * n) / (2 ^ (2 * n) * (fact n)²)) * S (2 * n) / (S (S (2 * n)))).
+replace (PI / 2 * fact (2 * S n) / (2 ^ (2 * S n) * (fact (S n)) ^2)) with
+  ((PI / 2 * fact (2 * n) / (2 ^ (2 * n) * (fact n)^2)) * S (2 * n) / (S (S (2 * n)))).
 apply Wallis_formula; apply IHn.
 
 replace (2 * S n)%nat with (S (S (2 * n))) by auto with *.
@@ -168,17 +169,17 @@ Qed.
 
 
 
-Lemma Wallis_odd n : Rint (sin_n (S (2 * n))) 0 (PI/2) ((2^(2*n) * (fact n) ²)/(fact (S (2 * n)))).
+Lemma Wallis_odd n : Rint (sin_n (S (2 * n))) 0 (PI/2) ((2^(2*n) * (fact n) ^2)/(fact (S (2 * n)))).
 Proof.
 unfold W_odd.
 induction n.
-  simpl; unfold Rsqr; replace (1 * (1 * 1) / 1) with 1 by field; apply Wallis_1.
+  simpl; replace (1 * (1 * (1*1)) / 1) with 1 by field; apply Wallis_1.
 apply Rint_eq_compat with (sin_n (S (S (S (2 * n))))).
   intros; simpl.
 replace (n + S (n + 0))%nat with (S (n + (n + 0))) by auto;
 reflexivity.
-replace (2 ^ (2 * S n) * (fact (S n))² / fact (S (2 * S n))) with
-  ((2 ^ (2 * n) * (fact n)² / fact (S (2 * n))) * (S (S (2 * n)))/(S (S (S (2 * n))))).
+replace (2 ^ (2 * S n) * (fact (S n))^2 / fact (S (2 * S n))) with
+  ((2 ^ (2 * n) * (fact n)^2 / fact (S (2 * n))) * (S (S (2 * n)))/(S (S (S (2 * n))))).
 apply Wallis_formula; apply IHn.
 
 replace (2 * S n)%nat with (S (S (2 * n))) by auto with *.
@@ -277,12 +278,9 @@ intro n.
  rewrite Rinv_pow.
  apply pow_lt ; fourier.
  apply Rgt_not_eq ; fourier.
- apply Rinv_0_lt_compat ; apply INR_fact_lt_0.
- apply Rinv_0_lt_compat ; apply INR_fact_lt_0.
- apply Rgt_not_eq ; apply INR_fact_lt_0.
- apply Rgt_not_eq ; apply INR_fact_lt_0.
- apply Rgt_not_eq ; apply pow_lt ; fourier.
- apply Rmult_integral_contrapositive_currified ; apply Rgt_not_eq ; apply INR_fact_lt_0.
+ apply Rinv_0_lt_compat, pow_lt, INR_fact_lt_0.
+ apply Rgt_not_eq, pow_lt ; fourier.
+apply Rgt_not_eq, pow_lt, INR_fact_lt_0.
 Qed.
 
 Lemma Wallis_bound : forall (n : nat),  2*n / (S(2 * n)) <= W_odd n / W_even n <= 1.
@@ -502,7 +500,7 @@ Qed.
 Lemma Wallis_quotient_lim2 l : 
 l <> 0 ->
   (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l) ->
-    Rseq_cv (fun n => W_odd n / W_even n) (l²/(2*PI)).
+    Rseq_cv (fun n => W_odd n / W_even n) (l^2/(2*PI)).
 Proof.
 intros l Hneq Hl.
 apply Rseq_cv_eq_compat with (fun n => (2*2 ^ (4*n) * (fact n) ^ 4)/(PI*fact (2 * n) * fact (S (2 * n)))).
@@ -535,7 +533,7 @@ apply Rseq_equiv_cv_constant.
 Open Local Scope Rseq_scope.
 apply Rseq_equiv_eq_compat with 
   (Un := 2 * (fun n => 2 ^ (4 * n)) * fact * fact * fact * fact *
-  / (PI * (fun n => fact (2 * n)) * (fun n => fact (S (2 * n))))) (Vn := (l² / (2 * PI))%R).
+  / (PI * (fun n => fact (2 * n)) * (fun n => fact (S (2 * n))))) (Vn := (l^2 / (2 * PI))%R).
 intro n; unfold Rseq_mult, Rseq_inv, Rdiv, Rseq_constant; ring.
 intro; reflexivity.
 apply Rseq_equiv_trans with 
@@ -582,13 +580,12 @@ assumption.
 clear Hl H2n H2n1.
 apply Rseq_cv_equiv_constant.
 unfold Rdiv. 
-apply Rmult_integral_contrapositive ; split ;
-[ (intro H ; apply Rsqr_0_uniq in H ; intuition)
-| (rewrite Rinv_mult_distr ; 
-[ apply Rmult_integral_contrapositive ; split ; 
-[ (intro ; fourier) | (generalize PI_neq0 ; intro H0 ; apply Rinv_neq_0_compat ; intuition) ] 
-| (intro ; fourier) | apply PI_neq0])]. 
-
+apply Rmult_integral_contrapositive ; split .
+ apply pow_nonzero; assumption.
+ apply Rinv_neq_0_compat.
+ apply Rmult_integral_contrapositive; split.
+  intro ; fourier.
+  apply PI_neq0.
 unfold Rseq_constant, Rseq_mult, Rseq_div, Rseq_plus, Rseq_minus, Rseq_inv.
 (* Simplification of the expression ! *)
 apply Rseq_cv_eq_compat1 with 
@@ -791,9 +788,9 @@ intro. generalize (exp_pos 1) ; intros ; fourier.
 apply PI_neq0.
 intros eps Heps. exists O. intros n Hn.
 unfold R_dist. unfold Rseq_constant, Rseq_div, Rseq_inv, Rseq_mult.
-unfold Rdiv. rewrite Rminus_diag_eq.
+unfold Rdiv, Rsqr. rewrite Rminus_diag_eq.
 rewrite Rabs_R0. apply Heps.
-intuition.
+ring.
 Qed.
 
 End Wallis.
