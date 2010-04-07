@@ -211,7 +211,7 @@ Lemma Rseq_poly_pow_gt_1_little_O : forall d r, r > 1 -> (Rseq_poly d) = o(Rseq_
 Proof.
 intros d r Hr.
 pose (npow := (fix F m d := match d with O => 1 | S d => m * F m d end)%nat).
-(* Would need a lemma in stdlib! *)
+(* Lack of a lemma in stdlib *)
 assert (Hpow : (forall x y n, pow (x * y) n = pow x n * pow y n)%R).
 intros x y n; induction n.
 simpl; rewrite Rmult_1_l; reflexivity.

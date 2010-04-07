@@ -45,7 +45,6 @@ match n with
 | _ => ln (Un (S n) / Un n)
 end.
 
-(* auto c'est bon mangez-en *)
 Hint Resolve lt_0_INR.
 Hint Resolve sqrt_lt_R0.
 Hint Resolve exp_pos.

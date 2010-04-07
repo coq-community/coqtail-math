@@ -648,8 +648,6 @@ apply Rlt_not_eq.
 exact Hl.
 Qed.
 
-(*TODO*)
-
 (**********)
 Lemma Rseq_cv_finite_pos_mult_neg_infty_r l:
   0 < l -> Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->

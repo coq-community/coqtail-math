@@ -30,7 +30,6 @@ Require Import MyRfunctions.
 Open Local Scope R_scope.
 
 (* begin hide *)
-(* TODO place me *)
 
 Lemma Rmin_def a b: a <= b -> Rmin a b = a.
 Proof.
@@ -495,7 +494,6 @@ exact (False_ind _ (Rlt_irrefl 0 pr)).
 Qed.
 
 (* begin hide *)
-(* TODO : move and rename *)
 Lemma Rsqr_eq_0_reg : forall a, a * a = 0 -> a = 0.
 Proof.
 intros a Haa.
@@ -546,7 +544,6 @@ assert (Hz : z = 0).
 subst y; subst z.
   repeat rewrite Rmult_0_r.
   rewrite pow_ne_zero; auto with *.
- (* apply Rle_refl. *)
 assert (Hy : 0 <= y).
   eapply Rint_pos with (f := (g * g)%F).
     eexact Hle.

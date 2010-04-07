@@ -35,8 +35,7 @@ Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
 Open Scope R_scope.
 
-(* Proofs largely (totaly?) inspired from Guillaume Allais's work on sin(PI/2) = 1 *)
-(* TODO : organisation des lemmes + convention de nommage *)
+(* Proofs largely inspired from Guillaume Allais's work on sin(PI/2) = 1 *)
 Open Scope R_scope.
 
 (** * Positivity of cosine *)
@@ -889,7 +888,7 @@ intro H11. rewrite H11 in H10. intuition. fourier.
 assumption.
 Qed.
 
-Lemma arctansin : forall x, sin (arctan x) = x / (sqrt( 1 + x^2)).
+Lemma arctansin : forall x, sin (arctan x) = x / (sqrt (1 + x ^ 2)).
 Proof.
 intro x.
 destruct (exists_arctan x) as (a, H).
@@ -911,7 +910,6 @@ intro H11. rewrite H11 in H10. intuition. fourier.
 assumption.
 Qed.
 
-(* TODO C'est manipulable
 Lemma arctan_inv_PI2_1 : forall x0, x0 > 0 -> 
 forall Pf : derivable_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0,
     derive_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0 Pf = 0.
@@ -1021,13 +1019,11 @@ intro H10. rewrite H10 in Hx. fourier.
 apply derivable_pt_arctan.
 apply derivable_pt_arctan.
 assumption.
-Qed.*)
-
-(* TODO : generaliser pour x different de PI/2 -PI/2 et periodicite*)
+Qed.
 
 Lemma exist_0_mPI : forall x, 
-{k : Z| forall x1, (x1 = IZR(k) * PI - x) -> 
-0 < x1 <= PI}.
+  {k : Z| forall x1, (x1 = IZR k * PI - x) -> 
+    0 < x1 <= PI}.
 Proof.
 intros x.
 exists (up (x/PI)).

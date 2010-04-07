@@ -340,7 +340,6 @@ field; repeat split.
   reflexivity.
 Qed.
 
-(*TODO replacer et completer le replacement !!! *)
 Lemma Rseq_cv_eq_compat1 : forall Un Vn l,
   {m | forall n, (n >= m)%nat -> Un n = Vn n} ->
     Rseq_cv Un l -> Rseq_cv Vn l.
@@ -553,11 +552,11 @@ apply Rmult_integral_contrapositive ; split ;
 [ apply PI_neq0 | apply INR_fact_neq_0] | apply INR_fact_neq_0 ].
 
 exists (S O). intros n Hn; unfold Rseq_mult, Rseq_constant.
-(* crade *)
+
 assert(H : {m | n = S m}). exists (pred n). intuition.
 destruct H as (m, Subst).
 rewrite Subst.
-(* fin crade *)
+
 apply Rmult_integral_contrapositive ; split ; 
 [ apply Rmult_integral_contrapositive ; split ; 
 [ apply PI_neq0 | apply Rmult_integral_contrapositive ; split ; 
@@ -620,7 +619,6 @@ do 2 rewrite <- tech_pow_Rmult.
 replace (/sqrt (2 * n))%R with (sqrt (2 * n) / (2 * n))%R by (apply sqrt_id ; inversion Hn ; [intuition | apply not_0_INR ; intuition]).
 unfold Rsqr. unfold Rdiv.
 repeat rewrite <- Rinv_pow. field.
-(* TODO c'est bourrin...*)
 
 (* Solving the "<> 0" equations *)
 

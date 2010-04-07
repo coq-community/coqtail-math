@@ -132,7 +132,7 @@ apply (Rle_trans 0 (INR n) x (le_INR _ _ (le_O_n n)) Hnx).
 Qed.
 
 Lemma Rser_RiemannInt_link_general_term_integrable (n : nat) : 
-  Riemann_integrable (fun x => fct_cte(f (INR n)) x - f x) (INR n) (INR (S n)).
+  Riemann_integrable (fun x => fct_cte (f (INR n)) x - f x) (INR n) (INR (S n)).
 Proof.
 intros n.
 apply RiemannInt_integrable_minus.
@@ -303,7 +303,7 @@ unfold plus_fct, fct_cte, id, inv_fct.
   assert (Heq2 : (fun n : nat => ln (INR (S (S n)))) ==
           (fun n : nat => RiemannInt (int_f_0_n (S n)))).
     intro n.
-    replace (ln (S (S n))) with ((ln (S n + 1)%R - ln (O + 1))). (* by (simpl; rewrite ln_1; ring).*)
+    replace (ln (S (S n))) with ((ln (S n + 1)%R - ln (O + 1))).
     destruct (Rint_inv1 0%nat (S n)) as [Hint Heq].
     auto with *.
     rewrite <- Heq.

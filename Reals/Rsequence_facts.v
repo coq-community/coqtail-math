@@ -42,7 +42,7 @@ intros x Hx; destruct Hx as [n Hn]; rewrite Hn.
 apply growing_ineq.
 apply Hg.
 apply Hl.
-apply growing_cv. (*rename*)
+apply growing_cv.
 apply Hg.
 apply H.
 Qed.
@@ -189,7 +189,7 @@ apply Rnot_le_lt in Hff.
 exists n.
 intros p Hp.
 apply Rlt_le_trans with (Un n); [ apply Hff | apply Rge_le].
-apply growing_prop. (* rename*)
+apply growing_prop.
 apply Hgr.
 apply Hp.
 Qed.
@@ -208,7 +208,7 @@ apply Rnot_le_lt in Hff.
 exists n.
 intros p Hp.
 apply Rle_lt_trans with (Un n).
-apply decreasing_prop. (* rename*)
+apply decreasing_prop.
 apply Hgr.
 apply Hp.
 apply Hff.

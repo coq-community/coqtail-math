@@ -201,7 +201,7 @@ Open Scope R_scope.
 
 (* begin hide *)
 Lemma R_dist_bounded_in_segment : forall a b c e, a <= b <= c -> R_dist a c < e -> 
-  (*R_dist a b < e /\*) R_dist b c < e.
+  R_dist b c < e.
 Proof.
 intros a b c e [ab bc] ace.
 unfold R_dist in *.
@@ -213,7 +213,6 @@ assert (forall x y, x <= y -> Rabs (x - y) = y - x).
  
  pose proof (Rle_trans _ _ _ ab bc) as ac.
  
- (*split;*)
   repeat rewrite H; rewrite H in ace; intuition;
   apply Rle_lt_trans with (c - a);
    fourier.
