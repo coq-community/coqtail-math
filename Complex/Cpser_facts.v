@@ -169,7 +169,7 @@ repeat rewrite Hrew ; rewrite R_dist_sym ; apply HN ; assumption.
  exists l ; apply Hl.
 Qed.
 
-(** Definition of the sum of a power serie (0 outside the cv-disc) and proof that it's really the sum *)
+(** Definition of the sum of a power serie (0 outside the cv-disc) *)
 
 Definition weaksum_r (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) : C -> C.
 Proof.
@@ -179,6 +179,28 @@ intros An r Rho x.
  exact 0.
 Defined.
 
+Definition sum_r (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) : C -> C.
+Proof.
+intros An r Pr x.
+ case (Rlt_le_dec (Cnorm x) r) ; intro x_bd.
+  assert (rho : Cv_radius_weak An (middle (Cnorm x) r)).
+  apply Pr; split.
+  apply Rle_trans with (Cnorm x).
+   apply Cnorm_pos.
+   left ; apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
+   apply (proj2 (middle_is_in_the_middle _ _ x_bd)).
+ apply (weaksum_r An (middle (Cnorm x) r) rho x).
+ exact 0.
+Defined.
+
+Definition sum (An : nat -> C) (Pr : infinite_cv_radius An) : C -> C.
+Proof.
+intros An Pr r.
+ apply (weaksum_r An (Cnorm r +1) (Pr (Cnorm r + 1)%R) r).
+Defined.
+
+(** Establishing the link between these functions and the sum *)
+
 Lemma weaksum_r_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (x : C),
       Cnorm x < r -> Pser An x (weaksum_r An r Pr x).
 Proof.
@@ -187,6 +209,25 @@ intros An r Pr x x_bd.
  destruct (Cpser_abel An r Pr x s) as (l,Hl) ; simpl ; assumption.
  apply False_ind ; fourier.
 Qed.
+
+Lemma sum_r_sums : forall  (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
+      forall x, Cnorm x < r -> Pser An x (sum_r An r Pr x).
+Proof.
+intros An r Pr x x_ub.
+ unfold sum_r ; destruct (Rlt_le_dec (Cnorm x) r) as [x_bd | x_nbd].
+ apply weaksum_r_sums.
+ apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
+  apply False_ind ; fourier.
+Qed.
+
+Lemma sum_sums : forall  (An : nat -> C) (Pr : infinite_cv_radius An),
+      forall x, Pser An x (sum An Pr x).
+Proof.
+intros An Pr x.
+ apply weaksum_r_sums ; intuition.
+Qed.
+
+(** Proof that the sum is unique *)
 
 Lemma weaksum_r_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (x : C),
      Cnorm x < r -> weaksum_r An r Pr1 x = weaksum_r An r Pr2 x.
@@ -207,30 +248,6 @@ intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2.
  eapply Pser_unique ; eassumption.
 Qed.
 
-Definition sum_r (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) : C -> C.
-Proof.
-intros An r Pr x.
- case (Rlt_le_dec (Cnorm x) r) ; intro x_bd.
-  assert (rho : Cv_radius_weak An (middle (Cnorm x) r)).
-  apply Pr; split.
-  apply Rle_trans with (Cnorm x).
-   apply Cnorm_pos.
-   left ; apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
-   apply (proj2 (middle_is_in_the_middle _ _ x_bd)).
- apply (weaksum_r An (middle (Cnorm x) r) rho x).
- exact 0.
-Defined.
-
-Lemma sum_r_sums : forall  (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
-      forall x, Cnorm x < r -> Pser An x (sum_r An r Pr x).
-Proof.
-intros An r Pr x x_ub.
- unfold sum_r ; destruct (Rlt_le_dec (Cnorm x) r) as [x_bd | x_nbd].
- apply weaksum_r_sums.
- apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
-  apply False_ind ; fourier.
-Qed.
-
 Lemma sum_r_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : finite_cv_radius An r) (x : C),
      Cnorm x < r -> sum_r An r Pr1 x = sum_r An r Pr2 x.
 Proof.
@@ -248,19 +265,6 @@ intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2 ;
  assert (T1 := sum_r_sums _ _ Pr1 _ x_bd1) ;
  assert (T2 := sum_r_sums _ _ Pr2 _ x_bd2) ;
  eapply Pser_unique ; eassumption.
-Qed.
-
-Definition sum (An : nat -> C) (Pr : infinite_cv_radius An) : C -> C.
-Proof.
-intros An Pr r.
- apply (weaksum_r An (Cnorm r +1) (Pr (Cnorm r + 1)%R) r).
-Defined.
-
-Lemma sum_sums : forall  (An : nat -> C) (Pr : infinite_cv_radius An),
-      forall x, Pser An x (sum An Pr x).
-Proof.
-intros An Pr x.
- apply weaksum_r_sums ; intuition.
 Qed.
 
 Lemma sum_unique : forall (An : nat -> C) (Pr1 Pr2 : infinite_cv_radius An) (x : C),
@@ -640,7 +644,7 @@ intros An n x ;
  apply (derivable_pt_lim_partial_sum An x n).
 Qed.
 
-(** Sum of the formal derivative *)
+(** * Sum of the formal derivative *)
 
 Definition weaksum_r_derive (An : nat -> C) (r : R) (Rho : Cv_radius_weak An r) (z : C) : C.
 Proof.
@@ -680,6 +684,8 @@ Proof.
  intros An Rho z ; apply (weaksum_r_derive _ _ (Rho (Cnorm z + 1)%R) z).
 Defined.
 
+(** Proof that it is really the sum *)
+
 Lemma weaksum_r_derive_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (z : C),
       Cnorm z < r -> Pser (An_deriv An) z (weaksum_r_derive An r Pr z).
 Proof.
@@ -692,15 +698,6 @@ intros An r Pr z z_bd.
  elim (Rlt_irrefl _ H).
 Qed.
 
-Lemma weaksum_r_derive_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (z : C),
-      Cnorm z < r -> weaksum_r_derive An r Pr1 z = weaksum_r_derive An r Pr2 z .
-Proof.
-intros An r Pr1 Pr2 z z_bd ;
- assert (T1 := weaksum_r_derive_sums _ _ Pr1 _ z_bd) ;
- assert (T2 := weaksum_r_derive_sums _ _ Pr2 _ z_bd).
- eapply Pser_unique ; eassumption.
-Qed.
-
 Lemma sum_r_derive_sums : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) (z : C),
       Cnorm z < r -> Pser (An_deriv An) z (sum_r_derive An r Pr z).
 Proof.
@@ -709,6 +706,23 @@ intros An r Pr z z_bd ; unfold sum_r_derive ;
  apply weaksum_r_derive_sums ; apply (middle_is_in_the_middle _ _ z_bd).
  assert (F : r < r) by (apply Rle_lt_trans with (Cnorm z) ; assumption) ;
  destruct (Rlt_irrefl _ F).
+Qed.
+
+Lemma sum_derive_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An) (z : C),
+      Pser (An_deriv An) z (sum_derive An Pr z).
+Proof.
+intros An Pr z ; unfold sum_derive ; apply weaksum_r_derive_sums ; intuition.
+Qed.
+
+(** Proof that the sum is unique *)
+
+Lemma weaksum_r_derive_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (z : C),
+      Cnorm z < r -> weaksum_r_derive An r Pr1 z = weaksum_r_derive An r Pr2 z .
+Proof.
+intros An r Pr1 Pr2 z z_bd ;
+ assert (T1 := weaksum_r_derive_sums _ _ Pr1 _ z_bd) ;
+ assert (T2 := weaksum_r_derive_sums _ _ Pr2 _ z_bd).
+ eapply Pser_unique ; eassumption.
 Qed.
 
 Lemma sum_r_derive_unique : forall (An : nat -> C) (r : R) (Pr1 Pr2 : finite_cv_radius An r) (z : C),
@@ -720,12 +734,6 @@ intros An r Pr1 Pr2 z z_bd ;
  eapply Pser_unique ; eassumption.
 Qed.
 
-Lemma sum_derive_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An) (z : C),
-      Pser (An_deriv An) z (sum_derive An Pr z).
-Proof.
-intros An Pr z ; unfold sum_derive ; apply weaksum_r_derive_sums ; intuition.
-Qed.
-
 Lemma sum_derive_unique : forall (An : nat -> C) (Pr1 Pr2 : infinite_cv_radius An) (z : C),
       sum_derive An Pr1 z = sum_derive An Pr2 z .
 Proof.
@@ -734,6 +742,8 @@ intros An Pr1 Pr2 z ;
  assert (T2 := sum_derive_sums _ Pr2 z).
  eapply Pser_unique ; eassumption.
 Qed.
+
+(** * Derivability of a power serie within its disc of convergence *)
 
 Lemma derivable_pt_lim_weaksum_r (An:nat->C) (r:R) (Pr : Cv_radius_weak An r) : forall z,
       Cnorm z < r -> derivable_pt_lim (weaksum_r An r Pr) z (weaksum_r_derive An r Pr z).

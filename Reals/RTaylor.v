@@ -192,7 +192,7 @@ assert (Hb : forall u, Rmin 0 x <= u <= Rmax 0 x -> -1 < u < 1).
     destruct Rle_dec; split; fourier.
 pose (Hcv := ln_minus_cv_radius).
 pose (g := weaksum_r Un 1 Hcv).
-pose (dg := sum_r_derive Un 1 Hcv).
+pose (dg := weaksum_r_derive Un 1 Hcv).
 destruct Rint_derive2
   with (f := f) (a := 0) (b := x) (d := df) as [pr HI].
   intros u Hu.
@@ -218,7 +218,7 @@ assert (Heq : forall u, -1 < u < 1 -> dg u = df u).
     with (- / (1 - u)) by (field; intros Hc; fourier).
   assert (Habs : Rabs u < 1).
     unfold Rabs; destruct Rcase_abs; fourier.
-  assert (Hser1 := sum_r_derive_sums Un 1 Hcv u Habs).
+  assert (Hser1 := weaksum_r_derive_sums Un 1 Hcv u Habs).
   assert (Hser2 := GP_infinite u Habs).
   eapply Rseq_cv_unique.
     apply Hser1.
@@ -241,7 +241,7 @@ edestruct Rint_eq_compat
 destruct Rint_derive2
   with (f := g) (a := 0) (b := x) (d := dg) as [pr3 HI3].
   intros u Hu.
-  apply Pser_derivability.
+  apply derivable_pt_lim_weaksum_r.
   apply Hb in Hu.
   destruct Hu as [Hul Hur].
   unfold Rabs; destruct Rcase_abs; fourier.

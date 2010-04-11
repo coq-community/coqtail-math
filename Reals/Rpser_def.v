@@ -19,12 +19,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Export Reals.
-Require Import Rsequence.
 Require Export MyReals.
+Require Import Rsequence.
+Require Import Rsequence_cv_facts.
+Require Import Rsequence_base_facts.
+
 Require Import Max.
 Require Import Fourier.
-Require Import Rsequence_base_facts.
+
 
 Open Local Scope R_scope.
 
@@ -83,6 +85,15 @@ intros An r [_ Hf].
 destruct (Hf 0).
 trivial.
 apply Cv_radius_weak_0.
+Qed.
+
+Lemma Cv_radius_weak_Rabs_compat_rev : forall (An : nat -> R) (r : R), 
+       Cv_radius_weak (fun n => Rabs (An n)) r -> Cv_radius_weak An r.
+Proof.
+intros An r [M HM] ; exists M.
+ intros x [n Hn] ; rewrite Hn.
+ unfold gt_abs_Pser ; rewrite Rabs_mult, <- Rabs_Rabsolu, <- Rabs_mult ;
+ apply HM ; exists n ; reflexivity.
 Qed.
 
 Lemma Cv_radius_weak_Rabs_compat : forall (An : nat -> R) (r : R), 
@@ -307,6 +318,31 @@ intros An x l Hyp.
  unfold gt_Pser.
  apply Hyp.
 Qed.
+
+Lemma Pser_unique : forall (An : nat -> R) (x l1 l2 : R),
+          Pser An x l1 -> Pser An x l2 -> l1 = l2.
+Proof.
+intros An x l1 l2 Hl1 Hl2.
+ assert (T1 := Pser_Rseqcv_link _ _ _ Hl1) ;
+ assert (T2 := Pser_Rseqcv_link _ _ _ Hl2) ;
+ eapply Rseq_cv_unique ; eassumption.
+Qed.
+
+Lemma Pser_unique_extentionality : forall (An Bn : nat -> R) (x l1 l2 : R),
+	(forall n, An n = Bn n) ->
+        Pser An x l1 -> Pser Bn x l2 -> l1 = l2.
+Proof.
+intros An Bn x l1 l2 An_eq_Bn Hl1 Hl2.
+ assert (T1 := Pser_Rseqcv_link _ _ _ Hl1) ;
+ assert (T2 := Pser_Rseqcv_link _ _ _ Hl2).
+ assert (T3 : forall (n : nat), sum_f_R0 (fun n => (gt_Pser An x) n) n
+                  = sum_f_R0 (fun n => (gt_Pser Bn x) n) n).
+  intro n ; apply sum_eq ; intros ; unfold gt_Pser ; rewrite An_eq_Bn ; reflexivity.
+ assert (T4 := Rseq_cv_eq_compat _ _ _ T3 T1).
+ eapply Rseq_cv_unique ; eassumption.
+Qed.
+
+(** Link between the finite_cv_radius and the upper bound *)
 
 Lemma finite_cv_radius_le An r r' : 
   finite_cv_radius An r -> Cv_radius_weak An r' -> r' <= r.

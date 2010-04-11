@@ -230,10 +230,8 @@ intros An r Rho x x_ub.
   apply R_complete ; apply Cauchy_crit_partial_sum with r ; assumption.
 Qed.
 
-(** * Definition of the sum of a power serie and proof that it's really the sum *)
+(** * Definition of the sum of a power serie (0 outside the convergence disc) *)
 
-
-(** finite convergence disc *)
 Definition weaksum_r (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) : R -> R.
 Proof.
 intros An r Rho x.
@@ -241,15 +239,6 @@ intros An r Rho x.
  elim (Rpser_abel _ _ Rho _ x_bd) ; intros y Hy ; exact y.
  exact 0.
 Defined.
-
-Lemma weaksum_r_sums : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) (x : R),
-      Rabs x < r -> Pser An x (weaksum_r An r Pr x).
-Proof.
-intros An r Pr x x_bd.
- unfold weaksum_r ; case (Rlt_le_dec (Rabs x) r) ; intro s.
- destruct (Rpser_abel An r Pr x s) as (l,Hl) ; simpl ; assumption.
- apply False_ind ; fourier.
-Qed.
 
 Definition sum_r (An : nat -> R) (r : R) (Pr : finite_cv_radius An r) : R -> R.
 Proof.
@@ -265,6 +254,23 @@ intros An r Pr x.
  exact 0.
 Defined.
 
+Definition sum (An : nat -> R) (Pr : infinite_cv_radius An) : R -> R.
+Proof.
+intros An Pr r.
+ apply (weaksum_r An (Rabs r +1) (Pr (Rabs r + 1)) r).
+Defined.
+
+(** Proof that it is really the sum *)
+
+Lemma weaksum_r_sums : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) (x : R),
+      Rabs x < r -> Pser An x (weaksum_r An r Pr x).
+Proof.
+intros An r Pr x x_bd.
+ unfold weaksum_r ; case (Rlt_le_dec (Rabs x) r) ; intro s.
+ destruct (Rpser_abel An r Pr x s) as (l,Hl) ; simpl ; assumption.
+ apply False_ind ; fourier.
+Qed.
+
 Lemma sum_r_sums : forall  (An : nat -> R) (r : R) (Pr : finite_cv_radius An r),
       forall x, Rabs x < r -> Pser An x (sum_r An r Pr x).
 Proof.
@@ -275,17 +281,61 @@ intros An r Pr x x_ub.
   apply False_ind ; fourier.
 Qed.
 
-Definition sum (An : nat -> R) (Pr : infinite_cv_radius An) : R -> R.
-Proof.
-intros An Pr r.
- apply (weaksum_r An (Rabs r +1) (Pr (Rabs r + 1)) r).
-Defined.
-
 Lemma sum_sums : forall  (An : nat -> R) (Pr : infinite_cv_radius An),
       forall x, Pser An x (sum An Pr x).
 Proof.
 intros An Pr x.
  apply weaksum_r_sums ; intuition.
+Qed.
+
+
+(** Proof that the sum is unique *)
+
+Lemma weaksum_r_unique : forall (An : nat -> R) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (x : R),
+     Rabs x < r -> weaksum_r An r Pr1 x = weaksum_r An r Pr2 x.
+Proof.
+intros An r Pr1 Pr2 x x_bd ;
+ assert (T1 := weaksum_r_sums _ _ Pr1 _ x_bd) ;
+ assert (T2 := weaksum_r_sums _ _ Pr2 _ x_bd) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma weaksum_r_unique_strong : forall (An : nat -> R) (r1 r2 : R) (Pr1 : Cv_radius_weak An r1)
+     (Pr2 : Cv_radius_weak An r2) (x : R), Rabs x < r1 -> Rabs x < r2 ->
+     weaksum_r An r1 Pr1 x = weaksum_r An r2 Pr2 x.
+Proof.
+intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2.
+  assert (T1 := weaksum_r_sums _ _ Pr1 _ x_bd1) ;
+  assert (T2 := weaksum_r_sums _ _ Pr2 _ x_bd2) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_r_unique : forall (An : nat -> R) (r : R) (Pr1 Pr2 : finite_cv_radius An r) (x : R),
+     Rabs x < r -> sum_r An r Pr1 x = sum_r An r Pr2 x.
+Proof.
+intros An r Pr1 Pr2 x x_bd ;
+ assert (T1 := sum_r_sums _ _ Pr1 _ x_bd) ;
+ assert (T2 := sum_r_sums _ _ Pr2 _ x_bd) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_r_unique_strong : forall (An : nat -> R) (r1 r2 : R) (Pr1 : finite_cv_radius An r1)
+     (Pr2 : finite_cv_radius An r2) (x : R), Rabs x < r1 -> Rabs x < r2 ->
+     sum_r An r1 Pr1 x = sum_r An r2 Pr2 x.
+Proof.
+intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2 ;
+ assert (T1 := sum_r_sums _ _ Pr1 _ x_bd1) ;
+ assert (T2 := sum_r_sums _ _ Pr2 _ x_bd2) ;
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_unique : forall (An : nat -> R) (Pr1 Pr2 : infinite_cv_radius An) (x : R),
+      sum An Pr1 x = sum An Pr2 x.
+Proof.
+intros An Pr1 Pr2 x ;
+ assert (T1 := sum_sums  _ Pr1 x) ;
+ assert (T2 := sum_sums  _ Pr2 x) ;
+ eapply Pser_unique ; eassumption.
 Qed.
 
 (** Abel's lemma : Normal convergence of the power serie *)
@@ -802,7 +852,7 @@ Qed.
 
 (** Sum of the formal derivative *)
 
-Definition sum_r_derive (An : nat -> R) (r : R) (Rho : Cv_radius_weak An r) (x : R) : R.
+Definition weaksum_r_derive (An : nat -> R) (r : R) (Rho : Cv_radius_weak An r) (x : R) : R.
 Proof.
 intros An r Rho x ; case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
  pose (r' := (Rabs x + Rabs r)/2).
@@ -817,11 +867,31 @@ intros An r Rho x ; case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
  apply 0.
 Defined.
 
-Lemma sum_r_derive_sums : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) (x : R),
-      Rabs x < r -> Pser (An_deriv An) x (sum_r_derive An r Pr x).
+Definition sum_r_derive (An : nat -> R) (r : R) (Rho : finite_cv_radius An r) (x : R) : R.
+Proof.
+intros An r Rho z.
+ destruct (Rlt_le_dec (Rabs z) r) as [z_bd | z_gt].
+ assert (H : 0 <= middle (Rabs z) r < r).
+  split.
+  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Rabs z) ; [| assumption]] ;
+  apply Rabs_pos.
+  apply (middle_is_in_the_middle _ _ z_bd).
+ apply (weaksum_r_derive _ _ (proj1 Rho (middle (Rabs z) r) H) z).
+ apply 0.
+Defined.
+
+Definition sum_derive (An : nat -> R) (Rho : infinite_cv_radius An) (z : R) : R.
+Proof.
+ intros An Rho z ; apply (weaksum_r_derive _ _ (Rho (Rabs z + 1)%R) z).
+Defined.
+
+(** Proof that it is really the sum *)
+
+Lemma weaksum_r_derive_sums : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) (x : R),
+      Rabs x < r -> Pser (An_deriv An) x (weaksum_r_derive An r Pr x).
 Proof.
 intros An r Pr x x_bd.
- unfold sum_r_derive ; case (Rlt_le_dec (Rabs x) r) ; intro s.
+ unfold weaksum_r_derive ; case (Rlt_le_dec (Rabs x) r) ; intro s.
  rewrite <- Rabs_right in x_bd.
  apply weaksum_r_sums.
  apply (proj1 (Rpser_derivability_prelim _ _ x_bd)).
@@ -831,10 +901,55 @@ intros An r Pr x x_bd.
  elim (Rlt_irrefl _ H).
 Qed.
 
+Lemma sum_r_derive_sums : forall (An : nat -> R) (r : R) (Pr : finite_cv_radius An r) (z : R),
+      Rabs z < r -> Pser (An_deriv An) z (sum_r_derive An r Pr z).
+Proof.
+intros An r Pr z z_bd ; unfold sum_r_derive ;
+ destruct (Rlt_le_dec (Rabs z) r) as [z_bd2 | Hf].
+ apply weaksum_r_derive_sums ; apply (middle_is_in_the_middle _ _ z_bd).
+ assert (F : r < r) by (apply Rle_lt_trans with (Rabs z) ; assumption) ;
+ destruct (Rlt_irrefl _ F).
+Qed.
+
+Lemma sum_derive_sums : forall (An : nat -> R) (Pr : infinite_cv_radius An) (z : R),
+      Pser (An_deriv An) z (sum_derive An Pr z).
+Proof.
+intros An Pr z ; unfold sum_derive ; apply weaksum_r_derive_sums ; intuition.
+Qed.
+
+(** Proof that this derivative is unique *)
+
+Lemma weaksum_r_derive_unique : forall (An : nat -> R) (r : R) (Pr1 Pr2 : Cv_radius_weak An r) (z : R),
+      Rabs z < r -> weaksum_r_derive An r Pr1 z = weaksum_r_derive An r Pr2 z .
+Proof.
+intros An r Pr1 Pr2 z z_bd ;
+ assert (T1 := weaksum_r_derive_sums _ _ Pr1 _ z_bd) ;
+ assert (T2 := weaksum_r_derive_sums _ _ Pr2 _ z_bd).
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_r_derive_unique : forall (An : nat -> R) (r : R) (Pr1 Pr2 : finite_cv_radius An r) (z : R),
+      Rabs z < r -> sum_r_derive An r Pr1 z = sum_r_derive An r Pr2 z .
+Proof.
+intros An r Pr1 Pr2 z z_bd ;
+ assert (T1 := sum_r_derive_sums _ _ Pr1 _ z_bd) ;
+ assert (T2 := sum_r_derive_sums _ _ Pr2 _ z_bd).
+ eapply Pser_unique ; eassumption.
+Qed.
+
+Lemma sum_derive_unique : forall (An : nat -> R) (Pr1 Pr2 : infinite_cv_radius An) (z : R),
+      sum_derive An Pr1 z = sum_derive An Pr2 z .
+Proof.
+intros An Pr1 Pr2 z ;
+ assert (T1 := sum_derive_sums _ Pr1 z) ;
+ assert (T2 := sum_derive_sums _ Pr2 z).
+ eapply Pser_unique ; eassumption.
+Qed.
+
 (** Proof that the formal derivative is the actual derivative within the cv-disk *)
 
-Lemma Pser_derivability (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
-      Rabs x < r -> derivable_pt_lim (weaksum_r An r Pr) x (sum_r_derive An r Pr x).
+Lemma derivable_pt_lim_weaksum_r (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
+      Rabs x < r -> derivable_pt_lim (weaksum_r An r Pr) x (weaksum_r_derive An r Pr x).
 Proof.
 intros An r rho x x_bd.
  assert (x_bd' : Rabs x < Rabs r).
@@ -896,7 +1011,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
          {l : R | Un_cv (fun N : nat => SP
          (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n) N y) l}).
     intros y y_bd.
-    exists (sum_r_derive An r rho y).
+    exists (weaksum_r_derive An r rho y).
     assert (y_bd2 : Rabs y < r).
      unfold Boule, mkposreal_lb_ub in y_bd ; rewrite Rminus_0_r in y_bd.
      apply Rlt_trans with (((Rabs x + Rabs r) / 2 - - (Rabs x + Rabs r) / 2) / 2).
@@ -906,7 +1021,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
      destruct (middle_is_in_the_middle _ _ x_bd) as (_, Temp) ; unfold middle in Temp.
      rewrite Rabs_right with r ; [assumption | apply Rle_ge ;
      apply Rle_trans with (Rabs x) ; [apply Rabs_pos | intuition]].
-     intros alpha alpha_pos ; destruct (sum_r_derive_sums An r rho y y_bd2
+     intros alpha alpha_pos ; destruct (weaksum_r_derive_sums An r rho y y_bd2
            alpha alpha_pos) as (N, HN) ; exists N ; intros n n_lb ; apply HN ;
            assumption.
    assert (CVN : CVN_r (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n)
@@ -924,7 +1039,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
    assert (Main := CVN_CVU_interv (fun n x => gt_Pser (An_deriv An) x n)
           (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)
           lb_lt_x x_lt_ub) cv_interv CVN).
-   assert (Main2 : RFseq_cvu (Rpser_partial_sum_derive An) (sum_r_derive An r rho)
+   assert (Main2 : RFseq_cvu (Rpser_partial_sum_derive An) (weaksum_r_derive An r rho)
           ((- (Rabs x + Rabs r) / 2 + (Rabs x + Rabs r) / 2) / 2)
           (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)
           lb_lt_x x_lt_ub)).
@@ -949,7 +1064,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
      destruct (middle_is_in_the_middle _ _ x_bd) as (_, Temp') ; unfold middle in Temp'.
      rewrite Rabs_right with r ; [assumption | apply Rle_ge ;
      apply Rle_trans with (Rabs x) ; [apply Rabs_pos | intuition]].
-    assert (T2_temp := sum_r_derive_sums An r rho y y_bd3).
+    assert (T2_temp := weaksum_r_derive_sums An r rho y y_bd3).
     assert (T2 := Pser_Rseqcv_link _ _ _ T2_temp) ; clear T2_temp.
     assert (Hrew : (fun N : nat => sum_f_R0 (gt_Pser (An_deriv An) y) N)
     = (fun N : nat => SP (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n) N y)).
@@ -990,7 +1105,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
    intros n n_lb ; apply HN ; assumption.
     apply (RFseq_cvu_derivable (fun n x => sum_f_R0 (gt_Pser An x) n)
          (Rpser_partial_sum_derive An)
-         (weaksum_r An r rho) (sum_r_derive An r rho) x
+         (weaksum_r An r rho) (weaksum_r_derive An r rho) x
          (- (Rabs x + Rabs r)/2) ((Rabs x + Rabs r)/2)
          lb_lt_x x_lt_ub Dfn_eq_fn' fn_cv_f Main2).
    intros y y_lb y_ub.
@@ -1017,19 +1132,113 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
    assumption.
 Qed.
 
+Lemma derivable_pt_lim_sum_r (An:nat->R) (r:R) (Pr : finite_cv_radius An r) : forall z,
+      Rabs z < r -> derivable_pt_lim (sum_r An r Pr) z (sum_r_derive An r Pr z).
+Proof.
+intros An r Pr z z_bd eps eps_pos. 
+ assert (H : 0 <= middle (Rabs z) r < r).
+  split.
+  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Rabs z) ; [| assumption]] ;
+  apply Rabs_pos.
+  apply (middle_is_in_the_middle _ _ z_bd).
+ destruct (derivable_pt_lim_weaksum_r _ _ (proj1 Pr (middle (Rabs z) r) H) _
+ (proj1 (middle_is_in_the_middle _ _ z_bd)) _ eps_pos) as [delta Hdelta].
+ pose (delta' := Rmin delta (((middle (Rabs z) r) - Rabs z) / 2)%R) ;
+ assert (delta'_pos : 0 < delta').
+  apply Rmin_pos.
+   apply delta.
+   apply ub_lt_2_pos with (middle (Rabs z) (middle (Rabs z) r)) ;
+   apply (middle_is_in_the_middle _ _ (proj1 (middle_is_in_the_middle _ _ z_bd))).
+  exists (mkposreal delta' delta'_pos) ; intros h h_neq h_bd.
+
+ replace (sum_r An r Pr (z + h)) with (weaksum_r An (middle (Rabs z) r)
+               (proj1 Pr (middle (Rabs z) r) H) (z + h)).
+ replace (sum_r An r Pr z) with (weaksum_r An (middle (Rabs z) r)
+               (proj1 Pr (middle (Rabs z) r) H) z).
+ replace (sum_r_derive An r Pr z) with (weaksum_r_derive An (middle (Rabs z) r)
+              (proj1 Pr (middle (Rabs z) r) H) z).
+ apply Hdelta ; [assumption | apply Rlt_le_trans with delta'] ;
+ [assumption | apply Rmin_l].
+
+ unfold sum_r_derive ; destruct (Rlt_le_dec (Rabs z) r) as [z_bd2 | Hf].
+ apply weaksum_r_derive_unique ; apply (middle_is_in_the_middle _ _ z_bd).
+ assert (F : r < r) by (apply Rle_lt_trans with (Rabs z) ; assumption) ;
+ destruct (Rlt_irrefl _ F).
+
+ unfold sum_r ; destruct (Rlt_le_dec (Rabs z) r) as [z_bd2 | Hf].
+ apply weaksum_r_unique ; apply (middle_is_in_the_middle _ _ z_bd).
+ assert (F : r < r) by (apply Rle_lt_trans with (Rabs z) ; assumption) ;
+ destruct (Rlt_irrefl _ F).
+
+ unfold sum_r ; destruct (Rlt_le_dec (Rabs (z + h)) r) as [z_bd2 | Hf].
+ apply weaksum_r_unique_strong.
+ apply Rle_lt_trans with (Rabs z + Rabs h)%R.
+ apply Rabs_triang.
+ apply Rlt_le_trans with (Rabs z + ((middle (Rabs z) r - Rabs z) / 2))%R.
+ apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ; [assumption | apply Rmin_r].
+ unfold Rminus ; field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
+ left ; do 2 eapply middle_is_in_the_middle ; assumption.
+ eapply middle_is_in_the_middle ; assumption.
+ assert (F : r < r).
+  apply Rlt_trans with (middle (Rabs z) r).
+  apply Rle_lt_trans with (Rabs (z + h)).
+  assumption.
+  apply Rle_lt_trans with (Rabs z + Rabs h)%R.
+  apply Rabs_triang.
+  apply Rlt_trans with (Rabs z + ((middle (Rabs z) r - Rabs z) / 2))%R.
+  apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ; [intuition | apply Rmin_r].
+  unfold middle ; field_simplify.
+  apply Rlt_le_trans with ((2 * Rabs z + r + r) / 4)%R.
+  unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |].
+  apply Rplus_lt_compat_r.
+  apply Rle_lt_trans with (2 * Rabs z + Rabs z)%R.
+  right ; ring.
+  apply Rplus_lt_compat_l ; assumption.
+  right ; field.
+  eapply middle_is_in_the_middle ; assumption.
+  destruct (Rlt_irrefl _ F).
+Qed.
+
+Lemma derivable_pt_lim_sum (An:nat->R) (Pr : infinite_cv_radius An) : forall z,
+      derivable_pt_lim (sum An Pr) z (sum_derive An Pr z).
+Proof.
+intros An Pr z eps eps_pos. 
+ assert (H : 0 <= Rabs z < Rabs z + 1).
+  split ; [apply Rabs_pos |] ; intuition.
+ destruct (derivable_pt_lim_weaksum_r _ _ (Pr (Rabs z + 1)%R) z (proj2 H) _ eps_pos) as [delta Hdelta].
+
+ pose (delta' := Rmin delta 1) ; assert (delta'_pos : 0 < delta').
+  apply Rmin_pos ; [apply delta | apply Rlt_0_1].
+ exists (mkposreal _ delta'_pos) ; intros h h_neq h_bd.
+
+ replace (sum An Pr (z + h)) with (weaksum_r An (Rabs z + 1) (Pr (Rabs z + 1)%R) (z + h)).
+ apply Hdelta.
+ assumption.
+ apply Rlt_le_trans with delta' ; [assumption | apply Rmin_l].
+
+ unfold sum.
+ apply weaksum_r_unique_strong.
+ apply Rle_lt_trans with (Rabs z + Rabs h)%R.
+ apply Rabs_triang.
+ apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ;
+ [intuition | apply Rmin_r].
+ intuition.
+Qed.
+
+
 (** * Derivabilty / Continuity of the sum within the cv disk *)
 
-Lemma Rps_derivability_pt (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
+Lemma derivable_pt_weaksum_r (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
       Rabs x < r -> derivable_pt (weaksum_r An r Pr) x.
 Proof.
 intros An r rho x x_bd.
- exists (sum_r_derive An r rho x) ; apply Pser_derivability ; assumption.
+ exists (weaksum_r_derive An r rho x) ; apply derivable_pt_lim_weaksum_r ; assumption.
 Qed.
 
-Lemma Rps_continuity_pt (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
+Lemma continuity_pt_weaksum_r (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
       Rabs x < r -> continuity_pt (weaksum_r An r Pr) x.
 Proof.
-intros An r rho x x_bd ; apply derivable_continuous_pt ; apply Rps_derivability_pt ;
+intros An r rho x x_bd ; apply derivable_continuous_pt ; apply derivable_pt_weaksum_r ;
  assumption.
 Qed.
 
@@ -1217,7 +1426,7 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
         rewrite <- tech_pow_Rmult.
         field.
 assert (Hct : continuity_pt Ss 0).
-  apply Rps_continuity_pt.
+  apply continuity_pt_weaksum_r.
   rewrite Rabs_R0; assumption.
 destruct (Hct 1) as [alp [Halp Hd]]; [fourier|].
 assert (Hradius : exists P, forall p, (p >= P)%nat -> Rabs (En p) < r /\ Rabs (En p) < alp).
