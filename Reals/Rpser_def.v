@@ -87,6 +87,18 @@ trivial.
 apply Cv_radius_weak_0.
 Qed.
 
+Lemma Rle_cv_radius_compat : forall (An Bn : nat -> R) (r : R),
+      (forall n, Rabs (Bn n) <= Rabs (An n)) ->
+      Cv_radius_weak An r ->
+      Cv_radius_weak Bn r.
+Proof.
+intros An Bn r Bn_le_An [M HM] ; exists M ; intros x [n Hn] ;
+ rewrite Hn ; apply Rle_trans with (gt_abs_Pser An r n) ;
+ [| apply HM ; exists n ; reflexivity].
+ unfold gt_abs_Pser ; do 2 rewrite Rabs_mult ;
+ apply Rmult_le_compat_r ; [apply Rabs_pos | apply Bn_le_An].
+Qed.
+
 Lemma Cv_radius_weak_Rabs_compat_rev : forall (An : nat -> R) (r : R), 
        Cv_radius_weak (fun n => Rabs (An n)) r -> Cv_radius_weak An r.
 Proof.
@@ -128,7 +140,6 @@ intros x y x_pos x_lt_y n.
  simpl ; apply Req_le ; reflexivity.
  simpl ; apply Rmult_le_compat ; [| apply pow_le | |] ; assumption.
 Qed.
-
 
 Lemma Cv_radius_weak_le_compat : forall (An : nat -> R) (r r' : R),
        Rabs r' <= Rabs r -> Cv_radius_weak An r -> Cv_radius_weak An r'.
@@ -308,6 +319,15 @@ intros An Bn x N ; induction N.
  unfold gt_Pser ; field.
 Qed.
 
+Lemma Pser_opp : forall (An : nat -> R) (x : R) (N : nat),
+        sum_f_R0 (gt_Pser (- An)%Rseq x) N = - sum_f_R0 (gt_Pser An x) N.
+Proof.
+intros An x N ; induction N.
+ unfold gt_Pser ; simpl ; unfold Rseq_opp ; ring.
+ repeat rewrite tech5 ; rewrite IHN, Ropp_plus_distr ;
+ unfold gt_Pser, Rseq_opp ; ring.
+Qed.
+
 (** Pser and Un_cv are linked. See "tech12" for the reciprocal lemma *)
 
 Lemma Pser_Rseqcv_link : forall (An : nat -> R) (x l : R),
@@ -317,6 +337,16 @@ Proof.
 intros An x l Hyp.
  unfold gt_Pser.
  apply Hyp.
+Qed.
+
+Lemma Pser_opp_compat : forall (An : nat -> R) (x l : R),
+	Pser An x l -> Pser (- An)%Rseq x (-l).
+Proof.
+intros An x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ;
+ exists N ; intros n n_lb ; unfold R_dist, Rminus in *.
+ fold (gt_Pser (-An)%Rseq x).
+ rewrite Pser_opp, <- Ropp_plus_distr, Rabs_Ropp ; apply HN ;
+ assumption.
 Qed.
 
 Lemma Pser_unique : forall (An : nat -> R) (x l1 l2 : R),

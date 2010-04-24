@@ -5,7 +5,7 @@ Require Import Rseries_facts.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
 Require Import Rtrigo.
-Require Import Rtrigo_def.
+Require Import Rpser_usual.
 Require Import Reals.
 Require Import Rsequence_tactics.
 

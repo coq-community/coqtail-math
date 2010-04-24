@@ -194,14 +194,6 @@ intros a n ; induction n.
  repeat rewrite IHn ; simpl ; ring.
 Qed.
 
-Lemma n_modulo_2 : forall n:nat, {p | (n = 2 * p)%nat} + {p | n = S (2 * p)}.
-Proof.
-intro n ; induction n.
- left ; exists 0%nat ; intuition.
- case IHn ; intro H ; destruct H as (p,Hp) ;
- [right ; exists p | left ; exists (S p)] ; intuition.
-Qed.
-
 Lemma Cexp_trigo_compat : forall a, Cexp (0 +i a) = cos a +i sin a.
 Proof.
 intros a ; rewrite <- Ceq ; split ; simpl ;

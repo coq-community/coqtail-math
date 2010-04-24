@@ -140,6 +140,28 @@ rewrite <- Huw; rewrite <- Hvx.
 apply HN; apply Hn.
 Qed.
 
+(** ** Boundedness and subsequences *)
+
+(* TODO : Caser ça où ça doit aller *)
+
+Lemma n_modulo_2 : forall n:nat, {p | (n = 2 * p)%nat} + {p | n = S (2 * p)}.
+Proof.
+intro n ; induction n.
+ left ; exists 0%nat ; intuition.
+ case IHn ; intro H ; destruct H as (p,Hp) ;
+ [right ; exists p | left ; exists (S p)] ; intuition.
+Qed.
+
+Lemma even_odd_boundedness : forall (An : nat -> R) (M1 M2 : R),
+     Rseq_bound (fun n => An (2 * n)%nat) M1 ->
+     Rseq_bound (fun n => An (S (2 * n))) M2 ->
+     Rseq_bound An (Rmax M1 M2).
+Proof.
+intros An M1 M2 HM1 HM2 n ; destruct (n_modulo_2 n) as [n_even | n_odd].
+ destruct n_even as [p Hp] ; rewrite Hp ; apply Rle_trans with M1 ; [apply HM1 | apply RmaxLess1].
+ destruct n_odd as [p Hp] ; rewrite Hp ; apply Rle_trans with M2 ; [apply HM2 | apply RmaxLess2].
+Qed.
+
 (** ** Partial sequences. *)
 
 Section Rseq_partial.
