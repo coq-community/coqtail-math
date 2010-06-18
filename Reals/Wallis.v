@@ -35,7 +35,7 @@ Require Import Rsequence_tactics.
 Open Local Scope R_scope.
 
 Section Wallis.
-
+(** printing ~	~ *)
 Local Coercion INR : nat >-> R.
 
 Definition sin_n n := fun x => pow (sin x) n.

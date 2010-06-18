@@ -32,6 +32,7 @@ Require Import RTaylor.
 Require Import Fourier.
 Require Import Wallis.
 
+(** printing ~	~ *)
 (** Partial result : De Moivre approximation. *)
 
 Section De_Moivre.
