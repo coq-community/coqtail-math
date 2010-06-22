@@ -268,7 +268,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Theorem Nnewton : forall n a b, (a + b) ^ n == newton_sum n a b.
+  Theorem Newton : forall n a b, (a + b) ^ n == newton_sum n a b.
   Proof.
   intros n a b.
   induction n; [compute; ring | ].
