@@ -59,7 +59,7 @@ destruct b.
  rewrite fact_simpl. rewrite mult_INR. 
  field_simplify.
   simpl. rewrite <- minus_n_O. reflexivity.
-
+ 
  intuition.
 Qed.
 (* end hide *)
@@ -118,7 +118,7 @@ induction H.
  replace (sum_f_R0 f b) with (sum_f_R0 f b + 0) by ring.
  apply Rplus_le_lt_compat.
   left. apply IHle.
-
+  
   apply Hpos.
 Qed.
 
@@ -229,7 +229,7 @@ rewrite tech3.
    replace eps with (eps * (1 - k) * / (-k + 1)).
     unfold Rdiv. apply Rmult_lt_compat_r.
      apply Rinv_0_lt_compat. fourier.
-
+     
      apply HN. intuition. field. intros H3. fourier. 
     
    unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; fourier. 
@@ -250,12 +250,12 @@ induction Hnb.
  simpl pow.
  field_simplify. 
   right. reflexivity.
-
+  
   apply not_0_INR. intuition.
-
+  
   split. 
    apply INR_fact_neq_0.
-
+   
    apply not_0_INR. intuition.
    
    rewrite fact_simpl. rewrite mult_INR.
@@ -266,15 +266,15 @@ induction Hnb.
     rewrite Rmult_comm. rewrite Rmult_assoc.
     apply Rmult_le_compat.
      left. apply Rinv_0_lt_compat. intuition.
-
-     left. rewrite Rmult_comm. apply Rlt_mult_inv_pos ; apply INR_fact_lt_0.
-
-     apply Rle_Rinv ; [apply lt_0_INR ; intuition|apply lt_0_INR ; intuition|intuition].
-
-     rewrite Rmult_comm. apply IHHnb.
- 
-    apply not_0_INR. intuition.
      
+     left. rewrite Rmult_comm. apply Rlt_mult_inv_pos ; apply INR_fact_lt_0.
+     
+     apply Rle_Rinv ; [apply lt_0_INR ; intuition|apply lt_0_INR ; intuition|intuition].
+     
+     rewrite Rmult_comm. apply IHHnb.
+    
+    apply not_0_INR. intuition.
+    
     apply INR_fact_neq_0.
 Qed.
 
@@ -291,26 +291,26 @@ do 2 rewrite mult_INR. field_simplify.
   unfold pow. rewrite Rinv_mult_distr.
    do 2 rewrite Rmult_1_l. rewrite Rmult_1_r. apply Rmult_lt_compat_r.
     apply Rinv_0_lt_compat. intuition.
-
+    
     apply Rinv_lt_contravar. apply Rmult_lt_0_compat ; intuition.
     intuition.
-
+    
    apply not_0_INR. intuition.
-
+   
    rewrite Rmult_1_r.  apply not_0_INR. intuition.
-
+   
   apply not_0_INR. intuition.
   
   apply not_0_INR. intuition.
-
+  
  apply not_0_INR. intuition.
-
+ 
  split.
   apply INR_fact_neq_0.
-
+  
   split.
    apply not_0_INR. intuition.
-
+   
    apply not_0_INR. intuition.
 Qed.
 (* end hide *)
@@ -328,16 +328,16 @@ assert (Hgeom : (infinite_sum (fun i => (/INR (S b)) ^ i) (1 / (1 - /INR (S b)))
  unfold Rabs. destruct (Rcase_abs (/INR (S b))) as [H1|[H1|H1]].
   assert (H : (- /INR (S b) < 0 )) by intuition. 
   eapply (Rlt_trans) ; [apply H|intuition].
-
+  
   replace 1 with (/1) by intuition. 
   apply Rinv_lt_contravar. 
    rewrite Rmult_1_l. intuition.
-
+   
    destruct b. 
     destruct Hb0. reflexivity. 
-
+    
     rewrite S_INR. assert (INR (S b) > 0) by intuition. fourier.
-
+  
   rewrite H1. fourier.
 (* end of geometric summation *)
 
@@ -348,7 +348,7 @@ assert (He : (infinite_sum (fun i : nat => / INR (fact i)) x)).
  assert (Hrew : (sum_f_R0 (fun i : nat => / INR (fact i) * 1 ^ i) n = 
  sum_f_R0 (fun i : nat => / INR (fact i)) n)).
   apply sum_eq. intros. rewrite pow1. intuition.
-
+  
  rewrite <- Hrew. apply H1. clear Hexp.
 (* end of rewriting : He *)
 
@@ -385,29 +385,29 @@ assert (Hlw : Rser_cv Wn (( /INR (S b) *(1/ (1 - / INR (S b)))))).
  unfold Wn. apply Rser_cv_scal_mult_compat. 
  apply Rser_cv_eq_compat with (fun i : nat => (/ INR (S b)) ^ i).
   intro. reflexivity.
-
+  
   apply Hgeom.
 
 eapply Rlt_le_trans with (/ INR (S b) * (1 / (1 - / INR (S b)))).
  apply (Rser_Rser_rem_lt_le Wn Vn _ _ _ _).
   intros k Hkn.
   unfold Vn, Wn. apply identite. assumption.
-
+  
   exists (S (S b)). intuition. unfold Vn, Wn. apply identite1.
-
+  
   apply Hlw.
  
  field_simplify.
   replace (INR (S b) - 1) with (INR b). right. reflexivity.
-
+  
   rewrite S_INR. ring.
-
+  
   intuition.
 
 split. 
  apply not_0_INR. 
   intuition.
-
+  
   rewrite S_INR. unfold Rminus. rewrite Rplus_assoc.
   intro H2. ring_simplify in H2. intuition.
 Qed.
@@ -455,7 +455,6 @@ destruct x ; intros H.
  destruct H. fourier.
 Qed.
 
-(** * Final result: e is irrational *)
 Lemma eirr : forall a b, b <> 0%nat -> e = (INR a) / (INR b) -> False.
 Proof.
 intros a b Hb0 Habs.
@@ -470,6 +469,27 @@ assert (0 < x < 1).
  unfold x in *.
  rewrite Hm in H.
  apply (integer_0_1 m). assumption.
+Qed.
+
+(** * Final result: e is irrational *)
+Lemma e_is_irrational : forall (a : Z) (b : nat),
+  b <> O -> e = (IZR a) / (INR b) -> False.
+Proof.
+intros [|a|a] b Hb He.
+ refine (eirr O b Hb _).
+ simpl in He; assumption.
+ 
+ refine (eirr (nat_of_P a) b Hb _).
+ simpl in He; assumption.
+ 
+ unfold IZR, e in *.
+ assert (0 < INR (nat_of_P a) / INR b) by
+   (apply Rlt_mult_inv_pos; auto with real; INR_solve).
+ pose proof exp_pos 1 as Hpos.
+ rewrite He in Hpos.
+ apply (Rlt_not_le_frac_opp _ _ Hpos).
+ rewrite Ropp_involutive.
+ auto with real.
 Qed.
 
 End eirr.
