@@ -1,3 +1,24 @@
+(*
+(C) Copyright 2010, COQTAIL team
+
+Project Info: http://sourceforge.net/projects/coqtail/
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or
+(at your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+USA.
+*)
+
 Section eirr.
 Require Import Max.
 
@@ -29,7 +50,7 @@ assumption.
 intuition.
 Qed.
 
-Lemma integer_INR_div : forall b, b <> O -> / INR b * INR (fact b) = INR (fact (b-1)).
+Lemma integer_INR_div : forall b, b <> O -> / INR b * INR (fact b) = INR (fact (b - 1)).
 Proof.
 intros b Hb0.
 destruct b.
@@ -44,7 +65,7 @@ Qed.
 (* end hide *)
 
 Lemma sum_integer_INR_div : forall n, {m | 
-sum_f_R0 (fun i : nat => / INR (fact i) * INR (fact n)) n = INR m}.
+   sum_f_R0 (fun i : nat => / INR (fact i) * INR (fact n)) n = INR m}.
 Proof.
 induction n.
  exists 1%nat. simpl. field.
@@ -63,8 +84,8 @@ induction n.
 Qed.
 
 Lemma integer_exp_minus_sum : forall a b : nat, 
-b <> 0%nat -> e = INR a / INR b ->
-{n | INR (fact b) * (e - partial_e b) = IZR n}.
+  b <> O -> e = INR a / INR b ->
+  {n | INR (fact b) * (e - partial_e b) = IZR n}.
 Proof.
 intros a b Hb0 Habs.
 rewrite Habs.
@@ -82,8 +103,8 @@ ring.
 Qed.
 
 Lemma sum_max : forall b N f, 
-(forall n, f n > 0) -> (sum_f_R0 f b < 
-  sum_f_R0 f (max N (S b))).
+  (forall n, f n > 0) -> (sum_f_R0 f b < 
+    sum_f_R0 f (max N (S b))).
 Proof.
 intros b N f Hpos.
 assert (b < max N (S b))%nat by intuition.
@@ -126,9 +147,9 @@ fourier.
 Qed.
 
 Lemma sum_max1 : forall N b f, 
-(forall n, f n >= 0) ->
-sum_f_R0 f (max N (S b)) >=
-sum_f_R0 f (S b).
+  (forall n, f n >= 0) ->
+    sum_f_R0 f (max N (S b)) >=
+    sum_f_R0 f (S b).
 Proof.
 intros N b f Hpos.
 assert (H : (S b <= max N (S b))%nat) by intuition.
@@ -141,8 +162,8 @@ induction H.
 Qed.
 
 Lemma minus_exp_sum_pos : forall a b : nat, 
-b <> 0%nat ->
-INR (fact b) * (e - partial_e b) > 0.
+  b <> O ->
+  INR (fact b) * (e - partial_e b) > 0.
 Proof.
 intros a b Hb0.
 unfold e, partial_e, exp.
@@ -258,7 +279,7 @@ induction Hnb.
 Qed.
 
 Lemma identite1 : forall b, INR (fact b) * / INR (fact (S (S b))) <
-/ INR (S b) * (/ INR (S b)) ^ (S (S b) - S b).
+  / INR (S b) * (/ INR (S b)) ^ (S (S b) - S b).
 Proof.
 intros b.
 do 2 rewrite fact_simpl.
@@ -295,7 +316,7 @@ Qed.
 (* end hide *)
 
 Lemma exp_remain_sum : forall n, 
-n <> 0%nat -> INR (fact n) * (e - partial_e n) < 1 / INR n.
+  n <> O -> INR (fact n) * (e - partial_e n) < 1 / INR n.
 Proof.
 intros b Hb0.
 unfold partial_e, e, exp.
@@ -434,6 +455,7 @@ destruct x ; intros H.
  destruct H. fourier.
 Qed.
 
+(** * Final result: e is irrational *)
 Lemma eirr : forall a b, b <> 0%nat -> e = (INR a) / (INR b) -> False.
 Proof.
 intros a b Hb0 Habs.
@@ -449,6 +471,5 @@ assert (0 < x < 1).
  rewrite Hm in H.
  apply (integer_0_1 m). assumption.
 Qed.
-
 
 End eirr.
