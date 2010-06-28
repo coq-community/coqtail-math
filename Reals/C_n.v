@@ -111,3 +111,190 @@ induction d.
     
     apply IHd.
 Qed.
+
+Lemma C_pred_compat : forall n f,
+  C (S n) f -> C n f.
+Proof.
+ induction n.
+  intros f Hf.
+  constructor.
+  inversion Hf; reg.
+  
+  intros f Hf.
+  inversion Hf; subst.
+  destruct H0 as [f' [Hf' Hcf']].
+  apply C_Sn with pr.
+  exists f'; auto.
+Qed.
+
+Lemma C_plus_compat : forall n f g,
+  C n f -> C n g -> C n (plus_fct f g).
+Proof.
+induction n.
+ intros f g Hf Hg.
+ inversion Hf; inversion Hg; subst.
+ constructor; intro; reg.
+ 
+ intros f g Hf Hg.
+ inversion Hf; inversion Hg; subst.
+ destruct H0 as [f' [Hf' Hcf']].
+ destruct H3 as [g' [Hg' Hcg']].
+ refine (C_Sn _ _ (derivable_plus _ _ pr pr0) _).
+ exists (plus_fct f' g').
+ split.
+  intros x.
+  unfold plus_fct.
+  rewrite <- Hf'; rewrite <- Hg'.
+  reg.
+  rewrite (pr_nu _ _ H (pr x)).
+  rewrite (pr_nu _ _ H0 (pr0 x)).
+  reflexivity.
+  
+  apply IHn; auto.
+Qed.
+
+Lemma C_infty_plus_compat : forall f g,
+  C_infty f -> C_infty g -> C_infty (plus_fct f g).
+Proof.
+ intros; intro; apply C_plus_compat; auto.
+Qed.
+
+Lemma C_scal_compat : forall n f a,
+  C n f -> C n (mult_real_fct a f).
+Proof.
+induction n.
+ intros f a Hf.
+ inversion Hf; subst.
+ constructor; intro; reg.
+ 
+ intros f a Hf.
+ inversion Hf; subst.
+ destruct H0 as [f' [Hf' Hcf']].
+ refine (C_Sn _ _ (derivable_scal _ _ pr) _).
+ exists (mult_real_fct a f').
+ split.
+  intros x.
+  unfold mult_real_fct.
+  rewrite <- Hf'.
+  reg.
+  rewrite (pr_nu _ _ H (pr x)).
+  reflexivity.
+  
+  apply IHn; auto.
+Qed.
+
+Lemma C_infty_scal_compat : forall f a,
+  C_infty f -> C_infty (mult_real_fct a f).
+Proof.
+ intros; intro; apply C_scal_compat; auto.
+Qed.
+
+Lemma C_mult_compat : forall n f g,
+  C n f -> C n g -> C n (mult_fct f g).
+Proof.
+ induction n.
+  intros f g Hf Hg.
+  inversion Hf; inversion Hg; subst.
+  constructor; intro; reg.
+  
+  intros f g Hf Hg.
+  inversion Hf; inversion Hg; subst.
+  destruct H0 as [f' [Hf' Hcf']].
+  destruct H3 as [g' [Hg' Hcg']].
+  refine (C_Sn _ _ (derivable_mult _ _ pr pr0) _).
+  exists (fun x => f' x * g x + g' x * f x)%R.
+  split.
+   intros x.
+   rewrite <- Hf'; rewrite <- Hg'.
+   reg.
+   rewrite (pr_nu _ _ H (pr x)).
+   rewrite (pr_nu _ _ H0 (pr0 x)).
+   ring.
+   
+   eapply C_plus_compat.
+    apply IHn.
+     apply Hcf'.
+     apply C_pred_compat, Hg.
+    apply IHn.
+     apply Hcg'.
+     apply C_pred_compat, Hf.
+Qed.
+
+Lemma C_infty_mult_compat : forall f g,
+  C_infty f -> C_infty g -> C_infty (mult_fct f g).
+Proof.
+ intros; intro; apply C_mult_compat; auto.
+Qed.
+
+Lemma C_comp_compat : forall n f g,
+  C n f -> C n g -> C n (comp f g).
+Proof.
+ induction n.
+  intros f g Hf Hg.
+  inversion Hf; inversion Hg; subst.
+  constructor; intro; reg.
+  
+  intros f g Hf Hg.
+  inversion Hf; inversion Hg; subst.
+  destruct H0 as [f' [Hf' Hcf']].
+  destruct H3 as [g' [Hg' Hcg']].
+  refine (C_Sn _ _ (derivable_comp _ _ pr0 pr) _).
+  exists (fun x => g' x * f' (g x))%R.
+  split.
+   intros x.
+   rewrite <- Hf'; rewrite <- Hg'.
+   reg.
+   rewrite (pr_nu _ _ H (pr (g x))).
+   rewrite (pr_nu _ _ H0 (pr0 x)).
+   ring.
+   
+   eapply C_mult_compat.
+    auto.
+    fold (comp f' g).
+    apply IHn.
+     auto.
+     destruct n.
+      constructor; intro; reg.
+      
+      apply (C_Sn _ _ pr0).
+      exists g'; split.
+       auto.
+       apply C_pred_compat, Hcg'.
+Qed.
+
+Lemma C_infty_comp_compat : forall f g,
+  C_infty f -> C_infty g -> C_infty (comp f g).
+Proof.
+ intros; intro; apply C_comp_compat; auto.
+Qed.
+
+Lemma C_cos_sin : forall n, C n sin /\ C n cos /\ C n (-sin) /\ C n (-cos).
+ induction n.
+  repeat split; constructor; reg.
+  
+  destruct IHn as [IHs [IHc [IHns IHnc]]].
+  repeat split.
+   apply C_Sn with derivable_sin.
+   eexists cos; split; [intro; reg | eauto].
+   
+   apply C_Sn with derivable_cos.
+   eexists (-sin); split; [intro; reg | eauto].
+   
+   assert (dns : derivable (-sin)) by reg.
+   apply C_Sn with dns.
+   eexists (-cos); split; [intro; reg | eauto].
+   
+   assert (dnc : derivable (-cos)) by reg.
+   apply C_Sn with dnc.
+   eexists sin; split; [intro; reg | eauto].
+Qed.
+
+Lemma C_infty_sin : C_infty sin.
+Proof.
+ intro; eapply C_cos_sin.
+Qed.
+
+Lemma C_infty_cos : C_infty cos.
+Proof.
+ intro; eapply C_cos_sin.
+Qed.
