@@ -67,7 +67,7 @@ COQLIBS:=-I .\
   -I Sets\
   -I Subseq\
   -I Topology 
-COQDOCLIBS:= $(COQDOCOPTIONS) 
+COQDOCLIBS:= -g --coqlib http://coq.inria.fr/library/ 
 
 ##########################
 #                        #

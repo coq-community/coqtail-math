@@ -11,7 +11,7 @@ coq_makefile $DIRS $SRC_V -no-install -opt \
   | grep -v "^.cd [A-Za-z0-9]* ; ..MAKE. all" \
   | grep -v "^..cd [A-Za-z0-9]* ; ..MAKE. clean." \
   | sed 's/mkdir/mkdir -p/' \
-  | sed 's/^COQDOCLIBS:=/COQDOCLIBS:= $(COQDOCOPTIONS) /' \
+  | sed "s/^COQDOCLIBS:=/COQDOCLIBS:= $COQDOCOPTIONS /" \
   | sed 's/\(..COQDOC. .*html.*\)$/\1\n\tsh alter_doc.sh html/' \
   > $GENERATED_MAKEFILE
 
