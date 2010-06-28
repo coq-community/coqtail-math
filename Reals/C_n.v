@@ -10,7 +10,21 @@ Lemma id_C_infty : C_infty id.
 Proof.
  intro n ; destruct n.
   constructor ; apply derivable_continuous ; apply derivable_id.
-  induction n.
-   apply C_Sn with derivable_id.
-   exists (fun x => R1) ; split ; [intro x | constructor] ; reg.
-   
+  apply C_Sn with derivable_id.
+  exists (fct_cte 1); split.
+   intro; reg.
+   destruct n.
+    constructor; reg.
+    
+    apply C_Sn with (derivable_const 1).
+    exists (fct_cte R0).
+    split.
+     intro; reg.
+     induction n.
+      constructor; reg.
+      
+      apply C_Sn with (derivable_const 0).
+      exists (fct_cte 0); split.
+       intro; reg.
+       apply IHn.
+Qed.
