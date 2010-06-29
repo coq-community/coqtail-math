@@ -85,9 +85,20 @@ Lemma Qmax_comm : forall p q, (Qmax p q == Qmax q p)%Q.
   auto with qartih.
 Qed.
 Lemma le_Qmax : forall p q r:Q, (p <= q)%Q -> (p <= Qmax q r)%Q.
-Admitted.
+Proof.
+intros p q r H.
+unfold Qmax. destruct (Qlt_le_dec q r).
+transitivity q. apply H. auto with qarith.
+apply H.
+Qed.
+
 Lemma lt_Qmax : forall p q r:Q, (p < q)%Q -> (p < Qmax q r)%Q.
-Admitted.
+Proof.
+intros p q r H.
+unfold Qmax ; destruct (Qlt_le_dec q r).
+transitivity q ; auto with qarith.
+apply H.
+Qed.
 
 Lemma Qmult_pos_le_compat : 
    forall a b c d:Q, 0 <= a <= b -> 0 <= c <= d -> a*c <= b*d.
@@ -111,7 +122,7 @@ Lemma Qdiv_pos :
   forall n, forall x :Q, 0 < x -> 0 < x * (1 # n).
 intros; apply Qmult_pos_compat.
 assumption.
-auto with qarith qartih.
+auto with qartih.
 Qed.
 
 Lemma Qplus_le_lt_compat : 

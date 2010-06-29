@@ -10,7 +10,11 @@
 (**          Definitions for the axiomatization          *)
 (*********************************************************)
 
+
+(* TODO ne compile pas : (Require des trucs que tout les 
+utilisateurs n'ont peut etre pas...)
 Declare ML Module "r_syntax_plugin".
+*)
 Require Export ZArith_base.
 
 Parameter R : Set.
@@ -29,14 +33,15 @@ Parameter Rplus : R -> R -> R.
 Parameter Rmult : R -> R -> R.
 Parameter Ropp : R -> R.
 (** WATCH OUT **)
-Parameter Rinv : forall (r : R), r <> 0 -> R.
+Parameter Rinv : forall (r : R), r <> R0 -> R.
 Parameter Rlt : R -> R -> Prop.
 Parameter up : R -> Z.
 
 Infix "+" := Rplus : R_scope.
 Infix "*" := Rmult : R_scope.
 Notation "- x" := (Ropp x) : R_scope.
-Notation "/ x H" := (Rinv x H) : R_scope.
+Notation "/ x H" := (Rinv x H) (at level 0) : R_scope.
+(*TODO level *)
 
 Infix "<" := Rlt : R_scope.
 
@@ -55,7 +60,7 @@ Definition Rge (r1 r2:R) : Prop := Rgt r1 r2 \/ r1 = r2.
 Definition Rminus (r1 r2:R) : R := r1 + - r2.
 
 (**********)
-Definition Rdiv (r1 r2:R) : R := r1 * / r2.
+Definition Rdiv (r1 r2:R) (H : r2 <> R0): R := r1 * (Rinv r2 H).
 
 (**********)
 
