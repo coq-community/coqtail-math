@@ -84,7 +84,6 @@ unfold Un_cv.
 intros An l Hcve Hcvo eps Heps.
 destruct (Hcve eps Heps) as (Ne, He).
 destruct (Hcvo eps Heps) as (No, Ho).
-SearchPattern (?a <= ?b )%nat.
 exists (max (2*Ne) (S (2*No))).
 intros n Hn.
 destruct (odd_or_even n) as (p, Hp).
