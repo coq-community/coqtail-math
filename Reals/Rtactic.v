@@ -347,311 +347,404 @@ intuition.
 intuition.
 Qed.
 
-Ltac elim_INR x := 
+Ltac elim_INR x := (* idtac "elim_INR (" x ")" *)
 match x with 
-	| (INR (S ?a)) => rewrite (S_INR a)
-	| (INR (?a + ?b)) => rewrite (plus_INR a b)
-	| (INR (?a - ?b)) => 
-		match goal with
-			| H : (a >= b) |- _ => rewrite (minus_INR1 a b H)
-			| _ => idtac
-		end
-	| (INR (?a * ?b)) => rewrite (mult_INR a b)
-	| (INR 0) => rewrite INR_0
-	| (INR ?x) => idtac ""
+  | S ?a => rewrite (S_INR a); elim_INR a
+  | plus ?a ?b => rewrite (plus_INR a b); elim_INR a; elim_INR b
+  | minus ?a ?b => 
+      match goal with
+        | H : (a >= b)%nat |- _ => rewrite (minus_INR1 a b H)
+        | _ => idtac
+      end
+  | mult ?a ?b => rewrite (mult_INR a b); elim_INR a; elim_INR b
+  | O => rewrite INR_0
+  | _ => idtac
 end.
 
 
 Ltac elim_IZR x := 
 match x with 
-	| (IZR (?a + ?b)) => rewrite (plus_IZR a b)
-	| (IZR (?a - ?b)) => rewrite (Z_R_minus a b)
-	| (IZR (?a * ?b)) => rewrite (mult_IZR a b)
-	| (IZR (Zsucc ?n)) => rewrite (succ_IZR n)
-	| (IZR (Zpower ?z (Z_of_nat ?n))) => rewrite <- (pow_IZR z n) 
-	| (IZR (- ?n)) => rewrite (Ropp_Ropp_IZR n)
-	| (IZR 0) => rewrite IZR_0
-	| (IZR (Zpos xH)) => rewrite Zpos_xH_IZR
-	| (IZR (Zneg xH)) => rewrite Zneg_xH_IZR
-	| (IZR (Zpos (xO ?x))) => rewrite (Zpos_xO_IZR x)
-	| (IZR (Zpos (xI ?x))) => rewrite (Zpos_xI_IZR x)
-	| (IZR (Zneg (xO ?x))) => rewrite (Zneg_xO_IZR x)
-	| (IZR (Zneg (xI ?x))) => rewrite (Zneg_xI_IZR x)	
-	| (IZR ?x) => idtac ""
+  | (IZR (?a + ?b)) => rewrite (plus_IZR a b)
+  | (IZR (?a - ?b)) => rewrite (Z_R_minus a b)
+  | (IZR (?a * ?b)) => rewrite (mult_IZR a b)
+  | (IZR (Zsucc ?n)) => rewrite (succ_IZR n)
+  | (IZR (Zpower ?z (Z_of_nat ?n))) => rewrite <- (pow_IZR z n) 
+  | (IZR (- ?n)) => rewrite (Ropp_Ropp_IZR n)
+  | (IZR 0) => rewrite IZR_0
+  | (IZR (Zpos xH)) => rewrite Zpos_xH_IZR
+  | (IZR (Zneg xH)) => rewrite Zneg_xH_IZR
+  | (IZR (Zpos (xO ?x))) => rewrite (Zpos_xO_IZR x)
+  | (IZR (Zpos (xI ?x))) => rewrite (Zpos_xI_IZR x)
+  | (IZR (Zneg (xO ?x))) => rewrite (Zneg_xO_IZR x)
+  | (IZR (Zneg (xI ?x))) => rewrite (Zneg_xI_IZR x)	
+  | (IZR ?x) => idtac
 end.
 
 Ltac elim_pow x := 
 match x with
-	| ((?y * ?z) ^ ?n) => rewrite (Rmult_pow y z n)
-	| (?x ^ (?a + ?b)) => rewrite (pow_add x a b)
-	| (?x ^ (S ?n)) => rewrite <- (tech_pow_Rmult x n)
-	| (?x ^ 1) => rewrite (pow_1 x)
-	| (?x ^ 0) => rewrite (pow_0 x)
-	| (0 ^ ?n) => 	match goal with
-						| H : (n <> 0) |- _ => rewrite (pow_ne_zero n H)
-						| _ => idtac
-					end
-	| (1 ^ ?n) =>	match goal with
-						| H : (n <> 0) |- _ => rewrite (pow_ne_zero n H)
-						| _ => idtac
-					end
+  | ((?y * ?z) ^ ?n) => rewrite (Rmult_pow y z n)
+  | (?x ^ (?a + ?b)) => rewrite (pow_add x a b)
+  | (?x ^ (S ?n)) => rewrite <- (tech_pow_Rmult x n)
+  | (?x ^ 1) => rewrite (pow_1 x)
+  | (?x ^ 0) => rewrite (pow_0 x)
+  | (0 ^ ?n) => match goal with
+      | H : (n <> 0) |- _ => rewrite (pow_ne_zero n H)
+      | _ => idtac
+    end
+  | (1 ^ ?n) =>	match goal with
+      | H : (n <> 0) |- _ => rewrite (pow_ne_zero n H)
+      | _ => idtac
+    end
 end.
 
 Ltac elim_Rsqr x :=
 match x with
-	| (?a * ?b) => rewrite (Rsqr_mul a b)
-	| (?a / ?b) =>	match goal with 
-						| H : (b <> 0) |- _ => rewrite (Rsqr_div_unRsqr a b H)
-						| _ => idtac
-					end
-	| (?a + ?b) => rewrite (Rsqr_add a b)
-	| (?a - ?b) => rewrite (Rsqr_minus a b)
-    | ?a =>  rewrite (Rsqr_pow2 a)(* TODO manque plein de trucs*)
+  | (?a * ?b) => rewrite (Rsqr_mul a b)
+  | (?a / ?b) => match goal with 
+      | H : (b <> 0) |- _ => rewrite (Rsqr_div_unRsqr a b H)
+      | _ => idtac
+    end
+  | (?a + ?b) => rewrite (Rsqr_add a b)
+  | (?a - ?b) => rewrite (Rsqr_minus a b)
+  | ?a => rewrite (Rsqr_pow2 a)(* TODO manque plein de trucs*)
 end.
 
-Ltac estceunnumeral x :=
-match x with
-	| R0 => constr:1
-	| R1 => constr:1
-	| (?a + ?b) => let a1 := (estceunnumeral a) in
-						let a2 := (estceunnumeral b) in
-							match a1 with
-								| 0 => constr:0
-								| 1 =>	match a2 with 
-											| 0 => constr:0
-											| 1 => constr:1 
-										end
-							end
-	| (?a * ?b) => let a1 := (estceunnumeral a) in
-						let a2 := (estceunnumeral b) in
-							match a1 with
-								| 0 => constr:0
-								| 1 =>	match a2 with 
-											| 0 => constr:0
-											| 1 => constr:1
-										end
-                                                         end
-      | (?a / ?b) => let a1 := (estceunnumeral a) in
-						let a2 := (estceunnumeral b) in
-							match a1 with
-								| 0 => constr:0
-								| 1 =>	match a2 with 
-											| 0 => constr:0
-											| 1 => constr:1
-										end
-							end
-      | _ => constr:0
+Ltac estceunnumeral x := match x with
+  | R0 => constr:1
+  | R1 => constr:1
+  | (?a + ?b) =>
+      let a1 := (estceunnumeral a) in
+      let a2 := (estceunnumeral b) in
+      match a1 with
+        | 0 => constr:0
+        | 1 => match a2 with 
+          | 0 => constr:0
+          | 1 => constr:1 
+        end
+      end
+  | (?a * ?b) =>
+      let a1 := (estceunnumeral a) in
+      let a2 := (estceunnumeral b) in
+      match a1 with
+        | 0 => constr:0
+        | 1 => match a2 with 
+          | 0 => constr:0
+          | 1 => constr:1
+        end
+      end
+  | (?a / ?b) =>
+      let a1 := (estceunnumeral a) in
+      let a2 := (estceunnumeral b) in
+      match a1 with
+        | 0 => constr:0
+        | 1 => match a2 with 
+          | 0 => constr:0
+          | 1 => constr:1
+        end
+      end
+  | _ => constr:0
 end.
 
 Ltac reduirenumeral x :=
-let h := fresh "H" in 
-	(assert (h : x >= 0) by fourier) ;
-	rewrite (Rabs_right x h).
+  let h := fresh "H" in 
+    (assert (h : x >= 0) by fourier) ;
+    rewrite (Rabs_right x h).
 
 Ltac elim_Rabs x :=
 match goal with
-	| H : (x >= 0) |- _ => rewrite (Rabs_right x H)
-	| H : (0 >= x) |- _ => rewrite (Rabs_left1_inv x H)
-	| H : (0 > x) |- _ => rewrite (Rabs_left_inv x H)
-	| H : (x > 0) |- _ => rewrite (Rabs_right1 x H)
-	| _ =>
-
+  | H : (x >= 0) |- _ => rewrite (Rabs_right x H)
+  | H : (0 >= x) |- _ => rewrite (Rabs_left1_inv x H)
+  | H : (0 > x) |- _ => rewrite (Rabs_left_inv x H)
+  | H : (x > 0) |- _ => rewrite (Rabs_right1 x H)
+  | _ =>
+  
 let z := estceunnumeral x in
-	match z with
-		| 1 => reduirenumeral x
-		| 0 =>
- 
+  match z with
+    | 1 => reduirenumeral x
+    | 0 =>
+  
 match x with
-	| (- ?a) => rewrite (Rabs_Ropp a)
-
-	| (?a + ?b) =>	let a1 := estceunnumeral a in 
-						let b1 := estceunnumeral b in 
-							match b1 with
-								| 0 => idtac
-								| 1 =>  let h := fresh "H" in
-											assert (h : b >= 0) by fourier
-							end ; 
-							match a1 with
-								| 0 => idtac
-								| 1 => 	let h := fresh "H" in
-											assert (h : a >= 0) by fourier
-							end ;
-							match goal with
-								| H : a > 0 |- _ => generalize (Rgt_ge a 0 H) ; intro
-								| H : 0 > a |- _ => generalize (Rgt_ge 0 a H) ; intro
-								| H : b > 0 |- _ => generalize (Rgt_ge b 0 H) ; intro
-								| H : 0 > b |- _ => generalize (Rgt_ge 0 b H) ; intro
-							end ;            
-							match goal with
-								| H : a >= 0 |- _ => 
-								 match goal with 
-									| H1 : b >= 0 |- _ => rewrite (Rabs_add a b H H1)
-								end
-								| H : 0 >= a |- _ => 
-								 match goal with 
-									| H1 : 0 >= b |- _ => rewrite (Rabs_add1 a b H H1)
-								end	
-							end
-
-	| (?a - ?b) =>	match goal with
-						| H : a > 0 |- _ => generalize (Rgt_ge a 0 H) ; intro
-						| H : 0 > a |- _ => generalize (Rgt_ge 0 a H) ; intro
-						| H : b > 0 |- _ => generalize (Rgt_ge b 0 H) ; intro
-						| H : 0 > b |- _ => generalize (Rgt_ge 0 b H) ; intro
-						| H : a > b |- _ => generalize (Rgt_ge a b H) ; intro
-						| H : b > a |- _ => generalize (Rgt_ge b a H) ; intro
-					end ;
-					match goal with
-						| H : a >= b |- _ => rewrite (Rabs_minus_dev a b H)
-						| H : b >= a |- _ => rewrite (Rabs_minus_dev1 a b H)
-						| _ =>
-							let a1 := estceunnumeral a in
-								let b1 := estceunnumeral b in
-									match b1 with
-										| 0 => idtac
-										| 1 => 	let h := fresh "H" in
-													assert (h : b >= 0) by fourier
-									end ; 
-									match a1 with
-										| 0 => idtac
-										| 1 =>	let h := fresh "H" in
-													assert (h : a >= 0) by fourier
-									end ;
-									match goal with
-										| H : a >= 0 |- _ => 
-											match goal with
-												| H1 : 0 >= b |- _ => rewrite (Rabs_minus a b H H1)
-											end
-										| H : 0 >= a |- _ => 
-											match goal with 
-												| H1 : b >= 0 |- _ => rewrite (Rabs_minus1 a b H H1)
-											end	
-									end
-					end
-
-	| (?a / ?b) =>  match goal with 
-						| H : (b <> 0) |- _ => rewrite (Rabs_div a b H)
-						| H : (b > 0) |- _ => rewrite (Rabs_div_pos a b H)
-						| H : (0 > b) |- _ => rewrite (Rabs_div_neg a b H)
-						| _ => idtac "For more reductions assert :" ; idtac b ; idtac "<> 0" 
-					end
-
-	| (/ ?b) =>	match goal with 
-					| H : (b <> 0) |- _ => rewrite (Rabs_Rinv b H)
-					| H : (b > 0) |- _ => rewrite (Rabs_Rinv_pos b H)
-					| H : (0 > b) |- _ => rewrite (Rabs_Rinv_neg b H)
-					| _ => idtac "For more reductions assert :" ; idtac b ; idtac "<> 0"
-				end
-
-	| (?a * ?b) => rewrite (Rabs_mult a b)
-	| _ => idtac
+  | (- ?a) => rewrite (Rabs_Ropp a)
+  
+  | (?a + ?b) =>
+      let a1 := estceunnumeral a in 
+      let b1 := estceunnumeral b in 
+      match b1 with
+        | 0 => idtac
+        | 1 =>  let h := fresh "H" in
+              assert (h : b >= 0) by fourier
+      end ; 
+      match a1 with
+        | 0 => idtac
+        | 1 => let h := fresh "H" in
+              assert (h : a >= 0) by fourier
+      end ;
+      match goal with
+        | H : a > 0 |- _ => generalize (Rgt_ge a 0 H) ; intro
+        | H : 0 > a |- _ => generalize (Rgt_ge 0 a H) ; intro
+        | H : b > 0 |- _ => generalize (Rgt_ge b 0 H) ; intro
+        | H : 0 > b |- _ => generalize (Rgt_ge 0 b H) ; intro
+      end ;            
+      match goal with
+        | H : a >= 0 |- _ => 
+         match goal with 
+          | H1 : b >= 0 |- _ => rewrite (Rabs_add a b H H1)
+        end
+        | H : 0 >= a |- _ => 
+         match goal with 
+          | H1 : 0 >= b |- _ => rewrite (Rabs_add1 a b H H1)
+        end
+      end
+  
+  | (?a - ?b) =>
+      match goal with
+        | H : a > 0 |- _ => generalize (Rgt_ge a 0 H) ; intro
+        | H : 0 > a |- _ => generalize (Rgt_ge 0 a H) ; intro
+        | H : b > 0 |- _ => generalize (Rgt_ge b 0 H) ; intro
+        | H : 0 > b |- _ => generalize (Rgt_ge 0 b H) ; intro
+        | H : a > b |- _ => generalize (Rgt_ge a b H) ; intro
+        | H : b > a |- _ => generalize (Rgt_ge b a H) ; intro
+      end ;
+      match goal with
+        | H : a >= b |- _ => rewrite (Rabs_minus_dev a b H)
+        | H : b >= a |- _ => rewrite (Rabs_minus_dev1 a b H)
+        | _ =>
+          let a1 := estceunnumeral a in
+            let b1 := estceunnumeral b in
+              match b1 with
+                | 0 => idtac
+                | 1 => let h := fresh "H" in
+                      assert (h : b >= 0) by fourier
+              end ; 
+              match a1 with
+                | 0 => idtac
+                | 1 => let h := fresh "H" in
+                      assert (h : a >= 0) by fourier
+              end ;
+              match goal with
+                | H : a >= 0 |- _ => 
+                  match goal with
+                    | H1 : 0 >= b |- _ => rewrite (Rabs_minus a b H H1)
+                  end
+                | H : 0 >= a |- _ => 
+                  match goal with 
+                    | H1 : b >= 0 |- _ => rewrite (Rabs_minus1 a b H H1)
+                  end
+              end
+      end
+  
+  | (?a / ?b) =>
+    match goal with 
+      | H : (b <> 0) |- _ => rewrite (Rabs_div a b H)
+      | H : (b > 0) |- _ => rewrite (Rabs_div_pos a b H)
+      | H : (0 > b) |- _ => rewrite (Rabs_div_neg a b H)
+      | _ => idtac "For more reductions assert :" b "<> 0" 
+    end
+  
+  | (/ ?b) =>
+    match goal with 
+      | H : (b <> 0) |- _ => rewrite (Rabs_Rinv b H)
+      | H : (b > 0) |- _ => rewrite (Rabs_Rinv_pos b H)
+      | H : (0 > b) |- _ => rewrite (Rabs_Rinv_neg b H)
+      | _ => idtac "For more reductions assert :" b "<> 0"
+    end
+  
+  | (?a * ?b) => rewrite (Rabs_mult a b)
+  | _ => idtac
 (* TODO j'oublie des choses *)
 end
 end
 end.
 
+
 Ltac elim_sqrt x :=
 match x with
-	| (Rsqr ?x) => rewrite (sqrt_Rsqr_abs x)
-	| (?x * ?x) => rewrite (sqrt_Rabs_mult_compat x)
-	| (?x ^ 2) => rewrite (sqrt_Rabs_pow2 x)
-	| (?a * ?b) => 
-		match goal with
-			| H : (a >= 0) |- _ => 
-				match goal with 
-					| H1 : (b >= 0) |- _ => rewrite (sqrt_mult1 a b H H1) 
-					| _ => idtac
-				end
-			| H : ( 0 >= a) |- _ =>
-				match goal with
-					| H1 : (0 >= b) |- _ => rewrite (sqrt_mult_opp a b H H1) 
-					| _ => idtac
-				end
-			| _ => idtac
-		end
-
-	| (?a / ?b) => 
-		match goal with
-			| H : (0 <= a) |- _ => 
-				match goal with 
-					| H1 : (0 < b) |- _ => rewrite (sqrt_div a b H H1) 
-					| _ => idtac
-				end
-			| _ => idtac
-		end
+  | (Rsqr ?x) => rewrite (sqrt_Rsqr_abs x)
+  | (?x * ?x) => rewrite (sqrt_Rabs_mult_compat x)
+  | (?x ^ 2) => rewrite (sqrt_Rabs_pow2 x)
+  | (?a * ?b) => 
+    match goal with
+      | H : (a >= 0) |- _ => 
+        match goal with 
+          | H1 : (b >= 0) |- _ => rewrite (sqrt_mult1 a b H H1) 
+          | _ => idtac
+        end
+      | H : ( 0 >= a) |- _ =>
+        match goal with
+          | H1 : (0 >= b) |- _ => rewrite (sqrt_mult_opp a b H H1) 
+          | _ => idtac
+        end
+      | _ => idtac
+    end
+  
+  | (?a / ?b) => 
+    match goal with
+      | H : (0 <= a) |- _ => 
+        match goal with 
+          | H1 : (0 < b) |- _ => rewrite (sqrt_div a b H H1) 
+          | _ => idtac
+        end
+      | _ => idtac
+    end
 end.
 
 Ltac simpl_function x := 
 match x with
-	| sum_f_R0 (fun l => _ + _) ?n => rewrite sum_plus (* TODO ok on fait tout*)
-	| sum_f_R0 (fun l => _ - _) ?n => rewrite minus_sum
-	| sum_f_R0 (fun l => _ * ?a) ?n => rewrite <- scal_sum
-	| sum_f_R0 (fun l => ?a * _) ?n => rewrite <- scal_sum1
-	| sum_f_R0 (fun l => ?a) ?n => rewrite sum_cte (* ?a n'est pas une fonction de l*)
-	| sum_f_R0 (_) (S ?n) => rewrite tech5
-	| sum_f_R0 (fun l => _ / ?b) ?n => 	match goal with 
-											| H : b <> 0 |- _ => rewrite (sum_div b H)
-										end
-	| sum_f_R0 (fun l => - _) ?n => rewrite sum_opp
+  | sum_f_R0 (fun l => _ + _) ?n => rewrite sum_plus (* TODO ok on fait tout*)
+  | sum_f_R0 (fun l => _ - _) ?n => rewrite minus_sum
+  | sum_f_R0 (fun l => _ * ?a) ?n => rewrite <- scal_sum
+  | sum_f_R0 (fun l => ?a * _) ?n => rewrite <- scal_sum1
+  | sum_f_R0 (fun l => ?a) ?n => rewrite sum_cte (* ?a n'est pas une fonction de l*)
+  | sum_f_R0 (_) (S ?n) => rewrite tech5
+  | sum_f_R0 (fun l => _ / ?b) ?n =>
+    match goal with 
+      | H : b <> 0 |- _ => rewrite (sum_div b H)
+    end
+  | sum_f_R0 (fun l => - _) ?n => rewrite sum_opp
 end.
 
-
-Ltac elim_ident1 X := 
+Ltac elim_ident1 X := (* idtac "elim_ident1 (" X ")";*)
 match X with
-	| (INR ?x) => elim_INR (INR x)
-	| (IZR ?x) => elim_IZR (IZR x)
-	| (?a ^ ?b) => elim_ident1 a ; elim_ident1 b ; elim_pow (a ^ b) 
-	| (sum_f_R0 ?f ?x) => simpl_function (sum_f_R0 f x)
-
-
-	| (Rabs ?x) =>  elim_ident1 x ; (elim_Rabs x)
-	| (sqrt ?x) => elim_ident1 x ; (elim_sqrt x) 
-	| (Rsqr ?x) => elim_ident1 x ; (elim_Rsqr x) 
-
-
-	| (?r ?a ?b) => elim_ident1 a ; elim_ident1 b
- 
-	| _ => idtac
+  | (INR ?x) => elim_INR x
+  | (IZR ?x) => elim_IZR (IZR x)
+  | (?a ^ ?b) => elim_ident1 a ; elim_ident1 b ; elim_pow (a ^ b) 
+  | (sum_f_R0 ?f ?x) => simpl_function (sum_f_R0 f x)
+  
+  | (Rabs ?x) => elim_ident1 x ; (elim_Rabs x)
+  | (sqrt ?x) => elim_ident1 x ; (elim_sqrt x) 
+  | (Rsqr ?x) => elim_ident1 x ; (elim_Rsqr x) 
+  
+  | (?r ?a ?b) => elim_ident1 a ; elim_ident1 b
+  | (/ ?a) => elim_ident1 a
+  
+  | _ => idtac
 end.
 
 Ltac elim_infequal := 
 match goal with
-	| H : _ <= _ |- _ => apply Rle_ge in H
-	| H : _ < _ |- _ => apply Rlt_gt in H
-	| _ => idtac
+  | H : _ <= _ |- _ => apply Rle_ge in H
+  | H : _ < _ |- _ => apply Rlt_gt in H
+  | _ => idtac
 end.
 
 Ltac elim_ident := 
 elim_infequal ; 
 match goal with 
-	| |- (?X1 = ?X2) => elim_ident1 X1 ; elim_ident1 X2
-	| |- (?X1 < ?X2) => elim_ident1 X1 ; elim_ident1 X2
-
+  | |- (?X1 = ?X2) => elim_ident1 X1 ; elim_ident1 X2
+  | |- (?X1 < ?X2) => elim_ident1 X1 ; elim_ident1 X2
 end.
 
 Open Scope R_scope.
 
-Definition aaa n m := INR (n + m).
 
-(*TODO il manque des cas > quand le >= existe*)
 
-Example hfdd : sum_f_R0 (fun n => (aaa n n) / 1) 0 = 1.
+(** Reverse tactic, trying to solve goals with nat properties *)
+
+Lemma mult_lt_O_compat : forall a b, lt O a -> lt O b -> lt O (mult a b).
 Proof.
-assert (1 <> 0) by (intro Hc; fourier).
-elim_ident.
-admit.
+ intros a b Ha Hb.
+ destruct a; [ inversion Ha | clear Ha ].
+ destruct b; [ inversion Hb | clear Hb ].
+ simpl.
+ apply lt_O_Sn.
 Qed.
 
-Example njfkl : forall y, Rabs (INR 5) * y + IZR 10 = 5 * y + 10.
-Proof.
-intros y.
-repeat elim_ident.
-ring.
-Qed.
+Ltac nat_solve := match goal with
+  | |- (0 <= ?n)%nat => apply le_O_n
+  | |- (0 < ?a * ?b)%nat => apply mult_lt_O_compat; nat_solve
+  | |- (0 < S ?a)%nat => apply lt_O_Sn
+  | |- (?a > ?b)%nat => unfold gt; nat_solve
+  | |- (?a >= ?b)%nat => unfold ge; nat_solve
+  | |- (0 < fact ?n)%nat => apply lt_O_fact
+  | |- _ => idtac
+end.
 
-Example njfk : forall x, x <> 0 -> 1 / Rabs x + ((IZR (-5) + INR 7) + 4 ^ 2 + sqrt (5 * 5)) = IZR (2 * 9) + Rsqr 2 + Rabs (1 / x) + 1.
-Proof.
-intros.
-repeat elim_ident.
-ring.
-Qed.
+Ltac INR_group term := match term with
+  | 0 => replace 0 with (INR 0) by trivial
+  | 1 => replace 1 with (INR 1) by trivial
+  | 2 => replace 2 with (INR 2) by trivial
+  | INR ?a * INR ?b => rewrite <- mult_INR
+  | INR ?a + INR ?b => rewrite <- plus_INR
+  | INR ?a - INR ?b => rewrite <- minus_INR
+  | ?a * ?b => try INR_group a; try INR_group b; try rewrite <- mult_INR
+  | ?a + ?b => try INR_group a; try INR_group b; try rewrite <- plus_INR
+  | ?a - ?b => try INR_group a; try INR_group b; try rewrite <- minus_INR; [|omega]
+  | INR ?a => idtac
+end.
+
+Ltac INR_solve := match goal with
+  | |- INR ?a <> INR ?b => apply not_INR
+  | |- INR ?a = INR ?b => let H := fresh in cut (H : a = b); [rewrite H; reflexivity | ]
+  | |- ?a > ?b => apply Rlt_gt; try INR_solve
+  | |- ?a >= ?b => apply Rle_ge; try INR_solve
+  | |- 0 < ?a ^ 2 => rewrite <- (Rsqr_pow2 a); try INR_solve
+  | |- 0 < ?a² => apply Rlt_0_sqr; try INR_solve
+  | |- 0 <= ?a / ?b => apply Rle_mult_inv_pos; try INR_solve
+  | |- 0 < ?a / ?b => apply Rlt_mult_inv_pos; try INR_solve
+  | |- 0 < / ?a => apply Rinv_0_lt_compat; try INR_solve
+  | |- 0 <= / ?a => apply Rlt_le; apply Rinv_0_lt_compat; try INR_solve
+  | |- ?a <> ?b => try INR_group a; try INR_group b; try apply not_INR
+  | |- ?a < ?b => try INR_group a; try INR_group b; try apply lt_INR
+  | |- ?a <= ?b => try INR_group a; try INR_group b; apply le_INR
+  | |- ?a = ?b => INR_group a; INR_group b; try reflexivity
+  | |- ?a = ?b => INR_group a; INR_group b; let H := fresh in cut (H : a = b); [rewrite H; reflexivity | ]
+  | |- ?a ?op ?b => INR_group a; INR_group b
+  | |- ?a /\ ?b => split; try INR_solve
+end; nat_solve; try omega.
+
+Section examples.
+  
+  Definition aaa n m := INR (n + m).
+  
+  (*TODO il manque des cas > quand le >= existe*)
+  
+  Example hfdd : sum_f_R0 (fun n => (aaa n n) / 1) 0 = 1.
+  Proof.
+  assert (1 <> 0) by (intro Hc; fourier).
+  elim_ident.
+  admit.
+  Qed.
+  
+  Example njfkl : forall y, Rabs (INR 5) * y + IZR 10 = 5 * y + 10.
+  Proof.
+  intros y.
+  repeat elim_ident.
+  ring.
+  Qed.
+  
+  Example njfk : forall x, x <> 0 -> 1 / Rabs x + ((IZR (-5) + INR 7) + 4 ^ 2 + sqrt (5 * 5)) = IZR (2 * 9) + Rsqr 2 + Rabs (1 / x) + 1.
+  Proof.
+  intros.
+  repeat elim_ident.
+  ring.
+  Qed.
+  
+  Example triangle n : INR (n * S n) / 2 + INR (S n) = INR (S n * S (S n)) / 2.
+  Proof.
+  intros.
+  elim_ident.
+  field.
+  Qed.
+  
+  Example le0fact n : 0 < INR (S n * S (S n)) / INR (fact n).
+  Proof.
+  intros.
+  INR_solve.
+  Qed.
+  
+  Example fieldoblig n : 1 / INR (S n) - 1 / INR (S (S n)) = 1 / INR (S n * S (S n)).
+  Proof.
+  intros.
+  elim_ident.
+  field.
+  INR_solve.
+  Qed.
+  
+  Example pos_2np1_inv_sqr n : 0 < / (2 * (INR n) + 1) ^ 2.
+  Proof.
+  intros.
+  INR_solve.
+  Qed.
+  
+End examples.
+

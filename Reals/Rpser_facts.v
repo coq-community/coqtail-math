@@ -31,6 +31,7 @@ Require Import Ranalysis_def.
 Require Import RFsequence.
 Require Import RFsequence_facts.
 
+Open Scope Rseq_scope.
 Open Scope R_scope.
 
 (** * Tools *)

@@ -23,6 +23,7 @@ Require Import Rsequence.
 Require Import Rsequence_facts.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_usual_facts.
+Require Import Rtactic.
 Require Import MyRIneq.
 
 Require Import Cprop_base.

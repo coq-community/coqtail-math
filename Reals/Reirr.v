@@ -29,6 +29,7 @@ Require Import Rtrigo.
 Require Import Rpser_usual.
 Require Import Reals.
 Require Import Rsequence_tactics.
+Require Import Rtactic.
 
 Require Import Fourier.
 

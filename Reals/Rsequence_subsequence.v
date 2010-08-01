@@ -24,6 +24,7 @@ Require Import Rsequence.
 Require Import Rsequence_facts.
 
 Require Import Fourier.
+Open Scope Rseq_scope.
 Open Scope nat_scope.
 (** printing ~	~ *)
 Definition is_extractor (phi : nat -> nat) := forall n, phi n < phi (S n).

@@ -29,6 +29,7 @@ Require Import Rintegral.
 Require Import Rseries_facts.
 Require Import Rseries_RiemannInt.
 Require Import Rsequence_subsequence.
+Require Import Rtactic.
 
 (* begin hide *)
 Lemma continuity_pt_eq_compat :

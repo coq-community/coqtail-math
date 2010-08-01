@@ -216,3 +216,4 @@ Qed.
 
 End Classical_facts.
 
+Close Scope Rseq_scope.

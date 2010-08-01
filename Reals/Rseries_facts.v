@@ -28,6 +28,7 @@ Require Import Rsequence_facts.
 Require Export Rsequence_subsequence.
 Require Import Fourier.
 Require Import Max.
+Require Import Rtactic.
 Open Scope R_scope.
 (** printing ~	~ *)
 
@@ -1361,33 +1362,6 @@ eapply Rser_pos_maj_cv.
  assumption.
 Qed.
 
-(* begin hide *)
-Ltac INR_group term := match term with
-  | 0 => replace 0 with (INR 0) by trivial
-  | 1 => replace 1 with (INR 1) by trivial
-  | 2 => replace 2 with (INR 2) by trivial
-  | INR ?a * INR ?b => rewrite <- mult_INR
-  | INR ?a + INR ?b => rewrite <- plus_INR
-  | INR ?a - INR ?b => rewrite <- minus_INR
-  | ?a * ?b => try INR_group a; try INR_group b; try rewrite <- mult_INR
-  | ?a + ?b => try INR_group a; try INR_group b; try rewrite <- plus_INR
-  | ?a - ?b => try INR_group a; try INR_group b; try rewrite <- minus_INR; [|omega]
-  | INR ?a => idtac
-end.
-
-Ltac INR_solve := match goal with
-  | |- INR ?a <> INR ?b => apply not_INR
-  | |- INR ?a = INR ?b => let H := fresh in cut (H : a = b); [rewrite H; reflexivity | ]
-  | |- ?a <> ?b => try INR_group a; try INR_group b; try apply not_INR
-  | |- ?a < ?b => try INR_group a; try INR_group b; try apply lt_INR
-  | |- ?a <= ?b => try INR_group a; try INR_group b; apply le_INR
-  | |- ?a = ?b => INR_group a; INR_group b; try reflexivity
-  | |- ?a = ?b => INR_group a; INR_group b; let H := fresh in cut (H : a = b); [rewrite H; reflexivity | ]
-  | |- ?a ?op ?b => INR_group a; INR_group b
-  | |- ?a /\ ?b => split; try INR_solve
-end; try omega.
-(* end hide *)
-
 Lemma Rser_cv_square_inv : {l | Rser_cv (fun i => / INR (S i) ^ 2) l}.
 Proof.
 eapply Rser_pos_maj_cv_shift with (fun n => / (INR ((S n) * (S (S n))))).
@@ -1395,8 +1369,7 @@ intro n; split.
  apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
  
  apply Rlt_le; apply Rinv_lt_contravar.
-  unfold pow; INR_solve; simpl.
-  assert (AP : forall a, (O < S a)%nat) by (intro; omega); apply AP.
+  unfold pow; INR_solve.
   
   unfold pow; rewrite Rmult_1_r.
   INR_solve; simpl; omega.

@@ -25,6 +25,7 @@ Require Import Rsequence_facts.
 Require Import Rseries_def.
 Require Import Rseries_facts.
 Require Import Rsequence_subsequence.
+Require Import Rtactic.
 
 Open Scope R_scope.
 
@@ -157,13 +158,10 @@ unfold Rser_cv.
 eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
  apply Rsum_eq_compat.
  intros n.
- unfold tg_alt.
- unfold PI_tg.
- rewrite plus_INR.
- rewrite mult_INR.
- replace (INR 2) with 2 by reflexivity.
- replace (INR 1) with 1 by reflexivity.
- reflexivity.
+ unfold tg_alt, PI_tg, antg.
+ INR_group (2 * INR n + 1).
+ field.
+ INR_solve.
  
  unfold PI.
  destruct exist_PI as [pi H].
@@ -210,8 +208,6 @@ Lemma bntg_pos : forall n, 0 < bntg n.
 Proof.
 intro n.
 unfold bntg.
-apply Rinv_0_lt_compat.
-apply pow_lt.
 INR_solve.
 Qed.
 
@@ -227,9 +223,8 @@ intros.
 destruct n.
  simpl.
  replace (2 * 0 - 1) with (- 1) by field.
- apply Ropp_neq_0_compat; apply R1_neq_R0.
- 
- INR_solve.
+  apply Ropp_neq_0_compat; apply R1_neq_R0.
+  INR_solve.
 Qed.
 
 Lemma bntg_neg_simpl : forall n, 
@@ -248,9 +243,7 @@ Lemma pi_tg2_corresp : forall n,
   pi_tg2 n = tg_alt PI_tg (2 * n) + tg_alt PI_tg (S (2 * n)).
 Proof.
 intros.
-unfold tg_alt.
-unfold PI_tg.
-unfold pi_tg2.
+unfold tg_alt, PI_tg, pi_tg2.
 rewrite pow_1_odd.
 rewrite pow_1_even.
 assert (R1 : INR ((2 * (2 * n) + 1)%nat) = 2 * (2 * (INR n)) + 1) by INR_solve.
@@ -1297,7 +1290,7 @@ destruct n.
  replace (/ INR k) with (Un O) by trivial.
  
  edestruct (alt_bounding Un).
-  intro; unfold Un; apply Rle_Rinv; INR_solve.
+  intro; unfold Un. apply Rle_Rinv; INR_solve.
   intro; unfold Un; apply Rlt_le; apply Rinv_0_lt_compat; INR_solve.
  
  assert (0 <= sum_f_R0 (tg_alt Un) i) by apply H0.
@@ -1481,9 +1474,7 @@ eapply Rseq_cv_0_pos_maj_compat.
   apply Rmult_le_compat.
    apply Rlt_le; apply Rinv_0_lt_compat; INR_solve.
    apply cond_pos_sum; assumption.
-   apply Rlt_le; apply (Rinv_lt_contravar (INR (S n))).
-    replace (2 * S n + 1)%nat with (S (2 * S n)) by omega; apply Rmult_lt_0_compat; INR_solve.
-    INR_solve.
+   apply Rlt_le; apply (Rinv_lt_contravar (INR (S n))); INR_solve.
   apply (sum_growing _ (fun n => k / INR (S n))); apply Unbound.
   
   replace (sum_f_R0 (fun n0 : nat => k / INR (S n0)) n)
