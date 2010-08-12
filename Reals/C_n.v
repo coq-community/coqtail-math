@@ -4,9 +4,11 @@ Require Import FunctionalExtensionality.
 
 Open Local Scope R_scope.
 
-Inductive C : nat -> (R -> R) -> Set :=
-  | C_0 : forall f, continuity f -> C 0 f
-  | C_Sn : forall f n (pr : derivable f), C n (derive f pr) -> C (S n) f.
+Inductive Class (f : R -> R) : nat -> Set :=
+  | C_0 : continuity f -> Class f 0
+  | C_Sn : forall n (pr : derivable f), Class (derive f pr) n -> Class f (S n).
+
+Definition C n f := (Class f n).
 
 Inductive C_infty (f : R -> R) : Set :=
   | C_infty_const : (forall n, C n f) -> C_infty f.
@@ -40,7 +42,7 @@ Lemma id_C_infty : C_infty id.
 Proof.
  apply C_infty_const ; intro n ; destruct n.
   constructor ; apply derivable_continuous ; apply derivable_id.
-  apply C_Sn with derivable_id.
+  apply C_Sn with derivable_id ; fold (C n (derive id derivable_id)).
   replace (derive id derivable_id) with (fct_cte 1).
   assert (H := const_C_infty 1) ; inversion H ; auto.
   extensionality x ; unfold derive.
@@ -75,7 +77,7 @@ Lemma C_eq_compat : forall f g,
   forall n, C n f -> C n g.
 Proof.
 intros f g Heq n Hf.
-destruct Hf as [| f n Df HDf].
+destruct Hf as [| n Df HDf].
  constructor.
  refine (Rfun_continuity_eq_compat f g _ _); auto.
  
@@ -103,7 +105,7 @@ intro d ; induction d ; intro a ; apply C_infty_const ; intro n.
    constructor; intro; reg.
    
    assert (pr : derivable (fun x : R => (a * x ^ S d)%R)) by reg.
-   refine (C_Sn _ _ pr _).
+   refine (C_Sn _ _ pr _) ; fold (C n (derive (fun x : R => a * x ^ S d) pr)).
    replace (derive (fun x : R => (a * x ^ S d)%R) pr) with (fun x => (a * INR (S d) * pow x d)%R).
    assert (H := IHd (a * INR (S d))) ; inversion H ; auto.
    extensionality x ; symmetry.
@@ -293,7 +295,7 @@ Qed.
 
 (** nth derivative *)
 
-Fixpoint nth_derive (n : nat) (f : R -> R) (pr : C n f) : R -> R := match pr with
-   | C_0 f0 H => f
-   | C_Sn f0 n0 pr H => nth_derive n0 (derive f0 pr) H
+Fixpoint nth_derive {n : nat} (f : R -> R) (pr : C n f) : R -> R := match pr with
+   | C_0 H => f
+   | C_Sn n0 pr H => nth_derive (derive f pr) H
 end.
