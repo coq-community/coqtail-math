@@ -746,5 +746,13 @@ Section examples.
   INR_solve.
   Qed.
   
+  Example inz n : 0 <> 2 * IZR n + 1.
+  Proof.
+  intros.
+  prove_sup.
+  discrR.
+  omega.
+  Qed.
+  
 End examples.
 
