@@ -50,9 +50,9 @@ Definition Rdiv (x y : R) (pr : y # R0) : R := x * Rinv y pr.
 (** Congruences **)
 Axiom Req_lt_compat_l : forall x1 x2 y : R, x1 == x2 -> x1 < y -> x2 < y.
 Axiom Req_lt_compat_r : forall x1 x2 y : R, x1 == x2 -> y < x1 -> y < x2.
-Axiom Req_inv_compat : forall (x : R) (pr : R0 < x) (pr' : x # R0), R0 < Rinv x pr'.
 Axiom Radd_lt_compat_l : forall x y1 y2 : R, y1 < y2 -> x + y1 < x + y2.
 Axiom Rmul_lt_compat_l : forall x y1 y2 : R, R0 < x -> y1 < y2 -> x * y1 < x * y2.
+Axiom Req_inv_compat : forall (x : R) (pr : R0 < x) (pr' : x # R0), R0 < Rinv x pr'.
 
 Infix "-" := Rsub : R_scope.
 Infix "/" := Rdiv : R_scope.
@@ -94,12 +94,12 @@ Definition IZR (z : Z) : R :=
   end.
 Arguments Scope IZR [Z_scope].
 
-Definition Rsqr r : R := r * r.
+Definition Rdist x y d : Type := prod (x - y < d) (- d < x - y).
 
 (** Getting back to Z **)
 
 Parameter Rup : R -> Z.
-Axiom Rup_spec : forall r : R, Rsqr (r - IZR (Rup r)) < R1.
+Axiom Rup_spec : forall r : R, Rdist r (IZR (Rup r)) R1.
 
 (** * Completeness **)
 
@@ -120,10 +120,10 @@ Fixpoint Rpow_nat (x : R) (n : nat) : R := match n with
 end.
 
 Definition Rseq_Cauchy (Un : nat -> R) : Type := forall k,
-  {N : nat & forall p q, (N <= p)%nat -> (N <= q)%nat -> Rsqr (Un p - Un q) < Rpow_nat Rinv_2 k}.
+  {N : nat & forall p q, (N <= p)%nat -> (N <= q)%nat -> Rdist (Un p) (Un q) (Rpow_nat Rinv_2 k)}.
 
 Definition Rseq_cv (Un : nat -> R) (l : R) : Type := forall k,
-  {N : nat & forall n, (N <= n)%nat -> Rsqr (Un n - l) < Rpow_nat Rinv_2 k}.
+  {N : nat & forall n, (N <= n)%nat -> Rdist (Un n) l (Rpow_nat Rinv_2 k)}.
 
 Axiom Rcomplete : forall Un, Rseq_Cauchy Un -> {l : R & Rseq_cv Un l}.
 
