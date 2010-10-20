@@ -14,32 +14,31 @@ Proof.
 split; repeat intros []; eauto.
 Qed.
 
-Lemma Prop_inhabited_stable : forall P : Prop, P -> [ P ].
+Lemma Prop_inhabited_stable : forall P : Prop, P -> [P].
 Proof.
 auto.
 Qed.
 
-Lemma Prop_inhabited_inversion : forall P : Prop, [ P ] -> P.
+Lemma Prop_inhabited_inversion : forall P : Prop, [P] -> P.
 Proof.
 intros ? []; apply id.
 Qed.
 
-Lemma Type_inhabited_stable : forall P : Type, P -> [ P ].
+Lemma Type_inhabited_stable : forall P : Type, P -> [P].
 Proof.
 auto.
 Qed.
 
 Definition epsilon := forall (A : Type) (f : A -> Prop), (exists x, f x) -> { x | f x }.
 
-Definition monad_output := forall P : Type, [ P ] -> P.
+Definition algebraic := forall P : Type, [ P ] -> P.
 
-Lemma Type_inhabited_inversion_implies_epsilon : monad_output -> epsilon.
+Lemma Type_inhabited_inversion_implies_epsilon : algebraic -> epsilon.
 Proof.
 intros Hs A f Hex.
 apply Hs.
 apply ex_inhabited_sig; assumption.
 Qed.
-
 
 Require Import InhabitedTactics.
 
@@ -61,3 +60,21 @@ Lemma unlift_example3  : forall (P Q R : Type), [ P ] -> [ P -> Q ] -> [ Q -> R 
 Proof.
 intros P Q R p pq qr.
 Admitted.
+
+Lemma stronger_inhabited_in_hypothese : forall A B, ([A] -> [B]) -> (A -> [B]).
+Proof.
+eauto.
+Qed.
+
+Definition not (A : Type) : Type := A -> False.
+
+(* to show that ([A] -> [B]) is strictely stronger than (A -> [B]) *)
+
+Lemma stronger_inhabited_in_hypothese' :
+  (forall A B, (A -> [B]) -> ([A] -> [B])) ->
+  True (* something strong and bad here (?) *).
+Proof.
+intros HH. 
+(* big complicated proof here *)
+apply I.
+Qed.
