@@ -57,8 +57,10 @@ Lemma Wallis_0 : Rint (sin_n 0)  0 (PI/2) (PI/2).
 Proof.
 apply Rint_eq_compat with (fct_cte 1).
   trivial.
-assert(Hrew : (PI/2) = (1*(PI/2 -0))) by ring; rewrite Hrew at 2; clear Hrew.
-auto with Rint.
+assert(Hrew : (PI/2) = (1*(PI/2 -0))) by ring.
+apply Rint_eq with (1 * (PI / 2 - 0)).
+ auto with Rint.
+ ring.
 Qed.
 
 Lemma Wallis_1 : Rint (sin_n 1)  0 (PI/2) 1.
@@ -68,9 +70,9 @@ apply Rint_eq_compat with sin.
   auto with *.
 assert(Heq : 1 = (cos 0 - cos (PI/2))).
   rewrite cos_PI2, cos_0; ring.
-rewrite Heq at 3.
-auto with Rint.
+apply Rint_eq with (cos 0 - cos (PI / 2)) ; auto with Rint.
 Qed.
+
 
 (** Recurrence formula *)
 Lemma Wallis_formula Wn n: 

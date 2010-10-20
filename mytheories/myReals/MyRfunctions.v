@@ -123,8 +123,8 @@ Qed.
 Lemma prolongement_C1_derivable (f d : R -> R) (a b : R) :
   a <= b ->
   (forall c, a <= c <= b -> derivable_pt_abs f c (d c)) ->
-  exists derg, forall x, derive (C1_continuation f a b d) derg x =
-               C1_continuation_derive d a b x.
+  { derg | forall x, derive (C1_continuation f a b d) derg x =
+               C1_continuation_derive d a b x}.
 (*         (forall c : R, a <= c <= b -> g c = f c) /\ 
          (forall c : R, a <= c <= b -> derive g derg c = d c). *)
 Proof.
@@ -827,9 +827,9 @@ Lemma prolongement_C1_C1 (f d : R -> R) (a b : R) :
   a <= b ->
   (forall c, a <= c <= b -> derivable_pt_abs f c (d c)) ->
   (forall c, a <= c <= b -> continuity_pt d c) ->
-  exists g : C1_fun,
-  (forall c : R, a <= c <= b -> f c = g c) /\ 
-  (forall c : R, a <= c <= b -> d c = derive g (diff0 g) c).
+  {g : C1_fun |
+  (forall c : R, a <= c <= b -> f c = g c) /\
+  (forall c : R, a <= c <= b -> d c = derive g (diff0 g) c)}.
 Proof.
 intros f d a b Hab Hder Hcont.
 pose proof (prolongement_C1_derivable f d a b Hab Hder) as [diff0 Heq].

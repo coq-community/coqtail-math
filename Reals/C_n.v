@@ -117,7 +117,7 @@ Qed.
 
 (** nth derivative *)
 
-Fixpoint nth_derive {n : nat} (f : R -> R) (pr : C n f) : R -> R := match pr with
+Fixpoint nth_derive (n : nat) (f : R -> R) (pr : C n f) : R -> R := match pr with
    | C_0 H => f
-   | C_Sn n0 pr H => nth_derive (derive f pr) H
+   | C_Sn n0 pr H => nth_derive n0 (derive f pr) H
 end.

@@ -74,7 +74,7 @@ Qed.
 
 (** * Definition of the integral of f between a and b using Riemann_integrable *)
 
-Definition Rint f a b I := exists pr : Riemann_integrable f a b, RiemannInt pr = I.
+Definition Rint f a b I := {pr : Riemann_integrable f a b | RiemannInt pr = I}.
 
 (** * Common results on integrals *)
 
@@ -82,14 +82,18 @@ Section Rint_facts.
 
 (** The integral from a to b is the opposite of the integral from b to a *)
 
-Lemma Rint_reverse f a b x : Rint f a b  x <-> Rint f b a (-x).
+Lemma Rint_reverse_1 f a b x : Rint f a b  (-x) -> Rint f b a x.
 Proof.
-intros f a b x. split; intros [pr H].
-pose proof RiemannInt_P1 pr as pr2;
-exists pr2;
+ intros f a b x [pr H]. pose proof RiemannInt_P1 pr as pr2.
+ exists pr2;
 assert(RiemannInt pr2 = - RiemannInt pr) as Hrew;
   [ apply RiemannInt_P8 | rewrite Hrew];
 rewrite H; intuition.
+Qed.
+
+Lemma Rint_reverse_2 f a b x : Rint f a b  x -> Rint f b a (-x).
+Proof.
+intros f a b x [pr H]. 
 pose proof RiemannInt_P1 pr as pr2;
 exists pr2;
 assert(RiemannInt pr2 = - RiemannInt pr) as Hrew;
@@ -135,8 +139,8 @@ erewrite RiemannInt_P18.
  intuition.
 rewrite Rmin_comm, Rmax_comm in Heq.
 intro RIf.
-apply (proj2 (Rint_reverse _ _ _ _ )) .
-apply Rint_reverse in RIf.
+apply Rint_reverse_1.
+apply Rint_reverse_2 in RIf.
 destruct RIf as [prf Hf].
 pose proof (Riemann_integrable_eq_compat f g b a Heq prf) as prg.
 exists prg.
@@ -161,7 +165,7 @@ Qed.
 Lemma Rint_continuity f a b : 
   a <= b ->
     (forall x, a <= x <= b -> continuity_pt f x) ->
-  exists x, Rint f a b x.
+  {x : R & (Rint f a b x)}.
 Proof.
 intros f a b Hab f_cont.
 exists(RiemannInt (continuity_implies_RiemannInt Hab f_cont)).
@@ -207,12 +211,11 @@ apply RiemannInt_P5.
 Qed.
 
 Lemma Rint_subinterval f a b c x : (a <= b <= c) ->
-  Rint f a c  x -> exists y, Rint f a b y /\ Rint f b c (x-y).
+  Rint f a c  x -> {y : R & Rint f a b y & Rint f b c (x-y)}.
 Proof.
 intros f a b c x Hb [prac Hf].
 pose proof RiemannInt_P22 prac Hb as prab.
 exists (RiemannInt prab).
-split.
   apply Rint_RiemannInt_link.
 pose proof RiemannInt_P23 prac Hb as prbc.
 exists prbc.
@@ -227,6 +230,12 @@ End Rint_facts.
 (** * Compatibility of integrals with operations *)
 
 Section Rint_operations.
+
+Lemma Rint_eq : forall x y f a b, Rint f a b x -> x = y -> Rint f a b y.
+Proof.
+ intros x y f a b H Heq.
+ subst. apply H.
+Qed.
 
 Lemma Rint_plus f g a b x y : Rint f a b x -> Rint g a b y -> Rint (f + g)%F a b (x + y).
 Proof.
@@ -252,9 +261,9 @@ rewrite RiemannInt_P13 with _ _ _ _ _ prf prg prfg.
 rewrite Hf, Hg; reflexivity.
 Qed.
 
-Lemma Rint_opp f a b x : Rint f a b x <-> Rint (- f)%F a b (- x).
+Lemma Rint_opp1 f a b x : Rint f a b x -> Rint (- f)%F a b (- x).
 Proof.
-intros f a b x; split; intros [prf Hf]; unfold opp_fct.
+intros f a b x; intros [prf Hf]; unfold opp_fct.
   apply Rint_eq_compat with (fun u => fct_cte 0 u + (-1) * f u).
     unfold fct_cte; intros; ring.
   replace (- x) with (0 + (-1)* x) by ring.
@@ -263,6 +272,11 @@ intros f a b x; split; intros [prf Hf]; unfold opp_fct.
   exists prfg.
   rewrite RiemannInt_P13 with _ _ _ _ _ prg prf prfg.
   rewrite Hf, Hg; ring.
+Qed.
+
+Lemma Rint_opp2 f a b x : Rint (-f)%F a b (- x) -> Rint f a b x.
+Proof.
+intros f a b x; intros [prf Hf]; unfold opp_fct.
 apply Rint_eq_compat with (fun u => fct_cte 0 u + (-1) *(- f)%F u).
   unfold fct_cte, opp_fct; intros; ring.
 replace (x) with (0 + (-1)*(- x)) by ring.
@@ -305,17 +319,16 @@ End Rint_operations.
 
 Create HintDb Rint.
 
-Hint Resolve Rint_reverse : Rint.
+Hint Resolve Rint_reverse_2 : Rint.
 Hint Resolve Rint_RiemannInt_link : Rint.
 Hint Resolve Rint_Chasles : Rint.
 Hint Resolve Rint_constant : Rint.
 Hint Resolve Rint_plus : Rint.
 Hint Resolve Rint_minus : Rint.
-Hint Resolve Rint_opp : Rint.
+Hint Resolve Rint_opp1 : Rint.
 Hint Resolve Rint_scalar_mult_compat_l : Rint.
 Hint Resolve Rint_scalar_mult_compat_r : Rint.
 Hint Resolve Rint_uniqueness : Rint.
-Hint Resolve Rint_reverse : Rint.
 Hint Resolve RiemannInt_P6 : Rint.
 Hint Resolve RiemannInt_P7 : Rint.
 Hint Resolve RiemannInt_P10 : Rint.
@@ -359,12 +372,11 @@ Qed.
 
 Lemma Rint_abs_le_int f a b x : 
   a <= b -> Rint f a b x -> 
-    exists y, Rint (fun u => Rabs (f u)) a b y /\ Rabs x <= y.
+    {y : R & (Rint (fun u => Rabs (f u)) a b y) & (Rabs x <= y)}.
 Proof.
 intros f a b x Hab [prf Hf].
 pose proof RiemannInt_P16 prf as prabs.
 exists (RiemannInt prabs).
-split.
   exists prabs.
   reflexivity.
 rewrite <- Hf.
@@ -439,9 +451,9 @@ assert(exists c, exists d, a <= c <= b /\ a <= d <= b /\ c < d /\ forall x, c <=
       apply (proj2 Hx).
       apply Rmin_l.    
 destruct H as [c [d [ Hacb [Hadb [Hcd Hstp]]]]].
-destruct (Rint_subinterval _ _ _ _ _ Hacb HX) as [Y [HY HZ]].
+destruct (Rint_subinterval _ _ _ _ _ Hacb HX) as [Y HY HZ'].
 assert(c <= d<=b) as Hcdb by intuition.
-destruct (Rint_subinterval _ _ _ _ _ Hcdb HZ) as [T [HT HV]].
+destruct (Rint_subinterval _ _ _ _ _ Hcdb HZ') as [T HV HT'].
 destruct (continuity_ab_min f c d) as [m Hm].
  apply Hcdb.
 
@@ -458,15 +470,15 @@ apply Rle_trans with T.
 
   apply Rint_constant.
 
-  apply HT.
+  apply HV.
 apply Rle_trans with (X - Y).
   assert(Hcbpos : forall x : R, c <= x <= b -> 0 <= f x).
     intros x [H1 H2]; apply Hpos; split;[apply Rle_trans with c| ]; intuition.
-    pose proof (Rint_pos _ _ _ _ (proj2 Hacb) Hcbpos HZ) as H.
+    pose proof (Rint_pos _ _ _ _ (proj2 Hacb) Hcbpos HZ') as H.
   assert(0 <= X - Y - T).
     assert(Hdbpos : forall x : R, d <= x <= b -> 0 <= f x).
       intros x [H1 H2]; apply Hpos; split;[apply Rle_trans with d| ]; intuition.
-    apply (Rint_pos _ _ _ _ (proj2 Hadb) Hdbpos HV).
+    apply (Rint_pos _ _ _ _ (proj2 Hadb) Hdbpos HT').
   fourier.
 assert(Hacpos : forall x : R, a <= x <= c -> 0 <= f x).
   intros x [H1 H2]; apply Hpos; split; [ | apply Rle_trans with c]; intuition.
@@ -474,7 +486,7 @@ pose proof (Rint_pos _ _ _ _ (proj1 Hacb) Hacpos HY) as H.
   assert(0 <= X - Y - T).
     assert(Hdbpos : forall x : R, d <= x <= b -> 0 <= f x).
       intros x [H1 H2]; apply Hpos; split;[apply Rle_trans with d| ]; intuition.
-    apply (Rint_pos _ _ _ _ (proj2 Hadb) Hdbpos HV).
+    apply (Rint_pos _ _ _ _ (proj2 Hadb) Hdbpos HT').
   fourier.
 Qed.
 
@@ -602,7 +614,7 @@ destruct (Rle_dec a b) as [n|n].
 apply Rint_derive; assumption.
 apply Rnot_le_lt, Rlt_le in n.
   rewrite Rmin_comm, Rmax_comm, Rmin_def, Rmax_def  in *; try assumption.
-apply <- Rint_reverse; replace (- (f b - f a)) with (f a - f b) by ring.
+apply Rint_reverse_1; replace (- (f b - f a)) with (f a - f b) by ring.
 apply Rint_derive; assumption.
 Qed.
 
@@ -693,3 +705,5 @@ auto.
 Qed.
 
 End Rint_props.
+
+Definition integral_function a b f I (pr : Rint a b f I) := I.
