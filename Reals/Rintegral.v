@@ -705,5 +705,3 @@ auto.
 Qed.
 
 End Rint_props.
-
-Definition integral_function a b f I (pr : Rint a b f I) := I.

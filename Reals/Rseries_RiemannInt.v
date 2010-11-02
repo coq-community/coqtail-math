@@ -27,6 +27,7 @@ Require Import RiemannInt.
 Require Import Fourier.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
+Require Import Riemann_integrable.
 Require Import Rintegral.
 
 Open Local Scope R_scope.
@@ -80,39 +81,6 @@ induction n.
 apply Rint_Chasles with (S n).
   apply IHn.
 apply H.
-Qed.
-
-Lemma RiemannInt_integrable_eq_compat : forall f g a b, (forall x, f x = g x) ->
-  Riemann_integrable f a b -> Riemann_integrable g a b.
-intros f g a b H X eps.
-elim X with eps;intros x p; exists x.
-elim p; intros x0 [p01 p02]; exists x0.
-split; intros; [ rewrite <- (H t); apply p01 | ]; assumption.
-Qed.
-
-Lemma RiemannInt_integrable_minus : forall (f g:R -> R) (a b:R)
-   (prf:Riemann_integrable f a b)
-   (prg:Riemann_integrable g a b), (Riemann_integrable (fun x => f x - g x) a b).
-Proof.
-intros.
-apply RiemannInt_integrable_eq_compat with (fun x => f x + (-1) * g x); [intros; ring|].
-apply RiemannInt_P10; assumption.
-Qed.
-
-Lemma RiemannInt_minus :
-  forall (f g:R -> R) (a b:R)
-   (prf:Riemann_integrable f a b)
-   (prg:Riemann_integrable g a b)
-   (prfg:Riemann_integrable (fun x:R => f x - g x) a b),
-     a<=b -> RiemannInt prfg = RiemannInt prf - RiemannInt prg.
-Proof.
-intros.
-assert (REW: forall x y, x - y = x + (-1)*y) by (intros; ring); rewrite REW; clear REW.
-pose proof (RiemannInt_P10 (-1) prf prg) as prfg'.
-replace (RiemannInt prfg) with (RiemannInt prfg').
-apply RiemannInt_P13.
-apply RiemannInt_P18 ; intuition.
-ring.
 Qed.
 
 Section Rser_RiemannInt_link.

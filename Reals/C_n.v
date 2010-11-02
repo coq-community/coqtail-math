@@ -95,6 +95,18 @@ Proof.
  constructor; intro; eapply C_cos_sin.
 Qed.
 
+Lemma C_exp : forall n, C n exp.
+Proof.
+ induction n.
+  constructor. apply derivable_continuous. apply derivable_exp.
+  
+  apply C_Sn with (derivable_exp). unfold derive. 
+  apply C_ext with exp. 
+   intro. rewrite <- (derive_pt_exp x). apply pr_nu_var. reflexivity.
+
+   apply IHn.
+Qed.
+
 Require Import Rpser_def.
 Require Import Rpser_facts.
 
@@ -113,11 +125,53 @@ Qed.
 
 
 
+Lemma C_Sn_derivable : forall f n, C (S n) f -> derivable f.
+Proof.
+ intros.
+ inversion H. subst. apply pr.
+Qed.
+
+Lemma C_Sm_derive_C_m : forall f n pr, C (S n) f -> C n (derive f pr).
+Proof.
+ intros.
+ inversion H.
+ eapply C_ext. Focus 2. apply H1. intro. apply pr_nu.
+Qed.
+
+Lemma C_continuity : forall f n, C n f -> continuity f.
+Proof.
+intros.
+inversion H. apply H0.
+apply derivable_continuous. assumption.
+Qed.
+
+Lemma C_infty_n : forall f, C_infty f -> (forall n, C n f).
+Proof.
+ intros. inversion H. apply H0.
+Qed.
 
 
 (** nth derivative *)
 
+Program Fixpoint nth_derive (n : nat) (f : R -> R) (pr : C n f) : R -> R := match n with
+   | 0 => f
+   | S m => nth_derive m (derive f (C_Sn_derivable f m pr)) (C_Sm_derive_C_m f m (C_Sn_derivable f m pr) pr)
+end.
+
+Program Fixpoint nth_derive1 (n : nat) (f : R -> R) (pr : C n f) : R -> R := match n with
+   | 0 => f
+   | S m => nth_derive m (derive f _) _
+end.
+Next Obligation.
+exact (C_Sn_derivable f m pr).
+Qed.
+Next Obligation.
+apply C_Sm_derive_C_m. subst. apply pr.
+Qed.
+
+(*
 Fixpoint nth_derive (n : nat) (f : R -> R) (pr : C n f) : R -> R := match pr with
    | C_0 H => f
    | C_Sn n0 pr H => nth_derive n0 (derive f pr) H
 end.
+*)

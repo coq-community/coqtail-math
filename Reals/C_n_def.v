@@ -29,6 +29,12 @@ Proof.
   apply IHn ; assumption.
 Qed.
 
+Lemma C_eq : forall f g n, f = g -> C n f -> C n g.
+Proof.
+intros.
+subst. apply H0.
+Qed.
+
 Lemma C_ext : forall n f g, f == g -> C n f -> C n g.
 Proof.
 intro n ; induction n ; intros f g f_eq_g Cnf.
