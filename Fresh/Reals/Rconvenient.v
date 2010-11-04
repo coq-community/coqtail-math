@@ -92,10 +92,30 @@ eapply Req_trans.
   eapply Rmul_eq_compat_r; eassumption.
 Qed.
 
+Lemma Radd_0_r : forall x, x + R0 == x.
+Proof.
+intro.
+rewrite Radd_comm.
+apply Radd_0_l.
+Qed.
+
+Lemma Radd_eq_cancel_r : forall x x' y, x + y == x' + y -> x == x'.
+intros x x' y Hxy.
+rewrite <- (Radd_0_r x), <- (Radd_0_r x').
+rewrite <- (Radd_opp_r y).
+repeat rewrite <- Radd_assoc.
+rewrite <- Hxy.
+apply Radd_eq_compat_l.
+reflexivity.
+Qed.
+
 Instance Proper_Req_opp : Proper (Req ==> Req) Ropp.
 Proof.
 intros x x' Hx.
-Admitted.
+apply (Radd_eq_cancel_r _ _ x).
+rewrite Hx at 3.
+do 2 rewrite Radd_comm, Radd_opp_r; reflexivity.
+Qed.
 
 Definition R_ring : ring_theory R0 R1 Radd Rmul Rsub Ropp Req.
 Proof.
@@ -112,11 +132,6 @@ split.
 Qed.
 
 Add Ring R_ring : R_ring.
-
-Lemma Radd_0_r : forall x, Req (x + R0) x.
-Proof.
-intros; ring.
-Qed.
 
 Lemma Radd_lt_compat_r : forall x1 x2 y : R, x1 < x2 -> x1 + y < x2 + y.
 Proof.
