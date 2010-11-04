@@ -1,6 +1,6 @@
 Module Type CReals.
 
-Require Import ZArith.
+Require Export ZArith.
 
 (** * Constructive ordered field *)
 
@@ -50,9 +50,14 @@ Definition Rdiv (x y : R) (pr : y # R0) : R := x * Rinv y pr.
 (** Congruences **)
 Axiom Req_lt_compat_l : forall x1 x2 y : R, x1 == x2 -> x1 < y -> x2 < y.
 Axiom Req_lt_compat_r : forall x1 x2 y : R, x1 == x2 -> y < x1 -> y < x2.
+
 Axiom Radd_lt_compat_l : forall x y1 y2 : R, y1 < y2 -> x + y1 < x + y2.
+Axiom Radd_eq_compat_l : forall x y1 y2, y1 == y2 -> x + y1 == x + y2.
+
 Axiom Rmul_lt_compat_l : forall x y1 y2 : R, R0 < x -> y1 < y2 -> x * y1 < x * y2.
-Axiom Req_inv_compat : forall (x : R) (pr : R0 < x) (pr' : x # R0), R0 < Rinv x pr'.
+Axiom Rmul_eq_compat_l : forall x y1 y2, y1 == y2 -> x * y1 == x * y2.
+
+Axiom Rinv_0_lt_compat : forall (x : R) (pr : R0 < x) (pr' : x # R0), R0 < Rinv x pr'.
 
 Infix "-" := Rsub : R_scope.
 Infix "/" := Rdiv : R_scope.

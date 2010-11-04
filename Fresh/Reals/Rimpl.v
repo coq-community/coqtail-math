@@ -1,6 +1,4 @@
-(*
-
-Require Reals.
+(* Require Reals.
 Require Raxiom.
 
 Module Rimpl : Raxiom.CReals.
@@ -13,7 +11,7 @@ Module Rimpl : Raxiom.CReals.
   Definition Ropp := Coq.Reals.Rdefinitions.Ropp.
   Definition Rlt := Coq.Reals.Rdefinitions.Rlt.
   Definition Rup := Coq.Reals.Rdefinitions.up.
-  
+
 Infix "+" := Rplus : R_scope.
 Infix "*" := Rmult : R_scope.
 Notation "- x" := (Ropp x) : R_scope.
