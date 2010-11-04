@@ -103,27 +103,11 @@ Axiom Rup_spec : forall r : R, Rdist r (IZR (Rup r)) R1.
 
 (** * Completeness **)
 
-Lemma Rdiscr_0_2 : Rdiscr (R1 + R1) R0.
-Proof.
-right.
-apply (Req_lt_compat_l _ _ _ (Radd_0_l _)).
-apply Rlt_trans with (R0 + R1).
- apply Radd_lt_compat_l, Rlt_0_1.
- apply (Req_lt_compat_l _ _ _ (Radd_comm _ _)); apply Radd_lt_compat_l, Rlt_0_1.
-Qed.
+Definition Rseq_Cauchy (Un : nat -> R) : Type := forall eps, R0 < eps ->
+  {N : nat & forall p q, (N <= p)%nat -> (N <= q)%nat -> Rdist (Un p) (Un q) eps}.
 
-Definition Rinv_2 := Rinv (R1 + R1) Rdiscr_0_2.
-
-Fixpoint Rpow_nat (x : R) (n : nat) : R := match n with
-  | O => R1
-  | S n => x * Rpow_nat x n
-end.
-
-Definition Rseq_Cauchy (Un : nat -> R) : Type := forall k,
-  {N : nat & forall p q, (N <= p)%nat -> (N <= q)%nat -> Rdist (Un p) (Un q) (Rpow_nat Rinv_2 k)}.
-
-Definition Rseq_cv (Un : nat -> R) (l : R) : Type := forall k,
-  {N : nat & forall n, (N <= n)%nat -> Rdist (Un n) l (Rpow_nat Rinv_2 k)}.
+Definition Rseq_cv (Un : nat -> R) (l : R) : Type := forall eps, R0 < eps ->
+  {N : nat & forall n, (N <= n)%nat -> Rdist (Un n) l eps}.
 
 Axiom Rcomplete : forall Un, Rseq_Cauchy Un -> {l : R & Rseq_cv Un l}.
 
