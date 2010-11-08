@@ -1,6 +1,6 @@
 Require Import Monad.
 
-Lemma ex_inhabited_sig A (f : A -> Prop) :  ex f -> [ sig f ].
+Lemma ex_inhabited_sig : forall A (f : A -> Prop),  ex f -> [ sig f ].
 Proof.
 intros A f Hex.
 destruct Hex as (x, fx).

@@ -22,7 +22,7 @@ Proof.
 pose Rlt_asym; eauto.
 Qed.
 
-Lemma Rdiscr_irrefl : forall r, r # r -> False.
+Lemma Rdiscr_irrefl : forall r, r ## r -> False.
 Proof.
 intros ? [|]; apply Rlt_irrefl.
 Qed.

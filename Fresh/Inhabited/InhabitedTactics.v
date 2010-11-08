@@ -1,9 +1,5 @@
 Require Import Monad.
 
-Parameter PProp : Prop.
-Parameter PType : Type.
-Parameter PSet : Set.
-
 Ltac unroll_hypotheses := match goal with
   | H : inhabited _ |- _ => destruct H as (H); unroll_hypotheses
   | _ => idtac

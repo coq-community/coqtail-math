@@ -31,7 +31,7 @@ Infix "+" := Radd : R_scope.
 Infix "*" := Rmul : R_scope.
 Notation "- x" := (Ropp x) : R_scope.
 Infix "==" := Req (at level 70, no associativity) : R_scope.
-Infix "#" := Rdiscr (at level 70, no associativity) : R_scope.
+Infix "##" := Rdiscr (at level 70, no associativity) : R_scope.
 Infix "<=" := Rle : R_scope.
 Infix ">=" := Rge : R_scope.
 Infix ">"  := Rgt : R_scope.
@@ -45,7 +45,7 @@ Axiom Rinv : forall x, Rdiscr x R0 -> R.
 
 (** Convenient operations **)
 Definition Rsub (x y : R) : R := Radd x (Ropp y).
-Definition Rdiv (x y : R) (pr : y # R0) : R := x * Rinv y pr.
+Definition Rdiv (x y : R) (pr : y ## R0) : R := x * Rinv y pr.
 
 (** Congruences **)
 Axiom Req_lt_compat_l : forall x1 x2 y : R, x1 == x2 -> x1 < y -> x2 < y.
@@ -57,7 +57,7 @@ Axiom Radd_eq_compat_l : forall x y1 y2, y1 == y2 -> x + y1 == x + y2.
 Axiom Rmul_lt_compat_l : forall x y1 y2 : R, R0 < x -> y1 < y2 -> x * y1 < x * y2.
 Axiom Rmul_eq_compat_l : forall x y1 y2, y1 == y2 -> x * y1 == x * y2.
 
-Axiom Rinv_0_lt_compat : forall (x : R) (pr : R0 < x) (pr' : x # R0), R0 < Rinv x pr'.
+Axiom Rinv_0_lt_compat : forall (x : R) (pr : R0 < x) (pr' : x ## R0), R0 < Rinv x pr'.
 
 Infix "-" := Rsub : R_scope.
 Infix "/" := Rdiv : R_scope.
@@ -75,7 +75,7 @@ Axiom Rmul_assoc : forall x y z : R, (x * y) * z == x * (y * z).
 Axiom Rmul_1_l : forall r : R, R1 * r == r.
 
 (** Constructive field operation **)
-Axiom Rinv_l : forall (x : R) (pr : x # R0), Rinv x pr * x == R1.
+Axiom Rinv_l : forall (x : R) (pr : x ## R0), Rinv x pr * x == R1.
 
 (** Ordered Field **)
 Axiom Rlt_0_1 : R0 < R1.
