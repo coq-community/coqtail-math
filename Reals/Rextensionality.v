@@ -14,12 +14,17 @@ intros f_cont x eps eps_pos.
  intros ; do 2 rewrite <- fg_ext ; auto.
 Qed.
 
+Lemma derivable_pt_lim_ext : forall x l, derivable_pt_lim f x l ->
+  derivable_pt_lim g x l.
+Proof.
+intros x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [delta Hdelta] ;
+ exists delta ; intros ; do 2 rewrite <- fg_ext ; auto.
+Qed.
+
 Lemma derivable_pt_ext : forall x, derivable_pt f x ->
   derivable_pt g x.
 Proof.
-intros x [df Hdf] ; exists df ; intros eps eps_pos ;
- destruct (Hdf _ eps_pos) as [delta Hdelta] ; exists delta ;
- intros ; do 2 rewrite <- fg_ext ; auto.
+intros x [df Hdf] ; exists df ; apply derivable_pt_lim_ext ; trivial.
 Qed.
 
 Lemma derivable_ext : derivable f -> derivable g.

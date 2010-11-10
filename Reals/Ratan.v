@@ -21,7 +21,6 @@ USA.
 
 Require Import Rbase.
 Require Import PSeries_reg.
-Require Import Rtrigo.
 Require Import Fourier.
 Require Import Ranalysis.
 Require Import Rfunctions.

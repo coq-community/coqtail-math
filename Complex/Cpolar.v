@@ -20,7 +20,6 @@ USA.
 *)
 
 
-Require Import Rtrigo.
 Require Import AltSeries.
 Require Import Rseries_def.
 Require Import Ratan.

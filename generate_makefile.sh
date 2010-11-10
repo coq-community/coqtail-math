@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #DIRS="Arith Complex Hierarchy Modulo mytheories Reals Sets Subseq Topology"
-DIRS="-I . -I Arith -I Complex -I Hierarchy -I Modulo -I mytheories/myReals -I Reals -I Sets -I Subseq -I Topology"
+DIRS="-I . -I Arith -I Complex -I Hierarchy -I Modulo -I mytheories/myReals -I Reals -I Sets -I Subseq -I Topology -I Fresh/Reals -I Fresh/Inhabited"
 GENERATED_MAKEFILE="Makefile"
 SRC_V="$(find . -name '*.v' | grep -v Raxioms)"
 

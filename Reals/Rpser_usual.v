@@ -47,7 +47,7 @@ intro n ; destruct (n_modulo_2 n) as [ [p Hp] | [p Hp]].
  apply 0.
 Defined.
 
-Lemma sin_seq (n : nat) : R.
+Definition sin_seq (n : nat) : R.
 Proof.
 intro n ; case (n_modulo_2 n) ; intros [p Hp].
  apply 0.
@@ -227,4 +227,19 @@ Lemma derivable_pt_lim_sine : forall x, derivable_pt_lim sine x (cosine x).
 Proof.
 intro x ; rewrite cosine_eq_Deriv_sine ;
  apply derivable_pt_lim_sum.
+Qed.
+
+Lemma derivable_pt_Rexp : forall x, derivable_pt Rexp x.
+Proof.
+intro x ; exists (Rexp x) ; apply derivable_pt_lim_Rexp.
+Qed.
+
+Lemma derivable_pt_cosine : forall x, derivable_pt cosine x.
+Proof.
+intro x ; exists (- sine x) ; apply derivable_pt_lim_cosine.
+Qed.
+
+Lemma derivable_pt_sine : forall x, derivable_pt sine x.
+Proof.
+intro x ; exists (cosine x) ; apply derivable_pt_lim_sine.
 Qed.

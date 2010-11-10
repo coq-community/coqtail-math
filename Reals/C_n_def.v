@@ -14,8 +14,10 @@ Definition C n f := (Class f n).
 
 (** Being C_infty *)
 
-Inductive C_infty (f : R -> R) : Set :=
-  | C_infty_const : (forall n, C n f) -> C_infty f.
+Definition C_infty (f : R -> R) := forall n, C n f.
+
+Definition Cn (n : nat) := sigT (C n).
+Definition Cinfty := sigT C_infty.
 
 
 (** * Basic Properties *)
@@ -27,12 +29,6 @@ Proof.
   constructor ; inversion Cnf ; reg.
   inversion_clear Cnf ; apply C_Sn with pr ;
   apply IHn ; assumption.
-Qed.
-
-Lemma C_eq : forall f g n, f = g -> C n f -> C n g.
-Proof.
-intros.
-subst. apply H0.
 Qed.
 
 Lemma C_ext : forall n f g, f == g -> C n f -> C n g.
@@ -65,8 +61,8 @@ Qed.
 Lemma C_infty_opp : forall f,
  C_infty f -> C_infty (- f)%F.
 Proof.
-intros f Cf ; constructor ; intro ;
- apply C_opp ; apply Cf.
+intros f Cf n ; apply C_opp ;
+ apply Cf.
 Qed.
 
 Lemma C_plus : forall n f g,
@@ -90,7 +86,7 @@ Qed.
 Lemma C_infty_plus : forall f g,
   C_infty f -> C_infty g -> C_infty (plus_fct f g).
 Proof.
- intros f g Cf Cg ; constructor ; intro; apply C_plus ;
+ intros f g Cf Cg n ; apply C_plus ;
  [ apply Cf | apply Cg].
 Qed.
 
@@ -104,7 +100,7 @@ Qed.
 Lemma C_infty_minus : forall f g,
   C_infty f -> C_infty g -> C_infty (minus_fct f g).
 Proof.
- intros f g Cf Cg ; constructor ; intro; apply C_minus ;
+ intros f g Cf Cg n ; apply C_minus ;
  [ apply Cf | apply Cg].
 Qed.
 
@@ -125,7 +121,7 @@ Qed.
 Lemma C_infty_scal : forall f a,
   C_infty f -> C_infty (mult_real_fct a f).
 Proof.
- intros f a Cf ; constructor ; intro ; apply C_scal ;
+ intros f a Cf n ; apply C_scal ;
  apply Cf.
 Qed.
 
@@ -150,7 +146,7 @@ Qed.
 Lemma C_infty_mult : forall f g,
   C_infty f -> C_infty g -> C_infty (mult_fct f g).
 Proof.
- intros f g Cf Cg ; constructor ; intro ; apply C_mult ;
+ intros f g Cf Cg n ; apply C_mult ;
  [apply Cf | apply Cg].
 Qed.
 
@@ -175,6 +171,28 @@ Qed.
 Lemma C_infty_comp : forall f g,
   C_infty f -> C_infty g -> C_infty (comp f g).
 Proof.
- intros f g Cf Cg ; constructor ; intro ; apply C_comp ;
+ intros f g Cf Cg n ; apply C_comp ;
  [apply Cf | apply Cg].
 Qed.
+
+
+(** nth derivative *)
+
+Program Fixpoint nth_derive (n : nat) (f : R -> R) (pr : C n f) : R -> R := match n with
+   | O   => f
+   | S n' => nth_derive n' (derive f _) _
+end.
+Next Obligation.
+inversion pr ; assumption.
+Qed.
+Next Obligation.
+assert (pr2 := pr) ; rewrite <- Heq_n in pr2 ; inversion pr2.
+eapply C_ext ; [| apply H0].
+
+ intro x ; unfold derive.
+ symmetry ; rewrite derive_pt_eq.
+ rewrite <- derive_pt_eq.
+ reflexivity.
+Qed.
+
+Implicit Arguments nth_derive [n].
