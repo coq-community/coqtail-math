@@ -19,7 +19,7 @@ Lemma C_Sm_derive_C_m : forall f n pr, C (S n) f -> C n (derive f pr).
 Proof.
  intros.
  inversion H.
- eapply C_ext. Focus 2. apply H1. intro. apply pr_nu.
+ eapply C_ext. 2: apply H1. intro. apply pr_nu.
 Qed.
 
 Lemma C_continuity : forall f n, C n f -> continuity f.

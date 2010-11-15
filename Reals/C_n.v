@@ -146,3 +146,12 @@ Defined.
 Lemma zero_infty : Cinfty.
 exists (fct_cte 0) ; apply zero_C_infty.
 Defined.
+
+Hint Resolve zero_C_infty : C_hint.
+Hint Resolve const_C_infty : C_hint.
+Hint Resolve id_C_infty : C_hint.
+Hint Resolve monomial_C_infty : C_hint.
+Hint Resolve C_infty_sin : C_hint.
+Hint Resolve C_infty_cos : C_hint.
+Hint Resolve C_infty_exp : C_hint.
+Hint Resolve C_infty_Rpser : C_hint.

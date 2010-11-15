@@ -966,3 +966,33 @@ intros fn fn' f g x lb ub x_in_I Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos
  assumption.
  field. assumption.
 Qed.
+
+
+(* Hint Rewrite for derive_pt *)
+(* TODO to place elsewhere *)
+(* Warning ! This is also a matching over the proof inside derive_pt (weak)*)
+
+Hint Rewrite derive_pt_plus : derive_hint.
+Hint Rewrite derive_pt_opp : derive_hint.
+Hint Rewrite derive_pt_minus : derive_hint.
+Hint Rewrite derive_pt_mult : derive_hint.
+Hint Rewrite derive_pt_const : derive_hint.
+Hint Rewrite derive_pt_scal : derive_hint.
+Hint Rewrite derive_pt_id : derive_hint.
+Hint Rewrite derive_pt_Rsqr : derive_hint.
+Hint Rewrite derive_pt_comp : derive_hint.
+Hint Rewrite derive_pt_pow : derive_hint.
+Hint Rewrite derive_pt_div : derive_hint.
+Hint Rewrite derive_pt_inv : derive_hint.
+(* std lib function *)
+Hint Rewrite derive_pt_exp : derive_hint.
+Hint Rewrite derive_pt_cosh : derive_hint.
+Hint Rewrite derive_pt_sinh : derive_hint.
+
+(* TODO example of use *)
+Goal forall x, derive_pt ((- exp) * cosh) x 
+  (derivable_pt_mult _ _ _ (derivable_pt_opp  _ _ (derivable_pt_exp x)) (derivable_pt_cosh x)) 
+  = derive_pt (comp sinh exp) x (derivable_pt_comp _ _ _ (derivable_pt_exp x) (derivable_pt_sinh (exp x))).
+intros.
+autorewrite with derive_hint.
+Admitted.

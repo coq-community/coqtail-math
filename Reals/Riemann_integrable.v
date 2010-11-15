@@ -345,54 +345,69 @@ Lemma RiemannInt_derivable_pt_lim :
 Proof.
  intros.
  unfold derivable_pt_lim. intros.
+ (* epsilon is eps / 2 *)
  assert (H4:0 < eps / 2) by fourier.
  destruct (Hcont _ H4) as [x1 [Hcont1 Hcont2]].
  exists (mkposreal _ Hcont1). (* TODO c'est pas le bon epsilon *)
+ (* epsilon is eps / 2 end *)
  intros.
+(* rewriting *)
  rewrite <- (RiemannInt_Chasles f a x (x+h) (pr a x) (pr x (x + h)) (pr a (x + h))).
  ring_simplify ((RiemannInt (pr a x) + RiemannInt (pr x (x + h)) - RiemannInt (pr a x))).
- replace (f x) with (RiemannInt (Riemann_integrable_constant x (x + h) (f x)) / h).
+ replace (f x) with (RiemannInt (Riemann_integrable_constant x (x + h) (f x)) / h) 
+  by (rewrite RiemannInt_constant; field; assumption).
   replace
   (RiemannInt (pr x (x + h)) / h - RiemannInt (Riemann_integrable_constant x (x + h) (f x)) / h)
     with ((RiemannInt (pr x (x + h)) + (-1) *  RiemannInt (Riemann_integrable_constant x (x + h) (f x))) / h) 
       by (unfold Rdiv ; ring).
   rewrite RiemannInt_linear_1.
+(* end rewritiing *)
   unfold Rdiv in |- *; rewrite Rabs_mult; case (Rle_dec x (x + h)); intro.
-   apply Rle_lt_trans with
+(* case x <= x + h *)
+(* passage de Rabs à l'interieur *)
+  apply Rle_lt_trans with
      (RiemannInt
-       (RiemannInt_P16
-         (RiemannInt_P10 (-1) (pr x (x + h)) (RiemannInt_P14 x (x + h) (f x)))) *
+       (Riemann_integrable_Rabs _ _ _
+         (Riemann_integrable_linear _ _ _ _ (-1) (pr x (x + h)) (Riemann_integrable_constant x (x + h) (f x)))) *
        Rabs (/ h)).
+(* Preuve de Rabs int <= int Rabs *)
     do 2 rewrite <- (Rmult_comm (Rabs (/ h))); apply Rmult_le_compat_l.
-    apply Rabs_pos. apply RiemannInt_P17. assumption.
+    apply Rabs_pos. apply RiemannInt_le_Rabs. assumption.
 
+(* Suite de la preuve avec int Rabs *)
     apply Rle_lt_trans with
-      (RiemannInt (RiemannInt_P14 x (x + h) (eps / 2)) * Rabs (/ h)).
+      (RiemannInt (Riemann_integrable_constant x (x + h) (eps / 2)) * Rabs (/ h)).
   do 2 rewrite <- (Rmult_comm (Rabs (/ h))); apply Rmult_le_compat_l.
   apply Rabs_pos.
   apply RiemannInt_P19; try assumption.
+(* rewriting *)
   intros; replace (f x0 + -1 * fct_cte (f x) x0) with (f x0 - f x) by (intros ; unfold fct_cte ; simpl ; ring).
-  unfold fct_cte in |- *; case (Req_dec x x0); intro.
-  rewrite H3; unfold Rminus in |- *; rewrite Rplus_opp_r; rewrite Rabs_R0; left.
-  fourier.
-  intros ; left. simpl in *. unfold R_dist in *. apply Hcont2.
+  unfold fct_cte.
+(* end rewriting *)
+(* x <> x0 *)
+  assert (x <> x0) by (intro ; subst ; destruct H2 ; fourier).
+(* end x <> x0 *)
+(* TODO pas besoin de x <= x+h là dedans*)
+  left. simpl in *. unfold R_dist in *. apply Hcont2.
   unfold D_x, no_cond. repeat split. assumption.
-  rewrite Rabs_right. 
+  eapply Rlt_trans ; [|apply H1].
+  assert (0 < x0 - x < h) by (intuition ; fourier).
+  rewrite Rabs_pos_eq. rewrite Rabs_pos_eq. intuition.
+  apply Rle_trans with (x0 - x) ; intuition. intuition.
+(* end TODO *) 
+  
+
+(*  rewrite Rabs_right. 
   apply Rplus_lt_reg_r with x; replace (x + (x1 - x)) with x1; [ idtac | ring ].
   apply Rlt_le_trans with (x + h). ring_simplify. apply H2.
    apply Rplus_le_compat_l. apply Rle_trans with x1. left.
    apply Rle_lt_trans with (Rabs h). apply RRle_abs. apply H1.
    (*unfold del.*) (*apply Rmin_l.*) right. reflexivity.
-   destruct H2. fourier.
-   rewrite RiemannInt_P15.
+   destruct H2. fourier.*)
+(* TODO here need eps / 2 et x <= x + h*)
+  rewrite RiemannInt_constant.
   rewrite Rmult_assoc; replace ((x + h - x) * Rabs (/ h)) with 1.
-  rewrite Rmult_1_r; unfold Rdiv in |- *; apply Rmult_lt_reg_l with 2;
-    [ prove_sup0
-      | rewrite <- (Rmult_comm (/ 2)); rewrite <- Rmult_assoc;
-        rewrite <- Rinv_r_sym;
-          [ rewrite Rmult_1_l; pattern eps at 1 in |- *; rewrite <- Rplus_0_r;
-            rewrite double; apply Rplus_lt_compat_l; assumption
-            | discrR ] ].
+  ring_simplify. fourier.
   rewrite Rabs_right.
   replace (x + h - x) with h; [ idtac | ring ].
   apply Rinv_r_sym.
@@ -403,6 +418,8 @@ Proof.
   elim H0; symmetry  in |- *; apply Rplus_eq_reg_l with x; rewrite Rplus_0_r;
     assumption.
 
+(* case ~ x <= x + h *)
+(* on insere la valeur absolu en echangeant les bornes *)
   apply Rle_lt_trans with 
     (RiemannInt
       (Riemann_integrable_Rabs _ _ _
@@ -415,16 +432,17 @@ Proof.
   apply Rabs_pos. 
   rewrite RiemannInt_bound_exchange_1.
   rewrite Rabs_Ropp.
-  apply RiemannInt_P17. left. intuition.
+  apply RiemannInt_le_Rabs. left. intuition.
    apply Rle_lt_trans with
     (RiemannInt (Riemann_integrable_constant (x + h) x (eps / 2)) * Rabs (/ h)).
   do 2 rewrite <- (Rmult_comm (Rabs (/ h))); apply Rmult_le_compat_l.
   apply Rabs_pos.
-  apply RiemannInt_P19.
+  apply RiemannInt_le_ext.
   auto with real.
+  intros. unfold fct_cte in *. ring_simplify (-1 * f x).
   intros; replace (f x0 + -1 * fct_cte (f x) x0) with (f x0 - f x).
   unfold fct_cte in |- *; case (Req_dec x x0); intro.
-  rewrite H3. ring_simplify (f x0 - f x0). rewrite Rabs_R0; left;
+  rewrite H3. ring_simplify (f x0 + - f x0). rewrite Rabs_R0; left;
     assumption.
   left; simpl in Hcont2 ; ring_simplify (f x0 + -1 * f x) ; apply Hcont2.
   repeat split.
@@ -462,7 +480,6 @@ Proof.
   assert (H8 : x + h < x).
   auto with real.
   apply Rplus_lt_reg_r with x; rewrite Rplus_0_r; assumption.
-  rewrite RiemannInt_constant. field. assumption.
 Qed.
 
 Lemma RiemannInt_derivable_pt :

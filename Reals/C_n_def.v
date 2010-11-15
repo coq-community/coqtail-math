@@ -6,7 +6,7 @@ Open Local Scope R_scope.
 
 (** * Being of Class C_n *)
 
-Inductive Class (f : R -> R) : nat -> Set :=
+Inductive Class (f : R -> R) : nat -> Type :=
   | C_0 : continuity f -> Class f 0
   | C_Sn : forall n (pr : derivable f), Class (derive f pr) n -> Class f (S n).
 
@@ -186,14 +186,19 @@ Next Obligation.
 inversion pr ; assumption.
 Qed.
 Next Obligation.
-
-(* assert (pr2 := pr) ; rewrite <- Heq_n in pr2 ; inversion pr2.
-eapply C_ext ; [| apply H0].
-
+inversion pr. subst.
+eapply C_ext ; [|apply H0].
  intro x ; unfold derive.
  symmetry ; rewrite derive_pt_eq.
  rewrite <- derive_pt_eq.
- reflexivity. *)
-Admitted.
+ reflexivity.
+Qed.
 
 Implicit Arguments nth_derive [n].
+
+Hint Resolve C_opp : C_hint.
+Hint Resolve C_plus : C_hint.
+Hint Resolve C_minus : C_hint.
+Hint Resolve C_scal : C_hint.
+Hint Resolve C_mult : C_hint.
+Hint Resolve C_comp : C_hint.
