@@ -171,7 +171,7 @@ Qed.
 
 (** Definition of the sum of a power serie (0 outside the cv-disc) *)
 
-Definition weaksum_r (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) : C -> C.
+Definition weaksum_r : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r), C -> C.
 Proof.
 intros An r Rho x.
  case (Rlt_le_dec (Cnorm x) r) ; intro x_bd.
@@ -179,7 +179,7 @@ intros An r Rho x.
  exact 0.
 Defined.
 
-Definition sum_r (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) : C -> C.
+Definition sum_r : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r), C -> C.
 Proof.
 intros An r Pr x.
  case (Rlt_le_dec (Cnorm x) r) ; intro x_bd.
@@ -193,7 +193,7 @@ intros An r Pr x.
  exact 0.
 Defined.
 
-Definition sum (An : nat -> C) (Pr : infinite_cv_radius An) : C -> C.
+Definition sum : forall (An : nat -> C) (Pr : infinite_cv_radius An), C -> C.
 Proof.
 intros An Pr r.
  apply (weaksum_r An (Cnorm r +1) (Pr (Cnorm r + 1)%R) r).
@@ -210,7 +210,7 @@ intros An r Pr x x_bd.
  apply False_ind ; fourier.
 Qed.
 
-Lemma sum_r_sums : forall  (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
+Lemma sum_r_sums : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
       forall x, Cnorm x < r -> Pser An x (sum_r An r Pr x).
 Proof.
 intros An r Pr x x_ub.
@@ -220,7 +220,7 @@ intros An r Pr x x_ub.
   apply False_ind ; fourier.
 Qed.
 
-Lemma sum_sums : forall  (An : nat -> C) (Pr : infinite_cv_radius An),
+Lemma sum_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An),
       forall x, Pser An x (sum An Pr x).
 Proof.
 intros An Pr x.
@@ -488,7 +488,7 @@ intros An An_neq An_frac_0 r.
  apply Rplus_le_lt_0_compat ; [apply Rabs_pos | apply Rlt_0_1].
 Qed.
 
-Lemma Cpser_bound_criteria (An : nat -> C) (z l : C) :
+Lemma Cpser_bound_criteria : forall (An : nat -> C) (z l : C),
     Pser An z l -> Cv_radius_weak An (Cnorm z).
 Proof.
 intros An z l Hzl.
@@ -530,7 +530,7 @@ intros An z l Hzl.
 Qed.
 
 (** A sufficient condition for the radius of convergence*)
-Lemma Cpser_finite_cv_radius_caracterization (An : nat -> C) (z l : C) :
+Lemma Cpser_finite_cv_radius_caracterization : forall (An : nat -> C) (z l : C),
    Pser An z l -> (forall l' : R, ~ Pser_norm An z l')  -> finite_cv_radius An (Cnorm z).
 Proof.
 intros An z l Hcv Hncv.
@@ -547,7 +547,7 @@ split; intros x Hx.
  apply Hncv with l' ; assumption.
 Qed.
 
-Lemma Cpser_infinite_cv_radius_caracterization An : (forall x, {l | Pser An x l}) ->
+Lemma Cpser_infinite_cv_radius_caracterization : forall An, (forall x, {l | Pser An x l}) ->
      infinite_cv_radius An.
 Proof.
 intros An weaksum r ; destruct (weaksum r) as (l, Hl).
@@ -646,7 +646,7 @@ Qed.
 
 (** * Sum of the formal derivative *)
 
-Definition weaksum_r_derive (An : nat -> C) (r : R) (Rho : Cv_radius_weak An r) (z : C) : C.
+Definition weaksum_r_derive : forall (An : nat -> C) (r : R) (Rho : Cv_radius_weak An r) (z : C), C.
 Proof.
 intros An r Rho z ; case (Rlt_le_dec (Cnorm z) r) ; intro z_bd.
  pose (r' := middle (Cnorm z)  (Rabs r)).
@@ -666,7 +666,7 @@ intros An r Rho z ; case (Rlt_le_dec (Cnorm z) r) ; intro z_bd.
 apply C0.
 Defined.
 
-Definition sum_r_derive (An : nat -> C) (r : R) (Rho : finite_cv_radius An r) (z : C) : C.
+Definition sum_r_derive : forall (An : nat -> C) (r : R) (Rho : finite_cv_radius An r) (z : C), C.
 Proof.
 intros An r Rho z.
  destruct (Rlt_le_dec (Cnorm z) r) as [z_bd | z_gt].
@@ -679,7 +679,7 @@ intros An r Rho z.
  apply 0.
 Defined.
 
-Definition sum_derive (An : nat -> C) (Rho : infinite_cv_radius An) (z : C) : C.
+Definition sum_derive : forall (An : nat -> C) (Rho : infinite_cv_radius An) (z : C), C.
 Proof.
  intros An Rho z ; apply (weaksum_r_derive _ _ (Rho (Cnorm z + 1)%R) z).
 Defined.
@@ -745,7 +745,7 @@ Qed.
 
 (** * Derivability of a power serie within its disc of convergence *)
 
-Lemma derivable_pt_lim_weaksum_r (An:nat->C) (r:R) (Pr : Cv_radius_weak An r) : forall z,
+Lemma derivable_pt_lim_weaksum_r : forall (An:nat->C) (r:R) (Pr : Cv_radius_weak An r) z,
       Cnorm z < r -> derivable_pt_lim (weaksum_r An r Pr) z (weaksum_r_derive An r Pr z).
 Proof.
 intros An r rho z z_bd.
@@ -844,7 +844,7 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
  exact (CFseq_cvu_derivable fn fn' f g z 0 r' z_in fn_deriv fn_cv fn'_cvu2 g_cont).
 Qed.
 
-Lemma derivable_pt_lim_sum_r (An:nat->C) (r:R) (Pr : finite_cv_radius An r) : forall z,
+Lemma derivable_pt_lim_sum_r : forall (An:nat->C) (r:R) (Pr : finite_cv_radius An r) z,
       Cnorm z < r -> derivable_pt_lim (sum_r An r Pr) z (sum_r_derive An r Pr z).
 Proof.
 intros An r Pr z z_bd eps eps_pos. 
@@ -911,7 +911,7 @@ intros An r Pr z z_bd eps eps_pos.
   destruct (Rlt_irrefl _ F).
 Qed.
 
-Lemma derivable_pt_lim_sum (An:nat->C) (Pr : infinite_cv_radius An) : forall z,
+Lemma derivable_pt_lim_sum : forall (An:nat->C) (Pr : infinite_cv_radius An) z,
       derivable_pt_lim (sum An Pr) z (sum_derive An Pr z).
 Proof.
 intros An Pr z eps eps_pos. 

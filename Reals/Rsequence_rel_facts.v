@@ -837,7 +837,7 @@ End Rseq_little_O_pos_infty.
 Section Rseq_equiv_cv.
 
 (**********)
-Instance Rseq_equiv_cv_compat : Morphism (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
+Instance Rseq_equiv_cv_compat : Proper (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
 Proof.
 assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
   intros Un Vn l Heq H eps Heps.
@@ -972,7 +972,7 @@ Qed.
 End Rseq_equiv_cv.
 
 (**********)
-Lemma Rseq_equiv_cv_constant Un l :
+Lemma Rseq_equiv_cv_constant : forall Un l,
   Un ~ (Rseq_constant l) -> Rseq_cv Un l.
 Proof.
 intros Un l H.
@@ -994,7 +994,7 @@ auto with Rseq.
 Qed.
 
 (**********)
-Lemma Rseq_cv_equiv_constant Un l :
+Lemma Rseq_cv_equiv_constant : forall Un l,
   l <> 0 -> Rseq_cv Un l -> Un ~ (Rseq_constant l).
 Proof.
 intros Un l Hl H.
@@ -1013,7 +1013,7 @@ left; apply HN; assumption.
 Qed.
 
 (**********)
-Lemma Rseq_equiv_1 Un Vn : (forall n, Vn n <> 0) -> (Rseq_div Un  Vn) ~ 1 -> Un ~ Vn.
+Lemma Rseq_equiv_1 : forall Un Vn, (forall n, Vn n <> 0) -> (Rseq_div Un  Vn) ~ 1 -> Un ~ Vn.
 Proof.
 intros Un Vn Hneq H.
 apply Rseq_equiv_sym in H.
@@ -1032,7 +1032,7 @@ apply Rmult_le_compat_r.
 Qed.
 
 (**********)
-Lemma Rseq_equiv_inv_compat Un Vn : 
+Lemma Rseq_equiv_inv_compat : forall Un Vn, 
   {m | forall n, (n >= m)%nat -> Un n <> 0} -> 
   {m | forall n, (n >= m)%nat -> Vn n <> 0} -> 
   Un ~ Vn -> (Rseq_inv Un) ~ (Rseq_inv Vn).

@@ -45,7 +45,6 @@ int_hierarchy.
 int_hierarchy.
 int_hierarchy.
 int_hierarchy.
-int_hierarchy.
 Qed.
 
 Instance monoid_commutative_nat : Monoid_Commutative nat eq plus 0 :=
@@ -57,7 +56,6 @@ Qed.
 Instance monoid_nat_mult_1 : Monoid nat eq mult 1 :=
 {monoid_iden_l := mult_1_l }.
 Proof.
-int_hierarchy.
 int_hierarchy.
 int_hierarchy.
 int_hierarchy.
@@ -88,13 +86,11 @@ int_hierarchy.
 int_hierarchy.
 int_hierarchy.
 int_hierarchy.
-int_hierarchy.
 Qed.
 
 Instance monoid_mult_Z : Monoid Z eq Zmult 1%Z :=
 {monoid_iden_l := Zmult_1_l}.
 Proof.
-int_hierarchy.
 int_hierarchy.
 int_hierarchy.
 int_hierarchy.
@@ -271,8 +267,6 @@ Qed.
 
 Instance group_commutative_Z_nZ : Group_Commutative Z mod_eq Zplus 0%Z :=
 {group_comm_group := group_Z_nZ}.
-Proof.
-Qed.
 
 Lemma Zmod_mult_plus_distr_r : forall n m p : Z, (n * (m + p)) %= (n * m + n * p).
 Proof.
@@ -298,8 +292,6 @@ Qed.
 
 Instance ring_commutative_Z_nZ : Ring_Commutative Z mod_eq Zplus Zmult 0%Z 1%Z :=
 {ring_comm_ring := ring_Z_nZ}.
-Proof.
-Qed.
 
 End Z_nZ.
 

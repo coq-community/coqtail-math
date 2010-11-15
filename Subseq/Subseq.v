@@ -41,7 +41,7 @@ apply (H n).
 Qed.
 
 (** A sub-sequence of a convergent sequence converges to the same limit*)
-Lemma Rsubseq_cv (An : nat -> R) (f : nat -> nat) (pr : strictly_increasing f) (l : R):
+Lemma Rsubseq_cv : forall (An : nat -> R) (f : nat -> nat) (pr : strictly_increasing f) (l : R),
     Un_cv An l -> Un_cv (sub_seq An f pr) l.
 Proof.
 unfold Un_cv.
@@ -76,7 +76,7 @@ omega.
 Qed.
 
 (** a seqence converges if its odd and even subsequences converges to the same limit*)
-Lemma even_odd_cv (An : nat -> R) (l : R): 
+Lemma even_odd_cv : forall (An : nat -> R) (l : R),
     Un_cv (fun n => An ((2*n) %nat)) l ->  Un_cv (fun n => An (S (2*n) %nat)) l ->
         Un_cv An l.
 Proof.
@@ -105,7 +105,7 @@ apply le_max_r.
 apply Hn.
 Qed.
 
-Lemma sub_seq_ub_compat (An : nat -> R) (f : nat -> nat) (pr : strictly_increasing f) : 
+Lemma sub_seq_ub_compat : forall (An : nat -> R) (f : nat -> nat) (pr : strictly_increasing f),
     has_ub An -> has_ub (sub_seq An f pr).
 Proof.
 intros An f pr Hub.
@@ -120,7 +120,7 @@ reflexivity.
 Qed.
 
 (*?*)
-Lemma sub_seq_lb_compat (An : nat -> R) (f : nat -> nat) (pr : strictly_increasing f) : 
+Lemma sub_seq_lb_compat : forall (An : nat -> R) (f : nat -> nat) (pr : strictly_increasing f), 
     has_lb An -> has_lb (sub_seq An f pr).
 Proof.
 intros An f pr Hlb.

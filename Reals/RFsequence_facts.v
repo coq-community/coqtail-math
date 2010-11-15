@@ -37,7 +37,7 @@ intros x ub lb lb_lt_x x_lt_ub.
  unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition.
 Qed.
 
-Definition mkposreal_lb_ub (x lb ub:R) (lb_lt_x:lb<x) (x_lt_ub:x<ub) : posreal.
+Definition mkposreal_lb_ub : forall (x lb ub:R) (lb_lt_x:lb<x) (x_lt_ub:x<ub), posreal.
 intros x lb ub lb_lt_x x_lt_ub.
  apply (mkposreal ((ub-lb)/2) (ub_lt_2_pos x ub lb lb_lt_x x_lt_ub)).
 Defined.
@@ -345,8 +345,8 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  field. assumption.
 Qed.
 
-Definition SFL_interv (fn:nat -> R -> R) (r:posreal)
-  (cv:forall x:R, Boule 0 r x -> {l:R | Un_cv (fun N:nat => SP fn N x) l }) (y:R) : R.
+Definition SFL_interv : forall (fn:nat -> R -> R) (r:posreal)
+  (cv:forall x:R, Boule 0 r x -> {l:R | Un_cv (fun N:nat => SP fn N x) l }) (y:R), R.
 Proof.
 intros fn r cv x.
  case (Rlt_le_dec x r) ; intro x_bd1.

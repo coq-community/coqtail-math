@@ -233,7 +233,7 @@ Qed.
 
 (** * Definition of the sum of a power serie (0 outside the convergence disc) *)
 
-Definition weaksum_r (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) : R -> R.
+Definition weaksum_r : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r), R -> R.
 Proof.
 intros An r Rho x.
  case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
@@ -241,7 +241,7 @@ intros An r Rho x.
  exact 0.
 Defined.
 
-Definition sum_r (An : nat -> R) (r : R) (Pr : finite_cv_radius An r) : R -> R.
+Definition sum_r : forall (An : nat -> R) (r : R) (Pr : finite_cv_radius An r), R -> R.
 Proof.
 intros An r Pr x.
  case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
@@ -255,7 +255,7 @@ intros An r Pr x.
  exact 0.
 Defined.
 
-Definition sum (An : nat -> R) (Pr : infinite_cv_radius An) : R -> R.
+Definition sum : forall (An : nat -> R) (Pr : infinite_cv_radius An), R -> R.
 Proof.
 intros An Pr r.
  apply (weaksum_r An (Rabs r +1) (Pr (Rabs r + 1)) r).
@@ -508,7 +508,7 @@ intros An An_neq An_frac_0 r.
 Qed.
 
 (** A kind of reciprocal for the Abel's lemma*)
-Lemma Rpser_bound_criteria (An : nat -> R) (x l : R) :
+Lemma Rpser_bound_criteria : forall (An : nat -> R) (x l : R),
     Pser An x l -> Cv_radius_weak An x.
 Proof.
 intros An x l Hxl.
@@ -543,7 +543,7 @@ intros An x l Hxl.
 Qed.
 
 (** A sufficient condition for the radius of convergence*)
-Lemma Rpser_finite_cv_radius_caracterization (An : nat -> R) (x0 l : R) :
+Lemma Rpser_finite_cv_radius_caracterization : forall (An : nat -> R) (x0 l : R),
    Pser An x0 l -> (forall l : R, ~ Pser_abs An x0 l)  -> finite_cv_radius An (Rabs x0).
 Proof.
 intros An x0 l Hcv Hncv.
@@ -560,7 +560,7 @@ split; intros x Hx.
 trivial.
 Qed.
 
-Lemma Rpser_infinite_cv_radius_caracterization An : (forall x, {l | Pser An x l}) ->
+Lemma Rpser_infinite_cv_radius_caracterization : forall An, (forall x, {l | Pser An x l}) ->
      infinite_cv_radius An.
 Proof.
 intros An weaksum r ; destruct (weaksum r) as (l, Hl) ; apply Rpser_bound_criteria with l ;
@@ -897,7 +897,7 @@ Qed.
 
 (** Sum of the formal derivative *)
 
-Definition weaksum_r_derive (An : nat -> R) (r : R) (Rho : Cv_radius_weak An r) (x : R) : R.
+Definition weaksum_r_derive : forall (An : nat -> R) (r : R) (Rho : Cv_radius_weak An r) (x : R), R.
 Proof.
 intros An r Rho x ; case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
  pose (r' := (Rabs x + Rabs r)/2).
@@ -912,13 +912,13 @@ intros An r Rho x ; case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
  apply 0.
 Defined.
 
-Definition sum_r_derive (An : nat -> R) (r : R) (Rho : finite_cv_radius An r) (x : R) : R.
+Definition sum_r_derive : forall (An : nat -> R) (r : R) (Rho : finite_cv_radius An r) (x : R), R.
 Proof.
 intros An r Rho.
  apply (sum_r (An_deriv An) r (finite_cv_radius_derivable_compat An r Rho)).
 Defined.
 
-Definition sum_derive (An : nat -> R) (Rho : infinite_cv_radius An) (z : R) : R.
+Definition sum_derive : forall (An : nat -> R) (Rho : infinite_cv_radius An) (z : R), R.
 Proof.
 intros An Rho.
  apply (sum (An_deriv An) (infinite_cv_radius_derivable_compat An Rho)). 
@@ -986,7 +986,7 @@ Qed.
 
 (** Proof that the formal derivative is the actual derivative within the cv-disk *)
 
-Lemma derivable_pt_lim_weaksum_r (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
+Lemma derivable_pt_lim_weaksum_r : forall (An:nat->R) (r:R) (Pr : Cv_radius_weak An r), forall x,
       Rabs x < r -> derivable_pt_lim (weaksum_r An r Pr) x (weaksum_r_derive An r Pr x).
 Proof.
 intros An r rho x x_bd.
@@ -1170,7 +1170,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
    assumption.
 Qed.
 
-Lemma derivable_pt_lim_sum_r (An:nat->R) (r:R) (Pr : finite_cv_radius An r) : forall z,
+Lemma derivable_pt_lim_sum_r : forall (An:nat->R) (r:R) (Pr : finite_cv_radius An r) z,
       Rabs z < r -> derivable_pt_lim (sum_r An r Pr) z (sum_r_derive An r Pr z).
 Proof.
 intros An r Rho z z_bd eps eps_pos.
@@ -1242,7 +1242,7 @@ intros An r Rho z z_bd eps eps_pos.
   elim (Rlt_irrefl _ (Rlt_le_trans _ _ _ z_bd Hf)).
 Qed.
 
-Lemma derivable_pt_lim_sum (An:nat->R) (Pr : infinite_cv_radius An) : forall z,
+Lemma derivable_pt_lim_sum : forall (An:nat->R) (Pr : infinite_cv_radius An), forall z,
       derivable_pt_lim (sum An Pr) z (sum_derive An Pr z).
 Proof.
 intros An Pr z eps eps_pos. 
@@ -1283,21 +1283,21 @@ Qed.
 
 (** * Derivabilty / Continuity of the sum within the cv disk *)
 
-Lemma derivable_pt_weaksum_r (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
+Lemma derivable_pt_weaksum_r : forall (An:nat->R) (r:R) (Pr : Cv_radius_weak An r), forall x,
       Rabs x < r -> derivable_pt (weaksum_r An r Pr) x.
 Proof.
 intros An r rho x x_bd.
  exists (weaksum_r_derive An r rho x) ; apply derivable_pt_lim_weaksum_r ; assumption.
 Qed.
 
-Lemma derivable_pt_sum_r (An:nat->R) (r:R) (Pr : finite_cv_radius An r) : forall x,
+Lemma derivable_pt_sum_r : forall (An:nat->R) (r:R) (Pr : finite_cv_radius An r), forall x,
       Rabs x < r -> derivable_pt (sum_r An r Pr) x.
 Proof.
 intros An r rho x x_bd.
  exists (sum_r_derive An r rho x) ; apply derivable_pt_lim_sum_r ; assumption.
 Qed.
 
-Lemma derivable_pt_sum (An:nat->R) (Pr : infinite_cv_radius An) : forall x,
+Lemma derivable_pt_sum : forall (An:nat->R) (Pr : infinite_cv_radius An) x,
       derivable_pt (sum An Pr) x.
 Proof.
 intros An rho x.
@@ -1305,21 +1305,21 @@ intros An rho x.
 Qed.
 
 
-Lemma continuity_pt_weaksum_r (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) : forall x,
+Lemma continuity_pt_weaksum_r : forall (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) x,
       Rabs x < r -> continuity_pt (weaksum_r An r Pr) x.
 Proof.
 intros An r rho x x_bd ; apply derivable_continuous_pt ; apply derivable_pt_weaksum_r ;
  assumption.
 Qed.
 
-Lemma continuity_pt_sum_r (An:nat->R) (r:R) (Pr : finite_cv_radius An r) : forall x,
+Lemma continuity_pt_sum_r : forall (An:nat->R) (r:R) (Pr : finite_cv_radius An r) x,
       Rabs x < r -> continuity_pt (sum_r An r Pr) x.
 Proof.
 intros An r rho x x_bd ; apply derivable_continuous_pt ; apply derivable_pt_sum_r ;
  assumption.
 Qed.
 
-Lemma continuity_pt_sum (An:nat->R) (Pr : infinite_cv_radius An) : forall x,
+Lemma continuity_pt_sum : forall (An:nat->R) (Pr : infinite_cv_radius An) x,
       continuity_pt (sum An Pr) x.
 Proof.
 intros An rho x ; apply derivable_continuous_pt ; apply derivable_pt_sum.
@@ -1327,13 +1327,13 @@ Qed.
 
 (** * Derivability / continuity of the sum when the cv disk as an infinite radius *)
 
-Lemma derivable_sum (An:nat->R) (Pr : infinite_cv_radius An) :
+Lemma derivable_sum : forall (An:nat->R) (Pr : infinite_cv_radius An),
       derivable (sum An Pr).
 Proof.
 intros An rho x ; apply derivable_pt_sum.
 Qed.
 
-Lemma continuity_sum (An:nat->R) (Pr : infinite_cv_radius An) :
+Lemma continuity_sum : forall (An:nat->R) (Pr : infinite_cv_radius An),
       continuity (sum An Pr).
 Proof.
 intros An rho x ; apply derivable_continuous ; apply derivable_sum.

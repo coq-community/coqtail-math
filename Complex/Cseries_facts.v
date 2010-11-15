@@ -30,7 +30,7 @@ Require Import Cseries.
 Open Scope C_scope.
 Open Scope Cseq_scope.
 
-Lemma Cser_cv_re_compat Un l : Cser_cv Un l -> 
+Lemma Cser_cv_re_compat : forall Un l, Cser_cv Un l -> 
   Rser_cv (fun n : nat => Cre (Un n)) (Cre l).
 Proof.
 intros Un l HC.
@@ -40,7 +40,7 @@ apply Rseq_cv_eq_compat with (fun n => Cre (sum_f_C0 Un n)).
  apply HC.
 Qed.
 
-Lemma Cser_cv_im_compat Un l : Cser_cv Un l -> 
+Lemma Cser_cv_im_compat : forall Un l, Cser_cv Un l -> 
   Rser_cv (fun n : nat => Cim (Un n)) (Cim l).
 Proof.
 intros Un l HC.
@@ -126,13 +126,13 @@ apply Cser_cv_re_im_compat.
     apply HNAim.
 Qed.
 
-Lemma Cser_cv_unique Un l1 l2 : Cser_cv Un l1 -> Cser_cv Un l2 -> l1 = l2.
+Lemma Cser_cv_unique : forall Un l1 l2, Cser_cv Un l1 -> Cser_cv Un l2 -> l1 = l2.
 Proof.
 intros Un l1 l2 H H'.
 apply Cseq_cv_unique with (sum_f_C0 Un); auto.
 Qed.
 
-Lemma Csum_eq_compat_weak Un Vn n :
+Lemma Csum_eq_compat_weak : forall Un Vn n,
   (forall j, Un j = Vn j) -> sum_f_C0 Un n = sum_f_C0 Vn n.
 Proof.
 intros Un Vn n H.
@@ -141,7 +141,7 @@ induction n.
  simpl; rewrite H; rewrite IHn; trivial.
 Qed.
 
-Lemma Csum_eq_compat Un Vn n :
+Lemma Csum_eq_compat : forall Un Vn n,
   (forall j, (j <= n)%nat -> Un j = Vn j) -> sum_f_C0 Un n = sum_f_C0 Vn n.
 Proof.
 intros Un Vn n H.
@@ -153,7 +153,7 @@ induction n.
  apply H; omega.
 Qed.
 
-Lemma Cser_cv_eq_compat Un Vn l :
+Lemma Cser_cv_eq_compat : forall Un Vn l,
   (forall j, Un j = Vn j) -> Cser_cv Un l -> Cser_cv Vn l.
 Proof.
 intros Un Vn l H HC.

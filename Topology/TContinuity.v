@@ -54,11 +54,11 @@ Definition Metric_Continuity
   (f : U->V) : Prop :=
     forall a, Metric_Continuity_Pt U V dU dV MU MV f a.
 
-Lemma metric_continuity_is_topological
+Lemma metric_continuity_is_topological : forall
   (U:Type) (V:Type)
   (dU : U -> U -> R) (dV : V -> V -> R)
   (MU : Metric_Space U dU) (MV : Metric_Space V dV)
-  (f : U->V) :
+  (f : U->V),
     Metric_Continuity U V dU dV MU MV f ->
     Topological_Continuity U V (Full_set U) (Full_set V)
       (metric_open _ dU) (metric_open _ dV)

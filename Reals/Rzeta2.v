@@ -60,7 +60,7 @@ Definition odds Un : Rseq := fun n => Un (S (2 * n)).
 Definition evens Un : Rseq := fun n => Un (mult 2 n).
 
 (** Convergence of splitting *)
-Lemma Rser_cv_pair_compat Un l : Rser_cv Un l -> Rser_cv (fun n => Un (mult 2 n) + Un (S (mult 2 n))) l.
+Lemma Rser_cv_pair_compat : forall Un l, Rser_cv Un l -> Rser_cv (fun n => Un (mult 2 n) + Un (S (mult 2 n))) l.
 Proof.
 intros Un l Ucv.
 intros e epos.
@@ -105,7 +105,7 @@ Qed.
 
 (** Substracting odd terms *)
 
-Lemma remove_odds Un l : {lu | Rser_cv Un lu} ->
+Lemma remove_odds : forall Un l, {lu | Rser_cv Un lu} ->
   Rser_cv (evens Un) l -> Rser_cv (Un - (odds Un)) l.
 Proof.
 intros Un lo [lu Hu] Ho.
@@ -125,7 +125,7 @@ Qed.
 
 (** Substracting even terms *)
 
-Lemma remove_evens Un l : {lu | Rser_cv Un lu} ->
+Lemma remove_evens : forall Un l, {lu | Rser_cv Un lu} ->
   Rser_cv (odds Un) l -> Rser_cv (Un - evens Un) l.
 Proof.
 intros Un lo [lu Hu] Ho.
@@ -305,7 +305,7 @@ Definition pow1 z := match z with
   | Zpos n | Zneg n => pow1_P n
 end.
 
-Lemma pow1_P_ind p : pow1_P (Psucc (Psucc p)) = pow1_P p.
+Lemma pow1_P_ind : forall p, pow1_P (Psucc (Psucc p)) = pow1_P p.
 Proof.
 destruct p; trivial.
 Qed.
@@ -319,7 +319,7 @@ assert (P n /\ P (S n)).
  apply H2.
 Qed.
 
-Lemma pow1_nat n : pow1 (Z_of_nat n) = (- 1) ^ n.
+Lemma pow1_nat : forall n, pow1 (Z_of_nat n) = (- 1) ^ n.
 Proof.
 intros n.
 destruct n.
@@ -333,7 +333,7 @@ destruct n.
  simpl pow; field.
 Qed.
 
-Lemma pow1_nat_neg n : pow1 (- Z_of_nat n) = (- 1) ^ n.
+Lemma pow1_nat_neg : forall n, pow1 (- Z_of_nat n) = (- 1) ^ n.
 Proof.
 intros n.
 destruct n.
@@ -347,32 +347,32 @@ destruct n.
  simpl pow; field.
 Qed.
 
-Lemma pow1_squared z : (pow1 z) ^ 2 = 1.
+Lemma pow1_squared : forall z, (pow1 z) ^ 2 = 1.
 Proof.
 destruct z; [simpl; ring | | ]; unfold pow1;
   destruct p;
     simpl; ring.
 Qed.
 
-Lemma pow1_Rabs z : Rabs (pow1 z) = 1.
+Lemma pow1_Rabs : forall z, Rabs (pow1 z) = 1.
 Proof.
 destruct z; try destruct p; simpl; try rewrite Rabs_Ropp; apply Rabs_R1.
 Qed.
 
-Lemma pow1_P_plus a b : pow1_P (a + b) = pow1_P a * pow1_P b.
+Lemma pow1_P_plus : forall a b, pow1_P (a + b) = pow1_P a * pow1_P b.
 Proof.
 intros a b.
 destruct a; destruct b; simpl; ring.
 Qed.
 
-Lemma pow1_succ z : pow1 (Zsucc z) = - pow1 z.
+Lemma pow1_succ : forall z, pow1 (Zsucc z) = - pow1 z.
 Proof.
 destruct z; trivial;
  destruct p; simpl; try ring;
  destruct p; simpl; ring.
 Qed.
 
-Lemma pow1_plus_nat a b : pow1 (a + Z_of_nat b) = (pow1 a) * (-1) ^ b.
+Lemma pow1_plus_nat : forall a b, pow1 (a + Z_of_nat b) = (pow1 a) * (-1) ^ b.
 Proof.
 intros.
 induction b.
@@ -389,7 +389,7 @@ Definition zr (op : R -> R) (f : Z -> R) z := op (f z).
 Definition zr2 (op : R -> R -> R) (f g : Z -> R) z := op (f z) (g z).
 Definition zr22 (op : R -> R -> R) (f g : Z -> Z -> R) x y := op (f x y) (g x y).
 
-Lemma bisum_eq_compat f g n : (forall z, f z = g z) -> bisum f n = bisum g n.
+Lemma bisum_eq_compat : forall f g n, (forall z, f z = g z) -> bisum f n = bisum g n.
 Proof.
 intros.
 induction n.
@@ -446,7 +446,7 @@ Qed.
 
 (** Reversing terms *)
 
-Lemma bisum_reverse f n : bisum f n = bisum (fun i => f (- i)%Z) n.
+Lemma bisum_reverse : forall f n, bisum f n = bisum (fun i => f (- i)%Z) n.
 Proof.
 induction n.
  trivial.
@@ -458,7 +458,7 @@ Qed.
 
 (** Rewriting a bisum as sums *)
 
-Lemma sum_bisum n f : bisum f (S n) =
+Lemma sum_bisum : forall n f, bisum f (S n) =
   sum_f_R0 (fun i => f (Z_of_nat i)) (S n) + sum_f_R0 (fun i => f (- Z_of_nat (S i))%Z) n.
 Proof.
 intros.
@@ -479,7 +479,7 @@ Definition bnz z := / (2 * (IZR z) + 1) ^ 2.
 Definition An := bisum anz.
 Definition Bn := bisum bnz.
 
-Lemma anz_antg n : antg n = anz (Z_of_nat n).
+Lemma anz_antg : forall n, antg n = anz (Z_of_nat n).
 Proof.
 intro n.
 unfold antg, anz.
@@ -491,7 +491,7 @@ destruct n.
  trivial.
 Qed.
 
-Lemma anz_antg_neg n : antg_neg n = anz (- Z_of_nat n).
+Lemma anz_antg_neg : forall n, antg_neg n = anz (- Z_of_nat n).
 Proof.
 intro n.
 unfold antg_neg, anz.
@@ -564,7 +564,7 @@ Definition bisumsum_strip_diag' f N := bisumsum (fun i j => if Z_eq_dec i j then
 
 (** Weak extensional equality *)
 
-Lemma bisumsum_eq_compat f g n : (forall x y, f x y = g x y) ->
+Lemma bisumsum_eq_compat : forall f g n, (forall x y, f x y = g x y) ->
   bisumsum f n = bisumsum g n.
 Proof.
 intros; apply bisum_eq_compat.
@@ -574,7 +574,7 @@ Qed.
 
 (** Bounded extensional equality *)
 
-Lemma bisum_eq_compat_bounded f g n : (forall z, ((-Z_of_nat n) <= z <= Z_of_nat n)%Z -> f z = g z) ->
+Lemma bisum_eq_compat_bounded : forall f g n, (forall z, ((-Z_of_nat n) <= z <= Z_of_nat n)%Z -> f z = g z) ->
   bisum f n = bisum g n.
 Proof.
 intros.
@@ -593,7 +593,7 @@ Qed.
 
 (** Double sum distributivity *)
 
-Lemma bisumsum_square f n : bisumsum (fun i j => f i * f j) n = bisum f n * bisum f n.
+Lemma bisumsum_square : forall f n, bisumsum (fun i j => f i * f j) n = bisum f n * bisum f n.
 Proof.
 intros.
 rewrite bisum_mult.
@@ -602,7 +602,7 @@ Qed.
 
 (** Inequalities *)
 
-Lemma Psucc_lt p : (Zpos p < Zpos (Psucc p))%Z.
+Lemma Psucc_lt : forall p, (Zpos p < Zpos (Psucc p))%Z.
 Proof.
 intros.
 replace (Zpos (Psucc p)) with (1 + Zpos p)%Z.
@@ -610,7 +610,7 @@ replace (Zpos (Psucc p)) with (1 + Zpos p)%Z.
  induction p; trivial.
 Qed.
 
-Lemma Psucc_lt_neg p : (Zneg (Psucc p) < Zneg p)%Z.
+Lemma Psucc_lt_neg : forall p, (Zneg (Psucc p) < Zneg p)%Z.
 Proof.
 intros.
 replace (Zneg (Psucc p)) with (- 1 + Zneg p)%Z.
@@ -620,7 +620,7 @@ Qed.
 
 (** A special term outside the bounds can be ignored *)
 
-Lemma bisum_not_in f g j n : (j < (- Z_of_nat n) \/ Z_of_nat n < j)%Z -> 
+Lemma bisum_not_in : forall f g j n, (j < (- Z_of_nat n) \/ Z_of_nat n < j)%Z -> 
   bisum (fun i : Z => if Z_eq_dec i j then g j else f i) n = bisum f n.
 Proof.
 intros.
@@ -640,7 +640,7 @@ Qed.
 
 (** A special term between the bounds can be extracted *)
 
-Lemma bisum_in f g j n : (- Z_of_nat n <= j <= Z_of_nat n)%Z -> 
+Lemma bisum_in : forall f g j n, (- Z_of_nat n <= j <= Z_of_nat n)%Z -> 
   bisum (fun i : Z => if Z_eq_dec i j then g j else f i) n = bisum f n - f j + g j.
 Proof.
 intros.
@@ -682,7 +682,7 @@ Qed.
 
 Definition Zzero : Z -> R := fun _ => 0.
 
-Lemma bisum_strip_equiv f n j : ((- Z_of_nat n) <= j <= Z_of_nat n)%Z -> 
+Lemma bisum_strip_equiv : forall f n j, ((- Z_of_nat n) <= j <= Z_of_nat n)%Z -> 
   bisum_strip f j n = bisum_strip' f j n.
 Proof.
 intros.
@@ -699,7 +699,7 @@ replace
  unfold Zzero; trivial.
 Qed.
 
-Lemma bisum_strip_nothing f n j : ((- Z_of_nat (S n)) = j \/ j = Z_of_nat (S n))%Z -> 
+Lemma bisum_strip_nothing : forall f n j, ((- Z_of_nat (S n)) = j \/ j = Z_of_nat (S n))%Z -> 
   bisum_strip' f j n = bisum f n.
 Proof.
 intros.
@@ -716,12 +716,12 @@ Qed.
 
 (** Steps of calculus in bisums *)
 
-Lemma bisum_one_step f n : bisum f (S n) = bisum f n + f (Z_of_nat (S n)) + f (- Z_of_nat (S n))%Z.
+Lemma bisum_one_step : forall f n, bisum f (S n) = bisum f n + f (Z_of_nat (S n)) + f (- Z_of_nat (S n))%Z.
 Proof.
 trivial.
 Qed.
 
-Lemma bisumsum_one_step f n m : 
+Lemma bisumsum_one_step : forall f n m, 
   bisum (fun i => bisum (f i) (S n)) m =
   bisum (fun i => bisum (f i) n) m + 
   bisum (fun i =>        f i (Z_of_nat (S n))    ) m +
@@ -735,7 +735,7 @@ Qed.
 
 (** Switching indices *)
 
-Lemma bisum_eq_sym f z n :
+Lemma bisum_eq_sym : forall f z n,
   bisum (fun i : Z => if Z_eq_dec i z then 0 else f z i) n =
   bisum (fun j : Z => if Z_eq_dec z j then 0 else f z j) n.
 Proof.
@@ -746,7 +746,7 @@ Qed.
 
 (** Substracting the diagonal terms sum makes them null in the main double sum *)
 
-Lemma strip_diag f n : bisumsum_strip_diag' f n = bisumsum_strip_diag f n.
+Lemma strip_diag : forall f n, bisumsum_strip_diag' f n = bisumsum_strip_diag f n.
 Proof.
 intros.
 induction n.
@@ -787,7 +787,7 @@ Qed.
 
 (** Switching indices in a double sum *)
 
-Lemma bisumsum_switch_index f n : bisumsum (fun i j => f j i) n = bisumsum f n.
+Lemma bisumsum_switch_index : forall f n, bisumsum (fun i j => f j i) n = bisumsum f n.
 Proof.
 intros.
 induction n.
@@ -805,7 +805,7 @@ Qed.
 
 (** Switching indices in a double sum (where diagonal terms are null) *)
 
-Lemma bisumsum_strip_diag'_switch_index f n :
+Lemma bisumsum_strip_diag'_switch_index : forall f n,
   bisumsum_strip_diag' (fun i j => f j i) n =
   bisumsum_strip_diag' f n.
 Proof.
@@ -819,7 +819,7 @@ Qed.
 
 (** Adding double sums *)
 
-Lemma bisumsum_strip_diag'_plus f g n :
+Lemma bisumsum_strip_diag'_plus : forall f g n,
   bisumsum_strip_diag' (fun i j => f i j + g i j) n =
   bisumsum_strip_diag' f n +
   bisumsum_strip_diag' g n.
@@ -838,7 +838,7 @@ Qed.
 
 (** Switching indices of only one term in a sum in a double sum *)
 
-Lemma bisumsum_plus_switch f g n :
+Lemma bisumsum_plus_switch : forall f g n,
   bisumsum_strip_diag' (fun i j => f i j + g i j) n =
   bisumsum_strip_diag' (fun i j => f i j + g j i) n.
 Proof.
@@ -851,7 +851,7 @@ Qed.
 
 (** Extensional equality but on the diagonal terms *)
 
-Lemma bisumsum_strip_diag'_eq_but_diag_compat f g n :
+Lemma bisumsum_strip_diag'_eq_but_diag_compat : forall f g n,
   (forall i j, i <> j -> f i j = g i j) ->
   bisumsum_strip_diag' f n = bisumsum_strip_diag' g n.
 Proof.
@@ -869,7 +869,7 @@ Fixpoint sum1 u n := match n with
   | S n' => (sum1 u n') + u (Z_of_nat n)
 end.
 
-Lemma sum_f_R0_sum1 u n : sum1 u (S n) = 
+Lemma sum_f_R0_sum1 : forall u n, sum1 u (S n) = 
   sum_f_R0 (fun i => u (Z_of_nat (S i))) n.
 Proof.
 intros.
@@ -883,7 +883,7 @@ Qed.
 
 Definition shiftp (u:Z->R) (p:nat) (i:Z) := u (i + (Z_of_nat p))%Z.
 
-Lemma bisum_shifting_S u a b : 
+Lemma bisum_shifting_S : forall u a b, 
   bisum (shiftp u (S b)) (S a) = 
   bisum (shiftp u b) a +
   u (Z_of_nat (S (a + b))) +
@@ -913,7 +913,7 @@ induction a.
    repeat rewrite inj_S; rewrite inj_plus; repeat rewrite inj_S; omega.
 Qed.
 
-Lemma bisum_shifting u n p : 
+Lemma bisum_shifting : forall u n p, 
   bisum (shiftp u p) (n + p) = 
   bisum u n + sum1 (shiftp u n) (2 * p)
 .
@@ -966,14 +966,14 @@ split; [|split].
  apply Rminus_eq_contra; assumption.
 Qed.
 
-Lemma d_not_null z : d' z <> 0.
+Lemma d_not_null : forall z, d' z <> 0.
 Proof.
 intros.
 unfold d', d.
 discrR; omega.
 Qed.
 
-Lemma calc1 N : (An N) * (An N) - Bn N =
+Lemma calc1 : forall N, (An N) * (An N) - Bn N =
   bisumsum_strip_diag' (fun n m =>
     (pow1 m * pow1 n) * / (2 * (IZR (m - n))) * (/ (d' n) - / (d' m))
   ) N.
@@ -1009,7 +1009,7 @@ replace (Bn N) with (bisum (fun i => anz i * anz i) N).
  discrR; omega.
 Qed.
 
-Lemma calc2 N : (An N) * (An N) - Bn N = bisumsum_strip_diag'  (fun n m =>
+Lemma calc2 : forall N, (An N) * (An N) - Bn N = bisumsum_strip_diag'  (fun n m =>
     (pow1 m * pow1 n) * / ((IZR (m - n)) * (d' n))
   ) N.
 Proof.
@@ -1038,7 +1038,7 @@ Qed.
 
 Definition cn n N := bisum (fun m => if Z_eq_dec n m then 0 else pow1 m / (IZR (m - n))) N.
 
-Lemma calc3 N : (An N) * (An N) - Bn N = bisum (fun n => pow1 n / (d' n) * (cn n N)) N.
+Lemma calc3 : forall N, (An N) * (An N) - Bn N = bisum (fun n => pow1 n / (d' n) * (cn n N)) N.
 Proof.
 intros.
 rewrite calc2.
@@ -1051,7 +1051,7 @@ destruct (Z_eq_dec z z0); field; [ | split ]; try apply d_not_null.
 discrR; omega.
 Qed.
 
-Lemma cn_odd n N : cn (- n)%Z N = - (cn n N).
+Lemma cn_odd : forall n N, cn (- n)%Z N = - (cn n N).
 Proof.
 intros.
 replace (- cn n N) with (-1 * cn n N) by ring.
@@ -1072,7 +1072,7 @@ destruct (Z_eq_dec (- n) (- z)); destruct (Z_eq_dec n z); subst; try ring.
   induction z; trivial.
 Qed.
 
-Lemma cn_zero_zero N : cn 0 N = 0.
+Lemma cn_zero_zero : forall N, cn 0 N = 0.
 Proof.
 intros.
 cut (2 * cn 0 N = 0).
@@ -1089,7 +1089,7 @@ Qed.
 
 (** * Bounding *)
 
-Lemma cn_pos n N : (S n <= N)%nat ->
+Lemma cn_pos : forall n N, (S n <= N)%nat ->
   cn (Zpos (P_of_succ_nat n)) N = 
   (pow (-1) (S (S n))) * 
   (sum_f_R0 (fun j => pow (-1) (j + N - n) * / (INR (j + N - n)))) (S (2 * n))
@@ -1250,7 +1250,7 @@ destruct (even_odd_cor n) as [p [he|ho]]; subst; split.
   apply pos.
 Qed.
 
-Lemma cn_maj n N : (n <= N)%nat -> Rabs (cn (Z_of_nat n) N) <= / (INR (N - n + 1)).
+Lemma cn_maj : forall n N, (n <= N)%nat -> Rabs (cn (Z_of_nat n) N) <= / (INR (N - n + 1)).
 Proof.
 intros.
 destruct n.
@@ -1298,7 +1298,7 @@ destruct n.
  apply H1.
 Qed.
 
-Lemma abound_eq n N : (O <= n)%nat -> (S n <= N)%nat ->
+Lemma abound_eq : forall n N, (O <= n)%nat -> (S n <= N)%nat ->
   / (INR (N - n)) * (/ (INR (2 * n + 1)) + / (INR (2 * n + 3))) =
   / (INR (2 * N + 1)) * (2 / (INR (2 * n + 1)) + / (INR (N - n))) +
   / (INR (2 * N + 3)) * (2 / (INR (2 * n + 3)) + / (INR (N - n))).
@@ -1334,7 +1334,7 @@ Definition bound2' N :=  / INR (2 * N + 3) * sum_f_R0 (fun n =>  2 / INR (2 * n 
 Definition bound1c N :=  / INR (2 * N + 1) * sum_f_R0 (fun n => / INR (N - (S n) + 1)) (pred N).
 Definition bound2c N :=  / INR (2 * N + 3) * sum_f_R0 (fun n => / INR (N - (S n) + 1)) (pred N).
 
-Lemma An_squared_Bn_maj N : (1 <= N)%nat -> Rabs (An N * An N - Bn N) <= abound N.
+Lemma An_squared_Bn_maj : forall N, (1 <= N)%nat -> Rabs (An N * An N - Bn N) <= abound N.
 Proof.
 intros N H.
 destruct N.
@@ -1395,7 +1395,7 @@ destruct N.
    rewrite INR_IZR_INZ; discrR.
 Qed.
 
-Lemma bound_eq N : abound (S N) = bound1 (S N) + bound2 (S N).
+Lemma bound_eq : forall N, abound (S N) = bound1 (S N) + bound2 (S N).
 Proof.
 intros.
 unfold abound, bound1, bound2.
@@ -1443,7 +1443,7 @@ eapply Rseq_cv_eq_compat.
  apply inverse_cv_0.
 Qed.
 
-Lemma Rseq_cv_0_pos_maj_compat Un Vn : (forall n, 0 <= Un n) -> (forall n, Un n <= Vn n) ->
+Lemma Rseq_cv_0_pos_maj_compat : forall Un Vn, (forall n, 0 <= Un n) -> (forall n, Un n <= Vn n) ->
   Rseq_cv Vn 0 -> Rseq_cv Un 0.
 Proof.
 intros Un Vn Unpos Unmaj Vncv e epos.
@@ -1458,7 +1458,7 @@ eapply Rle_lt_trans.
   eapply Rle_trans; [apply Unpos | apply Unmaj].
 Qed.
 
-Lemma half_mean_0 Un k m : 0 <= k -> (1 <= m)%nat -> (forall n, 0 <= Un n) -> (forall n, Un n <= k / INR (S n)) ->
+Lemma half_mean_0 : forall Un k m, 0 <= k -> (1 <= m)%nat -> (forall n, 0 <= Un n) -> (forall n, Un n <= k / INR (S n)) ->
   Rseq_cv (fun N => / INR (2 * N + m) * sum_f_R0 Un (pred N)) 0.
 Proof.
 intros Un k m kpos mpos Unpos Unbound.
@@ -1543,7 +1543,7 @@ assert (Rseq_cv
  apply J; omega.
 Qed.
 
-Lemma Rsum_switch_index Un N : sum_f_R0 (fun n => Un (N - n)%nat) N = sum_f_R0 Un N.
+Lemma Rsum_switch_index : forall Un N, sum_f_R0 (fun n => Un (N - n)%nat) N = sum_f_R0 Un N.
 Proof.
 intros Un N.
 induction N.
@@ -1679,7 +1679,7 @@ Qed.
 
 (** * Linking sums on nat and sums on Z *)
 
-Lemma bnz_bntg n : bntg n = bnz (Z_of_nat n).
+Lemma bnz_bntg : forall n, bntg n = bnz (Z_of_nat n).
 Proof.
 intro n.
 unfold bntg, bnz.
@@ -1691,7 +1691,7 @@ destruct n.
  INR_solve.
 Qed.
 
-Lemma bnz_bntg_neg n : bntg_neg n = bnz (- Z_of_nat n).
+Lemma bnz_bntg_neg : forall n, bntg_neg n = bnz (- Z_of_nat n).
 Proof.
 intro n.
 unfold bntg_neg, bnz.

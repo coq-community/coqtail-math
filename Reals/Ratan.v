@@ -278,7 +278,7 @@ assert (P n /\ P (S n)).
  apply H2.
 Qed.
 
-Lemma sin_first_order x : 0 <= x -> sin x <= x.
+Lemma sin_first_order : forall x, 0 <= x -> sin x <= x.
 Proof.
 intros x xpos.
 pose (g := fun x => x - sin x).
@@ -302,7 +302,7 @@ apply Rle_trans with (1 - cos x).
  trivial.
 Qed.
 
-Lemma sin_cv_0_right_sig e : e > 0 -> {x | 0 < x /\ sin x < e}.
+Lemma sin_cv_0_right_sig : forall eps, eps > 0 -> {x | 0 < x /\ sin x < eps}.
 Proof.
 intros e epos.
 exists (e / 2); split; [fourier | ].
@@ -311,7 +311,7 @@ eapply Rle_lt_trans.
  fourier.
 Qed.
 
-Lemma sin_cv_0_right_sig_local e a : e > 0 -> a > 0 -> {x | 0 < x < a /\ sin x < e}.
+Lemma sin_cv_0_right_sig_local : forall e a, e > 0 -> a > 0 -> {x | 0 < x < a /\ sin x < e}.
 Proof.
 intros e a epos apos.
 destruct (Rle_lt_dec e a).
@@ -328,7 +328,7 @@ destruct (Rle_lt_dec e a).
   fourier.
 Qed.
 
-Lemma cos_cv_0_left_sig_local e a : e > 0 -> a < PI / 2 -> {x | a < x < PI / 2 /\ cos x < e}.
+Lemma cos_cv_0_left_sig_local : forall e a, e > 0 -> a < PI / 2 -> {x | a < x < PI / 2 /\ cos x < e}.
 Proof.
 intros e a epos ainf.
 destruct (sin_cv_0_right_sig_local e (PI / 2 - a) epos) as [x Hx].

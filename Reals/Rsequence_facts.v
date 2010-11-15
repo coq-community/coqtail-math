@@ -32,23 +32,18 @@ Open Scope R_scope.
 Open Scope Rseq_scope.
 
 (** printing ~	~ *)
-Lemma Rseq_growing_constructive_limit (Un : nat -> R) : Rseq_growing Un -> (exists l, Rseq_cv Un l) -> {l | Rseq_cv Un l}.
+Lemma Rseq_growing_constructive_limit : forall (Un : nat -> R), Rseq_growing Un -> (exists l, Rseq_cv Un l) -> {l | Rseq_cv Un l}.
 Proof.
 intros Un Hg Hl.
 assert (has_ub Un).
-destruct Hl as [l Hl].
-exists l.
-intros x Hx; destruct Hx as [n Hn]; rewrite Hn.
-apply growing_ineq.
-apply Hg.
-apply Hl.
-apply growing_cv.
-apply Hg.
-apply H.
+  destruct Hl as [l Hl]; exists l.
+  intros x Hx; destruct Hx as [n Hn]; rewrite Hn.
+  apply growing_ineq; assumption.
+apply growing_cv; assumption.
 Qed.
 
 (** A sequence cannot both converge and diverge to infinity *)
-Lemma Rseq_cv_not_infty (Un : nat -> R) : ~ ((exists l, Rseq_cv Un l) /\ Rseq_cv_pos_infty Un).
+Lemma Rseq_cv_not_infty : forall (Un : nat -> R), ~ ((exists l, Rseq_cv Un l) /\ Rseq_cv_pos_infty Un).
 Proof.
 intros Un Hf.
 destruct Hf as [[l Hl] Hinf].
@@ -107,7 +102,7 @@ Qed.
 
 (** Sequences convergence shifting compatibility *)
 
-Lemma Rseq_cv_shift_compat Un l : Rseq_cv (Rseq_shift Un) l -> Rseq_cv Un l.
+Lemma Rseq_cv_shift_compat : forall Un l, Rseq_cv (Rseq_shift Un) l -> Rseq_cv Un l.
 Proof.
 intros Un l H eps epspos.
 destruct (H eps epspos) as [N Hu].
@@ -117,7 +112,7 @@ replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
 intuition.
 Qed.
 
-Lemma Rseq_cv_pos_infty_shift_compat Un : Rseq_cv_pos_infty (Rseq_shift Un) -> Rseq_cv_pos_infty Un.
+Lemma Rseq_cv_pos_infty_shift_compat : forall Un, Rseq_cv_pos_infty (Rseq_shift Un) -> Rseq_cv_pos_infty Un.
 Proof.
 intros Un H M.
 destruct (H M) as [N Hu].
@@ -127,7 +122,7 @@ replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
 intuition.
 Qed.
 
-Lemma Rseq_cv_neg_infty_shift_compat Un : Rseq_cv_neg_infty (Rseq_shift Un) -> Rseq_cv_neg_infty Un.
+Lemma Rseq_cv_neg_infty_shift_compat : forall Un, Rseq_cv_neg_infty (Rseq_shift Un) -> Rseq_cv_neg_infty Un.
 Proof.
 intros Un H M.
 destruct (H M) as [N Hu].
@@ -137,7 +132,7 @@ replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
 intuition.
 Qed.
 
-Lemma Rseq_cv_shift_compat_reciprocal Un l : Rseq_cv Un l -> Rseq_cv (Rseq_shift Un) l.
+Lemma Rseq_cv_shift_compat_reciprocal : forall Un l, Rseq_cv Un l -> Rseq_cv (Rseq_shift Un) l.
 Proof.
 intros Un l H eps epspos.
 destruct (H eps epspos) as [N Hu].
@@ -147,7 +142,7 @@ apply Hu.
 intuition.
 Qed.
 
-Lemma Rseq_cv_pos_infty_shift_compat_reciprocal Un : Rseq_cv_pos_infty Un -> Rseq_cv_pos_infty (Rseq_shift Un).
+Lemma Rseq_cv_pos_infty_shift_compat_reciprocal : forall Un, Rseq_cv_pos_infty Un -> Rseq_cv_pos_infty (Rseq_shift Un).
 Proof.
 intros Un H M.
 destruct (H M) as [N Hu].
@@ -157,7 +152,7 @@ apply Hu.
 intuition.
 Qed.
 
-Lemma Rseq_cv_neg_infty_shift_compat_reciprocal Un : Rseq_cv_neg_infty Un -> Rseq_cv_neg_infty (Rseq_shift Un).
+Lemma Rseq_cv_neg_infty_shift_compat_reciprocal : forall Un, Rseq_cv_neg_infty Un -> Rseq_cv_neg_infty (Rseq_shift Un).
 Proof.
 intros Un H M.
 destruct (H M) as [N Hu].

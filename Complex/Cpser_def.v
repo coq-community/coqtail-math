@@ -65,7 +65,7 @@ Definition infinite_cv_radius (An : nat -> C) := forall (r : R), Cv_radius_weak 
 
 (** * Some lemmas manipulating the definitions *)
 
-Lemma Cv_radius_weak_0 An : Cv_radius_weak An 0.
+Lemma Cv_radius_weak_0 : forall An, Cv_radius_weak An 0.
 Proof.
 intro An ; exists (Cnorm (An O)) ; intros x [n Hn] ; rewrite Hn ;
  unfold gt_norm_Pser ; destruct n.
@@ -73,8 +73,7 @@ intro An ; exists (Cnorm (An O)) ; intros x [n Hn] ; rewrite Hn ;
   rewrite IRC_pow_compat, pow_i, Cmult_0_r, Cnorm_C0 ; [apply Cnorm_pos | intuition].
 Qed.
 
-Lemma finite_cv_radius_pos An r : finite_cv_radius An r -> 0 <= r.
-
+Lemma finite_cv_radius_pos : forall An r, finite_cv_radius An r -> 0 <= r.
 Proof.
 intros An r [_ Hf].
  destruct(Rle_lt_dec 0 r).
@@ -309,7 +308,7 @@ intros An Bn x N ; induction N.
  unfold gt_Pser ; field.
 Qed.
 
-Lemma Pser_Cseqcv_link (An : nat -> C) (x l : C) :
+Lemma Pser_Cseqcv_link : forall (An : nat -> C) (x l : C),
        Pser An x l ->
        Cseq_cv (fun N : nat => sum_f_C0 (gt_Pser An x) N) l.
 Proof.

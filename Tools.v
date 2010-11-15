@@ -183,7 +183,8 @@ intros x ub lb lb_lt_x x_lt_ub.
  unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition.
 Qed.
 
-Definition mkposreal_lb_ub (x lb ub:R) (lb_lt_x:lb<x) (x_lt_ub:x<ub) : posreal.
+Definition mkposreal_lb_ub : forall (x lb ub:R) (lb_lt_x:lb<x) (x_lt_ub:x<ub), posreal.
+Proof.
 intros x lb ub lb_lt_x x_lt_ub.
  apply (mkposreal ((ub-lb)/2) (ub_lt_2_pos x ub lb lb_lt_x x_lt_ub)).
 Defined.
@@ -191,6 +192,7 @@ Defined.
 (** Pour tout epsilon, il est possible de trouver un N tel que pour tout n > N, 1/(2*n+1) < eps *)
 
 Lemma eps_gives_N : forall eps, eps > 0 -> exists N:nat, forall n, (n >= N)%nat -> Rabs ((-1)^n * 1/ (INR (2*n+1))) < eps.
+Proof.
   intros eps' eps'_pos.
    exists (Zabs_nat (up (1/eps'))).
    intros n n_gt_N.

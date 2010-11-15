@@ -40,7 +40,7 @@ Local Coercion INR : nat >-> R.
 
 Definition sin_n n := fun x => pow (sin x) n.
 
-Lemma integrable_sin_n n : Riemann_integrable (comp (fun x => pow x n) sin) 0 (PI/2).
+Lemma integrable_sin_n : forall n, Riemann_integrable (comp (fun x => pow x n) sin) 0 (PI/2).
 Proof.
 intro n.
 apply RiemannInt_P6.
@@ -75,7 +75,7 @@ Qed.
 
 
 (** Recurrence formula *)
-Lemma Wallis_formula Wn n: 
+Lemma Wallis_formula : forall Wn n,
   Rint (sin_n n) 0 (PI/2) Wn-> 
     Rint (sin_n (S (S n))) 0 (PI/2) (Wn * (S n)/(S (S n))).
 Proof.
@@ -140,7 +140,7 @@ field.
 auto with *.
 Qed.
 
-Lemma Wallis_even n : Rint (sin_n (2 * n)) 0 (PI/2) (W_even n).
+Lemma Wallis_even : forall n, Rint (sin_n (2 * n)) 0 (PI/2) (W_even n).
 Proof.
 unfold W_even.
 induction n.
@@ -171,7 +171,7 @@ Qed.
 
 
 
-Lemma Wallis_odd n : Rint (sin_n (S (2 * n))) 0 (PI/2) ((2^(2*n) * (fact n) ^2)/(fact (S (2 * n)))).
+Lemma Wallis_odd : forall n, Rint (sin_n (S (2 * n))) 0 (PI/2) ((2^(2*n) * (fact n) ^2)/(fact (S (2 * n)))).
 Proof.
 unfold W_odd.
 induction n.
@@ -196,7 +196,7 @@ repeat split;apply not_0_INR; try (auto with *).
 apply fact_neq_0.
 Qed.
 
-Lemma Wallis_odd_le_even n : W_odd n <= W_even n.
+Lemma Wallis_odd_le_even : forall n, W_odd n <= W_even n.
 Proof.
 intro n.
 apply (Rint_le_compat (sin_n (S (2 * n))) (sin_n (2 * n)) 0 (PI/2)).
@@ -215,7 +215,7 @@ apply Wallis_even.
 Qed.
 
 
-Lemma Wallis_even_le_odd n : W_even (S n) <= W_odd n.
+Lemma Wallis_even_le_odd : forall n, W_even (S n) <= W_odd n.
 Proof.
 intro n.
 apply (Rint_le_compat (sin_n (2 * (S n))) (sin_n (S (2 * n))) 0 (PI/2)).
@@ -235,7 +235,7 @@ apply Wallis_odd.
 Qed.
 
 
-Lemma Wallis_maj (n : nat) : (2*n/ (S (2 * n))) * (W_even n) <= W_odd n.
+Lemma Wallis_maj : forall n : nat, (2*n/ (S (2 * n))) * (W_even n) <= W_odd n.
 Proof.
 intro n.
 destruct n.
@@ -499,7 +499,7 @@ apply Rseq_equiv_trans with (f l).
   apply Rseq_cv_continuity_compat ; [assumption | reg].
 Qed.
 
-Lemma Wallis_quotient_lim2 l : 
+Lemma Wallis_quotient_lim2 : forall l, 
 l <> 0 ->
   (fun n => fact n) ~ (fun n => (n /(exp 1)) ^ n * sqrt n * l) ->
     Rseq_cv (fun n => W_odd n / W_even n) (l^2/(2*PI)).

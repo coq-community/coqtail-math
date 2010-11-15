@@ -193,7 +193,7 @@ Module Rimpl : Raxiom.CReals.
     exact Coq.Reals.R_Ifp.Int_part.
   Defined.
   
-  Lemma IZR_same z : Raxioms.IZR z = IZR z.
+  Lemma IZR_same : forall z, Raxioms.IZR z = IZR z.
   Proof.
     cut (forall p : positive, Raxioms.INR (nat_of_P p) = IPR p).
      intros H []; simpl; auto.

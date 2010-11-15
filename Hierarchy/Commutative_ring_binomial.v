@@ -139,7 +139,7 @@ Section Commutative_Ring.
   intros; simpl; ring.
   Qed.
   
-  Lemma CRsum_reindex n f : f O + CRsum (fun k => f (S k)) n == CRsum f (S n).
+  Lemma CRsum_reindex : forall n f, f O + CRsum (fun k => f (S k)) n == CRsum f (S n).
   Proof.
   intros n f.
   induction n.
@@ -150,7 +150,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Lemma CRsum_eq_compat_weak a b n : (forall n, a n == b n) -> CRsum a n == CRsum b n.
+  Lemma CRsum_eq_compat_weak : forall a b n, (forall n, a n == b n) -> CRsum a n == CRsum b n.
   Proof.
   intros a b n H.
   induction n.
@@ -162,7 +162,7 @@ Section Commutative_Ring.
    reflexivity.
   Qed.
   
-  Lemma CRsum_eq_compat a b n : (forall i, i <= n -> a i == b i) -> CRsum a n == CRsum b n.
+  Lemma CRsum_eq_compat : forall a b n, (forall i, i <= n -> a i == b i) -> CRsum a n == CRsum b n.
   Proof.
   intros a b n H.
   induction n.
@@ -177,7 +177,7 @@ Section Commutative_Ring.
     intros; apply H; auto.
   Qed.
   
-  Lemma CRsum_add_compat a b n : CRsum (fun i => a i + b i) n == CRsum a n + CRsum b n.
+  Lemma CRsum_add_compat : forall a b n, CRsum (fun i => a i + b i) n == CRsum a n + CRsum b n.
   Proof.
   intros a b n.
   induction n.
@@ -188,7 +188,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Lemma CRsum_scal_compat x f n : x * CRsum f n == CRsum (fun n => x * f n) n.
+  Lemma CRsum_scal_compat : forall x f n, x * CRsum f n == CRsum (fun n => x * f n) n.
   Proof.
   intros a b n.
   induction n.
@@ -200,19 +200,19 @@ Section Commutative_Ring.
    reflexivity.
   Qed.
   
-  Lemma CRpow_simpl a n : a ^ (S n) = a ^ n * a.
+  Lemma CRpow_simpl : forall a n, a ^ (S n) = a ^ n * a.
   Proof.
   reflexivity.
   Qed.
   
-  Lemma CRadd_eq_compat a b c d : a == c -> b == d -> a + b == c + d.
+  Lemma CRadd_eq_compat : forall a b c d, a == c -> b == d -> a + b == c + d.
   Proof.
   intros ? ? ? ? H H'.
   rewrite H; rewrite H'.
   ring.
   Qed.
   
-  Lemma CRmul_scal_compat a b n : n ** a * b == a * (n ** b).
+  Lemma CRmul_scal_compat : forall a b n, n ** a * b == a * (n ** b).
   Proof.
   intros a b n.
   induction n.
@@ -223,7 +223,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Lemma CRscal_eq_compat a b n : a == b -> n ** a == n ** b.
+  Lemma CRscal_eq_compat : forall a b n, a == b -> n ** a == n ** b.
   Proof.
   intros a b n H.
   induction n.
@@ -235,7 +235,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Lemma CRscal_mult_scal_one a n : (n ** one) * a == n ** a.
+  Lemma CRscal_mult_scal_one : forall a n, (n ** one) * a == n ** a.
   Proof.
   intros a n.
   induction n.
@@ -246,7 +246,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Lemma CRscal_add_eq_compat a b n : (n ** a) + (n ** b) == n ** (a + b).
+  Lemma CRscal_add_eq_compat : forall a b n, (n ** a) + (n ** b) == n ** (a + b).
   Proof.
   intros a b n.
   induction n.
@@ -257,7 +257,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Lemma CRadd_scal_eq_compat a n p : (n ** a) + (p ** a) == (n + p) ** a.
+  Lemma CRadd_scal_eq_compat : forall a n p, (n ** a) + (p ** a) == (n + p) ** a.
   Proof.
   intros a n p.
   induction n.
@@ -322,4 +322,5 @@ Section Commutative_Ring.
    rewrite CRscal_mult_scal_one.
    reflexivity.
   Qed.
+
 End Commutative_Ring.

@@ -65,7 +65,7 @@ Section Balls.
   Inductive closed_ball c r (rpos : (0 < r)%R) : Ensemble X :=
     closed_ball_intro : forall x, (d x c <= r)%R -> In _ (closed_ball c r rpos) x.
   
-  Lemma open_ball_is_open c r rpos : metric_open X d (open_ball c r rpos).
+  Lemma open_ball_is_open : forall c r rpos, metric_open X d (open_ball c r rpos).
   Proof.
   intros c r rpos x Hx.
   destruct Hx as [x Hxc].
@@ -147,7 +147,7 @@ End Metric_topology.
 
 (** * A metric space is separated *)
 
-Lemma metric_space_is_separated X d (MX : Metric_Space X d) :
+Lemma metric_space_is_separated : forall X d (MX : Metric_Space X d),
   separated_space X (Full_set X) (metric_open X d).
 Proof.
 intros X d MX x y _ _ H.

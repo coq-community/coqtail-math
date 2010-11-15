@@ -282,8 +282,8 @@ apply Rmult_lt_compat_r ; [rewrite <- Cnorm_inv ; [apply Cnorm_pos_lt ;
 Qed.
 
 
-Definition SFL_interv (fn:nat -> C -> C) (r:posreal)
-  (cv : forall z : C, Boule 0 r z -> {l:C | Cseq_cv (fun N:nat => CFpartial_sum (fun n => fn n z) N) l }) (y:C) : C.
+Definition SFL_interv : forall (fn:nat -> C -> C) (r:posreal)
+  (cv : forall z : C, Boule 0 r z -> {l:C | Cseq_cv (fun N:nat => CFpartial_sum (fun n => fn n z) N) l }) (y:C), C.
 Proof.
 intros fn r cv z.
  destruct (Rlt_le_dec (Cnorm (0 - z)) r) as [z_bd | z_lb].

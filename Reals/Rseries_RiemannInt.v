@@ -71,7 +71,7 @@ Qed.
 
 
 (** * Generalized Chasles relation *)
-Lemma Rint_generalized_Chasles f An : 
+Lemma Rint_generalized_Chasles : forall f An, 
   (forall n : nat, Rint f n (S n) (An n)) -> 
     forall n : nat, Rint f 0 (S n) (sum_f_R0 An n).
 Proof.
@@ -90,7 +90,7 @@ Hypothesis Hcont : forall x, 0 <= x -> continuity_pt f x.
 Hypothesis Hpos : forall x, 0 <= x -> 0 <= f x.
 Hypothesis Hdec : forall x y : R, 0 <= x <= y -> f y <= f x.
 
-Lemma Riemann_integrable_f_n_Sn  (n : nat) : Riemann_integrable f (INR n) (INR (S n)).
+Lemma Riemann_integrable_f_n_Sn : forall (n : nat), Riemann_integrable f (INR n) (INR (S n)).
 Proof.
 intro n.
 apply continuity_implies_RiemannInt.
@@ -99,7 +99,7 @@ intros x [Hnx HxSn]; apply Hcont.
 apply (Rle_trans 0 (INR n) x (le_INR _ _ (le_O_n n)) Hnx).
 Qed.
 
-Lemma Rser_RiemannInt_link_general_term_integrable (n : nat) : 
+Lemma Rser_RiemannInt_link_general_term_integrable : forall (n : nat), 
   Riemann_integrable (fun x => fct_cte (f (INR n)) x - f x) (INR n) (INR (S n)).
 Proof.
 intros n.
@@ -218,7 +218,7 @@ Section Applications.
 
 Definition ln1 := comp ln (fun x => x+1).
 
-Lemma Rint_inv1 a b : 
+Lemma Rint_inv1 : forall a b, 
   -1 < a <= b -> Rint (/(id + fct_cte 1))%F a b (ln (b + 1) - ln (a + 1)).
 Proof.
 intros a b Hab.
@@ -307,4 +307,3 @@ Qed.
 End Applications.
 
 End Rseries_RiemannInt.
-

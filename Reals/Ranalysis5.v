@@ -652,7 +652,7 @@ intros x ub lb lb_lt_x x_lt_ub.
  unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition.
 Qed.
 
-Definition mkposreal_lb_ub (x lb ub:R) (x_in_I : open_interval lb ub x) : posreal.
+Definition mkposreal_lb_ub : forall (x lb ub:R) (x_in_I : open_interval lb ub x), posreal.
 intros x lb ub x_in_I.
  apply (mkposreal ((ub-lb)/2) (ub_lt_2_pos x ub lb (proj1 x_in_I) (proj2 x_in_I))).
 Defined.

@@ -40,14 +40,14 @@ Open Scope R_scope.
 
 Definition exp_seq (n : nat) := / INR (fact n).
 
-Definition cos_seq (n : nat) : R.
+Definition cos_seq : nat -> R.
 Proof.
 intro n ; destruct (n_modulo_2 n) as [ [p Hp] | [p Hp]].
  apply ((-1) ^ p / INR (fact n)).
  apply 0.
 Defined.
 
-Definition sin_seq (n : nat) : R.
+Definition sin_seq : nat -> R.
 Proof.
 intro n ; case (n_modulo_2 n) ; intros [p Hp].
  apply 0.

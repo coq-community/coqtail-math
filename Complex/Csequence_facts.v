@@ -231,7 +231,7 @@ apply Rle_refl.
 Qed.
 
 (**********)
-Lemma Cseq_cv_eq_compat l :
+Lemma Cseq_cv_eq_compat : forall l,
     (forall n, Un n = Vn n) -> Cseq_cv Un l -> Cseq_cv Vn l.
 Proof.
 intros l H Hl eps Heps.
@@ -240,7 +240,7 @@ intros n Hn; rewrite <- H; apply HN; apply Hn.
 Qed.
 
 (**********)
-Lemma Cseq_cst_cv (c : C) : Cseq_cv (fun _ => c) c.
+Lemma Cseq_cst_cv : forall (c : C), Cseq_cv (fun _ => c) c.
 intros c eps Heps; exists O; intros n Hn.
 unfold R_dist.
 assert (c - c = 0)%C.
@@ -425,7 +425,7 @@ Qed.
 End Cseq_cv.
 
 (** Compatibility with Cre and Cim *)
-Lemma Cseq_cv_re_compat Un l : Cseq_cv Un l -> 
+Lemma Cseq_cv_re_compat : forall Un l, Cseq_cv Un l -> 
   Rseq_cv (fun n : nat => Cre (Un n)) (Cre l).
 Proof.
 intros Un l HC e epos.
@@ -439,7 +439,7 @@ eapply Rle_lt_trans.
  auto.
 Qed.
 
-Lemma Cseq_cv_im_compat Un l : Cseq_cv Un l -> 
+Lemma Cseq_cv_im_compat : forall Un l, Cseq_cv Un l -> 
   Rseq_cv (fun n : nat => Cim (Un n)) (Cim l).
 Proof.
 intros Un l HC e epos.
@@ -514,4 +514,3 @@ intro Hlu ; unfold Cseq_div, Rdiv.
 Qed.
 
 End Cseq_cv_bonus.
-

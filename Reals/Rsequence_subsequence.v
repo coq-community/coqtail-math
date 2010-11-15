@@ -168,7 +168,7 @@ Qed.
 
 (** Composition of extractors *)
 
-Lemma extractor_comp phi1 phi2 :
+Lemma extractor_comp : forall phi1 phi2,
   is_extractor phi1 -> is_extractor phi2 -> is_extractor (fun n => phi1 (phi2 n)).
 Proof.
 intros phi1 phi2 H1 H2 n.
@@ -184,7 +184,7 @@ intro n.
 constructor.
 Qed.
 
-Lemma extractor_Rseq_iter_S k : is_extractor (Rseq_iter_S k).
+Lemma extractor_Rseq_iter_S : forall k, is_extractor (Rseq_iter_S k).
 Proof.
 intros k n. 
 unfold Rseq_iter_S.

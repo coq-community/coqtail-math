@@ -82,7 +82,7 @@ intros n m l l' modnl modnl'.
  rewrite <- Temp ; assumption.
 Qed.
 
-Lemma disjoints_prelim (n:nat) : 0 < n -> forall M m, m < max n M ->
+Lemma disjoints_prelim : forall n, 0 < n -> forall M m, m < max n M ->
       {k | k < n /\ mod n k m /\ forall l, l <> k -> ~ mod n l m}.
 Proof.
 intros n n_pos M ; induction M ; intros m m_ub.
@@ -170,7 +170,7 @@ intros n n_pos M ; induction M ; intros m m_ub.
   intuition.
 Qed.
 
-Lemma disjoints (n:nat) : 0 < n -> forall m,
+Lemma disjoints : forall n, 0 < n -> forall m,
       {k | k < n /\ mod n k m /\ forall l, l <> k -> ~ mod n l m}.
 Proof.
 intros n n_pos m ; apply disjoints_prelim with (M:= (S m)) ; intuition.

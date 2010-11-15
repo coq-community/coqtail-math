@@ -31,21 +31,21 @@ Open Local Scope R_scope.
 
 (* begin hide *)
 
-Lemma Rmin_def a b: a <= b -> Rmin a b = a.
+Lemma Rmin_def : forall a b, a <= b -> Rmin a b = a.
 Proof.
 intros a b Hab.
 unfold Rmin.
 destruct (Rle_dec a b); tauto.
 Qed.
 
-Lemma Rmax_def a b: a <= b -> Rmax a b = b.
+Lemma Rmax_def : forall a b, a <= b -> Rmax a b = b.
 Proof.
 intros a b Hab.
 unfold Rmax.
 destruct (Rle_dec a b); tauto.
 Qed.
 
-Lemma Rmax_le a b c : a <= c -> b <= c -> Rmax a b <= c.
+Lemma Rmax_le : forall a b c, a <= c -> b <= c -> Rmax a b <= c.
 intros a b c H1 H2.
 unfold Rmax.
 case (Rle_dec a b); intro H.
@@ -53,7 +53,7 @@ case (Rle_dec a b); intro H.
 apply H1.
 Qed.
 
-Lemma Rmax_lt a b c : a < c -> b < c -> Rmax a b < c.
+Lemma Rmax_lt : forall a b c, a < c -> b < c -> Rmax a b < c.
 Proof.
 intros a b c H1 H2.
 unfold Rmax.
@@ -62,7 +62,7 @@ case (Rle_dec a b); intro H.
 apply H1.
 Qed.
 
-Lemma Rmin_ge a b c : c <= a -> c <= b -> c <= Rmin a b.
+Lemma Rmin_ge : forall a b c, c <= a -> c <= b -> c <= Rmin a b.
 intros a b c H1 H2.
 unfold Rmin.
 case (Rle_dec a b); intro H.
@@ -82,7 +82,7 @@ Section Rint_facts.
 
 (** The integral from a to b is the opposite of the integral from b to a *)
 
-Lemma Rint_reverse_1 f a b x : Rint f a b  (-x) -> Rint f b a x.
+Lemma Rint_reverse_1 : forall f a b x, Rint f a b  (-x) -> Rint f b a x.
 Proof.
  intros f a b x [pr H]. pose proof RiemannInt_P1 pr as pr2.
  exists pr2;
@@ -91,7 +91,7 @@ assert(RiemannInt pr2 = - RiemannInt pr) as Hrew;
 rewrite H; intuition.
 Qed.
 
-Lemma Rint_reverse_2 f a b x : Rint f a b  x -> Rint f b a (-x).
+Lemma Rint_reverse_2 : forall f a b x, Rint f a b  x -> Rint f b a (-x).
 Proof.
 intros f a b x [pr H]. 
 pose proof RiemannInt_P1 pr as pr2;
@@ -101,7 +101,7 @@ assert(RiemannInt pr2 = - RiemannInt pr) as Hrew;
 rewrite H; intuition.
 Qed.
 
-Lemma Riemann_integrable_eq_compat f g a b : 
+Lemma Riemann_integrable_eq_compat : forall f g a b, 
   (forall x, Rmin a b <= x <= Rmax a b -> g x = f x) -> 
     Riemann_integrable f a b -> 
       Riemann_integrable g a b.
@@ -123,7 +123,7 @@ case(Rle_dec a b); intro Hab;
     apply Hpsi ] .
 Qed.
 
-Lemma Rint_eq_compat f g a b x :
+Lemma Rint_eq_compat : forall f g a b x,
   (forall x, Rmin a b <= x <= Rmax a b -> g x = f x) -> 
     Rint f a b x -> Rint g a b x.
 Proof.
@@ -152,7 +152,7 @@ erewrite RiemannInt_P18.
  intuition.
 Qed.
 
-Lemma Rint_RiemannInt_link f a b (pr : Riemann_integrable f a b) : 
+Lemma Rint_RiemannInt_link : forall f a b (pr : Riemann_integrable f a b), 
   Rint f a b (RiemannInt pr).
 Proof.
 intros f a b pr.
@@ -162,7 +162,7 @@ Qed.
 
 (** * Continuous functions are integrable *)
 
-Lemma Rint_continuity f a b : 
+Lemma Rint_continuity : forall f a b, 
   a <= b ->
     (forall x, a <= x <= b -> continuity_pt f x) ->
   {x : R & (Rint f a b x)}.
@@ -174,7 +174,7 @@ Qed.
 
 (** * Chasles relation on integrals *)
 
-Lemma Rint_Chasles f a b c x y :  
+Lemma Rint_Chasles : forall f a b c x y,  
   Rint f a b x -> Rint f b c y -> Rint f a c (x+y).
 Proof.
 intros f a b c x y [prab Hab] [prbc Hbc].
@@ -185,7 +185,7 @@ symmetry.
 apply RiemannInt_P26.
 Qed.
 
-Lemma Rint_singleton f a : Rint f a a 0.
+Lemma Rint_singleton : forall f a, Rint f a a 0.
 Proof.
 intros f a.
 pose proof RiemannInt_P7 f a as pr.
@@ -193,7 +193,7 @@ exists pr.
 apply RiemannInt_P9.
 Qed.
 
-Lemma Rint_constant c a b : Rint (fct_cte c) a b (c*(b-a)).
+Lemma Rint_constant : forall c a b, Rint (fct_cte c) a b (c*(b-a)).
 Proof.
 intros c a b.
 pose proof RiemannInt_P14 a b c as pr.
@@ -203,14 +203,14 @@ Qed.
 
 (** The value of the integral is unique *)
 
-Lemma Rint_uniqueness f a b x y : Rint f a b x -> Rint f a b y -> x = y.
+Lemma Rint_uniqueness : forall f a b x y, Rint f a b x -> Rint f a b y -> x = y.
 Proof.
 intros f a b x y [pr1 H1] [pr2 H2].
 rewrite <- H1, <- H2.
 apply RiemannInt_P5.
 Qed.
 
-Lemma Rint_subinterval f a b c x : (a <= b <= c) ->
+Lemma Rint_subinterval : forall f a b c x, (a <= b <= c) ->
   Rint f a c  x -> {y : R & Rint f a b y & Rint f b c (x-y)}.
 Proof.
 intros f a b c x Hb [prac Hf].
@@ -237,7 +237,7 @@ Proof.
  subst. apply H.
 Qed.
 
-Lemma Rint_plus f g a b x y : Rint f a b x -> Rint g a b y -> Rint (f + g)%F a b (x + y).
+Lemma Rint_plus : forall f g a b x y, Rint f a b x -> Rint g a b y -> Rint (f + g)%F a b (x + y).
 Proof.
 intros f g a b x y [prf Hf] [prg Hg]; unfold plus_fct.
 apply Rint_eq_compat with (fun u => f u + 1 * g u).
@@ -249,7 +249,7 @@ rewrite RiemannInt_P13 with _ _ _ _ _ prf prg prfg.
 rewrite Hf, Hg; reflexivity.
 Qed.
 
-Lemma Rint_minus f g a b x y : Rint f a b x -> Rint g a b y -> Rint (f - g)%F a b (x - y).
+Lemma Rint_minus : forall f g a b x y, Rint f a b x -> Rint g a b y -> Rint (f - g)%F a b (x - y).
 Proof.
 intros f g a b x y [prf Hf] [prg Hg]; unfold minus_fct.
 apply Rint_eq_compat with (fun u => f u + (-1) * g u).
@@ -261,7 +261,7 @@ rewrite RiemannInt_P13 with _ _ _ _ _ prf prg prfg.
 rewrite Hf, Hg; reflexivity.
 Qed.
 
-Lemma Rint_opp1 f a b x : Rint f a b x -> Rint (- f)%F a b (- x).
+Lemma Rint_opp1 : forall f a b x, Rint f a b x -> Rint (- f)%F a b (- x).
 Proof.
 intros f a b x; intros [prf Hf]; unfold opp_fct.
   apply Rint_eq_compat with (fun u => fct_cte 0 u + (-1) * f u).
@@ -274,7 +274,7 @@ intros f a b x; intros [prf Hf]; unfold opp_fct.
   rewrite Hf, Hg; ring.
 Qed.
 
-Lemma Rint_opp2 f a b x : Rint (-f)%F a b (- x) -> Rint f a b x.
+Lemma Rint_opp2 : forall f a b x, Rint (-f)%F a b (- x) -> Rint f a b x.
 Proof.
 intros f a b x; intros [prf Hf]; unfold opp_fct.
 apply Rint_eq_compat with (fun u => fct_cte 0 u + (-1) *(- f)%F u).
@@ -287,7 +287,7 @@ rewrite RiemannInt_P13 with _ _ _ _ _ prg prf prfg.
 rewrite Hf, Hg; ring.
 Qed.
 
-Lemma Rint_scalar_mult_compat_l f a b x C : Rint f a b x -> Rint (fct_cte C * f)%F a b (C*x).
+Lemma Rint_scalar_mult_compat_l : forall f a b x C, Rint f a b x -> Rint (fct_cte C * f)%F a b (C*x).
 Proof.
 intros f a b x C [prf Hf].
 apply Rint_eq_compat with (fun u => fct_cte 0 u + C * f u).
@@ -300,7 +300,7 @@ apply Rint_eq_compat with (fun u => fct_cte 0 u + C * f u).
   rewrite Hf, Hg; ring.
 Qed.
 
-Lemma Rint_scalar_mult_compat_r f a b x C : Rint f a b x -> Rint (f * fct_cte C)%F a b (x * C).
+Lemma Rint_scalar_mult_compat_r : forall f a b x C, Rint f a b x -> Rint (f * fct_cte C)%F a b (x * C).
 Proof.
 intros f a b x C [prf Hf].
 apply Rint_eq_compat with (fun u => fct_cte 0 u + C * f u).
@@ -339,7 +339,7 @@ Section Rint_props.
 
 (** * Inequalities involving integrals *)
 
-Lemma Rint_le_compat f g a b x y : 
+Lemma Rint_le_compat : forall f g a b x y, 
   a <= b -> (forall u, a < u < b -> f u <= g u) ->
       Rint f a b x -> Rint g a b y ->  x <= y.
 Proof.
@@ -352,7 +352,7 @@ Qed.
 
 (** A positive function has positive growing integral *)
 
-Lemma Rint_pos f a b x : 
+Lemma Rint_pos : forall f a b x, 
   a <= b -> (forall u, a <= u <= b -> 0 <= f u) -> Rint f a b x -> 0 <= x.
 Proof.
 intros f a b x Hab Hpos Hf.
@@ -370,7 +370,7 @@ Qed.
 (** Inequality between integral of the absolute value and 
  absolute value of the integral *)
 
-Lemma Rint_abs_le_int f a b x : 
+Lemma Rint_abs_le_int : forall f a b x, 
   a <= b -> Rint f a b x -> 
     {y : R & (Rint (fun u => Rabs (f u)) a b y) & (Rabs x <= y)}.
 Proof.
@@ -386,7 +386,7 @@ Qed.
 
 (** A non always null, non negative, continuous function on a non trivial segment has positive integral *)
 
-Lemma Rint_continuous_gt_0 f a b u X :
+Lemma Rint_continuous_gt_0 : forall f a b u X,
   a < b ->
     a <= u <= b ->
       (forall x, a <= x <= b -> continuity_pt f x) ->
@@ -492,7 +492,7 @@ Qed.
 
 (** A non negative function with null integral in a non trivial segment is null on it *)
 
-Lemma Rint_continuous_pos_eq_0 f a b :
+Lemma Rint_continuous_pos_eq_0 : forall f a b,
   a < b ->
     (forall x, a <= x <= b -> continuity_pt f x) ->
       (forall x, a <= x <= b -> 0 <= f x) ->
@@ -519,7 +519,7 @@ Qed.
 
 (** Cauchy-Schwarz's theorem for integrals *)
 
-Lemma Rint_Cauchy_Schwarz f g a b x y z :
+Lemma Rint_Cauchy_Schwarz : forall f g a b x y z,
   a <= b -> 
     (forall x, a <= x <= b -> continuity_pt f x) ->
       (forall x, a <= x <= b -> continuity_pt g x) ->
@@ -588,7 +588,7 @@ Qed.
 
 (** Fundamental theorem of real analysis *)
 
-Lemma Rint_derive f a b d : 
+Lemma Rint_derive : forall f a b d, 
   a <= b -> 
   (forall x, a <= x <= b -> derivable_pt_abs f x (d x)) ->
   (forall x, a <= x <= b -> continuity_pt d x) ->
@@ -603,7 +603,7 @@ rewrite RiemannInt_P33; intuition.
 do 2 (rewrite Heq; intuition).
 Qed.
 
-Lemma Rint_derive2 f a b d :
+Lemma Rint_derive2 : forall f a b d,
   (forall x, Rmin a b <= x <= Rmax a b -> derivable_pt_abs f x (d x)) ->
   (forall x, Rmin a b <= x <= Rmax a b -> continuity_pt d x) ->
   Rint d a b (f b - f a).
@@ -620,7 +620,7 @@ Qed.
 
 (** Integration by parts *)
 
-Lemma Rint_parts f g a b f' g' Ifg' If'g :
+Lemma Rint_parts : forall f g a b f' g' Ifg' If'g,
 a <= b ->
   (forall x : R, a <= x <= b -> derivable_pt_lim f x (f' x)) ->
   (forall x : R, a <= x <= b -> derivable_pt_lim g x (g' x)) ->
@@ -651,7 +651,7 @@ Qed.
 
 (** Variable change theorem *)
 
-Lemma Rint_substitution f g g' a b I:
+Lemma Rint_substitution : forall f g g' a b I,
   a <= b -> (forall x, a <= x <= b -> g a <= g x <= g b) ->
   (forall x, g a <= x <= g b -> continuity_pt f x) ->
   (forall x, a <= x <= b -> derivable_pt_lim g x (g' x)) ->

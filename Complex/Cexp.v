@@ -369,7 +369,7 @@ rewrite Cmult_IRC_Rmult, Cnorm_pow, IRC_pow_compat ;
 reflexivity.
 Qed.
 
-Lemma binomial_diag n : Binomial.C n n = 1.
+Lemma binomial_diag : forall n, Binomial.C n n = 1.
 Proof.
 intros n.
 unfold Binomial.C.
@@ -379,7 +379,7 @@ field.
 INR_solve; apply fact_neq_0.
 Qed.
 
-Lemma binomial_zero n : Binomial.C n 0 = 1.
+Lemma binomial_zero : forall n, Binomial.C n 0 = 1.
 Proof.
 intros n.
 unfold Binomial.C.
@@ -391,7 +391,7 @@ Qed.
 
 Open Scope C_scope.
 
-Lemma binomial_sum (x y:C) n :
+Lemma binomial_sum : forall (x y:C) n,
   (x + y) ^ n = sum_f_C0 (fun p => IRC (Binomial.C n p) * x ^ p * y ^ (n - p)) n.
 Proof.
 intros x y n.

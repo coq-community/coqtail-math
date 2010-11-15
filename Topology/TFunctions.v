@@ -35,8 +35,7 @@ Section Functions.
   Definition function (A:Ensemble U) (B:Ensemble V) : (U->V)->Prop :=
     fun f:U->V => forall a:U, In U A a -> In V B (f a).
   
-  Lemma Image_in_arrival_space (A:Ensemble U) (B:Ensemble V) :
-    forall f:U->V,
+  Lemma Image_in_arrival_space : forall (A:Ensemble U) (B:Ensemble V) (f:U->V),
       function A B f -> Included _ (Image A f) B.
   Proof.
   intros A B f funf y.

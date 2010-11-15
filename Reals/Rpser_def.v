@@ -59,7 +59,7 @@ Definition infinite_cv_radius (An : nat -> R) := forall (r : R), Cv_radius_weak 
 
 (** * Some lemmas manipulating the definitions *)
 
-Lemma Cv_radius_weak_0 An : Cv_radius_weak An 0.
+Lemma Cv_radius_weak_0 : forall An, Cv_radius_weak An 0.
 Proof.
 intro An.
 exists (Rabs(An O)).
@@ -77,7 +77,7 @@ destruct n.
 omega.
 Qed.
 
-Lemma finite_cv_radius_pos An r : finite_cv_radius An r -> 0 <= r.
+Lemma finite_cv_radius_pos : forall An r, finite_cv_radius An r -> 0 <= r.
 Proof.
 intros An r [_ Hf].
  destruct(Rle_lt_dec 0 r).
@@ -374,7 +374,7 @@ Qed.
 
 (** Link between the finite_cv_radius and the upper bound *)
 
-Lemma finite_cv_radius_le An r r' : 
+Lemma finite_cv_radius_le : forall An r r', 
   finite_cv_radius An r -> Cv_radius_weak An r' -> r' <= r.
 Proof.
 intros An r r' [_ Hf] Hr'.
@@ -383,7 +383,7 @@ intros An r r' [_ Hf] Hr'.
   apply False_ind; apply (Hf r' r0 Hr').
 Qed.
 
-Lemma finite_cv_radius_lub An r : 
+Lemma finite_cv_radius_lub : forall An r, 
   finite_cv_radius An r -> is_lub (fun r' => Cv_radius_weak An r') r.
 Proof.
 intros An r H.

@@ -111,7 +111,7 @@ Qed.
 
 Open Scope Rseq_scope.
 
-Lemma sum_opp_compat Un : sum_f_R0 (-Un) == - sum_f_R0 Un.
+Lemma sum_opp_compat : forall Un, sum_f_R0 (-Un) == - sum_f_R0 Un.
 Proof.
 intro Un.
 unfold Rseq_eq.
@@ -124,7 +124,7 @@ rewrite <- Ropp_plus_distr.
 reflexivity.
 Qed.
 
-Lemma sum_minus_compat Un Vn : sum_f_R0 (Un - Vn) == sum_f_R0 Un - sum_f_R0 Vn.
+Lemma sum_minus_compat : forall Un Vn, sum_f_R0 (Un - Vn) == sum_f_R0 Un - sum_f_R0 Vn.
 Proof.
 intros Un Vn.
 unfold Rseq_eq, Rseq_minus.
@@ -179,7 +179,7 @@ Qed.
 
 (** Positive term series convergence caracterization *)
 
-Lemma Rser_pos_bound_cv M: Rser_bound_max Un M -> { l | Rser_cv Un l }.
+Lemma Rser_pos_bound_cv : forall M, Rser_bound_max Un M -> { l | Rser_cv Un l }.
 Proof.
 intros M Hb.
 destruct ub_to_lub with (sum_f_R0 Un).
@@ -228,18 +228,17 @@ End Classical_facts.
 
 (** * Extensionnal equality compatibility *)
 
-Lemma Rsum_eq_compat Un Vn : Un == Vn -> sum_f_R0 Un == sum_f_R0 Vn.
+Lemma Rsum_eq_compat : forall Un Vn, Un == Vn -> sum_f_R0 Un == sum_f_R0 Vn.
 Proof.
 intros Un Vn H n.
 induction n; simpl; rewrite (H _); [|rewrite IHn]; reflexivity.
 Qed.
 
-Lemma Rser_cv_eq_compat Un Vn l : Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
+Lemma Rser_cv_eq_compat : forall Un Vn l, Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
 Proof.
 intros Un Vn l H n.
 apply Rseq_cv_eq_compat with (sum_f_R0 Un); [apply Rsum_eq_compat | ]; assumption.
 Qed.
-
 
 (** * Compatibility between convergence and common operations *)
 
@@ -312,7 +311,7 @@ Qed.
 
 (** If a series converges absolutely, then it converges *)
 
-Lemma Rser_abs_cv_cv Un : {l | Rser_abs_cv Un l} -> { lu | Rser_cv Un lu}.
+Lemma Rser_abs_cv_cv : forall Un, {l | Rser_abs_cv Un l} -> {lu | Rser_cv Un lu}.
 Proof.
 unfold Rser_cv, Rser_abs_cv.
 intros Un Habs.
@@ -328,8 +327,8 @@ Section Rser_partition.
 
 (** If a gt-positive series converges on an extractor, then it converges *)
 
-Lemma Rser_cv_growing_subseq_compat Un :
-  forall (phi : extractor) l, 0 <= Un ->
+Lemma Rser_cv_growing_subseq_compat :
+  forall Un (phi : extractor) l, 0 <= Un ->
     Rseq_cv ((sum_f_R0 Un) ⋅ phi)%Rseq l -> Rser_cv Un l.
 Proof.
 intros Un phi l ephi Unpos Uncv.
@@ -341,7 +340,7 @@ Qed.
 
 (** If a gt-positive series converges on even integers, then it converges *)
 
-Lemma Rser_cv_growing_even_compat Un : forall l, 0 <= Un ->
+Lemma Rser_cv_growing_even_compat : forall Un l, 0 <= Un ->
   Rseq_cv (fun n => (sum_f_R0 Un (2*n))) l ->
   Rser_cv Un l.
 Proof.
@@ -427,7 +426,7 @@ End Rser_partition.
 
 Section Rser_pos_comp.
 
-Lemma Rser_pos_maj_cv (Un Vn : nat -> R) : 
+Lemma Rser_pos_maj_cv : forall (Un Vn : nat -> R), 
     (forall n : nat, 0 <= Un n) -> (forall n : nat, 0 <= Vn n) ->
         Rseq_le Un Vn ->  {lv | Rser_cv Vn lv } -> {lu | Rser_cv Un lu}.
 Proof.
@@ -447,7 +446,7 @@ Qed.
 
 (** Big-O and bound *)
 
-Lemma Rser_big_O_maj (Un Vn : nat -> R) : 
+Lemma Rser_big_O_maj : forall (Un Vn : nat -> R), 
     (forall n : nat, 0 <= Vn n) -> Un = O (Vn) ->
         exists K, exists SN, 0<= K /\ 
             forall n : nat, sum_f_R0 (|Un|) n <= K* (sum_f_R0 Vn n) + SN.
@@ -494,7 +493,7 @@ Qed.
 
 (** Convergence and big-O *)
 
-Lemma Rser_big_O_cv_weak (Un Vn : nat -> R) : 
+Lemma Rser_big_O_cv_weak : forall (Un Vn : nat -> R), 
     (forall n : nat, 0 <= Un n) -> (forall n : nat, 0 <= Vn n) ->
         Un = O(Vn) -> {lv | Rser_cv Vn lv} -> {lu | Rser_cv Un lu}.
 Proof.
@@ -524,7 +523,7 @@ apply Un_pos.
 apply HM.
 Qed.
 
-Lemma Rser_big_O_cv (Un Vn : nat -> R) : 
+Lemma Rser_big_O_cv : forall (Un Vn : nat -> R), 
   Un = O(Vn) -> {lv | Rser_abs_cv Vn lv} -> {lu | Rser_abs_cv Un lu}.
 Proof.
 intros Un Vn HO Hlv.
@@ -538,7 +537,7 @@ Qed.
 
 (** Little-O and bound *)
 
-Lemma Rser_little_O_maj (Un Vn : nat -> R) : 
+Lemma Rser_little_O_maj : forall (Un Vn : nat -> R),
     (forall n : nat, 0 <= Vn n) -> Un = o (Vn) ->
         forall eps, 0< eps -> exists SN,
             forall n : nat, sum_f_R0 (|Un|) n <= eps* (sum_f_R0 Vn n) + SN.
@@ -584,7 +583,7 @@ Qed.
 
 (** Convergence and little-O*)
 
-Lemma Rser_little_O_cv (Un Vn : nat -> R) : 
+Lemma Rser_little_O_cv : forall (Un Vn : nat -> R), 
   Un = o(Vn) -> {lv | Rser_abs_cv Vn lv} -> {lu | Rser_abs_cv Un lu}.
 Proof.
 intros Un Vn Ho Hcv.
@@ -594,7 +593,7 @@ Qed.
 
 (** Convergence and equivalence *)
 
-Lemma Rser_equiv_cv (Un Vn : nat -> R) : 
+Lemma Rser_equiv_cv : forall (Un Vn : nat -> R), 
     (forall n : nat, 0 <= Un n) -> (forall n : nat, 0 <= Vn n) ->
         Un ~ Vn -> {lv | Rser_cv Vn lv} -> {lu | Rser_cv Un lu}.
 Proof.
@@ -620,9 +619,9 @@ apply Rle_trans with (sum_f_R0 (fun n0 : nat => Vn n0 + Rabs (Vn n0 - Un n0)) n)
 apply sum_Rle.
 intros n0 Hn0.
 rewrite <- ( Rabs_pos_eq)  with (Vn n0).
-rewrite Rabs_pos_eq with (Vn n0) at 2.
+rewrite Rabs_pos_eq at 2.
 rewrite <- Rabs_pos_eq  with (Un n0).
-rewrite  Rabs_pos_eq  with (Un n0) at 2.
+rewrite  Rabs_pos_eq  at 2.
 rewrite <-  Rabs_Ropp.
 rewrite <-  Rabs_Ropp with (Vn n0).
 replace (- Un n0)%R with  (- Vn n0 + (Vn n0 - Un n0))%R by ring.
@@ -648,7 +647,7 @@ Hypothesis NNPP : forall p : Prop, ~ ~ p -> p.
 Hypothesis classic: forall P : Prop, P \/ ~ P.
 
 
-Lemma Rser_equiv_cv_infty (Un Vn : nat -> R) : 
+Lemma Rser_equiv_cv_infty : forall (Un Vn : nat -> R),
     (forall n : nat, 0 <= Un n) -> (forall n : nat, 0 <= Vn n) ->
         Un ~ Vn -> Rser_cv_pos_infty Vn -> Rser_cv_pos_infty Un.
 Proof.
@@ -682,7 +681,7 @@ Variables Vn : nat -> R.
 Hypothesis Vn_pos : (forall n : nat, 0 <= Vn n).
 Hypothesis Vn_infty : Rser_cv_pos_infty Vn.
 
-Lemma Rser_partial_big_O_compat (Un : nat -> R): 
+Lemma Rser_partial_big_O_compat : forall (Un : nat -> R), 
     Un = O(Vn) -> sum_f_R0 Un = O(sum_f_R0 Vn).
 Proof.
 intros Un HO.
@@ -706,7 +705,7 @@ apply Rlt_le; apply HN; apply Hn.
 apply (cond_pos_sum _ _ Vn_pos).
 Qed.
 
-Lemma Rser_partial_little_O_compat (Un : nat -> R): 
+Lemma Rser_partial_little_O_compat : forall (Un : nat -> R),
     Un = o(Vn) -> sum_f_R0 Un = o(sum_f_R0 Vn).
 Proof.
 intros Un Ho eps Heps.
@@ -722,7 +721,7 @@ apply sum_f_R0_triangle.
 apply Rle_trans with ((eps / 2) * sum_f_R0 Vn n + C)%R.
 apply HC.
 rewrite double_var with eps .
-rewrite <- double_var with eps at 1.
+rewrite <- double_var at 1.
 rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat_l.
 assert (C = (eps/2)*(/(eps/2))*C)%R as HCr.
@@ -738,7 +737,7 @@ apply HN; apply Hn.
 apply (cond_pos_sum Vn n Vn_pos).
 Qed.
 
-Lemma Rser_partial_equiv_compat (Un : nat -> R): 
+Lemma Rser_partial_equiv_compat : forall (Un : nat -> R), 
     Un ~ Vn -> (sum_f_R0 Un) ~ (sum_f_R0 Vn).
 Proof.
 intros Un Heq.
@@ -761,7 +760,7 @@ Section Rser_rem.
 
 (** Remainder caracterization *)
 
-Lemma Rser_rem_cv (Un : nat -> R) (lu : R) (Hlu : Rser_cv Un lu )(n : nat) : 
+Lemma Rser_rem_cv : forall (Un : nat -> R) (lu : R) (Hlu : Rser_cv Un lu )(n : nat), 
     Rser_cv (fun k => Un (S n+ k)%nat) (Rser_rem Un lu Hlu n).
 Proof.
 intros Un lu Hlu n eps Heps.
@@ -780,7 +779,7 @@ Qed.
 
 (** Compatibility between remainder and usual operations *)
 
-Lemma Rser_rem_plus_compat Un Vn lu lv Hlu Hlv :
+Lemma Rser_rem_plus_compat : forall Un Vn lu lv Hlu Hlv,
     Rser_rem Un lu Hlu + Rser_rem Vn lv Hlv == Rser_rem (Un+Vn) (lu+lv) (Rser_cv_plus_compat Un Vn lu lv Hlu Hlv).
 Proof.
 intros Un Vn lu lv Hlu hlv.
@@ -790,7 +789,7 @@ rewrite sum_plus.
 ring.
 Qed.
 
-Lemma Rser_rem_opp_compat Un lu Hlu :
+Lemma Rser_rem_opp_compat : forall Un lu Hlu,
     - Rser_rem Un lu Hlu == Rser_rem (-Un) (-lu) (Rser_cv_opp_compat Un lu Hlu).
 Proof.
 intros Un lu Hlu.
@@ -801,7 +800,7 @@ unfold Rseq_opp.
 ring.
 Qed.
 
-Lemma Rser_rem_minus_compat Un Vn lu lv Hlu Hlv :
+Lemma Rser_rem_minus_compat : forall Un Vn lu lv Hlu Hlv,
     Rser_rem Un lu Hlu - Rser_rem Vn lv Hlv == Rser_rem (Un-Vn) (lu-lv) (Rser_cv_minus_compat Un Vn lu lv Hlu Hlv).
 Proof.
 intros Un Vn lu lv Hlu hlv.
@@ -946,7 +945,7 @@ Qed.
 
 End Rser_equiv_cv.
 
-Lemma Rser_cv_zero Un l : Rser_cv Un l -> Rseq_cv Un 0.
+Lemma Rser_cv_zero : forall Un l, Rser_cv Un l -> Rseq_cv Un 0.
 Proof.
 intros Un l Hu.
 apply Rseq_cv_asymptotic_eq_compat with ((sum_f_R0 Un) - (fun n => sum_f_R0 Un (pred n))%R).
@@ -970,7 +969,7 @@ Open Scope R_scope.
 (* end hide *)
 Local Notation sum := sum_f_R0 (only parsing).
 
-Lemma Rsum_shift Un : sum_f_R0 (Rseq_shift Un) == ((Rseq_shift (sum_f_R0 Un)) - (Un O))%Rseq.
+Lemma Rsum_shift : forall Un, sum_f_R0 (Rseq_shift Un) == ((Rseq_shift (sum_f_R0 Un)) - (Un O))%Rseq.
 Proof.
 intros Un n.
 assert (REW : forall a b c, c + a = b -> a = b - c) by (intros; subst; field).
@@ -987,7 +986,7 @@ Qed.
 
 (** Series convergence shifting compatibility *)
 
-Lemma Rser_cv_shift Un l : Rser_cv Un l -> Rser_cv (Rseq_shift Un) (l - (Un O)).
+Lemma Rser_cv_shift : forall Un l, Rser_cv Un l -> Rser_cv (Rseq_shift Un) (l - (Un O)).
 Proof.
 intros Un l H.
 apply Rseq_cv_shift_compat.
@@ -1070,14 +1069,14 @@ rewrite Rplus_comm in Hun. assumption.
 Qed.
 
 
-Lemma Rser_cv_sig_shift_compat Un : {l | Rser_cv Un l} -> {l | Rser_cv (Rseq_shift Un) l}.
+Lemma Rser_cv_sig_shift_compat : forall Un, {l | Rser_cv Un l} -> {l | Rser_cv (Rseq_shift Un) l}.
 Proof.
 intros Un [l H].
 exists (l - (Un O)).
 apply Rser_cv_shift; assumption.
 Qed.
 
-Lemma Rser_cv_shift_reciprocal Un l : Rser_cv (Rseq_shift Un) (l - (Un O)) -> Rser_cv Un l.
+Lemma Rser_cv_shift_reciprocal : forall Un l, Rser_cv (Rseq_shift Un) (l - (Un O)) -> Rser_cv Un l.
 Proof.
 intros Un l H.
 assert (EC : forall (a:Rseq) (b x:R), Rseq_cv (a - b)%Rseq (x - b) -> Rseq_cv a x).
@@ -1095,7 +1094,7 @@ assert (EC : forall (a:Rseq) (b x:R), Rseq_cv (a - b)%Rseq (x - b) -> Rseq_cv a 
  apply H.
 Qed.
 
-Lemma Rser_cv_sig_shift_reciprocal_compat Un : {l | Rser_cv (Rseq_shift Un) l} -> {l | Rser_cv Un l}.
+Lemma Rser_cv_sig_shift_reciprocal_compat : forall Un, {l | Rser_cv (Rseq_shift Un) l} -> {l | Rser_cv Un l}.
 Proof.
 intros Un [l H].
 exists (l + (Un O)).
@@ -1103,7 +1102,7 @@ apply Rser_cv_shift_reciprocal.
 replace (l + Un 0%nat - Un 0%nat) with l by ring; assumption.
 Qed.
 
-Lemma Rseq_decomp An p n : sum An (S (p + n)) = sum An p + sum (fun i => An (plus i (S p))) n.
+Lemma Rseq_decomp : forall An p n, sum An (S (p + n)) = sum An p + sum (fun i => An (plus i (S p))) n.
 Proof.
 intros.
 induction n.
@@ -1117,7 +1116,7 @@ induction n.
  ring.
 Qed.
 
-Lemma Rseq_reverse An n : sum (fun i => An (n - i)%nat) n = sum An n.
+Lemma Rseq_reverse : forall An n, sum (fun i => An (n - i)%nat) n = sum An n.
 Proof.
 intros An n; generalize dependent An.
 induction n.
@@ -1139,7 +1138,7 @@ Qed.
 
 (** * Cauchy Product **)
 
-Lemma cauchy_product_subproof_rearrangement1 An Bn n :
+Lemma cauchy_product_subproof_rearrangement1 : forall An Bn n,
   sum (fun i => (sum Bn i * An (n - i)%nat)%R) n =
   sum (fun i => sum (fun k => (An (n - i)%nat * Bn (k)%nat)%R) i) n.
 Proof.
@@ -1148,7 +1147,7 @@ apply Rsum_eq_compat; intro.
 rewrite Rmult_comm; rewrite scal_sum_l; trivial.
 Qed.
 
-Lemma cauchy_product_subproof_rearrangement An Bn n :
+Lemma cauchy_product_subproof_rearrangement : forall An Bn n,
   sum (fun i => (sum Bn i * An (n - i)%nat)%R) n =
   sum (fun i => sum (fun k => (An k * Bn (i - k)%nat)%R) i) n.
 Proof.
@@ -1418,7 +1417,7 @@ intro n; split.
    field.
 Qed.
 
-Lemma Rser_cv_inv_poly d : (2 <= d)%nat -> {l | Rser_abs_cv (Rseq_inv_poly d) l}.
+Lemma Rser_cv_inv_poly : forall d, (2 <= d)%nat -> {l | Rser_abs_cv (Rseq_inv_poly d) l}.
 Proof.
 intros d Hd.
 unfold Rser_abs_cv.
@@ -1661,5 +1660,3 @@ rewrite (Rser_Rser_rem_equiv Un (Vn + Wn)%Rseq x (l + l1) H1 n).
 
  assumption.
 Qed.
-
-

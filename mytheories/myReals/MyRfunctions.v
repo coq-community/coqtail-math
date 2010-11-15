@@ -66,13 +66,13 @@ intros x y z H.
 repeat destruct Rcase_abs; fourier.
 Qed.
 
-Lemma continuity_pt_constant c x : continuity_pt (fct_cte c) x.
+Lemma continuity_pt_constant : forall c x, continuity_pt (fct_cte c) x.
 Proof.
 intros c x ; apply continuity_const.
 intros u y; reflexivity.
 Qed.
 
-Lemma continuity_constant c : continuity (fct_cte c).
+Lemma continuity_constant : forall c, continuity (fct_cte c).
 Proof.
 intro c; apply continuity_const.
 intros x y; reflexivity.
@@ -92,7 +92,7 @@ fun x : R =>
   if Rlt_dec x a then d a 
   else if Rle_dec x b then d x else d b.
 
-Lemma C1_continuation_eq f a b d x : 
+Lemma C1_continuation_eq : forall f a b d x, 
   a <= x <= b -> C1_continuation f a b d x = f x.
 Proof.
 intros f a b d x Hx.
@@ -106,7 +106,7 @@ destruct (Rlt_dec x a).
     apply False_ind, n0, (proj2 Hx).
 Qed.
 
-Lemma C1_continuation_derive_eq a b d x : 
+Lemma C1_continuation_derive_eq : forall a b d x, 
   a <= x <= b -> C1_continuation_derive d a b x = d x.
 Proof.
 intros a b d x Hx.
@@ -120,7 +120,7 @@ destruct (Rlt_dec x a).
     apply False_ind, n0, (proj2 Hx).
 Qed.
 
-Lemma prolongement_C1_derivable (f d : R -> R) (a b : R) :
+Lemma prolongement_C1_derivable : forall (f d : R -> R) (a b : R),
   a <= b ->
   (forall c, a <= c <= b -> derivable_pt_abs f c (d c)) ->
   { derg | forall x, derive (C1_continuation f a b d) derg x =
@@ -325,7 +325,7 @@ apply uniqueness_limite with (C1_continuation f a b d) x.
   apply H.
 Qed.
 
-Lemma C0_sticking_one_pt f gl gr a : 
+Lemma C0_sticking_one_pt : forall f gl gr a, 
   continuity gl -> continuity gr ->
   (forall x, x <= a -> f x = gl x) ->
   (forall x, a <= x -> f x = gr x) ->
@@ -438,7 +438,7 @@ fourier.
 Qed.
 
 
-Lemma C0_sticking_one_pt_strong f gl gr a : 
+Lemma C0_sticking_one_pt_strong : forall f gl gr a, 
   (forall x, x <= a -> continuity_pt gl x) ->
   (forall x, a <= x -> continuity_pt gr x) ->
   (forall x, x <= a -> f x = gl x) ->
@@ -548,7 +548,7 @@ destruct (Rtotal_order x a) as [|[]].
   fourier.
 Qed.
 
-Lemma C0_sticking_two_pt f gl gc gr a b :
+Lemma C0_sticking_two_pt : forall f gl gc gr a b,
   a <= b  ->
   continuity gl ->
   (forall x, a <= x <= b -> continuity_pt gc x) ->
@@ -789,7 +789,7 @@ apply (C0_sticking_one_pt_strong _ gl gcr a); auto.
    symmetry; apply Hcrr; apply Rlt_le; auto.
 Qed.*)
          
-Lemma C1_continuation_derive_continuous d a b : a <= b ->
+Lemma C1_continuation_derive_continuous : forall d a b, a <= b ->
 (forall c, a <= c <= b -> continuity_pt d c) ->
   continuity (C1_continuation_derive d a b).
 Proof.
@@ -823,7 +823,7 @@ apply (C0_sticking_two_pt _ (fct_cte (d a)) d (fct_cte (d b)) a b Hab);
  trivial.
 Qed.
 
-Lemma prolongement_C1_C1 (f d : R -> R) (a b : R) :
+Lemma prolongement_C1_C1 : forall (f d : R -> R) (a b : R),
   a <= b ->
   (forall c, a <= c <= b -> derivable_pt_abs f c (d c)) ->
   (forall c, a <= c <= b -> continuity_pt d c) ->
@@ -928,4 +928,3 @@ Hint Resolve derivable_pt_lim_pow : Rcont.
 Hint Resolve derivable_pt_lim_power : Rcont.
 Hint Resolve derivable_pt_lim_id : Rcont.
 Hint Resolve derivable_pt_lim_cosh : Rcont.
-

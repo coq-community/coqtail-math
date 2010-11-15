@@ -28,7 +28,7 @@ Require Import Rintegral.
 
 Open Scope R_scope.
 
-Lemma Rint_inv a b : 
+Lemma Rint_inv : forall a b, 
   0 < a <= b -> Rint (fun x => /x) a b (ln b - ln a).
 intros a b Hab.
 apply Rint_derive.
@@ -45,7 +45,7 @@ intros x Hx.
 Qed.
 Hint Resolve Rint_inv : Rint.
 
-Lemma Rint_exp a b : Rint exp a b (exp b - exp a).
+Lemma Rint_exp : forall a b, Rint exp a b (exp b - exp a).
 Proof.
 intros a b.
 apply Rint_derive2.
@@ -54,7 +54,7 @@ intros; apply derivable_continuous_pt, derivable_pt_exp.
 Qed.
 Hint Resolve Rint_exp : Rint.
 
-Lemma Rint_pow_pos n a b : 
+Lemma Rint_pow_pos : forall n a b, 
   Rint (fun y : R => INR n * y ^ (pred n)) a b ((b ^ n - a ^ n)).
 Proof.
 intros n a b.
@@ -78,8 +78,9 @@ auto with Rcont.
 Qed.
 Hint Resolve Rint_pow_pos : Rint.
 
-Lemma Rint_cos a b : 
+Lemma Rint_cos : forall a b, 
   Rint cos a b (sin b - sin a).
+Proof.
 intros a b.
 apply Rint_derive2.
 intros; apply derivable_pt_lim_sin.
@@ -87,7 +88,7 @@ intros; apply continuity_cos.
 Qed.
 Hint Resolve Rint_cos : Rint.
 
-Lemma Rint_sin a b : 
+Lemma Rint_sin : forall a b, 
   Rint sin a b (cos a - cos b).
 intros a b.
 replace (cos a - cos b) with (- cos b - -cos a) by ring.
@@ -98,7 +99,7 @@ intros; apply continuity_sin.
 Qed.
 Hint Resolve Rint_sin : Rint.
 
-Lemma Rint_sqrt_inv a b : 0 < a -> 0 < b ->
+Lemma Rint_sqrt_inv : forall a b, 0 < a -> 0 < b ->
   Rint (fun x => /(sqrt x)) a b (2 *( sqrt b - sqrt a)).
 Proof.
 intros a b Ha Hb.

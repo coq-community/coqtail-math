@@ -24,11 +24,10 @@ Require Import Powerset.
 
 (** * Infinite Union *)
 
-Inductive Infinite_Union (U:Type) (I:Type) (Ai : I -> Ensemble _) : Ensemble _ :=
+Inductive Infinite_Union (U:Type) (I:Type) (Ai : I -> Ensemble U) : Ensemble U :=
   Infinite_Union_intro : forall x:U,
     (exists i:I, In _ (Ai i) x) ->
-    In _ (Infinite_Union U I Ai) x
-.
+    In _ (Infinite_Union U I Ai) x.
 
 (** * Topological space *)
 

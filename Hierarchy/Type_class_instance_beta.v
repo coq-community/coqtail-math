@@ -56,7 +56,6 @@ int_hierarchy.
 int_hierarchy.
 int_hierarchy.
 int_hierarchy.
-int_hierarchy.
 Qed.
 
 Instance monoid_commutative_nat : Monoid_Commutative nat (fun n:nat => True) eq plus 0 :=
@@ -78,7 +77,6 @@ int_hierarchy.
 int_hierarchy.
 int_hierarchy.
 int_hierarchy.
-int_hierarchy.
 Qed.
 
 Instance semiring_nat : SemiRing nat (fun n:nat => True) eq plus mult 0 1 :=
@@ -95,7 +93,3 @@ Instance semiring_commutative_nat : SemiRing_Commutative nat (fun n:nat => True)
 Proof.
 int_hierarchy.
 Qed.
-
-
-
-

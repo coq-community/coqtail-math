@@ -53,7 +53,7 @@ apply Rle_refl.
 Qed.
 
 (**********)
-Lemma Rseq_constant_cv r : Rseq_cv (Rseq_constant r) r.
+Lemma Rseq_constant_cv : forall r, Rseq_cv (Rseq_constant r) r.
 intros r eps Heps; exists O; intros n Hn.
 unfold R_dist; unfold Rseq_constant.
 replace (r - r)%R with 0 by ring.
@@ -202,7 +202,7 @@ apply Rabs_no_R0; assumption.
 Qed.
 
 (**********)
-Lemma Rseq_cv_minus_compat Un Vn lu lv:
+Lemma Rseq_cv_minus_compat : forall Un Vn lu lv,
     Rseq_cv Un lu -> Rseq_cv Vn lv -> Rseq_cv (Un - Vn) (lu - lv).
 Proof.
 intros Un Vn lu lv Hlu Hlv.
@@ -240,7 +240,7 @@ apply HN; assumption.
 Qed.
 
 (**********)
-Lemma Rseq_cv_abs_compat (Un : nat -> R) (l : R) : 
+Lemma Rseq_cv_abs_compat : forall (Un : nat -> R) (l : R), 
     Rseq_cv Un l -> Rseq_cv (|Un|) (Rabs l).
 Proof.
 intros Un l Hl eps Heps.
@@ -278,7 +278,7 @@ apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_plus_pos_infty_r l :
+Lemma Rseq_cv_finite_plus_pos_infty_r : forall l,
   Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_pos_infty (Un + Vn).
 Proof.
@@ -308,7 +308,7 @@ apply HN0; omega.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_plus_pos_infty_l l :
+Lemma Rseq_cv_finite_plus_pos_infty_l : forall l,
   Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_pos_infty (Vn + Un).
 Proof.
@@ -415,7 +415,7 @@ apply HN; apply Hn.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_plus_neg_infty_r l: 
+Lemma Rseq_cv_finite_plus_neg_infty_r : forall l, 
   Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_neg_infty (Un + Vn).
 Proof.
@@ -441,7 +441,7 @@ ring_simplify; apply Rle_refl.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_plus_neg_infty_l l: 
+Lemma Rseq_cv_finite_plus_neg_infty_l : forall l, 
   Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_neg_infty (Vn + Un).
 Proof.
@@ -467,7 +467,7 @@ ring_simplify; apply Rle_refl.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_minus_neg_infty l: 
+Lemma Rseq_cv_finite_minus_neg_infty : forall l, 
   Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_pos_infty (Un - Vn).
 Proof.
@@ -498,7 +498,7 @@ apply HN0; omega.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_minus_pos_infty l: 
+Lemma Rseq_cv_finite_minus_pos_infty : forall l, 
   Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_neg_infty (Un - Vn).
 Proof.
@@ -559,7 +559,7 @@ ring_simplify; apply Rle_refl.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_pos_mult_pos_infty_r l: 
+Lemma Rseq_cv_finite_pos_mult_pos_infty_r : forall l, 
   0 < l -> Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_pos_infty (Un * Vn).
 Proof.
@@ -600,7 +600,7 @@ apply HN0; omega.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_neg_mult_pos_infty_r l: 
+Lemma Rseq_cv_finite_neg_mult_pos_infty_r : forall l, 
   l < 0 -> Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_neg_infty (Un * Vn).
 Proof.
@@ -649,7 +649,7 @@ exact Hl.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_pos_mult_neg_infty_r l:
+Lemma Rseq_cv_finite_pos_mult_neg_infty_r : forall l,
   0 < l -> Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_neg_infty (Un * Vn).
 Proof.
@@ -698,7 +698,7 @@ exact Hl.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_neg_mult_neg_infty_r l :
+Lemma Rseq_cv_finite_neg_mult_neg_infty_r : forall l,
   l < 0 -> Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_pos_infty (Un * Vn).
 Proof.
@@ -746,7 +746,7 @@ Qed.
 
 
 (**********)
-Lemma Rseq_cv_finite_pos_mult_pos_infty_l l :
+Lemma Rseq_cv_finite_pos_mult_pos_infty_l : forall l,
   0 < l -> Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_pos_infty (Vn * Un).
 Proof.
@@ -791,7 +791,7 @@ apply HN0; omega.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_neg_mult_pos_infty_l l :
+Lemma Rseq_cv_finite_neg_mult_pos_infty_l : forall l,
   l < 0 -> Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
     Rseq_cv_neg_infty (Vn * Un).
 Proof.
@@ -846,7 +846,7 @@ Qed.
 
 
 (**********)
-Lemma Rseq_cv_finite_pos_mult_neg_infty_l l :
+Lemma Rseq_cv_finite_pos_mult_neg_infty_l : forall l,
   0 < l -> Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_neg_infty (Vn * Un).
 Proof.
@@ -896,7 +896,7 @@ exact Hl.
 Qed.
 
 (**********)
-Lemma Rseq_cv_finite_neg_mult_neg_infty_l l : 
+Lemma Rseq_cv_finite_neg_mult_neg_infty_l : forall l, 
   l < 0 -> Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
     Rseq_cv_pos_infty (Vn * Un).
 Proof.
@@ -1004,7 +1004,7 @@ Qed.
 
 
 (**********)
-Lemma Rseq_cv_pos_infty_div_compat l : 
+Lemma Rseq_cv_pos_infty_div_compat : forall l, 
     Rseq_cv_pos_infty Un -> Rseq_cv Vn l -> Rseq_cv (Vn / Un) 0.
 Proof.
 intros l HU HV.
@@ -1041,7 +1041,7 @@ apply HN; assumption.
 Qed.
 
 (**********)
-Lemma Rseq_cv_neg_infty_div_compat l : 
+Lemma Rseq_cv_neg_infty_div_compat : forall l, 
     Rseq_cv_neg_infty Un -> Rseq_cv Vn l -> Rseq_cv (Vn / Un) 0.
 Proof.
 intros l HU HV.

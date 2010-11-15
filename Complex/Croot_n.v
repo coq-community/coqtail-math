@@ -476,9 +476,9 @@ apply Rplus_eq_reg_l in H15.
 rewrite <- H15. ring.
 assert (Htra :  (x1 = (x3 +i 0%R) /\ x2 = (x4 +i 0%R) \/ x1 = (x4 +i 0%R) /\ x2 = (x3 +i 0%R))).
 assert (forall x : C, (x + (x3 +i 0%R)) * (x + (x4 +i 0%R))  = (x + x1) * (x + x2)).
-intro x. apply Cmult_eq_reg_l with (a +i 0%R).
-CusingR2. reflexivity. generalize (H0 x). generalize (H10 x).
-intros abs1 abs2.
+intro x; apply Cmult_eq_reg_l with (a +i 0%R).
+red; injection 1; auto.
+generalize (H0 x) (H10 x); intros abs1 abs2.
 ring_simplify in abs1 ; ring_simplify in abs2 ; ring_simplify.
 rewrite <- abs1. rewrite abs2. reflexivity.
 apply Cpol_2_root_unicity.
@@ -650,5 +650,3 @@ unfold Cdiv. rewrite Cinv_1. rewrite Cmult_1_r.
 apply Hpol. 
 apply not_0_INC. intuition.
 Qed.
-
-

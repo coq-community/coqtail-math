@@ -242,7 +242,7 @@ rewrite Hn0; apply HN; omega.
 Qed.
 
 (**********)
-Lemma Rseq_cv_asymptotic_eq_compat Un Vn l : 
+Lemma Rseq_cv_asymptotic_eq_compat : forall Un Vn l, 
     (exists N, forall n : nat, (N <= n)%nat -> Un n = Vn n) -> Rseq_cv Un l -> Rseq_cv Vn l.
 Proof.
 intros Un Vn l [N HN] Hu eps Heps.
