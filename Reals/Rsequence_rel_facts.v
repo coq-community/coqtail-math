@@ -837,7 +837,7 @@ End Rseq_little_O_pos_infty.
 Section Rseq_equiv_cv.
 
 (**********)
-Instance Rseq_equiv_cv_compat : Proper (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
+Proper Rseq_equiv_cv_compat : Proper (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
 Proof.
 assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
   intros Un Vn l Heq H eps Heps.

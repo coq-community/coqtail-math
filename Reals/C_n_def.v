@@ -188,10 +188,7 @@ Qed.
 Next Obligation.
 inversion pr. subst.
 eapply C_ext ; [|apply H0].
- intro x ; unfold derive.
- symmetry ; rewrite derive_pt_eq.
- rewrite <- derive_pt_eq.
- reflexivity.
+intro. apply pr_nu_var ; reflexivity.
 Qed.
 
 Implicit Arguments nth_derive [n].
