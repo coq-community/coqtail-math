@@ -678,14 +678,14 @@ exists (Max.max Nu Nv); intros n Hn.
 unfold Rseq_minus; unfold Rseq_mult.
 replace (Un n * Vn n - Wn n * Xn n)%R
   with ((Un n * Vn n - Wn n * Vn n) + (Wn n * Vn n - Wn n * Xn n))%R
-  by field.
+  by ring.
 replace (eps * Rabs (Un n * Vn n))%R
   with (eps / 2 * Rabs (Un n * Vn n) + eps / 2 * Rabs (Un n * Vn n))%R
   by field.
 eapply Rle_trans; [apply Rabs_triang|].
 apply Rplus_le_compat.
 replace (Un n * Vn n - Wn n * Vn n)%R
-  with ((Un n - Wn n) * Vn n)%R by field.
+  with ((Un n - Wn n) * Vn n)%R by ring.
 repeat rewrite Rabs_mult; rewrite <- Rmult_assoc.
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
@@ -837,7 +837,7 @@ End Rseq_little_O_pos_infty.
 Section Rseq_equiv_cv.
 
 (**********)
-Proper Rseq_equiv_cv_compat : Proper (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
+Instance Rseq_equiv_cv_compat : Proper (Rseq_equiv ==> @eq R ==> iff) Rseq_cv.
 Proof.
 assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
   intros Un Vn l Heq H eps Heps.
