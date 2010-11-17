@@ -103,7 +103,7 @@ assert (H1 : (forall a b c d : C, a + b - (c - d) = (a -c) + (b + d))). intros. 
 rewrite H1.
 rewrite Cpow_S. ring_simplify.
 replace ((n- k +1)%nat) with (S(n-k))%nat by ring.
-field_simplify; [admit|].
+field_simplify. unfold Cdiv. repeat rewrite Cmult_0_l. reflexivity.
 apply not_0_INC. intro Habs.  apply mult_is_O in Habs. elim Habs.
 apply fact_neq_0. apply fact_neq_0.
 Qed.
@@ -178,6 +178,6 @@ replace (S n - S n)%nat with O by intuition.
 replace (S (S n) - S (S n))%nat with O by intuition.
 repeat rewrite fact_simpl.
 repeat rewrite mult_INC. simpl (INC 0).
-field_simplify; [admit|].
+field_simplify. unfold Cdiv. repeat rewrite Cmult_0_l.  reflexivity.
 split ; try split ; try split ; try split ; try apply not_0_INC ; try apply fact_neq_0 ; intuition.
 Qed.
