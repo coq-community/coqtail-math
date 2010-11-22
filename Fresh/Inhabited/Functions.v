@@ -76,4 +76,3 @@ destruct (AC RR
  destruct (D f) as [b [Hb1 Hb2]].
  split; intros Hf; simpl; intuition.
 Qed.
-

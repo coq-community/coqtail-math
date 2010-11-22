@@ -5,6 +5,8 @@ Module Rconvenient (Import T : CReals).
 
 Open Scope R_scope.
 
+Section Req.
+
 (** * Useful and basics results on <, ==, # *)
 
 Lemma Req_sym : forall x y, Req x y -> Req y x.
@@ -66,7 +68,7 @@ Qed.
 
 (** * Setoid **)
 
-Instance Equivalence_Req : Equivalence Req.
+Global Instance Equivalence_Req : Equivalence Req.
 Proof.
 split; red.
   apply Req_refl.
@@ -74,7 +76,9 @@ split; red.
   apply Req_trans.
 Qed.
 
-Instance Setoid_R : Setoid R := { equiv := Req }.
+Global Instance Setoid_R : Setoid R := { equiv := Req }.
+
+End Req.
 
 Lemma Radd_eq_compat_r : forall (x1 x2 y : R), Req x1 x2 -> Req (x1 + y) (x2 + y).
 Proof.
@@ -141,6 +145,7 @@ apply Rlt_trans with (R0 + R1).
 Qed.
 
 Lemma Radd_eq_cancel_r : forall x x' y, x + y == x' + y -> x == x'.
+Proof.
 intros x x' y Hxy.
 rewrite <- (Radd_0_r x), <- (Radd_0_r x').
 rewrite <- (Radd_opp_r y).
@@ -156,6 +161,33 @@ intros x x' Hx.
 apply (Radd_eq_cancel_r _ _ x).
 rewrite Hx at 3.
 do 2 rewrite Radd_comm, Radd_opp_r; reflexivity.
+Qed.
+
+Lemma Rmul_1_r : forall x, x * R1 == x.
+Proof.
+intros; rewrite Rmul_comm; apply Rmul_1_l.
+Qed.
+
+Lemma Rinv_r : forall x (pr : x ## R0), x * Rinv x pr == R1.
+Proof.
+intros x pr; rewrite Rmul_comm; apply Rinv_l.
+Qed.
+
+Lemma Rmul_eq_cancel_r : forall x x' y, y ## R0 -> x * y == x' * y -> x == x'.
+Proof.
+intros x x' y Hy Hxy.
+rewrite <- (Rmul_1_r x), <- (Rmul_1_r x'), <- (Rinv_r y Hy).
+repeat rewrite <- Rmul_assoc; rewrite <- Hxy.
+apply Rmul_eq_compat_l; reflexivity.
+Qed.
+
+Instance Proper_Req_inv : Proper
+  (fun f g : forall x, x ## R0 -> R => forall x x' H H', x == x' -> f x H == f x' H') Rinv.
+Proof.
+intros x x' Hx Hx' Heq.
+apply (Rmul_eq_cancel_r _ _ x Hx).
+rewrite Heq at 3.
+do 2 rewrite Rmul_comm, Rinv_r; reflexivity.
 Qed.
 
 Definition R_ring : ring_theory R0 R1 Radd Rmul Rsub Ropp Req.
@@ -188,6 +220,14 @@ eapply Req_lt_compat_l; [ apply Radd_0_l | ].
 eapply Req_lt_compat_r; [ apply Radd_opp_r | ].
 apply Radd_lt_compat_r.
 apply Rlt_0_1.
+Qed.
+
+Lemma Radd_lt_cancel_r : forall x1 x2 y : R, x1 + y < x2 + y -> x1 < x2.
+Proof.
+intros x1 x2 y H.
+apply (Radd_lt_compat_l (- y)) in H.
+eapply (Req_lt_compat_l _ x1) in H; [|ring].
+eapply (Req_lt_compat_r _ x2) in H; [auto|ring].
 Qed.
 
 Lemma Rmul_0_l : forall r:R, Req (R0 * r) R0.
@@ -239,6 +279,14 @@ Proof.
  apply Rmul_lt_compat_l; subst; auto.
 Qed.
 
+Lemma Rmul_lt_cancel_r : forall x1 x2 y : R, R0 < y -> x1 * y < x2 * y -> x1 < x2.
+Proof.
+intros x1 x2 y Hpos H.
+eapply Req_lt_compat_l in H; [|apply Rmul_comm].
+eapply Req_lt_compat_r in H; [|apply Rmul_comm].
+apply Rmul_lt_cancel_l in H; auto.
+Qed.
+
 Lemma Rmul_lt_compat_r : forall x y1 y2 : R, R0 < x -> y1 < y2 -> y1 * x < y2 * x.
 Proof.
  intros x; intros.
@@ -258,8 +306,7 @@ Qed.
 
 Lemma Zopp_Zpos : forall p, Zopp (Zpos p) = Zneg p.
 Proof.
-intros p.
-simpl; auto.
+reflexivity.
 Qed.
 
 Lemma Ropp_add : forall a b, - (a + b) == - a - b.
@@ -282,6 +329,17 @@ rewrite Ropp_add.
 unfold Rsub.
 rewrite Ropp_involutive.
 apply Radd_comm.
+Qed.
+
+Lemma Rlt_0_opp : forall x, R0 < x -> - x < R0.
+Proof.
+intros x xpos.
+apply Radd_lt_cancel_l with x.
+eapply Req_lt_compat_r.
+ symmetry; apply Radd_0_r.
+ eapply Req_lt_compat_l.
+  symmetry; apply Radd_opp_r.
+  apply xpos.
 Qed.
 
 Section IZR_results.
@@ -486,17 +544,6 @@ destruct n.
   assert (0 < Zn)%Z.
    rewrite HeqZn; compute; reflexivity.
    omega.
-Qed.
-
-Lemma Rlt_0_opp : forall x, R0 < x -> - x < R0.
-Proof.
-intros x xpos.
-apply Radd_lt_cancel_l with x.
-eapply Req_lt_compat_r.
- symmetry; apply Radd_0_r.
- eapply Req_lt_compat_l.
-  symmetry; apply Radd_opp_r.
-  apply xpos.
 Qed.
 
 Lemma Rinv_pow_2_cv_0 : Rseq_cv (fun n => Rinv (Rpow2 n) (Rnn_pow2 n)) R0.
