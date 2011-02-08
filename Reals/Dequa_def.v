@@ -1,22 +1,46 @@
+(*
+
 Require Import Reals.
 Require Import C_n_def C_n.
 Require Import Functions.
-Require Import List.
+Require Import Vec_def VecDep_def.
 Require Import Program.
+Require Import Max.
 
-Inductive side_equa : Set :=
-    | const : R -> side_equa
-    | y : forall (p : nat) (k : nat), side_equa
-    | opp : forall (s1 : side_equa), side_equa
-    | plus : forall (s1 s2 : side_equa), side_equa
-    | mult : forall (s1 s2 : side_equa), side_equa.
+Inductive side_equa (n : nat) : Set :=
+    | const : R -> side_equa n
+    | y : forall (p : nat) (k : nat) (plen : p < n), side_equa n
+    | opp : forall (s1 : side_equa n), side_equa n
+    | plus : forall (s1 s2 : side_equa n), side_equa n
+    | mult : forall (s1 s2 : side_equa n), side_equa n.
 
-Definition minus s1 s2 := plus s1 (opp s2).
+Definition minus {n : nat} (s1 s2 : side_equa n) := plus n s1 (opp n s2).
 
-Inductive diff_equa : Set :=
-    | eq : forall (s1 s2 : side_equa), diff_equa.
+Definition diff_equa (n : nat) : Set := prod (side_equa n) (side_equa n).
 
-Fixpoint interp_equa (s : side_equa) (rho : nat -> Cinfty) : R -> R := match s with
+Fixpoint max_se {n : nat} (s : side_equa n) (m : nat) (mltn : m < n) : nat :=
+match s with
+  | const _    => O
+  | y p k _    => let b := eq_nat_dec m p in if b then k else O
+  | opp s      => max_se s m mltn
+  | plus s1 s2 => max (max_se s1 m mltn) (max_se s2 m mltn)
+  | mult s1 s2 => max (max_se s1 m mltn) (max_se s2 m mltn)
+end.
+
+Fixpoint max_de {n : nat} (e : diff_equa n) (m : nat) (mltn : m < n) : nat :=
+let (s1 , s2) := e in max (max_se s1 m mltn) (max_se s2 m mltn).
+
+Definition Con {n : nat} (e : diff_equa n) : Vec Type n.
+eapply Vmap.
+ apply Cn.
+ eapply Vmap ; [| eapply genVec].
+ intro m ; eapply max_de.
+  eexact e.
+  
+ Vmap Cn (Vmap (fun m => max_de e m _) (genVec n)).
+
+
+Fixpoint interp_equa {n : nat} (s : side_equa n) (rho :) : R -> R := match s with
     | const x    => fun _ => x
     | y p k      => let (f , Cf) := rho p in nth_derive f (Cf k)
     | opp s1     => opp_fct  (interp_equa s1 rho)
@@ -46,3 +70,4 @@ Fixpoint list_to_fun {A : Type} (l : list A) (default : A) (n : nat) := match l 
 end.
 
 Notation "[| e |] rho" := (interp e%de (list_to_fun rho (zero_infty))) (at level 69).
+*)

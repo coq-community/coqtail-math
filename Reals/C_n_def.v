@@ -31,6 +31,16 @@ Proof.
   apply IHn ; assumption.
 Qed.
 
+Lemma C_le : forall m n f, (n <= m)%nat ->
+  C m f -> C n f.
+Proof.
+intro m ; induction m ; intros n f H Cmf.
+ destruct n ; [apply Cmf | apply False_rec ; inversion H].
+ destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
+  subst ; assumption.
+  apply IHm ; [omega | apply C_pred ; assumption].
+Qed.
+
 Lemma C_ext : forall n f g, f == g -> C n f -> C n g.
 Proof.
 intro n ; induction n ; intros f g f_eq_g Cnf.
@@ -178,9 +188,9 @@ Qed.
 
 (** nth derivative *)
 
-Program Fixpoint nth_derive (n : nat) (f : R -> R) (pr : C n f) : R -> R := match n with
+Program Fixpoint nth_derive {n : nat} (f : R -> R) (pr : C n f) : R -> R := match n with
    | O   => f
-   | S n' => nth_derive n' (derive f _) _
+   | S n' => @nth_derive n' (derive f _) _
 end.
 Next Obligation.
 inversion pr ; assumption.
@@ -191,7 +201,12 @@ eapply C_ext ; [|apply H0].
 intro. apply pr_nu_var ; reflexivity.
 Qed.
 
-Implicit Arguments nth_derive [n].
+Definition nth_derive' {m : nat} (n : nat) (f : R -> R) (pr : C m f)
+          (nlem : (n <= m)%nat) : R -> R.
+Proof.
+intros ; eapply nth_derive ;
+ [eapply C_le |] ; eassumption.
+Defined.
 
 Hint Resolve C_opp : C_hint.
 Hint Resolve C_plus : C_hint.

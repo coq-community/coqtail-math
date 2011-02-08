@@ -1,4 +1,4 @@
-Require Import Rpser_def Rpser_facts Rpser_usual.
+(* Require Import Rpser_def Rpser_facts Rpser_usual.
 Require Import Rfunction_facts Rextensionality.
 Require Import C_n_def C_n.
 Require Import Dequa_def.
@@ -49,3 +49,4 @@ intro x ; simpl ; unfold derive.
  rewrite <- derive_pt_eq ; reflexivity.
  rewrite derive_pt_eq ; apply derivable_pt_lim_cosine.
 Qed.
+*)
