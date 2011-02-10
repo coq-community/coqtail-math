@@ -16,9 +16,8 @@ Definition C n f := (Class f n).
 
 Definition C_infty (f : R -> R) := forall n, C n f.
 
-Definition Cn (n : nat) := sigT (C n).
-Definition Cinfty := sigT C_infty.
-
+Definition Cn (n : nat) : Type := sigT (C n).
+Definition Cinfty : Type := sigT C_infty.
 
 (** * Basic Properties *)
 

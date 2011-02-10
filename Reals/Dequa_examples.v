@@ -1,8 +1,9 @@
 (* Require Import Rpser_def Rpser_facts Rpser_usual.
 Require Import Rfunction_facts Rextensionality.
 Require Import C_n_def C_n.
+*)
 Require Import Dequa_def.
-Require Import Program.
+(* Require Import Program.
 
 Lemma nth_derive_ext : forall n f g (prf : C n f) (prg : C n g), f == g ->
     nth_derive f prf == nth_derive g prg.
@@ -48,5 +49,4 @@ intro x ; simpl ; unfold derive.
  intro a ; simpl ; symmetry ; rewrite derive_pt_eq ; apply derivable_pt_lim_sine.
  rewrite <- derive_pt_eq ; reflexivity.
  rewrite derive_pt_eq ; apply derivable_pt_lim_cosine.
-Qed.
-*)
+Qed.*)
