@@ -50,7 +50,7 @@ intros n s ; apply Vec_ext_eq ; intros p pltn ;
  do 2 rewrite Con_se_simpl ; reflexivity.
 Qed.
 
-Fixpoint Con_se_plus1 {n : nat} (s1 s2 : side_equa n) :
+Definition Con_se_plus1 {n : nat} (s1 s2 : side_equa n) :
  forall (rho : VecDep (Con_se (plus s1 s2))), VecDep (Con_se s1).
 assert (Cn_pr : forall k1 k2, Cn (max k1 k2) -> Cn k1).
  intros k1 k2 [f Cf] ; exists f ; eapply C_le ;
@@ -70,7 +70,7 @@ replace (Con_se s1) with (Vmap_full
  rewrite Vmap_full_sound ; reflexivity.
 Defined.
 
-Fixpoint Con_se_plus2 {n : nat} (s1 s2 : side_equa n) :
+Definition Con_se_plus2 {n : nat} (s1 s2 : side_equa n) :
  forall (rho : VecDep (Con_se (plus s1 s2))), VecDep (Con_se s2).
 assert (Cn_pr : forall k1 k2, Cn (max k1 k2) -> Cn k2).
  intros k1 k2 [f Cf] ; exists f ; eapply C_le ;
@@ -90,8 +90,45 @@ replace (Con_se s2) with (Vmap_full
  rewrite Vmap_full_sound ; reflexivity.
 Defined.
 
+Definition Con_se_mult1 {n : nat} (s1 s2 : side_equa n) :
+ forall (rho : VecDep (Con_se (mult s1 s2))), VecDep (Con_se s1).
+assert (Cn_pr : forall k1 k2, Cn (max k1 k2) -> Cn k1).
+ intros k1 k2 [f Cf] ; exists f ; eapply C_le ;
+ [eapply le_max_l | eassumption].
+assert (F : forall (m : nat) (mltn : m < n),
+     Vget (Con_se (mult s1 s2)) m mltn -> Vget (Con_se s1) m mltn).
+ clear -Cn_pr ; intros m mltn ; do 2 rewrite Con_se_simpl ; intro H ;
+ simpl in * ; eapply Cn_pr ; eassumption.
+intro H ;
+ assert (T := @VDmap_full n (Con_se (mult s1 s2))
+ (fun m mltn _ => Vget (Con_se s1) m mltn) F H).
+replace (Con_se s1) with (Vmap_full
+         (fun (m : nat) (mltn : m < n) (_ : Type) => Vget (Con_se s1) m mltn)
+         (Con_se (mult s1 s2))).
+ exact T.
+ apply Vec_ext_eq ; intros p pltn.
+ rewrite Vmap_full_sound ; reflexivity.
+Defined.
 
-
+Definition Con_se_mult2 {n : nat} (s1 s2 : side_equa n) :
+ forall (rho : VecDep (Con_se (mult s1 s2))), VecDep (Con_se s2).
+assert (Cn_pr : forall k1 k2, Cn (max k1 k2) -> Cn k2).
+ intros k1 k2 [f Cf] ; exists f ; eapply C_le ;
+ [eapply le_max_r | eassumption].
+assert (F : forall (m : nat) (mltn : m < n),
+     Vget (Con_se (mult s1 s2)) m mltn -> Vget (Con_se s2) m mltn).
+ clear -Cn_pr ; intros m mltn ; do 2 rewrite Con_se_simpl ; intro H ;
+ simpl in * ; eapply Cn_pr ; eassumption.
+intro H ;
+ assert (T := @VDmap_full n (Con_se (mult s1 s2))
+ (fun m mltn _ => Vget (Con_se s2) m mltn) F H).
+replace (Con_se s2) with (Vmap_full
+         (fun (m : nat) (mltn : m < n) (_ : Type) => Vget (Con_se s2) m mltn)
+         (Con_se (mult s1 s2))).
+ exact T.
+ apply Vec_ext_eq ; intros p pltn.
+ rewrite Vmap_full_sound ; reflexivity.
+Defined.
 
 Definition Con {n : nat} (e : diff_equa n) : Vec Type n :=
   genVec_P n (fun m mltn => Cn (max_y e m)).
@@ -102,29 +139,68 @@ Proof.
 intros ; apply genVec_P_get ; unfold PI_fun ; auto.
 Qed.
 
-(*
+Definition Con_l {n : nat} (s1 s2 : side_equa n) :
+ forall (rho : VecDep (Con (s1 , s2))), VecDep (Con_se s1).
+assert (Cn_pr : forall k1 k2, Cn (max k1 k2) -> Cn k1).
+ intros k1 k2 [f Cf] ; exists f ; eapply C_le ;
+ [eapply le_max_l | eassumption].
+assert (F : forall (m : nat) (mltn : m < n),
+     Vget (Con (s1, s2)) m mltn -> Vget (Con_se s1) m mltn).
+ clear -Cn_pr ; intros m mltn ; rewrite Con_simpl,
+  Con_se_simpl ; intro H ; simpl in * ; eapply Cn_pr ;
+ eassumption.
+intro H ;
+ assert (T := @VDmap_full n (Con (s1 , s2))
+ (fun m mltn _ => Vget (Con_se s1) m mltn) F H).
+replace (Con_se s1) with (Vmap_full
+         (fun (m : nat) (mltn : m < n) (_ : Type) => Vget (Con_se s1) m mltn)
+         (Con (s1 , s2))).
+ exact T.
+ apply Vec_ext_eq ; intros p pltn.
+ rewrite Vmap_full_sound ; reflexivity.
+Defined.
+
+Definition Con_r {n : nat} (s1 s2 : side_equa n) :
+ forall (rho : VecDep (Con (s1 , s2))), VecDep (Con_se s2).
+assert (Cn_pr : forall k1 k2, Cn (max k1 k2) -> Cn k2).
+ intros k1 k2 [f Cf] ; exists f ; eapply C_le ;
+ [eapply le_max_r | eassumption].
+assert (F : forall (m : nat) (mltn : m < n),
+     Vget (Con (s1, s2)) m mltn -> Vget (Con_se s2) m mltn).
+ clear -Cn_pr ; intros m mltn ; rewrite Con_simpl,
+  Con_se_simpl ; intro H ; simpl in * ; eapply Cn_pr ;
+ eassumption.
+intro H ;
+ assert (T := @VDmap_full n (Con (s1 , s2))
+ (fun m mltn _ => Vget (Con_se s2) m mltn) F H).
+replace (Con_se s2) with (Vmap_full
+         (fun (m : nat) (mltn : m < n) (_ : Type) => Vget (Con_se s2) m mltn)
+         (Con (s1 , s2))).
+ exact T.
+ apply Vec_ext_eq ; intros p pltn.
+ rewrite Vmap_full_sound ; reflexivity.
+Defined.
 
 Fixpoint interp_equa {n : nat} (s : side_equa n) (rho : VecDep (Con_se s)) : R -> R.
 destruct s.
  exact (fun _ => r).
  pose (VDget rho p pltn) as F ; rewrite Con_se_simpl in F ;
-  destruct F as [f _] ; exact f.
+  destruct F as [f Cnf].
+   simpl in Cnf ; destruct (eq_nat_dec p p) as [| Hf] ; [| apply False_rec ;
+   clear -Hf ; auto].
+   eapply nth_derive ; eassumption.
  apply opp_fct ; eapply interp_equa ; rewrite <- Con_se_opp ; eassumption.
- 
-
- :=
-match s with
-    | const x    => fun _ => x
-    | y p k pltn => let F := VDget rho p pltn in _
-    | opp s1     => opp_fct  (interp_equa s1 rho)
-    | plus s1 s2 => plus_fct (interp_equa s1 rho) (interp_equa s2 rho)
-    | mult s1 s2 => mult_fct (interp_equa s1 rho) (interp_equa s2 rho)
-end.
+ apply plus_fct ; eapply interp_equa ; [eapply Con_se_plus1 |
+ eapply Con_se_plus2] ; eassumption.
+ apply mult_fct ; eapply interp_equa ; [eapply Con_se_mult1 |
+ eapply Con_se_mult2] ; eassumption.
 Defined.
 
-Fixpoint interp (e : diff_equa) (rho : nat -> Cinfty) : Prop := match e with
-    | eq s1 s2 => forall x, (interp_equa s1 rho) x = (interp_equa s2 rho) x
-end.
+Fixpoint interp {n : nat} (e : diff_equa n) (rho : VecDep (Con e)) : Prop :=
+(match e as e0 return VecDep (Con e0) -> Prop with
+  | (s1 , s2) => fun rho => forall x,
+   (interp_equa s1 (Con_l _ _ rho)) x = (interp_equa s2 (Con_r _ _ rho)) x
+end) rho.
 
 Delimit Scope de_scope with de.
 
@@ -135,13 +211,4 @@ Infix "-" := minus : de_scope.
 Infix "*" := mult : de_scope.
 Infix "=" := eq : de_scope.
 
-Fixpoint list_to_fun {A : Type} (l : list A) (default : A) (n : nat) := match l with
-    | nil     => default
-    | h :: tl => match n with
-        | O   => h
-        | S m => list_to_fun tl default m
-    end
-end.
-
-Notation "[| e |] rho" := (interp e%de (list_to_fun rho (zero_infty))) (at level 69).
-*)
+Notation "[| e |]" := (interp e%de) (at level 69).

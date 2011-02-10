@@ -19,18 +19,16 @@ intros A B n f v ; induction v ; intros p pltn.
  destruct p ; [reflexivity | simpl ; apply IHv].
 Qed.
 
-Lemma Vmap_full_sound : forall (A : Type) (n : nat)
-  (f : forall (m : nat) (mltn : m < n), A -> Type)
+Lemma Vmap_full_sound : forall (A B : Type) (n : nat)
+  (f : forall (m : nat) (mltn : m < n), A -> B)
   (v : Vec A n) (p : nat) (pltn : p < n),
   Vget (Vmap_full f v) p pltn = f p pltn (Vget v p pltn).
 Proof.
-intros A n f v ; induction v ; intros p pltn.
+intros A B n f v ; induction v ; intros p pltn.
  inversion pltn.
  destruct p ; simpl ; [| rewrite IHv ] ;
  f_equal ; apply lt_PI.
 Qed.
-
-Definition Vec_ext {A n} (v1 v2 : Vec A n) := forall (p : nat) (pr : p < n), Vget v1 p pr = Vget v2 p pr.
 
 Lemma Vec_ext_eq : forall (A : Type) (n : nat) (v1 v2 : Vec A n)
   (Hext : forall (p : nat) (pr : p < n), Vget v1 p pr = Vget v2 p pr),
@@ -72,37 +70,29 @@ replace (Vget v3 p Hp) with (Vget (Vcon y v3) (S p) Hlt) by (simpl; apply Vget_P
 intuition.
 Qed.
 
+Lemma genVec_pr_get : forall (n p : nat) (pr : p < n),
+  Vget (genVec_pr n) p pr = exist _ p pr.
+Proof.
+intros n p pr ; unfold genVec_pr ; rewrite Vmap_full_sound ;
+ reflexivity.
+Qed.
+
+Definition PI_fun {A n} (P : forall (m : nat), m < n -> A) :=
+  forall (m : nat) (pr1 pr2 : m < n), P m pr1 = P m pr2.
+
+Lemma genVec_P_get : forall (A : Type) (n : nat) (P : forall (m : nat), m < n -> A)
+ (m : nat) (mltn : m < n), PI_fun P -> Vget (genVec_P n P) m mltn = P m mltn.
+Proof.
+intros A n P m mltn HP ; unfold genVec_P ; rewrite Vmap_full_sound ;
+reflexivity.
+Qed.
+
 Lemma genVec_get : forall (n p : nat) (pr : p < n), Vget (genVec n) p pr = p.
 Proof.
 intro n ; induction n ; intros p pr.
  inversion pr.
- destruct p ; [| simpl ; rewrite Vmap_sound, IHn] ; reflexivity.
+ destruct p ; [| simpl ; rewrite Vmap_full_sound] ; reflexivity.
 Qed.
-
-Lemma genVec_pr_get : forall (n p : nat) (pr : p < n), proj1_sig (Vget (genVec_pr n) p pr) = p.
-Proof.
-intro n ; induction n ; intros p pr.
- inversion pr.
- destruct p.
-  simpl ; reflexivity.
-  simpl ; rewrite Vmap_sound.
-  assert (H := IHn p (lt_S_n _ _ pr)).
-   destruct (Vget (genVec_pr n) p (lt_S_n p n pr)) as [k Hk] ;
-   simpl in * ; auto.
-Qed.
-
-Definition PI_fun {n} (P : forall (m : nat), m < n -> Type) :=
-  forall (m : nat) (pr1 pr2 : m < n), P m pr1 = P m pr2.
-
-Lemma genVec_P_get : forall (n : nat) (P : forall (m : nat), m < n -> Type)
- (m : nat) (mltn : m < n), PI_fun P -> Vget (genVec_P n P) m mltn = P m mltn.
-Proof.
-intros n P m mltn HP ; unfold genVec_P ;
- rewrite Vmap_sound ; assert (Heq := genVec_pr_get n m mltn) ;
- destruct (Vget (genVec_pr n) m mltn) ; simpl in Heq ; subst ;
- apply HP.
-Qed.
-
 
 (*
 Lemma genVec2_get : forall (n p : nat) (pr : p < n), Vget (genVec2 n) p pr = p.
