@@ -31,8 +31,52 @@ Admitted.
 Definition c := projT1 g_not_zero.
 Definition Hc : a < c /\ forall x, a < x <= c -> g x <> 0 := projT2 g_not_zero.
 
+Lemma Rabs_div2 : forall a b c e, e > 0 ->
+  Rabs (a - b) < e / 2 ->
+  Rabs (b - c) < e / 2 ->
+    Rabs (a - c) < e.
+Proof.
+  intros x y z e epos Hxy Hyz.
+  replace (x - z) with ((x - y) + (y - z)) by ring.
+  replace e with (e / 2 + e / 2) by field.
+  eapply Rle_lt_trans.
+    apply Rabs_triang.
+    fourier.
+Qed.
+
 Lemma f'a_lim : limit1_in (derive f Df) (open_interval a b) (derive f Df a) a.
-Admitted.
+Proof.
+  intros e epos.
+  pose (e' := e / 2).
+  assert (e'pos : e' > 0) by admit.
+  unfold derive, derive_pt.
+  
+  (* Distance between fx-fa/x-a and f'a *)
+  remember (Df a) as Dfa.
+  destruct Dfa as (f'a, Hf'a).
+  simpl.
+  generalize (Hf'a e' e'pos); intros Hffa.
+  destruct Hffa as (d1, Hd1).
+  
+  unfold dist; simpl; unfold R_dist.
+  
+  exists (d1 / 8); split.
+    admit (* OK *).
+    
+    intros x ((Hax, Hxb), Hxd).
+    apply Rabs_div2 with ((f x - f a) / (x - a)).
+      apply epos.
+      
+      (* faire ça avec x ... appliquer la compatibilité de la limite avec un truc compliqué ? *)
+      (* ou juste du découpage de epsilon ? *)
+      admit (* difficult part *).
+      
+      assert (Nax : x - a <> 0) by (intro; fourier).
+      assert (Hxdw : Rabs (x - a) < d1) by admit.
+      specialize (Hd1 (x - a) Nax Hxdw).
+      replace (a + (x - a)) with x in Hd1 by ring.
+      apply Hd1.
+Qed.
 
 Lemma g'a_lim : limit1_in (derive g Dg) (open_interval a b) (derive g Dg a) a.
 Admitted.
