@@ -1,9 +1,126 @@
 Require Import Reals.
 Require Import Fourier.
+Require Import C_n C_n_def.
+Require Import Cauchy_lipschitz. (* TODO on importe des trucs qui parlent de Cn *)
+Require Import Rextensionality.
 Open Scope R_scope.
 
 Definition derivable_on_interval a b (Hab : a < b) f :=
   forall x, open_interval a b x -> derivable_pt f x.
+
+Section SimplHopital.
+
+Variables f g : R -> R.
+Variables a b L : R.
+
+Hypothesis Hab : a < b.
+(* Hypotheses (Df : derivable f) (Dg : derivable g). *)
+Hypotheses (Cf : C 1 f) (Cg : C 1 g).
+Hypotheses g_not_zero : forall x, x <> a -> g x <> 0.
+Definition Df := C_Sn_derivable f O Cf.
+Definition Dg := C_Sn_derivable g O Cg.
+Hypotheses (Zf : limit1_in f no_cond 0 a).
+Hypotheses (Zg : limit1_in g no_cond 0 a).
+Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) no_cond L a).
+
+Lemma f_a_zero : f a = 0.
+Proof.
+symmetry. eapply tech_limit; [ | apply Zf].
+constructor.
+Qed.
+
+Lemma g_a_zero : g a = 0.
+Proof.
+symmetry. eapply tech_limit; [ | apply Zg].
+constructor.
+Qed.
+
+Lemma g'a_not_zero : derive g Dg a <> 0.
+Admitted.
+
+(*
+Lemma g_not_zero : { c | a < c /\ forall x, a < x <= c -> g x <> 0 }.
+Admitted.
+
+Definition c := projT1 g_not_zero.
+Definition Hc : a < c /\ forall x, a < x <= c -> g x <> 0 := projT2 g_not_zero.
+*)
+
+Lemma f'a_lim : limit1_in (derive f Df) (D_x no_cond a) (derive f Df a) a.
+Proof.
+assert (continuity (derive f Df)).
+ admit.
+ apply H.
+Qed.
+
+Lemma g'a_lim : limit1_in (derive g Dg) (D_x no_cond a) (derive g Dg a) a.
+Proof.
+assert (continuity (derive g Dg)).
+ admit.
+ apply H.
+Qed.
+
+Lemma L_decomp : L = derive f Df a / derive g Dg a.
+Admitted.
+
+Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (D_x no_cond a) L a.
+Proof.
+  assert (Hder' : limit1_in (fun x : R => derive f Df x / derive g Dg x)
+      (D_x no_cond a) (derive f Df a / derive g Dg a) a).
+    apply limit_mul.
+      apply f'a_lim.
+      apply limit_inv.
+        apply g'a_lim.
+        apply g'a_not_zero.
+    
+    rewrite L_decomp.
+    
+    apply limit1_ext with (fun x : R => ((f x - f a) / (x - a)) * ((x - a) / (g x - g a))).
+      intros x (Hax, Hxb).
+      rewrite f_a_zero, g_a_zero.
+      field; split.
+        
+        apply g_not_zero. intro; intuition.
+        intuition.
+      
+      apply limit_mul.
+        (* f'(a) *)
+        generalize (Df a); intros (l, Hl).
+        intros e epos.
+        destruct (Hl e epos) as (d, dpos).
+        exists d; split.
+          apply d.
+          intros x (Hxab, Hxd).
+          assert (Nxa : x - a <> 0). destruct Hxab. intro. apply H0. intuition.
+          unfold dist in Hxd; simpl in Hxd; unfold R_dist in Hxd.
+          specialize (dpos (x - a) Nxa Hxd).
+          simpl.
+          assert (Hdl : derive f Df a = l).
+            unfold derive, derive_pt.
+            admit (* blabla ~ Hl *).
+          
+          rewrite Hdl.
+          ring_simplify (a + (x - a)) in dpos.
+          apply dpos.
+        
+        (* g'(a) *)
+        apply limit1_ext with (fun x : R => / ((g x - g a) / (x - a))).
+          intros x (Hax, Hxb).
+          field.
+          split; [ | intro; intuition ].
+          rewrite g_a_zero.
+          rewrite Rminus_0_r.
+          apply g_not_zero; intuition.
+          
+          apply limit_inv.
+            admit. (* même chose que pour f'(a) : remplir le blabla ~ Hl d'abord *)
+            apply g'a_not_zero.
+Qed.
+
+
+
+End SimplHopital.
+
 
 Section Hopital.
 
@@ -17,6 +134,7 @@ Hypotheses (Zg : limit1_in g (open_interval a b) 0 a).
 Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (open_interval a b) L a).
 
 Lemma f_a_zero : f a = 0.
+Proof.
 Admitted.
 
 Lemma g_a_zero : g a = 0.
