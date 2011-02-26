@@ -9,7 +9,7 @@ Open Local Scope R_scope.
 
 (** Polynoms *)
 
-Lemma zero_C_infty : C_infty (fct_cte 0).
+Lemma C_infty_zero : C_infty (fct_cte 0).
 Proof.
  intro n ; induction n.
   constructor; reg.
@@ -19,7 +19,7 @@ Proof.
   rewrite derive_pt_eq ; apply derivable_pt_lim_const.
 Qed.
 
-Lemma const_C_infty : forall (c : R), C_infty (fct_cte c).
+Lemma C_infty_const : forall (c : R), C_infty (fct_cte c).
 Proof.
  intros c n ; destruct n.
   constructor ; reg. 
@@ -27,10 +27,10 @@ Proof.
   apply C_ext with (fct_cte 0).
   intro x ; unfold derive ; symmetry ;
   rewrite derive_pt_eq ; apply derivable_pt_lim_const.
-  apply zero_C_infty.
+  apply C_infty_zero.
 Qed.
 
-Lemma id_C_infty : C_infty id.
+Lemma C_infty_id : C_infty id.
 Proof.
  intros n ; destruct n.
   constructor ; reg.
@@ -38,15 +38,15 @@ Proof.
  apply C_ext with (fct_cte 1).
  intro x ; unfold derive ; symmetry ;
  rewrite derive_pt_eq ; apply derivable_pt_lim_id.
- eapply const_C_infty.
+ eapply C_infty_const.
 Qed.
 
-Lemma monomial_C_infty : forall d a,  C_infty (fun x => Rmult a (pow x d)).
+Lemma C_infty_monomial : forall d a,  C_infty (fun x => Rmult a (pow x d)).
 Proof.
 intro d ; induction d ; intros a n.
  apply C_ext with (fct_cte a).
   intro ; ring_simplify ; reflexivity.
-  eapply const_C_infty.
+  eapply C_infty_const.
  destruct n.
   constructor; intro; reg.
   assert (pr : derivable (fun x : R => (a * x ^ S d)%R)) by reg ;
@@ -119,7 +119,8 @@ Qed.
 Require Import Rpser_def.
 Require Import Rpser_facts.
 
-Lemma C_infty_Rpser : forall (An  : nat -> R) (Rho : infinite_cv_radius An), C_infty (sum An Rho).
+Lemma C_infty_Rpser : forall (An  : nat -> R) (Rho : infinite_cv_radius An),
+ C_infty (sum An Rho).
 Proof.
 intros An Rho n ; generalize Rho ; generalize An.
  clear An Rho ; induction n.
@@ -132,25 +133,17 @@ intros An Rho n ; generalize Rho ; generalize An.
   apply IHn.
 Qed.
 
-
-
-
 (** Handy abstractions: a function together with the proof
 that it is C_infty *)
 
 Lemma Cinfty_zero : Cinfty.
 Proof.
-exists (fct_cte 0) ; apply zero_C_infty.
+exists (fct_cte 0) ; apply C_infty_zero.
 Defined.
 
-Lemma zero_infty : Cinfty.
-exists (fct_cte 0) ; apply zero_C_infty.
-Defined.
-
-Hint Resolve zero_C_infty : C_hint.
-Hint Resolve const_C_infty : C_hint.
-Hint Resolve id_C_infty : C_hint.
-Hint Resolve monomial_C_infty : C_hint.
+Hint Resolve C_infty_const : C_hint.
+Hint Resolve C_infty_id : C_hint.
+Hint Resolve C_infty_monomial : C_hint.
 Hint Resolve C_infty_sin : C_hint.
 Hint Resolve C_infty_cos : C_hint.
 Hint Resolve C_infty_exp : C_hint.

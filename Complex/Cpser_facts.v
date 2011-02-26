@@ -635,7 +635,6 @@ Definition Cpser_partial_sum_derive An n x := match n with
      | S _      => sum_f_C0 (gt_Pser (An_deriv An) x) (pred n)
 end.
 
-
 Lemma Cpser_derive_finite_sum : forall An n x,
        derivable_pt_lim (fun x => sum_f_C0 (gt_Pser An x) n) x (Cpser_partial_sum_derive An n x).
 Proof.

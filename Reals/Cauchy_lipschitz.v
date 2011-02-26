@@ -78,7 +78,7 @@ Proof.
 
  assert (pr : C 1 (((fct_cte V0) + (fun t => RiemannInt (Hsol t0 t0 t))) *
   (comp exp (fun t => RiemannInt (Ha t0 t))))%F).
-  apply C_mult ; [apply C_plus ; [apply const_C_infty |] | apply C_comp ;
+  apply C_mult ; [apply C_plus ; [apply C_infty_const |] | apply C_comp ;
   [apply C_infty_exp |]] ; apply derivable_pt_continuity_Riemann_implies_C1 ; reg ;
   apply RiemannInt_continuity ; assumption.
 

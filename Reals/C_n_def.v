@@ -184,6 +184,15 @@ Proof.
  [apply Cf | apply Cg].
 Qed.
 
+(** * Compatibility with derivation *)
+
+Lemma C_derive : forall n f (pr : derivable f),
+  C (S n) f -> C n (derive f pr).
+Proof.
+intros n f pr Cnf ; inversion Cnf ;
+ eapply C_ext ; [| eassumption] ;
+ intro x ; eapply pr_nu ; reflexivity.
+Qed.
 
 (** nth derivative *)
 
@@ -195,9 +204,7 @@ Next Obligation.
 inversion pr ; assumption.
 Qed.
 Next Obligation.
-inversion pr. subst.
-eapply C_ext ; [|apply H0].
-intro. apply pr_nu_var ; reflexivity.
+apply C_derive ; assumption.
 Qed.
 
 Definition nth_derive' {m : nat} (n : nat) (f : R -> R) (pr : C m f)

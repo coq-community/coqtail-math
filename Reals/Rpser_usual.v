@@ -243,3 +243,25 @@ Lemma derivable_pt_sine : forall x, derivable_pt sine x.
 Proof.
 intro x ; exists (cosine x) ; apply derivable_pt_lim_sine.
 Qed.
+
+Lemma derivable_cosine : derivable cosine.
+Proof.
+intro x ; apply derivable_pt_cosine.
+Qed.
+
+Lemma derivable_sine : derivable sine.
+Proof.
+intro x ; apply derivable_pt_sine.
+Qed.
+
+Lemma derive_pt_sine_cosine : forall (x : R) (pr : derivable_pt sine x),
+  derive_pt sine x pr = cosine x.
+Proof.
+intros x pr ; rewrite derive_pt_eq ; apply derivable_pt_lim_sine.
+Qed.
+
+Lemma derive_pt_cosine_sine : forall (x : R) (pr : derivable_pt cosine x),
+  derive_pt cosine x pr = - sine x.
+Proof.
+intros x pr ; rewrite derive_pt_eq ; apply derivable_pt_lim_cosine.
+Qed.
