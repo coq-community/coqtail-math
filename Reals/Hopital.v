@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Fourier.
-Require Import C_n C_n_def.
+Require Import C_n_def.
 Require Import Cauchy_lipschitz. (* TODO on importe des trucs qui parlent de Cn *)
 Require Import Rextensionality.
 Open Scope R_scope.
@@ -121,7 +121,7 @@ Qed.
 
 End SimplHopital.
 
-
+(*
 Section Hopital.
 
 Variables f g : R -> R.
@@ -275,5 +275,4 @@ Theorem Hopital_finite_zero :
     limit1_in (fun x => pderive c b Hcb f Df x / pderive c b Hcb g Dg x) (open_interval c b) L c ->
       limit1_in (fun x => f x / g x) (open_interval c b) L c.
 Admitted.
-
-
+*)

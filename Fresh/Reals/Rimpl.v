@@ -2,6 +2,8 @@ Require Reals.
 Require Raxiom.
 Require Import ZArith.
 
+(* Realisation of Raxioms thanks to the standard library of Coq *)
+
 Module RD := Coq.Reals.Rdefinitions.
 Module RA := Coq.Reals.Raxioms.
 Module RI := Coq.Reals.RIneq.
