@@ -32,4 +32,16 @@ Proof.
 intros f_deriv x ; apply derivable_pt_ext ; auto.
 Qed.
 
+Lemma derive_pt_ext (x : R) (prf : derivable_pt f x) (prg : derivable_pt g x) :
+  derive_pt f x prf = derive_pt g x prg.
+Proof.
+apply pr_nu_var2 ; assumption.
+Qed.
+
+Lemma derive_ext (prf : derivable f) (prg : derivable g) :
+  derive f prf == derive g prg.
+Proof.
+intro x ; unfold derive ; apply derive_pt_ext.
+Qed.
+
 End Extensionality.

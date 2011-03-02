@@ -1,6 +1,6 @@
 Require Import Rpser_def Rpser_facts Rpser_usual.
 Require Import Rfunction_facts Rextensionality.
-Require Import C_n_def C_n.
+Require Import C_n_def C_n_facts C_n_usual.
 Require Import Dequa_def.
 Require Import List.
 
@@ -33,7 +33,7 @@ Definition de_id : diff_equa := (y 0 1, cst 1)%de.
 Definition rho_de_id : list (sigT Cn) :=
   (existT _ 1%nat (existT _ id (C_infty_id 1%nat))) :: nil.
 
-Lemma diff_equa_id : [| de_id |] rho_de_id.
+Lemma diff_equa_id : [| de_id |]R rho_de_id.
 Proof.
 intro x ; unfold nth_derive', nth_derive, derive.
  rewrite derive_pt_eq ; apply derivable_pt_lim_id.
@@ -43,7 +43,7 @@ Definition de_cos : diff_equa := (y 0 2, - y 0 0)%de.
 Definition rho_de_cos : list (sigT Cn) :=
   (existT _ 2%nat (existT (C 2) cosine (C_infty_Rpser _ _ 2%nat))) :: nil.
 
-Lemma diff_equa_cos : [| de_cos |] rho_de_cos.
+Lemma diff_equa_cos : [| de_cos |]R rho_de_cos.
 Proof.
 intro x ; unfold nth_derive' ; simpl ; unfold derive.
  replace ((- cosine)%F x) with
@@ -54,3 +54,27 @@ intro x ; unfold nth_derive' ; simpl ; unfold derive.
  apply derivable_pt_lim_opp ; apply derivable_pt_lim_sine.
  rewrite derive_pt_eq ; apply derivable_pt_lim_opp ; apply derivable_pt_lim_sine.
 Qed.
+
+Require Import Rsequence.
+
+Definition Option_app_Prop {A : Type} (P : A -> Prop) (Oa : option A) : Prop :=
+match Oa with
+  | None   => True
+  | Some a => P a
+end.
+
+(*
+Definition corresponding_pser (l : list Rseq)
+ (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)) : list (sigT Cn).
+induction l.
+ apply nil.
+ apply cons ; [ | apply IHl].
+ apply sum
+
+Lemma diff_sequences_functions : forall (e : diff_equa) (l : list Rseq)
+  (CVl : forall n, Option_app_Prop infinite_cv_radius (Lget l n)),
+  [| e |]N l ->
+  { l' | [| e |]R l'}.
+Proof.
+intros [a b] ; induction a ; intros l rhos Heq.
+*)

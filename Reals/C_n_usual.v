@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rfunction_facts.
-Require Import C_n_def.
+Require Import C_n_def C_n_facts.
 Require Import Rextensionality.
 
 Open Local Scope R_scope.

@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rintegral Riemann_integrable.
-Require Import C_n_def C_n.
+Require Import C_n_def C_n_facts C_n_usual.
 Require Import Fourier Ring.
 Require Import Ranalysis.
 Require Import Rextensionality.

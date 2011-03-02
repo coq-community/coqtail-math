@@ -55,7 +55,7 @@ Definition finite_cv_radius (An : nat -> R) (r:R) :=
     (forall r', 0 <= r' < r -> Cv_radius_weak An r') /\
     (forall r', r < r' -> ~ (Cv_radius_weak An r')).
 
-Definition infinite_cv_radius (An : nat -> R) := forall (r : R), Cv_radius_weak An r.
+Definition infinite_cv_radius (An : Rseq) := forall (r : R), Cv_radius_weak An r.
 
 (** * Some lemmas manipulating the definitions *)
 

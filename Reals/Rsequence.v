@@ -43,6 +43,7 @@ Coercion Rseq_constant : R >-> Funclass.
 
 Definition Rseq_plus Un Vn n := Un n + Vn n.
 Definition Rseq_mult Un Vn n := Un n * Vn n.
+Definition Rseq_prod Un Vn n := sum_f_R0 (Rseq_mult Un (fun p => Vn (n - p)%nat)) n.
 Definition Rseq_opp Un n := Ropp (Un n).
 Definition Rseq_inv Un n := Rinv (Un n).
 
