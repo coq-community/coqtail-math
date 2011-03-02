@@ -63,18 +63,24 @@ match Oa with
   | Some a => P a
 end.
 
-(*
-Definition corresponding_pser (l : list Rseq)
- (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)) : list (sigT Cn).
+Definition corresponding_Rpser (l : list Rseq)
+ (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)) : list Cinfty.
 induction l.
  apply nil.
- apply cons ; [ | apply IHl].
- apply sum
+ apply cons.
+  assert (H := cvl O) ; simpl in H ; exists (sum a H) ; apply C_infty_Rpser.
+  apply IHl ; intro n ; apply (cvl (S n)).
+Defined.
 
+(*
+Lemma side_sequences_functions : forall (s : side_equa) (l : list Rseq)
+ (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n))
+ 
 Lemma diff_sequences_functions : forall (e : diff_equa) (l : list Rseq)
-  (CVl : forall n, Option_app_Prop infinite_cv_radius (Lget l n)),
+  (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)),
   [| e |]N l ->
-  { l' | [| e |]R l'}.
+  [| e |]R2 (corresponding_Rpser l cvl).
 Proof.
-intros [a b] ; induction a ; intros l rhos Heq.
+
+Qed.
 *)
