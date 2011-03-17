@@ -8,6 +8,118 @@ Open Scope R_scope.
 Definition derivable_on_interval a b (Hab : a < b) f :=
   forall x, open_interval a b x -> derivable_pt f x.
 
+Section FirstGenHopital.
+
+Variables f g : R -> R.
+Variables a b L : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : derivable f) (Dg : derivable g).
+Hypotheses (Zf : limit1_in f (D_x no_cond a) 0 a).
+Hypotheses (Zg : limit1_in g (D_x no_cond a) 0 a).
+Hypothesis (g_not_0 : forall x, open_interval a b x -> derive g Dg x <> 0 /\ g x <> 0).
+Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (open_interval a b) L a).
+
+Lemma f_a_zero : f a = 0.
+Proof.
+assert (continuity f). apply derivable_continuous. apply Df. 
+unfold continuity in H. unfold continuity_pt in H. unfold continue_in in H.
+specialize (H a).
+eapply single_limit; [ | apply H | apply Zf ].
+unfold adhDa. intros. exists (a + alp / 2).
+split.
+constructor. constructor.
+intro. fourier.
+unfold R_dist. ring_simplify (a + alp / 2 - a).
+rewrite Rabs_right; fourier.
+Qed.
+
+Lemma g_a_zero : g a = 0.
+assert (continuity g). apply derivable_continuous. apply Dg. 
+unfold continuity in H. unfold continuity_pt in H. unfold continue_in in H.
+specialize (H a).
+eapply single_limit; [ | apply H | apply Zg ].
+unfold adhDa. intros. exists (a + alp / 2).
+split.
+constructor. constructor.
+intro. fourier.
+unfold R_dist. ring_simplify (a + alp / 2 - a).
+rewrite Rabs_right; fourier.
+Qed.
+
+(*
+Lemma Rabs_div2 : forall a b c e, e > 0 ->
+  Rabs (a - b) < e / 2 ->
+  Rabs (b - c) < e / 2 ->
+    Rabs (a - c) < e.
+Proof.
+  intros x y z e epos Hxy Hyz.
+  replace (x - z) with ((x - y) + (y - z)) by ring.
+  replace e with (e / 2 + e / 2) by field.
+  eapply Rle_lt_trans.
+    apply Rabs_triang.
+    fourier.
+Qed.
+*)
+
+Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (open_interval a b) L a.
+Proof.
+unfold limit1_in, limit_in.
+intros.
+unfold limit1_in, limit_in in Hlimder.
+specialize (Hlimder eps H).
+destruct Hlimder as [alp [Halp Hlim]].
+exists alp. split. assumption.
+intros.
+assert (Hacc2 : forall x, open_interval a b x -> exists c, f x / g x = derive f Df c / derive g Dg c /\ a < c < x).
+generalize MVT.
+intros.
+specialize (H1 f g a x0).
+assert (forall c, a < c < x0 -> derivable_pt f c). intros. apply Df.
+assert (forall c, a < c < x0 -> derivable_pt g c). intros. apply Dg.
+specialize (H1 H3 H4).
+assert (a < x0); unfold open_interval in H2; intuition.
+assert (forall c : R, a <= c <= x0 -> continuity_pt f c).
+intros. apply (derivable_continuous _ Df).
+assert (forall c, a <= c <= x0 -> continuity_pt g c).
+intros. apply (derivable_continuous _ Dg).
+specialize (H2 H1 H9).
+destruct H2 as [c [P H2]].
+exists c. split.
+rewrite g_a_zero in H2. rewrite f_a_zero in H2. do 2 rewrite Rminus_0_r in H2.
+unfold derive.
+apply (Rmult_eq_reg_l (g x0)).
+rewrite (pr_nu f c _ (H3 c P)). unfold Rdiv. do 2 rewrite <- Rmult_assoc.
+rewrite H2. rewrite (pr_nu g c _ (Dg c)).
+field. generalize (g_not_0 c). generalize (g_not_0 x0).
+intros H01 H02.
+unfold open_interval in H01, H02.
+unfold derive in H01, H02.
+assert (c < b). eapply Rlt_trans with x0; intuition. destruct P; assumption.
+destruct P;
+intuition.
+specialize (g_not_0 x0). 
+unfold open_interval in g_not_0. intuition.
+apply P.
+
+destruct H0.
+specialize (Hacc2 x H0).
+destruct Hacc2 as (c, Haccc).
+specialize (Hlim c). simpl in *. unfold R_dist in *.
+assert (open_interval a b c /\ Rabs (c - a) < alp).
+split.
+unfold open_interval. split; intuition. apply Rlt_trans with x; intuition. apply H0.
+destruct Haccc. destruct H3.
+rewrite Rabs_right. rewrite Rabs_right in H1.
+fourier. fourier. fourier.
+specialize (Hlim H2).
+destruct Haccc.
+rewrite H3. apply Hlim.
+Qed.
+
+End FirstGenHopital.
+
+
 Section VerySimplHopital.
 
 Variables f g : R -> R.
@@ -29,74 +141,83 @@ Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (D_x no
 
 Lemma f'a_lim : limit1_in (derive f Df) (D_x no_cond a) (derive f Df a) a.
 Proof.
-assert (continuity (derive f Df)).
- inversion Cf. inversion H0. 
- apply continuity_ext with (derive f pr).
- intro. apply derive_ext.
- intro. reflexivity.
-  apply H1.
- apply H.
+ assert (continuity (derive f Df)).
+  inversion Cf. inversion H0. apply continuity_ext with (derive f pr).
+   intro. apply derive_ext. intro. reflexivity.
+
+   apply H1.
+
+  apply H.
 Qed.
 
-Lemma g'a_lim : limit1_in (derive g Dg) (D_x no_cond a) (derive g Dg a) a.
+Lemma g'a_lim : limit1_in (derive g Dg) (D_x no_cond a) (derive g Dg a) a. Proof.
 Proof.
-assert (continuity (derive g Dg)).
- inversion Cg. inversion H0.
- apply continuity_ext with (derive g pr).
- intro. apply derive_ext.
- intro. reflexivity.
-  apply H1.
- apply H.
+ assert (continuity (derive g Dg)).
+  inversion Cg. inversion H0. apply continuity_ext with (derive g pr).
+   intro. apply derive_ext. intro. reflexivity.
+
+   apply H1.
+
+  apply H.
 Qed.
 
-Lemma L_decomp : L = derive f Df a / derive g Dg a.
-Proof.
-assert (limit1_in (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) (derive f Df a / derive g Dg a) a).
-unfold Rdiv.
-apply limit_mul.
-apply f'a_lim.
-apply limit_inv.
-apply g'a_lim.
-apply Hg_not_0.
+Lemma L_decomp : L = derive f Df a / derive g Dg a. Proof.
+ assert (limit1_in (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) (derive f Df a / derive g Dg a) a).
+  unfold Rdiv. apply limit_mul.
+   apply f'a_lim.
 
-eapply single_limit with (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) a.
-intros alp Halp.
-exists (a + alp / 2). split.
-constructor. constructor.
-intro. fourier.
-unfold R_dist. ring_simplify (a + alp / 2 - a). 
-apply Rle_lt_trans with (alp / 2).
-assert (alp / 2 > 0). fourier.
-rewrite Rabs_right. intuition. fourier.
-fourier.
-assumption.
-assumption.
+   apply limit_inv.
+    apply g'a_lim.
+
+    apply Hg_not_0.
+
+   eapply single_limit with (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) a.
+    intros alp Halp. exists (a + alp / 2). split.
+     constructor.
+      constructor.
+
+      intro. fourier.
+
+     unfold R_dist. ring_simplify (a + alp / 2 - a). apply Rle_lt_trans with (alp / 2).
+      assert (alp / 2 > 0).
+       fourier.
+      
+       rewrite Rabs_right. 
+        intuition. 
+        
+        fourier.
+        
+        fourier.
+        
+        assumption.
+        
+        assumption.
 Qed.
 
 
-Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (D_x no_cond a) L a.
+Theorem Hopital_finite_zero_weak' : limit1_in (fun x => f x / g x) (D_x no_cond a) L a.
 Proof.
-  assert (Hder' : limit1_in (fun x : R => derive f Df x / derive g Dg x)
+ assert (Hder' : limit1_in (fun x : R => derive f Df x / derive g Dg x)
       (D_x no_cond a) (derive f Df a / derive g Dg a) a).
-    apply limit_mul.
-      apply f'a_lim.
-      apply limit_inv.
-        apply g'a_lim.
-        apply Hg_not_0.
-    
-    rewrite L_decomp.
-    
-    apply limit1_ext with (fun x : R => ((f x - f a) / (x - a)) * ((x - a) / (g x - g a))).
-      intros x (Hax, Hxb).
-      rewrite f_a_zero, g_a_zero.
-      unfold Rdiv. rewrite <- Rmult_assoc.
-      rewrite (Rmult_assoc (f x - 0)).
-      replace (/ (x - a) * (x - a)) with 1.
-      rewrite Rminus_0_r. rewrite Rminus_0_r. ring.
-      intuition.
+  apply limit_mul.
+   apply f'a_lim.
 
-      apply limit_mul.
-        (* f'(a) *)
+   apply limit_inv.
+    apply g'a_lim.
+
+    apply Hg_not_0.
+
+   rewrite L_decomp. apply limit1_ext with (fun x : R => ((f x - f a) / (x - a)) * ((x - a) / (g x - g a))).
+    intros x (Hax, Hxb).
+      rewrite f_a_zero, g_a_zero. unfold Rdiv. rewrite <- Rmult_assoc. rewrite (Rmult_assoc (f x - R0)).
+      replace (/ (x - a) * (x - a)) with 1.
+      rewrite Rminus_0_r.
+     rewrite Rminus_0_r. ring.
+
+     intuition.
+
+    apply limit_mul.
+     (* f'(a) *)
         generalize (Df a); intros (l, Hl).
         intros e epos.
         destruct (Hl e epos) as (d, dpos).
