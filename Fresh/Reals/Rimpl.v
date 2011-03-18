@@ -8,7 +8,7 @@ Module RD := Coq.Reals.Rdefinitions.
 Module RA := Coq.Reals.Raxioms.
 Module RI := Coq.Reals.RIneq.
 
-Module Rimpl : Raxiom.CReals.
+Module Rimpl <: Raxiom.CReals.
   
   Definition R := RD.R.
   Definition R0 := RD.R0.
@@ -235,17 +235,101 @@ Module Rimpl : Raxiom.CReals.
   Definition Rseq_cv (Un : nat -> R) (l : R) : Type := forall eps, Rlt R0 eps ->
     {N : nat & forall n, (N <= n)%nat -> Rdist (Un n) l eps}.
   
+  Lemma R_dist : forall a b x, RD.Rlt (Rfunctions.R_dist a b) x -> Rdist a b x.
+  Proof.
+  intros.
+  unfold Rdist. unfold Rfunctions.R_dist in H. 
+  destruct (RA.total_order_T (Rdefinitions.Rminus a b) R0) as [[H1 | H1] | H1]. 
+  rewrite Rbasic_fun.Rabs_left in H; try assumption.
+  split. unfold Rsub. 
+  destruct (RA.total_order_T x R0) as [[H2 | H2] | H2]; intuition.
+  apply RA.Rlt_trans with (Rdefinitions.Ropp (Rdefinitions.Rminus a b)).
+  apply RA.Rlt_trans with R0. apply H1.
+  intuition.
+  apply H.
+  rewrite H2. apply H1.
+  apply RA.Rlt_trans with R0; intuition.
+  rewrite <- RI.Ropp_involutive. apply RI.Ropp_lt_contravar. 
+  assumption.
+  unfold Rsub. rewrite H1 in *. unfold R0 in H. rewrite Rbasic_fun.Rabs_R0 in H.
+  split. apply H. apply RI.Ropp_lt_gt_0_contravar. intuition.
+  
+  rewrite Rbasic_fun.Rabs_right in H; intuition.
+  destruct (RA.total_order_T x R0) as [[H2 | H2] | H2]. 
+  assert (RD.Rlt x x). apply RA.Rlt_trans with ((Rdefinitions.Rminus a b)).
+  apply RA.Rlt_trans with R0; intuition.
+  intuition.
+  apply RI.Rlt_irrefl in H0. destruct H0.
+  subst. unfold R0. unfold Ropp. rewrite RI.Ropp_0. assumption.
+
+  apply RA.Rlt_trans with R0. intuition.
+  intuition.
+  Qed.
+
   Lemma Rcomplete : forall Un, Rseq_Cauchy Un -> {l : R & Rseq_cv Un l}.
   Proof.
     intros u Hu.
     destruct (Coq.Reals.Rcomplete.R_complete u) as (l, Hl).
-     (* montrer que le critère ci-dessus implique celui de la stdlib *)
-     admit.
-     
+    intros eps Heps. specialize (Hu eps Heps).
+    destruct Hu as (N, Hu). exists N.
+    intros. specialize (Hu n m H H0). destruct Hu as (Hu1, Hu2).
+    unfold Rfunctions.R_dist. unfold Rbasic_fun.Rabs.
+    destruct (Rbasic_fun.Rcase_abs (Rdefinitions.Rminus (u n) (u m))).
+    rewrite <- (RI.Ropp_involutive eps). apply RI.Ropp_gt_lt_contravar. 
+    apply Hu2.
+    apply Hu1.
+     (* montrer que le critère ci-dessus implique celui de la stdlib (proof ci dessus) *)
+
+(* TODO preuve = disjonction sur le total_order puis preuve directe ou preuve de False *)     
      exists l.
-     (* montrer que la notion de convergence est impliquée par celle de la stdlib *)
-     (* attention à la destruction d'hypothèses dans Prop *)
-     admit.
+     intros eps Heps.
+     assert (Heps2 : Rlt R0 (RD.Rdiv eps (Radd R1 R1) )).
+     unfold Rlt. apply RI.Rmult_lt_0_compat. apply Heps.
+     apply RI.Rinv_0_lt_compat. intuition.
+     specialize (Hu (RD.Rdiv eps (Radd R1 R1)) Heps2).
+     destruct Hu as (N, Hu).
+     exists N. intros. specialize (Hl (RD.Rdiv eps (Radd R1 R1)) Heps2). 
+     destruct (RA.total_order_T eps (Rbasic_fun.Rabs (Rsub (u n) l))) as [H3 | H3]. 
+     assert (H4 : RD.Rle eps (Rbasic_fun.Rabs (Rsub (u n) l))).
+     destruct H3. intuition.
+     rewrite <- e. intuition.
+     assert False. destruct Hl as (N0, Hl0).
+     pose (n_spe := (Max.max N N0)).
+     assert (n_spe_t : n_spe >= N0). apply Max.le_max_r.
+     specialize (Hl0 n_spe n_spe_t).
+     assert (Rlt eps eps).
+     apply RI.Rle_lt_trans with (Rbasic_fun.Rabs (Rsub (u n) l)).
+     apply H4.
+     replace (Rsub (u n) l) with (Radd (Rsub (u n) (u n_spe)) (Rsub (u n_spe) l)).
+
+     apply RI.Rle_lt_trans with (Radd (Rbasic_fun.Rabs (Rsub (u n) (u n_spe))) (Rbasic_fun.Rabs (Rsub (u n_spe) l))).
+     apply Rbasic_fun.Rabs_triang.
+     replace eps with (Radd (RD.Rdiv eps (Radd R1 R1)) (RD.Rdiv eps (Radd R1 R1))).
+     unfold Radd. apply RI.Rplus_lt_compat.
+     assert (n_spe_r : n_spe >= N). apply Max.le_max_l.
+     specialize (Hu n n_spe H n_spe_r). unfold Rdist in Hu.
+     destruct Hu as (Hu1, Hu2).
+     unfold Rlt in Hu1, Hu2.
+     unfold Rbasic_fun.Rabs. destruct (Rbasic_fun.Rcase_abs (Rsub (u n) (u n_spe))).
+     rewrite <- RI.Ropp_involutive. apply RI.Ropp_gt_lt_contravar. apply Hu2.
+     apply Hu1.
+     apply Hl0. 
+     
+     unfold Radd, Rsub. unfold RD.Rdiv. rewrite <- RA.Rmult_plus_distr_l.
+     replace (Rdefinitions.Rplus (RD.Rinv (RD.Rplus R1 R1)) (RD.Rinv (RD.Rplus R1 R1))) with
+     (RD.Rmult (RD.Rplus R1 R1) (RD.Rinv (RD.Rplus R1 R1))).  
+     rewrite (RA.Rmult_comm (RD.Rplus _ _) _). rewrite RA.Rinv_l. intuition.
+     assert (RD.Rlt R0 2). intuition. intro. unfold R0 in *. rewrite <- H1 in H0. apply RI.Rlt_irrefl in H0. 
+     destruct H0.
+     apply RI.double.
+    
+     unfold Radd, Rsub. unfold RD.Rminus. rewrite RA.Rplus_assoc.
+     replace (Rdefinitions.Rplus (RD.Ropp (u n_spe)) (RD.Rplus (u n_spe) (RD.Ropp l))) with (RD.Ropp l).
+     reflexivity.
+     rewrite <- RA.Rplus_assoc. rewrite RI.Rplus_opp_l. intuition.
+     apply RI.Rlt_irrefl in H0. apply H0.
+     destruct H0.
+     apply R_dist. apply H3.
   Qed.
   
 End Rimpl.
