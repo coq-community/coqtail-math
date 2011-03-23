@@ -14,17 +14,157 @@ Variables f g : R -> R.
 Variables a b L : R.
 
 Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+Hypothesis (Zf : limit1_in f (D_x no_cond a) 0 a).
+Hypothesis (Zg : limit1_in g (D_x no_cond a) 0 a).
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
+Hypothesis (Hlimder : forall eps, eps > 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x a < alp -> 
+      R_dist (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)) L < eps)).
+
+(* Ancienne hypothese :
+limit1_in (fun x => derive_pt f Df x / derive g Dg x) (open_interval a b) L a).*)
+
+
+Lemma f_a_zero : f a = 0.
+Proof.
+  assert (forall x (Hclose : a <= x <= b), continuity_pt f x).
+   intros. apply Cf. now apply Hclose.
+
+   unfold continuity_pt in H. unfold continue_in in H. specialize (H a). eapply single_limit; [ | apply H | apply Zf ].
+    unfold adhDa. intros. exists (a + alp / 2). split.
+     constructor.
+      now constructor.
+
+      intro. now fourier.
+
+     unfold R_dist. ring_simplify (a + alp / 2 - a). now rewrite Rabs_right; fourier.
+
+    intuition.
+Qed.
+
+Lemma g_a_zero : g a = 0.
+Proof.
+  assert (forall x (Hclose : a <= x <= b), continuity_pt g x).
+   intros. apply Cg. now apply Hclose.
+
+   unfold continuity_pt in H. unfold continue_in in H. specialize (H a). eapply single_limit; [ | apply H | apply Zg ].
+    unfold adhDa. intros. exists (a + alp / 2). split.
+     constructor.
+      now constructor.
+
+      intro. now fourier.
+
+     unfold R_dist. ring_simplify (a + alp / 2 - a). now rewrite Rabs_right; fourier.
+
+    intuition.
+Qed.
+
+Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (open_interval a b) L a.
+Proof.
+  unfold limit1_in, limit_in. intros. specialize (Hlimder eps H). destruct Hlimder as [alp [Halp Hlim]]. exists alp. split.
+   now assumption.
+
+   intros. 
+   assert (Hacc2 : forall x, open_interval a b x ->  
+     exists c, exists Hopenc, f x / g x = derive_pt f c (Df c Hopenc) / derive_pt g c (Dg c Hopenc) /\ a < c < x).
+    generalize MVT. intros. specialize (H1 f g a x0). assert (forall c, a < c < x0 -> derivable_pt f c).
+     intros. apply Df. unfold open_interval. split.
+      now intuition.
+
+      now apply Rlt_trans with x0; unfold open_interval in H2; intuition.
+
+     assert (forall c, a < c < x0 -> derivable_pt g c).
+      intros. apply Dg. unfold open_interval. split.
+       now intuition.
+
+       now apply Rlt_trans with x0; unfold open_interval in H2; intuition.
+
+      specialize (H1 H3 H4). assert (a < x0) by (unfold open_interval in H2; intuition). 
+      assert (forall c : R, a <= c <= x0 -> continuity_pt f c).
+       intros. apply Cf. split.
+        now intuition.
+
+        unfold open_interval in H2. now apply Rle_trans with x0; intuition.
+
+       assert (forall c, a <= c <= x0 -> continuity_pt g c).
+        intros. apply Cg. split.
+         now intuition.
+
+         unfold open_interval in H2. now apply Rle_trans with x0; intuition.
+
+        specialize (H1 H5 H6 H7). destruct H1 as [c [P Hold2]]. exists c. assert (Hopenc : open_interval a b c).
+         unfold open_interval in *. split.
+          now apply P.
+
+          apply Rlt_trans with x0.
+           now apply P.
+
+           now apply H2.
+
+          exists Hopenc. split.
+           rewrite g_a_zero in Hold2. rewrite f_a_zero in Hold2. do 2 rewrite Rminus_0_r in Hold2. 
+           apply (Rmult_eq_reg_l (g x0)).
+            rewrite (pr_nu f c _ (H3 c P)). unfold Rdiv. do 2 rewrite <- Rmult_assoc. rewrite Hold2. 
+            rewrite (pr_nu g c _ (Dg c Hopenc)). field. generalize (g_not_0 c Hopenc). 
+            generalize (g_not_0 x0 H2). intros H01 H02. assert (c < b).
+             now unfold open_interval in Hopenc; destruct Hopenc; assumption.
+
+             split.
+              now apply H02.
+
+              now apply H01.
+
+             apply g_not_0. now apply H2.
+
+            now apply P.
+
+           destruct H0. specialize (Hacc2 x H0). destruct Hacc2 as [c [Hopenc Haccc]]. 
+           specialize (Hlim c). simpl in *. unfold R_dist in *. 
+           assert (open_interval a b c /\ Rabs (c - a) < alp).
+            split.
+             now apply Hopenc.
+
+             destruct Haccc. destruct H3. rewrite Rabs_right.
+              rewrite Rabs_right in H1.
+               now fourier.
+
+               now fourier.
+
+              now fourier.
+
+             specialize (Hlim Hopenc). destruct H2. specialize (Hlim H3). destruct Haccc. rewrite H4. apply Hlim.
+Qed.
+
+End FirstGenHopital.
+
+(*
+Section FirstGenHopital.
+
+Variables f g : R -> R.
+Variables a b L : R.
+
+Hypothesis Hab : a < b.
 Hypotheses (Df : derivable f) (Dg : derivable g).
 Hypotheses (Zf : limit1_in f (D_x no_cond a) 0 a).
 Hypotheses (Zg : limit1_in g (D_x no_cond a) 0 a).
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g_not_0 : forall x, open_interval a b x -> derive g Dg x <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (open_interval a b) L a).
 
 Lemma f_a_zero : f a = 0.
 Proof.
-assert (continuity f). apply derivable_continuous. apply Df. 
-unfold continuity in H. unfold continuity_pt in H. unfold continue_in in H.
-specialize (H a).
+ assert (continuity f).
+  apply derivable_continuous. apply Df.
+
+  unfold continuity in H. unfold continuity_pt in H. unfold continue_in in H. specialize (H a).
 eapply single_limit; [ | apply H | apply Zf ].
 unfold adhDa. intros. exists (a + alp / 2).
 split.
@@ -118,7 +258,7 @@ rewrite H3. apply Hlim.
 Qed.
 
 End FirstGenHopital.
-
+*)
 
 Section VerySimplHopital.
 
