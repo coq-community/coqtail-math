@@ -158,6 +158,11 @@ intros p; induction p; simpl.
   apply Rlt_0_1.
 Qed.
 
+Lemma Rdiscr_IPR_0 : forall p, IPR p ## R0.
+Proof.
+intros p; right; apply Rpos_IPR.
+Qed.
+
 Lemma IZR_lt : forall x y, (x < y)%Z -> IZR x < IZR y.
 Proof.
   intros x y xy.

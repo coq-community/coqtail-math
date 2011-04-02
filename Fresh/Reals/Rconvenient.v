@@ -206,12 +206,19 @@ Qed.
 
 Add Ring R_ring : R_ring.
 
+Lemma Rlt_eq_compat : forall x y x' y', x == x' -> y == y' -> x < y -> x' < y'.
+Proof.
+intros.
+eapply Req_lt_compat_l; eauto.
+eapply Req_lt_compat_r; eauto.
+Qed.
+
 Lemma Radd_lt_cancel_l : forall x1 x2 y : R, y + x1 < y + x2 -> x1 < x2.
 Proof.
 intros x1 x2 y Hx.
-eapply Req_lt_compat_l; [ rewrite <- Radd_0_l, <- (Radd_opp_r y), (Radd_comm y), Radd_assoc; reflexivity | ].
-eapply Req_lt_compat_r; [ rewrite <- Radd_0_l, <- (Radd_opp_r y), (Radd_comm y), Radd_assoc; reflexivity | ].
-apply Radd_lt_compat_l, Hx.
+cut (- y + (y + x1) < - y + (y + x2)).
+  apply Rlt_eq_compat; try (ring_simplify; reflexivity).
+  apply Radd_lt_compat_l, Hx.
 Qed.
 
 Lemma Rlt_opp_1_0 : - R1 < R0.
@@ -226,8 +233,8 @@ Lemma Radd_lt_cancel_r : forall x1 x2 y : R, x1 + y < x2 + y -> x1 < x2.
 Proof.
 intros x1 x2 y H.
 apply (Radd_lt_compat_l (- y)) in H.
-eapply (Req_lt_compat_l _ x1) in H; [|ring].
-eapply (Req_lt_compat_r _ x2) in H; [auto|ring].
+eapply (Req_lt_compat_l _ x1) in H; [ | ring ].
+eapply (Req_lt_compat_r _ x2) in H; [ auto | ring ].
 Qed.
 
 Lemma Rmul_0_l : forall r:R, Req (R0 * r) R0.
@@ -304,6 +311,54 @@ rewrite Radd_comm, Radd_opp_r.
 reflexivity.
 Qed.
 
+Lemma Ropp_lt_contravar : forall x y, x < y -> - y < - x.
+Proof.
+ intros x y Lxy.
+ apply (Radd_lt_cancel_r _ _ (x + y)).
+ eapply Req_lt_compat_l; [ | eapply Req_lt_compat_r; [ | apply Lxy ] ].
+   (* ; ring : Error: Tactic failure: anomaly: Find_at (level 97). *)
+   ring.
+   ring.
+Qed.
+
+Lemma Ropp_lt_contravar_reciprocal : forall x y, - y < - x -> x < y.
+Proof.
+ intros x y Lxy.
+ apply (Rlt_eq_compat (- - x) (- - y)); try (ring_simplify; reflexivity).
+    (* Again, we could use ring but we get a strange error *)
+ apply Ropp_lt_contravar; auto.
+Qed.
+
+Lemma Rlt_opp_0 : forall x, R0 < x -> - x < R0.
+Proof.
+ intros x xpos.
+ eapply Req_lt_compat_r; [ apply Ropp_0 | ].
+ apply Ropp_lt_contravar; auto.
+Qed.
+
+Lemma Rlt_0_opp : forall x, x < R0 -> R0 < - x.
+Proof.
+ intros x xpos.
+ eapply Req_lt_compat_l; [ apply Ropp_0 | ].
+ apply Ropp_lt_contravar; auto.  
+Qed.
+
+Lemma Rmul_lt_compat_neg_l : forall x y1 y2 : R, x < R0 -> y1 < y2 -> x * y2 < x * y1.
+Proof.
+ intros x; intros.
+ apply Ropp_lt_contravar_reciprocal.
+ apply (Rlt_eq_compat (- x * y1) (- x * y2)); try (ring_simplify; reflexivity).
+ apply Rmul_lt_compat_l; try apply Rlt_0_opp; auto.
+Qed.
+
+Lemma Rmul_lt_compat_neg_r : forall x y1 y2 : R, x < R0 -> y1 < y2 -> y2 * x < y1 * x.
+Proof.
+ intros x; intros.
+ apply (Req_lt_compat_l _ _ _ (Rmul_comm x _)).
+ apply (Req_lt_compat_r _ _ _ (Rmul_comm x _)).
+ apply Rmul_lt_compat_neg_l; auto.
+Qed.
+
 Lemma Ropp_add : forall a b, - (a + b) == - a - b.
 Proof.
 intros a b.
@@ -326,15 +381,10 @@ rewrite Ropp_involutive.
 apply Radd_comm.
 Qed.
 
-Lemma Rlt_0_opp : forall x, R0 < x -> - x < R0.
-Proof.
-intros x xpos.
-apply Radd_lt_cancel_l with x.
-eapply Req_lt_compat_r.
- symmetry; apply Radd_0_r.
- eapply Req_lt_compat_l.
-  symmetry; apply Radd_opp_r.
-  apply xpos.
-Qed.
+Lemma Rdiv_mul_r : forall a b (bpos : b ## R0), Rdiv a b bpos * b == a.
+Admitted.
+
+Lemma Rdiv_mul_l : forall a b (bpos : b ## R0), b * Rdiv a b bpos == a.
+Admitted.
 
 End Rconvenient.
