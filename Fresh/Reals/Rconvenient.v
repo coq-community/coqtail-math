@@ -136,6 +136,14 @@ eapply Req_lt_compat_r; try apply Radd_comm.
 apply Radd_lt_compat_l; auto.
 Qed.
 
+Lemma Radd_lt_compat : forall x1 x2 y1 y2 : R, x1 < x2 -> y1 < y2 -> x1 + y1 < x2 + y2.
+Proof.
+intros.
+eapply Rlt_trans.
+ eapply Radd_lt_compat_l; eauto.
+ eapply Radd_lt_compat_r; eauto.
+Qed.
+
 Lemma Rlt_0_2 : R0 < R1 + R1.
 Proof.
 apply Req_lt_compat_l with (R0 + R0); try apply Radd_0_l.
@@ -206,7 +214,7 @@ Qed.
 
 Add Ring R_ring : R_ring.
 
-Lemma Rlt_eq_compat : forall x y x' y', x == x' -> y == y' -> x < y -> x' < y'.
+Lemma Req_lt_compat : forall x y x' y', x == x' -> y == y' -> x < y -> x' < y'.
 Proof.
 intros.
 eapply Req_lt_compat_l; eauto.
@@ -217,7 +225,7 @@ Lemma Radd_lt_cancel_l : forall x1 x2 y : R, y + x1 < y + x2 -> x1 < x2.
 Proof.
 intros x1 x2 y Hx.
 cut (- y + (y + x1) < - y + (y + x2)).
-  apply Rlt_eq_compat; try (ring_simplify; reflexivity).
+  apply Req_lt_compat; try (ring_simplify; reflexivity).
   apply Radd_lt_compat_l, Hx.
 Qed.
 
@@ -324,7 +332,7 @@ Qed.
 Lemma Ropp_lt_contravar_reciprocal : forall x y, - y < - x -> x < y.
 Proof.
  intros x y Lxy.
- apply (Rlt_eq_compat (- - x) (- - y)); try (ring_simplify; reflexivity).
+ apply (Req_lt_compat (- - x) (- - y)); try (ring_simplify; reflexivity).
     (* Again, we could use ring but we get a strange error *)
  apply Ropp_lt_contravar; auto.
 Qed.
@@ -347,7 +355,7 @@ Lemma Rmul_lt_compat_neg_l : forall x y1 y2 : R, x < R0 -> y1 < y2 -> x * y2 < x
 Proof.
  intros x; intros.
  apply Ropp_lt_contravar_reciprocal.
- apply (Rlt_eq_compat (- x * y1) (- x * y2)); try (ring_simplify; reflexivity).
+ apply (Req_lt_compat (- x * y1) (- x * y2)); try (ring_simplify; reflexivity).
  apply Rmul_lt_compat_l; try apply Rlt_0_opp; auto.
 Qed.
 
@@ -382,9 +390,15 @@ apply Radd_comm.
 Qed.
 
 Lemma Rdiv_mul_r : forall a b (bpos : b ## R0), Rdiv a b bpos * b == a.
-Admitted.
+Proof.
+intros a b bpos.
+unfold Rdiv.
+rewrite Rmul_assoc, Rinv_l, Rmul_1_r; reflexivity.
+Qed.
 
 Lemma Rdiv_mul_l : forall a b (bpos : b ## R0), b * Rdiv a b bpos == a.
-Admitted.
+Proof.
+intros; rewrite Rmul_comm; apply Rdiv_mul_r.
+Qed.
 
 End Rconvenient.

@@ -32,7 +32,7 @@ Proof.
  intros e epos; destruct (Lab e epos) as (ab, ba).
  split; [ | now intuition ].
  apply Ropp_lt_contravar_reciprocal.
- eapply Rlt_eq_compat; [ .. | apply ba ]; ring_simplify; reflexivity.
+ eapply Req_lt_compat; [ .. | apply ba ]; ring_simplify; reflexivity.
 Qed.
 
 Lemma Rmul_2 : forall x, x + x == IPR 2 * x.
@@ -47,7 +47,7 @@ Lemma halfpos : forall e, R0 < e -> sigT (fun e' => prod (R0 < e') (e == e' + e'
  exists (Rdiv e (IPR 2) (Rdiscr_IPR_0 2)); split.
   apply Rmul_lt_cancel_l with (IPR 2).
    apply Rpos_IPR.
-   apply (Rlt_eq_compat R0 e); auto.
+   apply (Req_lt_compat R0 e); auto.
      ring_simplify; reflexivity (* TODO ring bug again *).
      symmetry; apply Rdiv_mul_l.
   rewrite Rmul_2.
