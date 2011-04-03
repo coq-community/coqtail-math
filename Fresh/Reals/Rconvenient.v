@@ -144,6 +144,15 @@ eapply Rlt_trans.
  eapply Radd_lt_compat_r; eauto.
 Qed.
 
+Lemma Radd_le_compat_l : forall x y1 y2 : R, y1 <= y2 -> x + y1 <= x + y2.
+Admitted.
+
+Lemma Radd_le_compat_r : forall x y1 y2 : R, y1 <= y2 -> y1 + x <= y2 + x.
+Admitted.
+
+Lemma Radd_le_compat : forall x1 x2 y1 y2 : R, x1 <= x2 -> y1 <= y2 -> x1 + y1 <= x2 + y2.
+Admitted.
+
 Lemma Rlt_0_2 : R0 < R1 + R1.
 Proof.
 apply Req_lt_compat_l with (R0 + R0); try apply Radd_0_l.
@@ -221,6 +230,9 @@ eapply Req_lt_compat_l; eauto.
 eapply Req_lt_compat_r; eauto.
 Qed.
 
+Lemma Req_le_compat : forall x y x' y', x == x' -> y == y' -> x <= y -> x' <= y'.
+Admitted.
+
 Lemma Radd_lt_cancel_l : forall x1 x2 y : R, y + x1 < y + x2 -> x1 < x2.
 Proof.
 intros x1 x2 y Hx.
@@ -228,6 +240,9 @@ cut (- y + (y + x1) < - y + (y + x2)).
   apply Req_lt_compat; try (ring_simplify; reflexivity).
   apply Radd_lt_compat_l, Hx.
 Qed.
+
+Lemma Radd_le_cancel_l : forall x1 x2 y : R, y + x1 <= y + x2 -> x1 <= x2.
+Admitted.
 
 Lemma Rlt_opp_1_0 : - R1 < R0.
 Proof.
@@ -244,6 +259,9 @@ apply (Radd_lt_compat_l (- y)) in H.
 eapply (Req_lt_compat_l _ x1) in H; [ | ring ].
 eapply (Req_lt_compat_r _ x2) in H; [ auto | ring ].
 Qed.
+
+Lemma Radd_le_cancel_r : forall x1 x2 y : R, x1 + y <= x2 + y -> x1 <= x2.
+Admitted.
 
 Lemma Rmul_0_l : forall r:R, Req (R0 * r) R0.
 Proof.
@@ -294,6 +312,9 @@ Proof.
  apply Rmul_lt_compat_l; subst; auto.
 Qed.
 
+Lemma Rmul_le_cancel_l : forall x y1 y2 : R, R0 < x -> x * y1 <= x * y2 -> y1 <= y2.
+Admitted.
+
 Lemma Rmul_lt_cancel_r : forall x1 x2 y : R, R0 < y -> x1 * y < x2 * y -> x1 < x2.
 Proof.
 intros x1 x2 y Hpos H.
@@ -302,6 +323,9 @@ eapply Req_lt_compat_r in H; [|apply Rmul_comm].
 apply Rmul_lt_cancel_l in H; auto.
 Qed.
 
+Lemma Rmul_le_cancel_r : forall x1 x2 y : R, R0 < y -> x1 * y <= x2 * y -> x1 <= x2.
+Admitted.
+
 Lemma Rmul_lt_compat_r : forall x y1 y2 : R, R0 < x -> y1 < y2 -> y1 * x < y2 * x.
 Proof.
  intros x; intros.
@@ -309,6 +333,9 @@ Proof.
  apply (Req_lt_compat_r _ _ _ (Rmul_comm x _)).
  apply Rmul_lt_compat_l; auto.
 Qed.
+
+Lemma Rmul_le_compat_r : forall x y1 y2 : R, R0 <= x -> y1 <= y2 -> y1 * x <= y2 * x.
+Admitted.
 
 Lemma Ropp_involutive : forall x, - - x == x.
 Proof.
@@ -329,6 +356,9 @@ Proof.
    ring.
 Qed.
 
+Lemma Ropp_le_contravar : forall x y, x <= y -> - y <= - x.
+Admitted.
+
 Lemma Ropp_lt_contravar_reciprocal : forall x y, - y < - x -> x < y.
 Proof.
  intros x y Lxy.
@@ -337,6 +367,9 @@ Proof.
  apply Ropp_lt_contravar; auto.
 Qed.
 
+Lemma Ropp_le_contravar_reciprocal : forall x y, - y <= - x -> x <= y.
+Admitted.
+
 Lemma Rlt_opp_0 : forall x, R0 < x -> - x < R0.
 Proof.
  intros x xpos.
@@ -344,12 +377,18 @@ Proof.
  apply Ropp_lt_contravar; auto.
 Qed.
 
+Lemma Rle_opp_0 : forall x, R0 <= x -> - x <= R0.
+Admitted.
+
 Lemma Rlt_0_opp : forall x, x < R0 -> R0 < - x.
 Proof.
  intros x xpos.
  eapply Req_lt_compat_l; [ apply Ropp_0 | ].
  apply Ropp_lt_contravar; auto.  
 Qed.
+
+Lemma Rle_0_opp : forall x, x <= R0 -> R0 <= - x.
+Admitted.
 
 Lemma Rmul_lt_compat_neg_l : forall x y1 y2 : R, x < R0 -> y1 < y2 -> x * y2 < x * y1.
 Proof.
@@ -359,6 +398,9 @@ Proof.
  apply Rmul_lt_compat_l; try apply Rlt_0_opp; auto.
 Qed.
 
+Lemma Rmul_le_compat_neg_l : forall x y1 y2 : R, x <= R0 -> y1 <= y2 -> x * y2 <= x * y1.
+Admitted.
+
 Lemma Rmul_lt_compat_neg_r : forall x y1 y2 : R, x < R0 -> y1 < y2 -> y2 * x < y1 * x.
 Proof.
  intros x; intros.
@@ -366,6 +408,9 @@ Proof.
  apply (Req_lt_compat_r _ _ _ (Rmul_comm x _)).
  apply Rmul_lt_compat_neg_l; auto.
 Qed.
+
+Lemma Rmul_le_compat_neg_r : forall x y1 y2 : R, x <= R0 -> y1 <= y2 -> y2 * x <= y1 * x.
+Admitted.
 
 Lemma Ropp_add : forall a b, - (a + b) == - a - b.
 Proof.
@@ -400,5 +445,25 @@ Lemma Rdiv_mul_l : forall a b (bpos : b ## R0), b * Rdiv a b bpos == a.
 Proof.
 intros; rewrite Rmul_comm; apply Rdiv_mul_r.
 Qed.
+
+Lemma Rinv_pos_compat : forall x (p : R0 < x) (p' : x ## R0), R0 < Rinv x p'.
+Proof.
+intros x xp xd.
+apply Rmul_lt_cancel_l with x.
+ auto.
+ apply (Req_lt_compat R0 R1).
+  ring_simplify; reflexivity.
+  rewrite Rinv_r; reflexivity.
+  apply Rlt_0_1.
+Qed.
+
+Lemma Req_le_compat_l : forall x1 x2 y : R, x1 == x2 -> x1 <= y -> x2 <= y.
+Admitted.
+
+Lemma Req_le_compat_r : forall x1 x2 y : R, x1 == x2 -> y <= x1 -> y <= x2.
+Admitted.
+
+Lemma Rmul_le_compat_l : forall x y1 y2 : R, R0 <= x -> y1 <= y2 -> x * y1 <= x * y2.
+Admitted.
 
 End Rconvenient.
