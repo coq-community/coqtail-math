@@ -14,34 +14,31 @@ Module Rapprox (Import T : CReals).
   
   Definition Rseq_approx : R -> Rseq := fun x n => ((IZR (Zapprox x n)) / po n) (pop n).
   
-
-Lemma Ppow2_double : forall x, (Zpos (Ppow2 (S x)) = 2 * Zpos (Ppow2 x))%Z.
-Proof.
-reflexivity.
-Qed.
-
-(* TODO Jm replace *)
-(* TODO attention efficacité ? Est ce qu'on s'en fout *)
-Lemma Zle_Ppow2 : forall p, (Zpos (p + 1) <= Zpos (Ppow2 (Zabs_nat (Zpos p))))%Z.
-Proof.
-intros.
-rewrite Zpos_plus_distr.
-replace (Zpos p + 1)%Z with ((Z_of_nat (nat_of_P p)) + 1)%Z.
-simpl.
-induction (nat_of_P p). simpl. intuition.
-rewrite Ppow2_double. apply Zle_trans with (2* (Z_of_nat n + 1))%Z.
-zify; omega.
-zify; omega.
-rewrite <- Zpos_eq_Z_of_nat_o_nat_of_P. reflexivity.
-Qed.
-
-Lemma Zpos_Ppow2_increasing : forall n m, (n <= m)%nat -> (Zpos (Ppow2 n) <= Zpos (Ppow2 m))%Z.
-Proof.
-intros n m Hnm.
-induction Hnm. omega.
- eapply Zle_trans; [apply IHHnm | ].
- simpl. zify; omega.
-Qed.
+  
+  Lemma Ppow2_double : forall x, (Zpos (Ppow2 (S x)) = 2 * Zpos (Ppow2 x))%Z.
+  Proof.
+    reflexivity.
+  Qed.
+  
+  Lemma Zle_S_Ppow2 : forall p, (Zpos (p + 1) <= Zpos (Ppow2 (Zabs_nat (Zpos p))))%Z.
+  Proof.
+    intros.
+    rewrite Zpos_plus_distr.
+    replace (Zpos p + 1)%Z with ((Z_of_nat (nat_of_P p)) + 1)%Z.
+      simpl.
+      induction (nat_of_P p).
+        simpl. intuition.
+        rewrite Ppow2_double. apply Zle_trans with (2* (Z_of_nat n + 1))%Z; zify; omega.
+        rewrite <- Zpos_eq_Z_of_nat_o_nat_of_P. reflexivity.
+  Qed.
+  
+  Lemma Zpos_Ppow2_increasing : forall n m, (n <= m)%nat -> (Zpos (Ppow2 n) <= Zpos (Ppow2 m))%Z.
+  Proof.
+    intros n m Hnm.
+    induction Hnm. omega.
+    eapply Zle_trans; [apply IHHnm | ].
+    simpl. zify; omega.
+  Qed.
 
   Lemma extract_eps : forall e, R0 < e -> sigT (fun N => forall n, le N n -> Rinv (po n) (pop n) < e).
   Proof.
@@ -80,7 +77,7 @@ Qed.
               destruct r as [ | p | p ].
                 simpl; now auto with *.
                 
-                apply Zle_Ppow2.
+                apply Zle_S_Ppow2.
                 
                 apply Zle_trans with 1%Z; zify; omega.
               

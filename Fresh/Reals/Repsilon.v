@@ -48,7 +48,7 @@ Lemma halfpos : forall e, R0 < e -> sigT (fun e' => prod (R0 < e') (e == e' + e'
   apply Rmul_lt_cancel_l with (IPR 2).
    apply Rpos_IPR.
    apply (Req_lt_compat R0 e); auto.
-     ring_simplify; reflexivity (* TODO ring bug again *).
+     simpl SetoidClass.equiv; ring (* "SetoidClass.equiv" n'est pas reconnu par "ring", en fait *).
      symmetry; apply Rdiv_mul_l.
   rewrite Rmul_2.
   symmetry; apply Rdiv_mul_l.

@@ -161,7 +161,6 @@ Proof.
    right. apply Radd_eq_compat_r. assumption.
 Qed.
 
-(* TODO JM regarder convention de nommage *)
 Lemma Radd_lt_le_compat : forall x1 x2 y1 y2 : R, x1 < x2 -> y1 <= y2 -> x1 + y1 < x2 + y2.
 Proof.
   intros x1 x2 y1 y2 H1 H2. apply Rlt_le_trans with (x2 + y1).
@@ -170,7 +169,6 @@ Proof.
    apply Radd_le_compat_l. apply H2.
 Qed.
 
-(* TODO JM regarder l'utilité *)
 Lemma Radd_le_lt_compat : forall x1 x2 y1 y2 : R, x1 <= x2 -> y1 < y2 -> x1 + y1 < x2 + y2.
 Proof.
   intros x1 x2 y1 y2 H1 H2. apply Rle_lt_trans with (x2 + y1).
@@ -313,18 +311,11 @@ eapply (Req_lt_compat_l _ x1) in H; [ | ring ].
 eapply (Req_lt_compat_r _ x2) in H; [ auto | ring ].
 Qed.
 
-(* TODO Jm check convention de nommage *)
-Lemma Req_add_cancel_l : forall x y1 y2, (x + y1 == x + y2) -> (y1 == y2).
+Lemma Radd_eq_cancel_l : forall x y1 y2, (x + y1 == x + y2) -> (y1 == y2).
 Proof.
   intros x y1 y2 H1. apply (Radd_eq_compat_l (-x)) in H1. ring_simplify in H1. apply H1.
 Qed.
 
-(* TODO Jm check convention de nommage *)
-Lemma Req_add_cancel_r : forall x y1 y2, (y1 + x == y2 + x) -> (y1 == y2).
-Proof.
-  intros x y1 y2 H1. apply (Radd_eq_compat_l (-x)) in H1. ring_simplify in H1. apply H1.
-Qed.
- 
 Lemma Radd_le_cancel_r : forall x1 x2 y : R, x1 + y <= x2 + y -> x1 <= x2.
 Proof.
   intros x1 x2 y H. destruct H.
