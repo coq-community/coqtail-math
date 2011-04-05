@@ -39,8 +39,8 @@ Module Rapprox (Import T : CReals).
     eapply Zle_trans; [apply IHHnm | ].
     simpl. zify; omega.
   Qed.
-
-  Lemma extract_eps : forall e, R0 < e -> sigT (fun N => forall n, le N n -> Rinv (po n) (pop n) < e).
+  
+  Lemma Rpos_witness : forall e, R0 < e -> sigT (fun N => forall n, le N n -> Rinv (po n) (pop n) < e).
   Proof.
     intros e epos.
     assert (de : e ## R0) by (right; auto).
@@ -89,7 +89,7 @@ Module Rapprox (Import T : CReals).
   Lemma Rseq_cv_approx : forall x, Rseq_cv (Rseq_approx x) x.
   Proof.
     intros x e epos.
-    destruct (extract_eps e epos) as (N, HN).
+    destruct (Rpos_witness e epos) as (N, HN).
     exists N; intros n Hn.
     unfold Rdist, Rseq_approx, Zapprox.
     destruct (Rup_spec (x * po n)) as (re, er).
