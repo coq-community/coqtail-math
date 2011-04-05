@@ -263,76 +263,104 @@ Hypothesis (Hlimder : forall eps, eps > 0 ->
 
 Theorem Hopital_finite_zero_weak_left : limit1_in (fun x => f x / g x) (open_interval a b) L b.
 Proof.
-apply limit1_ext with (comp (fun x => f (-x) / g (-x)) (fun x => -x)).
-intros. unfold comp. ring_simplify (--x). reflexivity.
-apply limit1_imp with (Dgf (open_interval a b) (open_interval (-b) (-a)) (fun x => - x)).
-intros. unfold Dgf. split. apply H.
-destruct H; split; fourier.
-apply limit_comp with (-b).
-unfold limit1_in, limit_in. intros. exists eps. split. assumption. intros. destruct H0.
-unfold dist in *. simpl in *. destruct H0. unfold R_dist in *. replace (- x -- b) with (- (x - b)) by ring.
-rewrite Rabs_Ropp. apply H1.
-
-assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
-intros. reg. apply Df. destruct H; split; fourier.
-assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
-intros. reg. apply Dg. destruct H; split; fourier.
-
-apply Hopital_finite_zero_weak with Df' Dg'.
-intuition.
-intros. reg. apply Cf. destruct H; split; fourier. 
-intros. reg. apply Cg. destruct H; split; fourier. 
-
-unfold limit1_in, limit_in in *. intros eps Heps.
-specialize (Zf eps Heps). destruct Zf as [alp [Halp Hsolve]].
-exists alp. split. assumption. intros x H.
-specialize (Hsolve (-x)). assert (H1 : open_interval a b (- x) /\ dist R_met (- x) b < alp).
-split. destruct H. destruct H; split; fourier.
-unfold dist in *. simpl in *. destruct H. unfold R_dist in *.
-replace (-x - b) with (- (x -- b)) by ring.
-rewrite Rabs_Ropp. apply H0.
-apply Hsolve. apply H1.
-
-unfold limit1_in, limit_in in *. intros eps Heps.
-specialize (Zg eps Heps). destruct Zg as [alp [Halp Hsolve]].
-exists alp. split. assumption. intros x H.
-specialize (Hsolve (-x)). assert (H1 : open_interval a b (- x) /\ dist R_met (- x) b < alp).
-split. destruct H. destruct H; split; fourier.
-unfold dist in *. simpl in *. destruct H. unfold R_dist in *.
-replace (-x - b) with (- (x -- b)) by ring.
-rewrite Rabs_Ropp. apply H0.
-apply Hsolve. apply H1.
-
-intros. 
-assert (Hopen2: open_interval a b (-x)). destruct Hopen; split; fourier.
-destruct (g_not_0 (-x) Hopen2).
-split. 
-assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) Hopen2)).
-reg. apply Ropp_eq_compat. apply pr_nu. apply Dg. apply Hopen2.
-rewrite H1. intro. apply H. replace 0 with (-0) in H2 by ring. apply Ropp_eq_compat in H2.  
-ring_simplify in H2. apply H2. 
-apply H0.
-intros eps Heps.
-specialize (Hlimder eps Heps).
-destruct Hlimder as [alp [Halp Hsolve]].
-exists alp. split. assumption. intros.
-assert (open_interval a b (-x)). destruct Hopen; split; fourier.
-assert (R_dist (-x) b < alp). unfold R_dist in *. 
-replace (- x - b) with (- (x -- b)) by ring.
-rewrite Rabs_Ropp. apply H.
-specialize (Hsolve (-x) H0 H1).
-assert (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen) = - derive_pt f (- x) (Df (- x) H0) ).
-reg. apply Ropp_eq_compat. apply pr_nu.
-apply Df. destruct Hopen; split; fourier.
-assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) H0) ).
-reg. apply Ropp_eq_compat. apply pr_nu.
-apply Dg. destruct Hopen; split; fourier.
-rewrite H2. rewrite H3.
-replace (- derive_pt f (- x) (Df (- x) H0) / - derive_pt g (- x) (Dg (- x) H0)) with
+  apply limit1_ext with (comp (fun x => f (-x) / g (-x)) (fun x => -x)).
+   intros. unfold comp. ring_simplify (--x). now reflexivity.
+   
+   apply limit1_imp with (Dgf (open_interval a b) (open_interval (-b) (-a)) (fun x => - x)).
+    intros. unfold Dgf. split.
+     now apply H.
+     
+     now destruct H; split; fourier.
+  
+  apply limit_comp with (-b).
+   unfold limit1_in, limit_in. intros. exists eps. split.
+    now assumption.
+    
+    intros. destruct H0. unfold dist in *. simpl in *. destruct H0. unfold R_dist in *.
+    replace (- x -- b) with (- (x - b)) by ring. rewrite Rabs_Ropp. now apply H1.
+  
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    
+    apply Hopital_finite_zero_weak with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+     
+     unfold limit1_in, limit_in in *. intros eps Heps. specialize (Zf eps Heps). destruct Zf as [alp [Halp Hsolve]].
+     exists alp. split.
+      now assumption.
+      
+      intros x H. specialize (Hsolve (-x)). assert (H1 : open_interval a b (- x) /\ dist R_met (- x) b < alp).
+       split.
+        destruct H. now destruct H; split; fourier.
+        
+        unfold dist in *. simpl in *. destruct H. unfold R_dist in *. replace (-x - b) with (- (x -- b)) by ring.
+        rewrite Rabs_Ropp. now apply H0.
+     
+     apply Hsolve. now apply H1.
+     
+     unfold limit1_in, limit_in in *. intros eps Heps. specialize (Zg eps Heps). destruct Zg as [alp [Halp Hsolve]].
+     exists alp. split.
+      now assumption.
+      
+      intros x H. specialize (Hsolve (-x)). assert (H1 : open_interval a b (- x) /\ dist R_met (- x) b < alp).
+       split.
+        destruct H. now destruct H; split; fourier.
+        
+        unfold dist in *. simpl in *. destruct H. unfold R_dist in *. replace (-x - b) with (- (x -- b)) by ring.
+        rewrite Rabs_Ropp. now apply H0.
+     
+     apply Hsolve. now apply H1.
+     
+     intros. assert (Hopen2: open_interval a b (-x)).
+      now destruct Hopen; split; fourier.
+      
+      destruct (g_not_0 (-x) Hopen2). split.
+       assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) Hopen2)).
+        reg.
+         apply Ropp_eq_compat. now apply pr_nu.
+         
+         apply Dg. now apply Hopen2.
+       
+       rewrite H1. intro. apply H. replace 0 with (-0) in H2 by ring. apply Ropp_eq_compat in H2.
+       ring_simplify in H2. now apply H2.
+       
+       now apply H0.
+  
+  intros eps Heps. specialize (Hlimder eps Heps). destruct Hlimder as [alp [Halp Hsolve]].
+  exists alp. split.
+   now assumption.
+   
+   intros. assert (open_interval a b (-x)).
+    now destruct Hopen; split; fourier.
+    
+    assert (R_dist (-x) b < alp).
+     unfold R_dist in *. replace (- x - b) with (- (x -- b)) by ring. rewrite Rabs_Ropp.
+     now apply H.
+     
+     specialize (Hsolve (-x) H0 H1). assert (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen) = - derive_pt f (- x) (Df (- x) H0) ).
+      reg.
+       apply Ropp_eq_compat. now apply pr_nu.
+       
+       apply Df. now destruct Hopen; split; fourier.
+  
+  assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) H0) ).
+   reg.
+    apply Ropp_eq_compat. now apply pr_nu.
+    
+    apply Dg. now destruct Hopen; split; fourier.
+  
+  rewrite H2. rewrite H3. replace (- derive_pt f (- x) (Df (- x) H0) / - derive_pt g (- x) (Dg (- x) H0)) with
  (derive_pt f (- x) (Df (- x) H0) / derive_pt g (- x) (Dg (- x) H0)).
-apply Hsolve.
-field.
-apply g_not_0.
+   now apply Hsolve.
+   
+   field. apply g_not_0.
 Qed.
 
 End FirstGenHopital_left.
