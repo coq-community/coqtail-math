@@ -20,7 +20,7 @@ Module Rorder (Import T : CReals).
   Section weak_constructive_eps.
     Variable P : nat -> Prop.
     Hypothesis P_upwards_closed : forall n : nat, P n -> P (S n).
-    Hypothesis P_weak_decidable : forall n : nat, {P n} + {~ P (S n)}.
+    Hypothesis P_weak_decidable : forall n : nat, {P (S n)} + {~ P n}.
     
     Let R (x y : nat) : Prop := x = S (S y) /\ ~ P y.
     
@@ -58,7 +58,7 @@ Module Rorder (Import T : CReals).
       apply (@Fix_F _ R); auto.
       clear HO; intros x IHx.
       destruct (P_weak_decidable x) as [ px | npx ].
-        exists x; auto.
+        exists (S x); auto.
         assert (Rx : R (S (S x)) x); unfold R; eauto.
     Qed.
     
@@ -68,6 +68,5 @@ Module Rorder (Import T : CReals).
     Qed.
   
   End weak_constructive_eps.
-  
   
 End Rorder.
