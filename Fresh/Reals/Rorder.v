@@ -90,7 +90,9 @@ Module Rorder (Import T : CReals).
             unfold xn, po; simpl; ring.
             ring.
             apply Rlt_trans with (R1 + IZR zn).
-              admit (* uxn *).
+              apply (Radd_lt_compat_r (IZR zn)) in uxn. 
+              apply Rle_lt_trans with (xn - IZR zn + IZR zn).
+              right. ring. apply uxn.
               
               change (IZR 1 + IZR zn < IZR 4).
               eapply Req_lt_compat_l; [ apply IZR_add | ].
@@ -108,7 +110,9 @@ Module Rorder (Import T : CReals).
               eapply Req_lt_compat_r; [ apply IZR_sub | ].
               apply IZR_lt; omega.
               
-              admit (* lxn *).
+              apply (Radd_lt_compat_l (IZR zn)) in lxn. 
+              apply Rlt_le_trans with (IZR zn + (xn - IZR zn)). 
+              apply lxn. right. ring.
         
         (* both right and left? *)
         subst.
@@ -126,11 +130,11 @@ Module Rorder (Import T : CReals).
               
               ring_simplify.
               apply Radd_eq_compat_l.
-              admit (* -3 = -3 *).
+               unfold IZR, IPR. ring.
     Qed.
     
     Lemma sigT_pos_nat : sigT pos_nat.
-    proof.
+    Proof.
      
       apply exT_sigT.
         apply pos_nat_weak_decidable.

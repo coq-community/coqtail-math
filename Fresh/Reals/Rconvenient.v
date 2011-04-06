@@ -611,6 +611,14 @@ Proof.
 Qed.
 
 Lemma Radd_pos_compat : forall x y, R0 < x -> R0 < y -> R0 < x + y.
-Admitted.
+Proof.
+  intros. apply Rle_lt_trans with (R0 + R0).
+   right. now ring.
+   
+   apply Rlt_trans with (x + R0).
+    apply Radd_lt_compat_r. now assumption.
+    
+    apply Radd_lt_compat_l. assumption.
+Qed.
 
 End Rconvenient.

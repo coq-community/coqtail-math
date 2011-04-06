@@ -68,6 +68,7 @@ Proof.
   reflexivity.
 Qed.
 
+
 Lemma Zopp_swap : forall a b, Zopp a = b -> a = Zopp b.
 Proof.
   intros a b H; rewrite <- H; ring.
@@ -139,7 +140,9 @@ Proof.
 Qed.
 
 Lemma IZR_sub : forall x y, IZR (x - y) == IZR x - IZR y.
-Admitted.
+Proof.
+  intros a b. unfold Zminus. unfold Rsub. rewrite IZR_add. rewrite IZR_Zopp. ring.
+Qed.
 
 Lemma Rpos_IPR : forall p, R0 < IPR p.
 Proof.
