@@ -138,6 +138,9 @@ Proof.
   apply Ropp_add.
 Qed.
 
+Lemma IZR_sub : forall x y, IZR (x - y) == IZR x - IZR y.
+Admitted.
+
 Lemma Rpos_IPR : forall p, R0 < IPR p.
 Proof.
 intros p; induction p; simpl.

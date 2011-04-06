@@ -610,5 +610,7 @@ Proof.
   right. rewrite <- r. ring.
 Qed.
 
+Lemma Radd_pos_compat : forall x y, R0 < x -> R0 < y -> R0 < x + y.
+Admitted.
 
 End Rconvenient.
