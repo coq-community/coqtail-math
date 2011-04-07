@@ -1,3 +1,4 @@
+Require Import Rsequence Rsequence_sums_facts.
 Require Import Rpser_def Rpser_facts Rpser_usual.
 Require Import Rfunction_facts Rextensionality.
 Require Import C_n_def C_n_facts.
@@ -11,8 +12,7 @@ Local Open Scope R_scope.
 Fixpoint max_y_se (s : side_equa) : nat := match s with
   | y _ p      => p
   | opp s      => max_y_se s
-  | plus s1 s2
-  | mult s1 s2 => max (max_y_se s1) (max_y_se s2)
+  | plus s1 s2 => max (max_y_se s1) (max_y_se s2)
   | _ => O
 end.
 
@@ -85,25 +85,6 @@ intro s ; induction s ; intros l n n_lb x ; simpl in *.
   reflexivity.
   reflexivity.
   reflexivity.
-
- destruct_eq (interp_side_equa_in_R2 s1 l) ;
- destruct_eq (interp_side_equa_in_R2 s2 l) ;
- destruct_eq (interp_side_equa_in_R s1 (map (fun cinf : Cinfty =>
- existT Cn n (Cinfty_to_Cn cinf n)) l)) ;
- destruct_eq (interp_side_equa_in_R s2 (map (fun cinf : Cinfty =>
- existT Cn n (Cinfty_to_Cn cinf n)) l)) ;
- assert (n_lb1 : (max_y_se s1 <= n)%nat) by (eapply le_trans ;
- [ | eapply n_lb] ; apply le_max_l) ;
- assert (n_lb2 : (max_y_se s2 <= n)%nat) by (eapply le_trans ;
- [ | eapply n_lb] ; apply le_max_r) ;
- assert (Hrew1 := IHs1 l _ n_lb1 x) ;
- assert (Hrew2 := IHs2 l _ n_lb2 x) ;
- symmetry in Heqb, Heqb0, Heqb1, Heqb2 ; rewrite Heqb, Heqb1 in Hrew1 ;
- rewrite Heqb0, Heqb2 in Hrew2 ; inversion Hrew1 ; inversion Hrew2.
-  compute ; do 2 f_equal ; assumption.
-  reflexivity.
-  reflexivity.
-  reflexivity.
 Qed.
 
 Lemma interp_in_R2_R : forall (e : diff_equa) (l : list Cinfty),
@@ -149,3 +130,67 @@ intros e l Heq ; pose (p := max_y e) ;
  exists (map (fun cinf => existT _ p (Cinfty_to_Cn cinf p)) l) ;
  apply interp_in_R2_R.
 Qed.
+
+Definition OptionArg {A B : Type} (f : A -> B) (a : option A) : option B :=
+match a with
+  | Some x => Some (f x)
+  | None => None
+end.
+
+Lemma interp_side_equa_in_N_SN : forall (s : side_equa) (l : list Rseq) (n : nat) (x : R),
+  OptionArg (fun e => Rseq_pps e x n) (interp_side_equa_in_N s l)
+  = OptionApp (OptionApp (interp_side_equa_in_SN s l) n) x.
+Proof.
+intros s l n x ; induction s.
+
+ simpl ; f_equal.
+ 
+ simpl ; destruct (nth_error l p) as [un |] ; reflexivity.
+
+ simpl ; destruct (interp_side_equa_in_N s l) ;
+  destruct (interp_side_equa_in_SN s l) ; simpl in * ;
+  inversion IHs as [Heq ].
+   rewrite Rseq_pps_opp_compat ; unfold Rseq_opp ;
+    rewrite Heq ; reflexivity.
+   reflexivity.
+
+ simpl ; destruct (interp_side_equa_in_N s1 l) ;
+  destruct (interp_side_equa_in_SN s1 l) ; simpl in * ;
+  inversion IHs1 as [Heq1 ] ; destruct (interp_side_equa_in_N s2 l) ;
+  destruct (interp_side_equa_in_SN s2 l) ; simpl in * ;
+  inversion IHs2 as [Heq2 ] ; try reflexivity.
+ rewrite Rseq_pps_plus_compat ; unfold Rseq_plus, plus_fct ;
+ rewrite Heq1, Heq2 ; reflexivity.
+Qed.
+
+Lemma interp_equa_in_N_SN : forall (e : diff_equa) (l : list Rseq),
+  [| e |]N l -> [| e |]SN l.
+Proof.
+intros [s1 s2] l Heq ; simpl in * ;
+ assert (H1 := interp_side_equa_in_N_SN s1 l) ;
+ assert (H2 := interp_side_equa_in_N_SN s2 l).
+ 
+ destruct (interp_side_equa_in_N s1 l).
+  destruct (interp_side_equa_in_N s2 l).
+   destruct (interp_side_equa_in_SN s1 l).
+    destruct (interp_side_equa_in_SN s2 l).
+    simpl in * ; intros n x ;
+     assert (H1' := H1 n x) ; inversion_clear H1' ;
+     assert (H2' := H2 n x) ; inversion_clear H2' ;
+     apply Rseq_pps_ext ; assumption.
+    assert (H2' := H2 O 0) ; inversion H2'.
+   assert (H1' := H1 O 0) ; inversion H1'.
+  destruct Heq.
+ destruct Heq.
+Qed.
+      
+ 
+  
+
+
+
+  
+ 
+  
+  
+

@@ -42,17 +42,17 @@ Module Rorder (Import T : CReals).
         tauto.
     Qed.
     
-    Corollary exT_Acc_0 : exT P -> Acc R 0.
+    Corollary exT_Acc_0 : exT P -> Acc R O.
     Proof.
       intros (n, Hn).
       apply (P_later_Acc n).
       rewrite <- plus_n_O; assumption.
     Qed.
     
-    Lemma Acc_0_sigT : Acc R 0 -> sigT P.
+    Lemma Acc_0_sigT : Acc R 0%nat -> sigT P.
     Proof.
       intros HO.
-      pattern 0.
+      pattern O.
       apply (@Fix_F _ R); auto.
       clear HO; intros x IHx.
       destruct (P_weak_decidable x) as [ px | npx ].

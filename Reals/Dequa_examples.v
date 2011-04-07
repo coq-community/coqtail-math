@@ -73,14 +73,18 @@ induction l.
 Defined.
 
 (*
-Lemma side_sequences_functions : forall (s : side_equa) (l : list Rseq)
- (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n))
- 
 Lemma diff_sequences_functions : forall (e : diff_equa) (l : list Rseq)
   (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)),
   [| e |]N l ->
   [| e |]R2 (corresponding_Rpser l cvl).
 Proof.
+intros [s1 s2] l cvl Heq.
+ destruct s1.
+ simpl in *.
 
 Qed.
+
+Lemma side_sequences_functions : forall (s : side_equa) (l : list Rseq)
+ (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n))
+
 *)
