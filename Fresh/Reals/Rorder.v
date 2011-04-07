@@ -94,21 +94,17 @@ Module Rorder (Import T : CReals).
               apply Rle_lt_trans with (xn - IZR zn + IZR zn).
               right. ring. apply uxn.
               
-              change (IZR 1 + IZR zn < IZR 4).
-              eapply Req_lt_compat_l; [ apply IZR_add | ].
-              apply IZR_lt; omega.
+              IZRrel.
         
         left.
         apply Rmul_lt_cancel_r with (R1 + R1).
-          apply Radd_pos_compat; apply Rlt_0_1.
+          IZRrel.
           
           apply (Req_lt_compat (IZR 2) xn); simpl.
             apply Rmul_comm.
             unfold xn, po; simpl; ring.
             apply Rlt_trans with (IZR zn - R1).
-              change (IZR 2 < IZR zn - IZR 1).
-              eapply Req_lt_compat_r; [ apply IZR_sub | ].
-              apply IZR_lt; omega.
+              IZRrel.
               
               apply (Radd_lt_compat_l (IZR zn)) in lxn. 
               apply Rlt_le_trans with (IZR zn + (xn - IZR zn)). 
@@ -119,7 +115,7 @@ Module Rorder (Import T : CReals).
         rewrite ezn in *.
         left.
         apply Rmul_lt_cancel_r with (R1 + R1).
-          apply Radd_pos_compat; apply Rlt_0_1.
+          IZRrel.
           
           apply (Req_lt_compat (IZR 2) xn); simpl.
             apply Rmul_comm.
@@ -130,7 +126,7 @@ Module Rorder (Import T : CReals).
               
               ring_simplify.
               apply Radd_eq_compat_l.
-               unfold IZR, IPR. ring.
+              IZRrel.
     Qed.
     
     Lemma sigT_pos_nat : sigT pos_nat.
@@ -161,5 +157,10 @@ Module Rorder (Import T : CReals).
     Qed.
     
   End DiscretePos.
+  
+  Theorem Rlt_eps : forall x, inhabited (R0 < x) -> R0 < x.
+  Proof.
+    apply Rlt_0_x.
+  Qed.
   
 End Rorder.

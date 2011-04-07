@@ -178,7 +178,7 @@ Proof.
   eapply Req_lt_compat_r; [ apply Radd_comm | ].
   eapply Req_lt_compat_r.
     rewrite <- IZR_Zopp, <- IZR_add; reflexivity.
-
+    
     remember (y + - x)%Z as d.
     assert (dp : (0 < d)%Z) by omega.
     destruct d; try inversion dp.
@@ -193,5 +193,57 @@ Proof.
   left; apply IZR_lt; auto.
   right; subst; apply Req_refl.
 Qed.
+
+Lemma IZR_opp : forall a, IZR (- a) == - IZR a.
+Proof.
+  intros [ | p | p ]; simpl; symmetry.
+    apply Ropp_0.
+    reflexivity.
+    apply Ropp_involutive.
+Qed.
+
+Lemma IZR_mul : forall a b, IZR (a * b) == IZR a * IZR b.
+Admitted.
+
+Lemma IZR_eq : forall a b, a = b -> IZR a == IZR b.
+Proof.
+  intros; subst; reflexivity.
+Qed.
+
+Ltac IZRify :=
+  replace R1 with (IZR 1) by reflexivity;
+  replace R0 with (IZR 0) by reflexivity;
+  repeat
+    (rewrite <- IZR_add ||
+    rewrite <- IZR_sub ||
+    rewrite <- IZR_mul ||
+    rewrite <- IZR_opp);
+  apply IZR_eq || apply IZR_lt || apply IZR_le || idtac.
+
+Ltac eq_lt_compat_r_tac t := eapply Req_lt_compat_r; [ t; reflexivity | ].
+Ltac eq_lt_compat_l_tac t := eapply Req_lt_compat_l; [ t; reflexivity | ].
+Ltac eq_le_compat_r_tac t := eapply Req_le_compat_r; [ t; reflexivity | ].
+Ltac eq_le_compat_l_tac t := eapply Req_le_compat_l; [ t; reflexivity | ].
+Ltac eq_eq_compat_l_tac t := eapply Req_trans; [ symmetry; t; reflexivity | ].
+Ltac eq_eq_compat_r_tac t := symmetry; eapply Req_trans; [ symmetry; t; reflexivity | ]; symmetry.
+
+Ltac eq_compat_l_tac t := match goal with
+  | |- _ == _ => eq_eq_compat_l_tac t
+  | |- _ <  _ => eq_lt_compat_l_tac t
+  | |- _ <= _ => eq_le_compat_l_tac t end.
+
+Ltac eq_compat_r_tac t := match goal with
+  | |- _ == _ => eq_eq_compat_r_tac t
+  | |- _ <  _ => eq_lt_compat_r_tac t
+  | |- _ <= _ => eq_le_compat_r_tac t end.
+
+Ltac IZRrel :=
+  eq_compat_r_tac IZRify;
+  eq_compat_l_tac IZRify;
+  match goal with
+  | |- _ == _ => try apply IZR_eq
+  | |- _ <= _ => try apply IZR_le
+  | |- _ <  _ => try apply IZR_lt
+  end; try omega.
 
 End IZR.
