@@ -202,8 +202,61 @@ Proof.
     apply Ropp_involutive.
 Qed.
 
+Lemma IPR_psucc : forall a, IPR (Psucc a) == IPR a + R1.
+Proof.
+induction a. simpl. rewrite IHa. ring.
+simpl. ring. 
+simpl. ring.
+Qed.
+
+(* TODO lolilol ^^ *)
+Lemma IPR_add : forall a b, IPR (a + b) == IPR a + IPR b 
+  /\ IPR (Pplus_carry a b) == IPR a + IPR b + R1.
+Proof.
+induction a; simpl; intros.
+destruct b. simpl. destruct (IHa b) as [H1 H2]. rewrite H2.
+split. ring. ring.
+simpl. destruct (IHa b) as [H1 H2]. rewrite H1, H2. split. ring.
+ring.
+simpl. destruct (IHa 1%positive) as [H1 H2]. rewrite IPR_psucc. split. 
+ring. ring. 
+
+destruct b; simpl. destruct (IHa b) as [H1 H2]. split. rewrite H1.
+ring.
+rewrite H2. ring.
+
+destruct (IHa b) as [H1 H2]. split. rewrite H1.
+ring.
+rewrite H1. ring.
+
+destruct (IHa 1%positive) as [H1 H2 ]. split. intuition. 
+rewrite IPR_psucc. simpl. ring.
+
+destruct b. simpl. split. rewrite IPR_psucc. ring.
+rewrite IPR_psucc. ring.
+split. simpl. ring.
+simpl. rewrite IPR_psucc. ring.
+simpl. split. ring. ring.
+Qed.
+
+(* TODO for rewrite *)
+Lemma IPR_add1 : forall a b, IPR (a + b) == IPR a + IPR b.
+Proof.
+apply IPR_add.
+Qed.
+
+Lemma IPR_mul : forall a b, IPR (a * b) == IPR a * IPR b.
+Proof.
+induction a. simpl. intros. rewrite (IPR_add1 b ((a * b)~0)). simpl. rewrite IHa.
+ring.
+intros. simpl. rewrite IHa. ring.
+intros. simpl. ring.
+Qed.
+
 Lemma IZR_mul : forall a b, IZR (a * b) == IZR a * IZR b.
-Admitted.
+Proof.
+destruct a, b; simpl; try rewrite IPR_mul; try ring.
+Qed.
 
 Lemma IZR_eq : forall a b, a = b -> IZR a == IZR b.
 Proof.
