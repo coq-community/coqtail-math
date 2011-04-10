@@ -59,6 +59,7 @@ Qed.
 Lemma unlift_example3  : forall (P Q R : Type), [ P ] -> [ P -> Q ] -> [ Q -> R ] -> R.
 Proof.
 intros P Q R p pq qr.
+intuition.
 Admitted.
 
 Lemma stronger_inhabited_in_hypothese : forall A B, ([A] -> [B]) -> (A -> [B]).
@@ -77,4 +78,12 @@ Proof.
 intros HH. 
 (* big complicated proof here *)
 apply I.
+Qed.
+
+Lemma inhabited_sum_or : forall (A B : Type) (P : Prop), 
+ (([A] \/ [B]) -> P) <-> ((A + B) -> P).
+Proof.
+intros; split.
+  intuition.
+  intros ? [ [ ] | [ ] ]; auto.
 Qed.
