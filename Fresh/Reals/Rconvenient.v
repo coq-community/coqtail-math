@@ -621,4 +621,20 @@ Proof.
     apply Radd_lt_compat_l. assumption.
 Qed.
 
+Lemma Rpos_lt : forall x y, R0 < y - x -> x < y.
+Proof.
+  intros x y pxy.
+  apply Radd_lt_cancel_r with (- x).
+  eapply Req_lt_compat_l; [ | eauto ]; symmetry; apply Radd_opp_r.
+Qed.
+
+Lemma Rlt_pos : forall x y, x < y -> R0 < y - x.
+Proof.
+  intros x y pxy.
+  apply Radd_lt_cancel_r with x.
+  eapply Req_lt_compat with x y; auto; symmetry.
+    apply Radd_0_l.
+    ring_simplify; reflexivity.
+Qed.
+
 End Rconvenient.

@@ -7,13 +7,6 @@ Module Rorder (Import T : CReals).
   Module Repsilon := Repsilon T. Import Repsilon.
   Module Rapprox := Rapprox T. Import Rapprox.
   
-  Definition Rlt_Prop : R -> R -> Prop := fun x y => inhabited (Rlt x y).
-  
-  Lemma Rlt_prop : forall x y, Rlt x y -> Rlt_Prop x y.
-  Proof.
-    intros; constructor; assumption.
-  Qed.
-  
   Section weak_constructive_eps.
     Inductive exT {A : Set} (P : A -> Type) : Prop :=
       exT_intro : forall a, P a -> exT P.
@@ -69,7 +62,7 @@ Module Rorder (Import T : CReals).
   
   Section DiscretePos.
     Variable x : R.
-    Hypotheses xpos : Rlt_Prop R0 x.
+    Hypothesis xpos : inhabited (Rlt R0 x).
     Definition pos_nat : nat -> Type := fun n => R1 < x * po n.
     
     Lemma pos_nat_weak_decidable : forall n, (pos_nat (S n)) + (pos_nat n -> False).
@@ -158,9 +151,17 @@ Module Rorder (Import T : CReals).
     
   End DiscretePos.
   
-  Theorem Rlt_eps : forall x, inhabited (R0 < x) -> R0 < x.
+  Theorem Rpos_witness : forall x, inhabited (R0 < x) -> R0 < x.
   Proof.
     apply Rlt_0_x.
+  Qed.
+  
+  Theorem Rlt_witness : forall x y, inhabited (x < y) -> x < y.
+  Proof.
+    intros x y L.
+    apply Rpos_lt, Rpos_witness.
+    destruct L; constructor.
+    apply Rlt_pos; auto.
   Qed.
   
 End Rorder.
