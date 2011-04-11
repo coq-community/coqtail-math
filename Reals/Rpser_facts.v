@@ -25,7 +25,7 @@ Require Import Fourier.
 Require Import Max.
 Require Import Min.
 Require Import RIneq.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Rsequence_facts.
 Require Import Ranalysis_def.
 Require Import RFsequence.

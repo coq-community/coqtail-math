@@ -21,7 +21,7 @@ USA.
 
 (** Common definitions of real functions sequences. *)
 Require Import Reals.
-Require Import Rsequence.
+Require Import Rsequence_def.
 
 Delimit Scope RFseq_scope with Rseq.
 

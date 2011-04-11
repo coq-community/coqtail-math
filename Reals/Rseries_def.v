@@ -22,7 +22,7 @@ USA.
 (** Common definitions of real series, based on real sequences definitions. *)
 
 Require Import Reals.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Open Local Scope R_scope.
 Open Local Scope Rseq_scope.
 

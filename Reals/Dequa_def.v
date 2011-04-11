@@ -1,7 +1,7 @@
 Require Import Reals.
 Require Import C_n_def C_n_facts.
 Require Import Functions.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import List.
 Require Import Destruct.
 

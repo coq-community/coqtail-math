@@ -657,7 +657,7 @@ intros x lb ub x_in_I.
  apply (mkposreal ((ub-lb)/2) (ub_lt_2_pos x ub lb (proj1 x_in_I) (proj2 x_in_I))).
 Defined.
 
-Require Import Rsequence.
+Require Import Rsequence_def.
 
 Lemma Dfn_CVU_implies_Df_exists : forall (fn fn':nat -> R -> R) (f g:R->R)
       (x lb ub:R) (x_in_I : open_interval lb ub x),

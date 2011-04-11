@@ -24,7 +24,7 @@ Require Export Cbase.
 Require Import Ctacfield.
 Require Import Cnorm.
 Require Import Cprop_base.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Csequence.
 Require Import Csequence_facts.
 Require Import Cfunctions.

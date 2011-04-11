@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import Reals.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Rsequence_facts.
 
 Require Import Fourier.

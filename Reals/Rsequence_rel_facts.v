@@ -21,7 +21,7 @@ USA.
 Require Import Max.
 Require Import Reals.
 Require Export Setoid Morphisms.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
 Require Import Rsequence_cv_facts.
 Require Import Fourier.

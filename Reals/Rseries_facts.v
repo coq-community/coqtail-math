@@ -22,7 +22,7 @@ USA.
 (** Properties of real series *)
 
 Require Export Reals.
-Require Export Rsequence.
+Require Export Rsequence_def.
 Require Export Rseries_def.
 Require Import Rsequence_facts.
 Require Export Rsequence_subsequence.

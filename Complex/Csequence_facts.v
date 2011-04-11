@@ -21,7 +21,7 @@ USA.
 
 Require Import MyReals.
 Require Import Max.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Rsequence_facts.
 Require Import Rsequence_base_facts.
 Require Import Fourier.

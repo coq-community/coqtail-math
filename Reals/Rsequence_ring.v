@@ -22,7 +22,7 @@ USA.
 Require Import Nnat.
 Require Import Arith.
 Require Export Ring.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Reals.
 Require Import Setoid.
 

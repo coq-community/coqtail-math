@@ -21,7 +21,7 @@ USA.
 
 Require Export Complex.
 Require Export Csequence.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Open Local Scope C_scope.
 Open Local Scope Cseq_scope.
 

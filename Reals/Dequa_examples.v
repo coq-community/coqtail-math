@@ -55,7 +55,7 @@ intro x ; unfold nth_derive' ; simpl ; unfold derive.
  rewrite derive_pt_eq ; apply derivable_pt_lim_opp ; apply derivable_pt_lim_sine.
 Qed.
 
-Require Import Rsequence.
+Require Import Rsequence_def.
 
 Definition Option_app_Prop {A : Type} (P : A -> Prop) (Oa : option A) : Prop :=
 match Oa with

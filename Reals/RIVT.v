@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import Rbase.
-Require Import Rsequence.
+Require Import Rsequence_def.
 Require Import Ranalysis.
 Require Import Rfunctions.
 Require Import Rseries_def.
