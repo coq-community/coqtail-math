@@ -204,51 +204,80 @@ Qed.
 
 Lemma IPR_psucc : forall a, IPR (Psucc a) == IPR a + R1.
 Proof.
-induction a. simpl. rewrite IHa. ring.
-simpl. ring. 
-simpl. ring.
+  induction a.
+   simpl. rewrite IHa. now ring.
+   
+   simpl. now ring.
+   
+   simpl. ring.
 Qed.
 
-Lemma IPR_add : forall a b, IPR (a + b) == IPR a + IPR b 
+Lemma IPR_add1 : forall a b, IPR (a + b) == IPR a + IPR b 
   /\ IPR (Pplus_carry a b) == IPR a + IPR b + R1.
 Proof.
-induction a; simpl; intros.
-destruct b. simpl. destruct (IHa b) as [H1 H2]. rewrite H2.
-split. ring. ring.
-simpl. destruct (IHa b) as [H1 H2]. rewrite H1, H2. split. ring.
-ring.
-simpl. destruct (IHa 1%positive) as [H1 H2]. rewrite IPR_psucc. split. 
-ring. ring. 
-
-destruct b; simpl. destruct (IHa b) as [H1 H2]. split. rewrite H1.
-ring.
-rewrite H2. ring.
-
-destruct (IHa b) as [H1 H2]. split. rewrite H1.
-ring.
-rewrite H1. ring.
-
-destruct (IHa 1%positive) as [H1 H2 ]. split. intuition. 
-rewrite IPR_psucc. simpl. ring.
-
-destruct b. simpl. split. rewrite IPR_psucc. ring.
-rewrite IPR_psucc. ring.
-split. simpl. ring.
-simpl. rewrite IPR_psucc. ring.
-simpl. split. ring. ring.
+  induction a; simpl; intros.
+   destruct b.
+    simpl. destruct (IHa b) as [H1 H2]. rewrite H2. split.
+     now ring.
+     
+     now ring.
+    
+    simpl. destruct (IHa b) as [H1 H2]. rewrite H1, H2. split.
+     now ring.
+     
+     now ring.
+   
+   simpl. destruct (IHa 1%positive) as [H1 H2]. rewrite IPR_psucc. split.
+    now ring.
+    
+    now ring.
+   
+   destruct b; simpl.
+    destruct (IHa b) as [H1 H2]. split.
+     rewrite H1. now ring.
+     
+     rewrite H2. now ring.
+    
+    destruct (IHa b) as [H1 H2]. split.
+     rewrite H1. now ring.
+     
+     rewrite H1. now ring.
+   
+   destruct (IHa 1%positive) as [H1 H2 ]. split.
+    now intuition.
+    
+    rewrite IPR_psucc. simpl. now ring.
+  
+  destruct b.
+   simpl. split.
+    rewrite IPR_psucc. now ring.
+    
+    rewrite IPR_psucc. now ring.
+   
+   split.
+    simpl. now ring.
+    
+    simpl. rewrite IPR_psucc. now ring.
+  
+  simpl. split.
+   now ring.
+   
+   ring.
 Qed.
 
-Lemma IPR_add1 : forall a b, IPR (a + b) == IPR a + IPR b.
+Lemma IPR_add : forall a b, IPR (a + b) == IPR a + IPR b.
 Proof.
-apply IPR_add.
+  apply IPR_add1.
 Qed.
 
 Lemma IPR_mul : forall a b, IPR (a * b) == IPR a * IPR b.
 Proof.
-induction a. simpl. intros. rewrite (IPR_add1 b ((a * b)~0)). simpl. rewrite IHa.
-ring.
-intros. simpl. rewrite IHa. ring.
-intros. simpl. ring.
+  induction a.
+   simpl. intros. rewrite (IPR_add b ((a * b)~0)). simpl. rewrite IHa. now ring.
+   
+   intros. simpl. rewrite IHa. now ring.
+   
+   intros. simpl. ring.
 Qed.
 
 Lemma IZR_mul : forall a b, IZR (a * b) == IZR a * IZR b.
