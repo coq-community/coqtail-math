@@ -26,7 +26,7 @@ Require Import Rsequence_facts.
 Require Import Rsequence_base_facts.
 Require Import Fourier.
 Require Import Complex.
-Require Import Csequence.
+Require Import Csequence_def.
 
 Open Scope C_scope.
 Open Scope Cseq_scope.
