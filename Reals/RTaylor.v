@@ -23,7 +23,8 @@ Require Export Reals.
 Require Export MyReals.
 Require Export Rsequence_facts.
 Require Export Rseries_def.
-Require Import Rpser_def Rpser_facts.
+Require Import Rpser_def Rpser_sums Rpser_derivative.
+Require Import Rpser_radius_facts Rpser_taylor.
 Require Import Fourier.
 Require Import Rintegral.
 Require Import Rseries_facts.

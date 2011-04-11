@@ -20,7 +20,8 @@ USA.
 *)
 
 Require Import Ranalysis_def.
-Require Import Rpser_def Rpser_base_facts Rpser_facts.
+Require Import Rpser_def Rpser_base_facts Rpser_cv_facts Rpser_sums.
+Require Import Rpow_facts.
 Require Import Rsequence_def Rsequence_facts.
 Require Import Rseries_def Rseries_facts.
 Require Import RFsequence_facts.
@@ -283,9 +284,9 @@ intros An r Rho x x_bd.
   exists n ; unfold gt_abs_Pser, gt_norm_Pser.
   rewrite Rabs_mult, Cnorm_Cmult, Rabs_Cnorm ; apply Rmult_eq_compat_l ;
   rewrite IRC_pow_compat, Cnorm_IRC_Rabs ; reflexivity.
- rewrite <- Rabs_Cnorm in x_bd ; pose (l := Rpser_facts.weaksum_r _ _ Rho' (Cnorm x)) ;
+ rewrite <- Rabs_Cnorm in x_bd ; pose (l := Rpser_sums.weaksum_r _ _ Rho' (Cnorm x)) ;
  exists l ; unfold Pser_norm, Pser, infinite_sum.
- assert (Hl := Rpser_facts.weaksum_r_sums _ _ Rho' (Cnorm x) x_bd) ;
+ assert (Hl := Rpser_sums.weaksum_r_sums _ _ Rho' (Cnorm x) x_bd) ;
  unfold Rseries.Pser, Rfunctions.infinite_sum in Hl.
 
  assert (Hrew : forall n, IRC (sum_f_R0 (fun n0 : nat => (Cnorm (An n0) * Cnorm x ^ n0)%R) n) =
@@ -324,9 +325,9 @@ intros An r Pr r0 r0_ub.
  rewrite Cnorm_IRC_Rabs, Rabs_Rabsolu ; assumption.
  assert (Pr' := Cv_radius_weak_Cnorm_compat2 _ _ Pr).
  exists (gt_abs_Pser (fun n => Cnorm (An n)) ((a+r)/2)).
- exists (Rpser_facts.weaksum_r (fun n => Cnorm (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
+ exists (Rpser_sums.weaksum_r (fun n => Cnorm (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
  rewrite Cnorm_IRC_Rabs in r'_bd2 ;
- assert (H := Rpser_facts.weaksum_r_sums (fun n => Cnorm (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
+ assert (H := Rpser_sums.weaksum_r_sums (fun n => Cnorm (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
  assert (Main := Pser_Rseqcv_link _ _ _ H).
  intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ; exists N.
   assert (Hrew : forall k, Cnorm (gt_abs_Pser (fun n => Cnorm (An n)) ((a + r) / 2) k)

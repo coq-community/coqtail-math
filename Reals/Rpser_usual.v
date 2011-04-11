@@ -26,7 +26,8 @@ Require Import Rsequence_base_facts Rsequence_usual_facts.
 Require Import Max.
 Require Import Fourier.
 
-Require Import Rpser_def Rpser_facts Rpser_base_facts.
+Require Import Rpser_def Rpser_base_facts Rpser_cv_facts.
+Require Import Rpser_sums Rpser_derivative.
 
 Open Scope R_scope.
 

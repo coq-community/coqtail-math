@@ -24,7 +24,6 @@ Require Import Rsequence_def.
 
 Open Local Scope R_scope.
 
-
 (** * Definitions *)
 
 (** General term of a Power Serie and its absolute value *)

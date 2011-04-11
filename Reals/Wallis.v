@@ -27,7 +27,7 @@ Require Import Rintegral_tactic.
 Require Import Fourier.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
-Require Import Rpser_facts.
+Require Import Rpser.
 Require Import RTaylor.
 Require Import MyRfunctions.
 Require Import Rsequence_tactics.

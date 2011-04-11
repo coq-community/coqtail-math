@@ -117,7 +117,7 @@ Qed.
 
 (** Power series *)
 Require Import Rpser_def.
-Require Import Rpser_facts.
+Require Import Rpser_def Rpser_cv_facts Rpser_sums Rpser_derivative.
 
 Lemma C_infty_Rpser : forall (An  : nat -> R) (Rho : infinite_cv_radius An),
  C_infty (sum An Rho).

@@ -25,8 +25,7 @@ Require Import Reals.
 Require Import Rsequence_facts.
 Require Import Rseries_def.
 Require Import Rseries_facts.
-Require Import Rpser_def.
-Require Import Rpser_facts.
+Require Import Rpser.
 Require Import Rintegral.
 Require Import RTaylor.
 Require Import Fourier.
