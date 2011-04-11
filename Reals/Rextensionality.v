@@ -1,7 +1,9 @@
 Require Import Reals.
 Require Import Rfunction_facts.
+Require Import Rsequence_def.
+Require Import Rpser_def Rpser_sums.
 
-Section Extensionality.
+Section Functions_extensionality.
 
 Variables f g : R -> R.
 Hypothesis fg_ext : f == g.
@@ -44,4 +46,44 @@ Proof.
 intro x ; unfold derive ; apply derive_pt_ext.
 Qed.
 
-End Extensionality.
+End Functions_extensionality.
+
+Section Rpser_extensionality.
+
+Variables An Bn : Rseq.
+Hypothesis AnBn_ext : (An == Bn)%Rseq.
+
+Lemma gt_Pser_ext : forall x, (gt_Pser An x == gt_Pser Bn x)%Rseq.
+Proof.
+intros x n ; unfold gt_Pser ; rewrite AnBn_ext ; reflexivity.
+Qed.
+
+Lemma gt_abs_Pser_ext : forall x, (gt_abs_Pser An x == gt_abs_Pser Bn x)%Rseq.
+Proof.
+intros x n ; unfold gt_abs_Pser ; rewrite AnBn_ext ; reflexivity.
+Qed.
+
+Lemma Cv_radius_weak_ext : forall r, Cv_radius_weak An r <-> Cv_radius_weak Bn r.
+Proof.
+intro r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
+ [rewrite <- gt_abs_Pser_ext | rewrite gt_abs_Pser_ext] ; apply HB ; exists i ; reflexivity.
+Qed.
+
+Lemma finite_cv_radius_ext : forall r, finite_cv_radius An r <->
+  finite_cv_radius Bn r.
+Proof.
+intro r ; split ; intros [rho_lb rho_ub] ; split ; intros r' Hr' ;
+ [rewrite <- Cv_radius_weak_ext | rewrite <- Cv_radius_weak_ext
+ | rewrite Cv_radius_weak_ext | rewrite Cv_radius_weak_ext] ; auto.
+Qed.
+
+Lemma infinite_cv_radius_ext : infinite_cv_radius An <->
+  infinite_cv_radius Bn.
+Proof.
+split ; intros rho r ; [rewrite <- Cv_radius_weak_ext |
+ rewrite Cv_radius_weak_ext] ; trivial.
+Qed.
+
+
+End Rpser_extensionality.
+

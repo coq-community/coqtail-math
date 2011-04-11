@@ -183,14 +183,4 @@ intros [s1 s2] l Heq ; simpl in * ;
   destruct Heq.
  destruct Heq.
 Qed.
-      
- 
-  
-
-
-
-  
- 
-  
-  
 
