@@ -79,71 +79,6 @@ Proof.
   intros; ring.
 Qed.
 
-Lemma IZR_add : forall x y, IZR (x + y) == IZR x + IZR y.
-Proof.
-  intros a b.
-  destruct (Z_le_gt_dec 0 a) as [Ha|Ha];
-  [ destruct (Z_of_nat_complete_inf a Ha) as (na, Hna)
-  | assert (Ha' : (0 <= -a)%Z) by omega; destruct (Z_of_nat_complete_inf _ Ha') as (na, Hna) ];
-  (destruct (Z_le_gt_dec 0 b) as [Hb|Hb];
-  [ destruct (Z_of_nat_complete_inf b Hb) as (nb, Hnb)
-  | assert (Hb' : (0 <= -b)%Z) by omega; destruct (Z_of_nat_complete_inf _ Hb') as (nb, Hnb) ]).
-  
-  subst.
-  rewrite <- inj_plus.
-  do 3 rewrite IZR_INR; apply INR_add.
-  
-  apply Zopp_swap in Hnb.
-  subst.
-  rewrite Zuminus.
-  destruct (le_dec na nb) as [ab|ab].
-    assert (Hr : forall a b, (a - b = - (b - a))%Z) by (intros; ring); rewrite Hr; clear Hr.
-    rewrite <- (inj_minus1 _ _ ab).
-    repeat rewrite IZR_Zopp.
-    repeat rewrite IZR_INR.
-    rewrite INR_sub; auto.
-    apply Ropp_sub.
-    
-    rewrite <- inj_minus1; [ | omega ].
-    rewrite IZR_Zopp.
-    repeat rewrite IZR_INR.
-    rewrite INR_sub; [ | omega ].
-    reflexivity.
-  
-  apply Zopp_swap in Hna.
-  subst.
-  destruct (le_dec na nb) as [ab|ab].
-    assert (Hr : forall a b, (- a + b = b - a)%Z) by (intros; ring); rewrite Hr; clear Hr.
-    rewrite <- (inj_minus1 _ _ ab).
-    repeat rewrite IZR_Zopp.
-    repeat rewrite IZR_INR.
-    rewrite INR_sub; auto.
-    rewrite Radd_comm.
-    reflexivity.
-    
-    assert (Hr : forall a b, (- a + b = - (a - b))%Z) by (intros; ring); rewrite Hr; clear Hr.
-    rewrite <- inj_minus1; [ | omega ].
-    repeat rewrite IZR_Zopp.
-    repeat rewrite IZR_INR.
-    rewrite INR_sub; [ | omega ].
-    rewrite Ropp_sub, Radd_comm; reflexivity.
-  
-  apply Zopp_swap in Hna.
-  apply Zopp_swap in Hnb.
-  subst.
-  rewrite <- Zopp_plus_distr.
-  repeat rewrite IZR_Zopp.
-  rewrite <- inj_plus.
-  repeat rewrite IZR_INR.
-  rewrite INR_add.
-  apply Ropp_add.
-Qed.
-
-Lemma IZR_sub : forall x y, IZR (x - y) == IZR x - IZR y.
-Proof.
-  intros a b. unfold Zminus. unfold Rsub. rewrite IZR_add. rewrite IZR_Zopp. ring.
-Qed.
-
 Lemma Rpos_IPR : forall p, R0 < IPR p.
 Proof.
 intros p; induction p; simpl.
@@ -169,31 +104,6 @@ Proof.
 intros p; right; apply Rpos_IPR.
 Qed.
 
-Lemma IZR_lt : forall x y, (x < y)%Z -> IZR x < IZR y.
-Proof.
-  intros x y xy.
-  apply Radd_lt_cancel_l with (-IZR x).
-  eapply Req_lt_compat_l; [ apply Radd_comm | ].
-  eapply Req_lt_compat_l; [ symmetry; apply Radd_opp_r | ].
-  eapply Req_lt_compat_r; [ apply Radd_comm | ].
-  eapply Req_lt_compat_r.
-    rewrite <- IZR_Zopp, <- IZR_add; reflexivity.
-    
-    remember (y + - x)%Z as d.
-    assert (dp : (0 < d)%Z) by omega.
-    destruct d; try inversion dp.
-    simpl.
-    apply Rpos_IPR.
-Qed.
-
-Lemma IZR_le : forall x y, (x <= y)%Z -> IZR x <= IZR y.
-Proof.
-  intros x y xy.
-  destruct (Z_le_lt_eq_dec _ _ xy).
-  left; apply IZR_lt; auto.
-  right; subst; apply Req_refl.
-Qed.
-
 Lemma IZR_opp : forall a, IZR (- a) == - IZR a.
 Proof.
   intros [ | p | p ]; simpl; symmetry.
@@ -212,7 +122,7 @@ Proof.
    simpl. ring.
 Qed.
 
-Lemma IPR_add1 : forall a b, IPR (a + b) == IPR a + IPR b 
+Lemma IPR_add_carry : forall a b, IPR (a + b) == IPR a + IPR b 
   /\ IPR (Pplus_carry a b) == IPR a + IPR b + R1.
 Proof.
   induction a; simpl; intros.
@@ -267,7 +177,75 @@ Qed.
 
 Lemma IPR_add : forall a b, IPR (a + b) == IPR a + IPR b.
 Proof.
-  apply IPR_add1.
+  apply IPR_add_carry.
+Qed.
+
+Lemma IPR_sub : forall a b, Pcompare a b Eq = Gt -> IPR (a - b) == IPR a - IPR b.
+Proof.
+  intros a b Cab.
+  unfold Pminus.
+  remember (Pminus_mask a b) as pmab.
+  destruct (Pminus_mask_Gt _ _ Cab) as (z, (Hz, (eqz, Dz))).
+  destruct pmab as [ | p | ]; try congruence.
+  rewrite <- eqz.
+  unfold Rsub (* TODO BUG : the following rewrite does not work under Rsub *) .
+  rewrite IPR_add.
+  cut (p = z).
+    intro; subst; ring.
+    congruence.
+Qed.
+
+Lemma IZR_add : forall a b, IZR (a + b) == IZR a + IZR b.
+Proof.
+  intros [ | a | a ] [ | b | b ]; simpl; try ring.
+    apply IPR_add.
+    
+    remember ((a ?= b)%positive Eq) as Cab.
+    destruct Cab; simpl.
+      erewrite (Pcompare_Eq_eq a b); [ ring | ]; auto.
+      rewrite IPR_sub; [ ring | ]; apply ZC2; auto.
+      rewrite IPR_sub; [ ring | ]; auto.
+    
+    remember ((a ?= b)%positive Eq) as Cab.
+    destruct Cab; simpl.
+      erewrite (Pcompare_Eq_eq a b); [ ring | ]; auto.
+      rewrite IPR_sub; [ ring | ]; apply ZC2; auto.
+      rewrite IPR_sub; [ ring | ]; auto.
+    
+    rewrite IPR_add; ring.
+Qed.
+
+Lemma IZR_sub : forall x y, IZR (x - y) == IZR x - IZR y.
+Proof.
+  intros a b.
+  unfold Zminus, Rsub.
+  rewrite IZR_add, IZR_Zopp.
+  reflexivity.
+Qed.
+
+Lemma IZR_lt : forall x y, (x < y)%Z -> IZR x < IZR y.
+Proof.
+  intros x y xy.
+  apply Radd_lt_cancel_l with (-IZR x).
+  eapply Req_lt_compat_l; [ apply Radd_comm | ].
+  eapply Req_lt_compat_l; [ symmetry; apply Radd_opp_r | ].
+  eapply Req_lt_compat_r; [ apply Radd_comm | ].
+  eapply Req_lt_compat_r.
+    rewrite <- IZR_Zopp, <- IZR_add; reflexivity.
+    
+    remember (y + - x)%Z as d.
+    assert (dp : (0 < d)%Z) by omega.
+    destruct d; try inversion dp.
+    simpl.
+    apply Rpos_IPR.
+Qed.
+
+Lemma IZR_le : forall x y, (x <= y)%Z -> IZR x <= IZR y.
+Proof.
+  intros x y xy.
+  destruct (Z_le_lt_eq_dec _ _ xy).
+  left; apply IZR_lt; auto.
+  right; subst; apply Req_refl.
 Qed.
 
 Lemma IPR_mul : forall a b, IPR (a * b) == IPR a * IPR b.
