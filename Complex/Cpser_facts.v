@@ -20,19 +20,14 @@ USA.
 *)
 
 Require Import Ranalysis_def.
-Require Import Rpser_def.
-Require Import Rpser_facts.
-Require Import Rsequence_def.
-Require Import Rsequence_facts.
-Require Import Rseries_def.
-Require Import Rseries_facts.
+Require Import Rpser_def Rpser_base_facts Rpser_facts.
+Require Import Rsequence_def Rsequence_facts.
+Require Import Rseries_def Rseries_facts.
 Require Import RFsequence_facts.
 
 Require Import Cpser_def.
-Require Import CFsequence.
-Require Import CFsequence_facts.
-Require Import Csequence.
-Require Import Csequence_facts.
+Require Import CFsequence CFsequence_facts.
+Require Import Csequence Csequence_facts.
 Require Import Cmet.
 Require Import Cnorm.
 Require Import Cprop_base.

@@ -19,18 +19,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Export MyReals.
-Require Import Rsequence_def.
-Require Import Rsequence_facts.
-Require Import Rsequence_cv_facts.
-Require Import Rsequence_base_facts.
-Require Import Rsequence_usual_facts.
+Require Import MyReals.
+Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts.
+Require Import Rsequence_base_facts Rsequence_usual_facts.
 
 Require Import Max.
 Require Import Fourier.
 
-Require Import Rpser_def.
-Require Import Rpser_facts.
+Require Import Rpser_def Rpser_facts Rpser_base_facts.
 
 Open Scope R_scope.
 

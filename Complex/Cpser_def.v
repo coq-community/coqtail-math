@@ -23,6 +23,7 @@ Require Export Complex.
 Require Import Cmet.
 Require Import Cnorm.
 Require Import Rpser_def.
+Require Import Rpow_facts.
 Require Import Max.
 Require Import Csequence.
 Require Import Csequence_facts.

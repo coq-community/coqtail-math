@@ -19,14 +19,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Export Reals.
-Require Export Rpser_def.
+Require Import Reals.
+Require Import Rpser_def Rpser_base_facts Rsequence_facts.
+Require Import Rpow_facts.
 Require Import Fourier.
 Require Import Max.
 Require Import Min.
 Require Import RIneq.
-Require Import Rsequence_def.
-Require Import Rsequence_facts.
 Require Import Ranalysis_def.
 Require Import RFsequence.
 Require Import RFsequence_facts.
