@@ -3,7 +3,7 @@ Require Import C_n_def C_n_facts.
 Require Import Functions.
 Require Import Rsequence_def.
 Require Import List.
-Require Import Destruct.
+Require Import Ass_handling.
 
 Local Open Scope R_scope.
 

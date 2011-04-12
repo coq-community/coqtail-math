@@ -1,6 +1,6 @@
 Require Import Vec_def.
 Require Import Omega.
-Require Import Destruct.
+Require Import Ass_handling.
 Require Import PI.
 
 Lemma Vget_PI : forall {A : Type} {n : nat} (v : Vec A n) (m : nat) (mltn1 mltn2 : m < n),

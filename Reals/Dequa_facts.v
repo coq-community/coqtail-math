@@ -5,7 +5,7 @@ Require Import C_n_def C_n_facts.
 Require Import Dequa_def.
 Require Import List.
 Require Import Max.
-Require Import Destruct.
+Require Import Ass_handling.
 
 Local Open Scope R_scope.
 

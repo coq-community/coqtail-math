@@ -1,1 +1,0 @@
-Ltac destruct_eq H := let b := fresh "b" in remember H as b ; destruct b.
