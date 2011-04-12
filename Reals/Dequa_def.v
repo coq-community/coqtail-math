@@ -1,5 +1,6 @@
 Require Import Reals.
-Require Import C_n_def C_n_facts.
+Require Import Rpser_def Rpser_sums Rpser_usual Rpser_derivative.
+Require Import C_n_def C_n_usual C_n_facts.
 Require Import Functions.
 Require Import Rsequence_def.
 Require Import List.
@@ -57,7 +58,7 @@ Defined.
 Fixpoint interp_side_equa_in_N (s : side_equa)
  (rho : list Rseq) : option (nat -> R).
 destruct_eq s.
- exact (Some (fun n => if eq_nat_dec n 0 then r else 0)).
+ exact (Some (cst_seq r)).
  destruct (nth_error rho p) as [un |].
    exact (Some (fun n => INR (fact (n + k)) / INR (fact n) * un (n + k)%nat)).
    exact None.
@@ -88,6 +89,23 @@ destruct_eq s.
    exact None.
 Defined.
 
+Fixpoint interp_side_equa_in_R3 (s : side_equa)
+ (rho : list (sigT infinite_cv_radius)) : option (R -> R).
+destruct_eq s.
+ exact (Some (fun _=> r)).
+ destruct (nth_error rho p) as [[An rAn] |].
+  exact (Some (nth_derive (sum An rAn) (C_infty_Rpser An rAn k))).
+  exact None.
+ destruct (interp_side_equa_in_R3 b rho) as [f |].
+   exact (Some (- f)%F).
+   exact None.
+ destruct (interp_side_equa_in_R3 b1 rho) as [f |].
+   destruct (interp_side_equa_in_R3 b2 rho) as [g |].
+     exact (Some (f + g)%F).
+     exact None.
+   exact None.
+Defined.
+
 Definition Invalid_context := False.
 
 Definition interp {A B : Type} (e : diff_equa) (rho : list A)
@@ -105,6 +123,9 @@ Definition interp_in_R (e : diff_equa) (rho : list (sigT Cn)) : Prop :=
 
 Definition interp_in_R2 (e : diff_equa) (rho : list Cinfty) : Prop :=
   interp e rho interp_side_equa_in_R2 (fun f1 f2 => forall (x : R), f1 x = f2 x).
+
+Definition interp_in_R3 (e : diff_equa) (rho : list (sigT infinite_cv_radius)) : Prop :=
+  interp e rho interp_side_equa_in_R3 (fun f1 f2 => forall (x : R), f1 x = f2 x).
 
 Definition interp_in_N (e : diff_equa) (rho : list Rseq) : Prop :=
   interp e rho interp_side_equa_in_N (fun un vn => forall (n : nat), un n = vn n).
@@ -126,5 +147,6 @@ Infix "-" := minus : de_scope.
 
 Notation "[| e |]R" := (interp_in_R e%de) (at level 69).
 Notation "[| e |]R2" := (interp_in_R2 e%de) (at level 69).
+Notation "[| e |]R3" := (interp_in_R3 e%de) (at level 69).
 Notation "[| e |]N" := (interp_in_N e%de) (at level 69).
 Notation "[| e |]SN" := (interp_in_SN e%de) (at level 69).

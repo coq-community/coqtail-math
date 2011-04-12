@@ -1,5 +1,6 @@
 Require Import Rsequence_def Rsequence_sums_facts.
 Require Import Rpser_def Rpser_base_facts Rpser_usual.
+Require Import Rpser_sums Rpser_derivative.
 Require Import Rfunction_facts Rextensionality.
 Require Import C_n_def C_n_facts.
 Require Import Dequa_def.
@@ -184,3 +185,35 @@ intros [s1 s2] l Heq ; simpl in * ;
  destruct Heq.
 Qed.
 
+Lemma interp_side_equa_in_N_R3 : forall (s : side_equa)
+  (l : list (sigT infinite_cv_radius)) (Un : Rseq) (f : R -> R),
+  interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l) = Some Un ->
+  interp_side_equa_in_R3 s l = Some f ->
+  forall (pr : infinite_cv_radius Un),
+  sum Un pr == f.
+Proof.
+intro s ; induction s ; simpl ; intros l Un f HN HR3 pr.
+
+ inversion HN ; inversion HR3 ; subst.
+  intro x ; rewrite <- (constant_is_cst r x) ; unfold constant ;
+   apply sum_unique.
+
+ destruct (nth_error (map (@projT1 _ infinite_cv_radius) l) p) as [un |].
+  destruct (nth_error l p) as [[An rAn] |].
+   admit.
+  inversion HR3.
+ inversion HN.
+
+ destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)).
+  destruct_eq (interp_side_equa_in_R3 s l).
+   inversion HN ; inversion HR3.
+   admit.
+  inversion HR3.
+ inversion HN.
+Admitted.
+
+Lemma interp_equa_in_N_R3 : forall (e : diff_equa)
+  (l : list (sigT infinite_cv_radius)),
+  [| e |]N (map (@projT1 _ infinite_cv_radius) l) -> [| e |]R3 l.
+Proof.
+Admitted.

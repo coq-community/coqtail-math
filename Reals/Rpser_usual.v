@@ -29,7 +29,46 @@ Require Import Fourier.
 Require Import Rpser_def Rpser_base_facts Rpser_cv_facts.
 Require Import Rpser_sums Rpser_derivative.
 
+Require Import Functions.
+
 Open Scope R_scope.
+
+(** * Definition of the constant *)
+
+Definition cst_seq (r : R) (n : nat) := if eq_nat_dec n 0 then r else 0.
+
+Lemma Pser_cst_seq : forall (r : R) (x : R), Pser (cst_seq r) x r.
+Proof.
+intros r x.
+  assert (Hrew : forall n, sum_f_R0 (fun n => (cst_seq r) n * x ^ n) n = r).
+   induction n.
+   unfold cst_seq ; simpl ; apply Rmult_1_r.
+   simpl ; rewrite IHn ; unfold cst_seq ; simpl ; rewrite Rmult_0_l, Rplus_0_r ;
+   reflexivity.
+intros eps eps_pos ; exists O ; intros n n_lb ; rewrite Hrew, R_dist_eq ;
+ assumption.
+Qed.
+
+Lemma cst_infinite_cv_radius : forall (r : R),
+  infinite_cv_radius (cst_seq r).
+Proof.
+intros r n ; exists (Rabs r) ; intros x [i Hi] ; subst ;
+ unfold gt_abs_Pser, cst_seq ; destruct i ; simpl ;
+ [rewrite Rmult_1_r ; right ; reflexivity |
+ rewrite Rmult_0_l, Rabs_R0 ; apply Rabs_pos].
+Qed.
+
+Definition constant (r : R) : R -> R :=
+  sum _ (cst_infinite_cv_radius r).
+
+Lemma constant_is_cst : forall (r : R) (x : R),
+  constant r x = r.
+Proof.
+intros r x ;
+ assert (Hl := sum_sums _ (cst_infinite_cv_radius r) x) ;
+ assert (Hr := Pser_cst_seq r x) ;
+ apply (Pser_unique _ _ _ _ Hl Hr).
+Qed.
 
 (** * Definition of exp, cosine and sine *)
 
