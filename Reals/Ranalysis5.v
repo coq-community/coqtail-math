@@ -132,7 +132,8 @@ intros f g lb ub lb_le_ub f_incr f_eq_g f_cont_interv b b_encad.
  assert (x1_lt_x : x1 < x).
   unfold x1 ; rewrite Rmax_lt_lt_lt ; split ; unfold open_interval in * ; intuition ; fourier.
  exists (Rmin (f x - f x1) (f x2 - f x)).
- split. apply Rmin_pos ; apply Rgt_minus. apply f_incr ; assumption.
+ split.
+ apply Rmin_pos_lt ; apply Rgt_minus. apply f_incr ; assumption.
  apply f_incr ; assumption.
  intros y [_ y_cond].
   rewrite <- f_x_b in y_cond.
@@ -308,10 +309,10 @@ intros f g lb ub f_deriv f_recip_g x g_incr g_cont x_in_I df_neq ; pose (y := g 
   destruct (Hlinv' Premisse l_neq eps eps_pos) as [alpha [alpha_neq Halpha]] ;
   clear Premisse Hlinv Hlinv' Hl.
   pose (mydelta := Rmin delta alpha) ; assert (mydelta_pos : 0 < mydelta).
-   unfold mydelta ; apply Rmin_pos ; [apply delta.(cond_pos) | assumption].
+   unfold mydelta ; apply Rmin_pos_lt ; [apply delta.(cond_pos) | assumption].
    destruct (g_cont mydelta mydelta_pos) as [delta' [delta'_pos Hdelta']].
   pose (mydelta'' := Rmin delta' (Rmin (x - lb) (ub - x))) ; assert(mydelta''_pos : mydelta'' > 0).
-   unfold mydelta'' ; repeat apply Rmin_pos ; [assumption | |] ; unfold open_interval in * ;
+   unfold mydelta'' ; repeat apply Rmin_pos_lt ; [assumption | |] ; unfold open_interval in * ;
    intuition ; fourier.
   pose (delta'' := mkposreal mydelta'' mydelta''_pos) ; exists delta'' ; intros h h_neq h_bd.
   assert (Sublemma2 : forall x y, Rabs x < Rabs y -> y > 0 -> x < y).
@@ -672,7 +673,7 @@ intros fn fn' f g x lb ub x_in_I Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos
  elim (g_cont x x_in_I (eps/8) eps_8_pos) ; clear g_cont ; intros delta1 Hdelta1 ;
  destruct Hdelta1 as (delta1_pos, g_cont).
  assert (delta_pos : 0 < Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1).
-  apply Rmin_pos ; [apply Rmin_pos | intuition] ; unfold Rdiv ;
+  apply Rmin_pos_lt ; [apply Rmin_pos_lt | intuition] ; unfold Rdiv ;
   apply Rlt_mult_inv_pos ; intuition ; apply Rlt_Rminus ;
   [apply (proj1 x_in_I) | apply (proj2 x_in_I)].
  pose (delta := mkposreal (Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1) (delta_pos)).

@@ -21,16 +21,18 @@ USA.
 
 Require Import Rpser_def.
 
-Require Import Rsequence_def.
-Require Import Rsequence_base_facts.
-Require Import Rsequence_cv_facts.
+Require Import Ranalysis_def.
+Require Import Rsequence_def Rsequence_base_facts.
+Require Import Rsequence_cv_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
 Require Import Fourier.
 
 Open Local Scope R_scope.
 
-(** * Some lemmas manipulating the definitions *)
+(** * Some lemmas manipulating the definitions. *)
+
+(** Compatibility of the Cv_radius_weak concept with various operations. *)
 
 Lemma Cv_radius_weak_0 : forall An, Cv_radius_weak An 0.
 Proof.
@@ -48,16 +50,6 @@ destruct n.
  ring_simplify(An(S n)%nat * 0).
  rewrite Rabs_R0; apply Rabs_pos.
 omega.
-Qed.
-
-Lemma finite_cv_radius_pos : forall An r, finite_cv_radius An r -> 0 <= r.
-Proof.
-intros An r [_ Hf].
- destruct(Rle_lt_dec 0 r).
-  trivial.
-destruct (Hf 0).
-trivial.
-apply Cv_radius_weak_0.
 Qed.
 
 Lemma Rle_cv_radius_compat : forall (An Bn : nat -> R) (r : R),
@@ -122,16 +114,6 @@ intros An r r' r'_bd Rho.
   field ; apply pow_nonzero ; assumption.
 Qed.
 
-
-Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
-      forall x, Rabs x < r -> Cv_radius_weak An x.
-Proof.
-intros An r [H_sup _] x Hx.
- apply Cv_radius_weak_le_compat with (Rabs x).
-  rewrite Rabs_Rabsolu ; right ; reflexivity.
-  apply H_sup ; split ; [apply Rabs_pos | assumption].
-Qed.
-
 Lemma Cv_radius_weak_padding_pos_compat : forall (An : nat -> R) (r : R),
      Cv_radius_weak An r -> forall N, Cv_radius_weak (fun n => An (n + N)%nat) r.
 Proof.
@@ -159,6 +141,7 @@ intros An r Rho N.
  rewrite <- Rabs_mult ; apply Rabs_eq_compat.
  symmetry ; apply pow_add.
 Qed.
+
 
 Lemma Cv_radius_weak_padding_neg_compat : forall (An : nat -> R) (r : R) (N : nat),
      Cv_radius_weak (fun n => An (n + N)%nat) r -> Cv_radius_weak An r.
@@ -237,11 +220,28 @@ intros An Bn r1 r2 RhoA RhoB.
  unfold Rminus ; apply Cv_radius_weak_plus ; assumption.
 Qed.
 
-Lemma Rmin_ge_0 : forall x y, 0 <= x -> 0 <= y -> 0 <= Rmin x y.
+(** Compatibility of the finite_cv_radius concept with various operations. *)
+
+Lemma finite_cv_radius_pos : forall An r, finite_cv_radius An r -> 0 <= r.
 Proof.
-intros x y x_pos y_pos.
- unfold Rmin ; case (Rle_dec x y) ; intro h ; intuition.
+intros An r [_ Hf].
+ destruct(Rle_lt_dec 0 r).
+  trivial.
+destruct (Hf 0).
+trivial.
+apply Cv_radius_weak_0.
 Qed.
+
+Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
+      forall x, Rabs x < r -> Cv_radius_weak An x.
+Proof.
+intros An r [H_sup _] x Hx.
+ apply Cv_radius_weak_le_compat with (Rabs x).
+  rewrite Rabs_Rabsolu ; right ; reflexivity.
+  apply H_sup ; split ; [apply Rabs_pos | assumption].
+Qed.
+
+(* TOOD: change name & Rpps_seqify *)
 
 Lemma Pser_add : forall (An Bn : nat -> R) (x : R) (N : nat),
        sum_f_R0 (gt_Pser (fun n => An n + Bn n) x) N = sum_f_R0 (gt_Pser An x) N + sum_f_R0 (gt_Pser Bn x) N.
@@ -289,7 +289,9 @@ intros An x l Hyp.
  apply Hyp.
 Qed.
 
-Lemma Pser_opp_compat : forall (An : nat -> R) (x l : R),
+(* TODO: modifier Pser pour utiliser Rseq_pps *)
+
+Lemma Pser_opp_compat : forall (An : Rseq) (x l : R),
 	Pser An x l -> Pser (- An)%Rseq x (-l).
 Proof.
 intros An x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ;
@@ -297,6 +299,36 @@ intros An x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ;
  fold (gt_Pser (-An)%Rseq x).
  rewrite Pser_opp, <- Ropp_plus_distr, Rabs_Ropp ; apply HN ;
  assumption.
+Qed.
+
+Lemma Pser_add_compat : forall (An Bn : Rseq) (x la lb : R),
+  Pser An x la -> Pser Bn x lb -> Pser (An + Bn)%Rseq x (la + lb).
+Proof.
+intros An Bn x la lb Hla Hlb eps eps_pos.
+ pose (eps' := middle 0 eps) ; assert (eps'_pos : 0 < eps')
+ by (apply middle_is_in_the_middle ; assumption).
+ destruct (Hla _ eps'_pos) as [Na HNa] ;
+ destruct (Hlb _ eps'_pos) as [Nb HNb] ;
+ exists (max Na Nb) ; intros n n_lb.
+ assert (Hrew := Rseq_pps_plus_compat An Bn x n) ;
+  unfold Rseq_pps, Rseq_sum, Rseq_mult in Hrew.
+ rewrite Hrew.
+ eapply Rle_lt_trans.
+  eapply R_dist_plus.
+ apply Rlt_le_trans with (eps' + eps').
+  eapply Rlt_trans.
+   eapply Rplus_lt_compat_l ; eapply HNb ;
+    apply le_trans with (max Na Nb) ; [apply le_max_r | assumption].
+   apply Rplus_lt_compat_r ; apply HNa ;
+    apply le_trans with (max Na Nb) ; [apply le_max_l | assumption].
+  right ; unfold eps', middle ; field.
+Qed.
+
+Lemma Pser_minus_compat : forall (An Bn : Rseq) (x la lb : R),
+  Pser An x la -> Pser Bn x lb -> Pser (An - Bn)%Rseq x (la - lb).
+Proof.
+intros ; unfold Rseq_minus, Rminus.
+ apply Pser_add_compat ; [| apply Pser_opp_compat] ; assumption.
 Qed.
 
 Lemma Pser_unique : forall (An : nat -> R) (x l1 l2 : R),

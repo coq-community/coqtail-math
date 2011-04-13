@@ -76,9 +76,51 @@ intros r1 r2 r1_le_r2 ; rewrite Rmax_comm ; apply Rmax_eq_l ;
  assumption.
 Qed.
 
+Lemma Rmin_pos : forall x y, 0 <= x -> 0 <= y -> 0 <= Rmin x y.
+Proof.
+intros x y x_pos y_pos ; unfold Rmin ;
+ destruct (Rle_dec x y) ; assumption.
+Qed.
+
+Lemma Rmin_pos_lt : forall x y, 0 < x -> 0 < y -> 0 < Rmin x y.
+Proof.
+intros x y x_pos y_pos ; unfold Rmin ;
+ destruct (Rle_dec x y) ; assumption.
+Qed.
+
+Lemma Rmax_pos_l : forall x y, 0 <= x -> 0 <= Rmax x y.
+Proof.
+intros x y x_pos ; unfold Rmax ; destruct (Rle_dec x y) ;
+ [apply Rle_trans with x |] ; assumption.
+Qed.
+
+Lemma Rmax_pos_r : forall x y, 0 <= y -> 0 <= Rmax x y.
+Proof.
+intros ; rewrite Rmax_comm ; apply Rmax_pos_l ; auto.
+(* U Mad? *)
+Qed.
+
+Lemma Rmax_pos_lt_l : forall x y, 0 < x -> 0 < Rmax x y.
+Proof.
+intros x y x_pos ; unfold Rmax ; destruct (Rle_dec x y) ;
+ [apply Rlt_le_trans with x |] ; assumption.
+Qed.
+
+Lemma Rmax_pos_lt_r : forall x y, 0 < y -> 0 < Rmax x y.
+Proof.
+intros ; rewrite Rmax_comm ; apply Rmax_pos_lt_l ; auto.
+(* U Mad? *)
+Qed.
+
 Lemma Rabs_eq_compat : forall r1 r2, r1 = r2 -> Rabs r1 = Rabs r2.
 Proof.
 intros ; subst ; reflexivity.
+Qed.
+
+Lemma Rabs_le : forall r, - Rabs r <= r.
+Proof.
+intros r ; unfold Rabs ; destruct (Rcase_abs r) ;
+ [| apply Rle_trans with 0] ; intuition.
 Qed.
 
 Lemma Req_dec : forall r1 r2, {r1 = r2} + {r1 <> r2}.
@@ -95,6 +137,12 @@ Qed.
 Lemma Req_or_neq : forall r, {r = 0} + {r <> 0}.
 Proof.
 intros r; exact (Req_dec r 0).
+Qed.
+
+Lemma Rminus_opp : forall x y, x - - y = x + y.
+Proof.
+intros ; unfold Rminus ; rewrite Ropp_involutive ;
+ reflexivity.
 Qed.
 
 Lemma Rplus_eq_compat_r : forall r r1 r2, r1 = r2 -> r1 + r = r2 + r.

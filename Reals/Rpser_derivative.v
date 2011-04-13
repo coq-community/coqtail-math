@@ -137,52 +137,18 @@ intros An n x ;
  apply (derivable_pt_lim_finite_sum An x n).
 Qed.
 
-(* begin hide *)
-
-Lemma Rpser_derivability_prelim : forall x r, Rabs x < Rabs r ->
-      Rabs x < (Rabs x + Rabs r)/2 < Rabs r.
-Proof.
-intros x r x_bd ; split.
- apply Rle_lt_trans with ((Rabs x + Rabs x)/2).
- apply Rle_trans with (Rabs ((x+x) /2)).
- right ; apply Rabs_eq_compat ; field.
- unfold Rdiv ; rewrite Rabs_mult.
- replace (Rabs (/2)) with (/2).
- apply Rmult_le_compat_r ; intuition.
- apply Rabs_triang.
- rewrite Rabs_right ; intuition ; fourier.
- unfold Rdiv ; apply Rmult_lt_compat_r ; fourier.
- apply Rlt_le_trans with ((Rabs r + Rabs r) / 2).
- unfold Rdiv ; apply Rmult_lt_compat_r ; fourier.
- right ; field.
-Qed.
-
-Lemma Rpser_derivability_prelim2 : forall x r, Rabs x < Rabs r ->
-      Rabs x < Rabs ((Rabs x + Rabs r)/2) < Rabs r.
-Proof.
-intros x r x_bd ; replace (Rabs ((Rabs x + Rabs r)/2)) with ((Rabs x + Rabs r)/2).
- apply Rpser_derivability_prelim ; assumption.
- unfold Rdiv ; rewrite Rabs_mult ; replace (Rabs (/2)) with (/2).
- apply Rmult_eq_compat_r.
- symmetry ; rewrite Rabs_right ; [reflexivity |].
- apply Rle_ge ; apply Rplus_le_le_0_compat ; apply Rabs_pos.
- rewrite Rabs_right ; intuition ; fourier.
-Qed.
-
-(* end hide *)
-
 (** Sum of the formal derivative *)
 
 Definition weaksum_r_derive : forall (An : nat -> R) (r : R) (Rho : Cv_radius_weak An r) (x : R), R.
 Proof.
 intros An r Rho x ; case (Rlt_le_dec (Rabs x) r) ; intro x_bd.
- pose (r' := (Rabs x + Rabs r)/2).
+ pose (r' := middle (Rabs x) (Rabs r)).
  rewrite <- Rabs_right in x_bd by (apply Rle_ge ; apply Rle_trans with (Rabs x) ;
  [apply Rabs_pos | left ; assumption]).
- assert (H := Rpser_derivability_prelim2 _ _ x_bd).
+ assert (H := Rabs_middle_is_in_the_middle _ _ (Rabs_pos _) x_bd).
  assert (r'_bd : Rabs r' < Rabs r).
   destruct H ; intuition.
- apply (weaksum_r (An_deriv An) ((Rabs x + Rabs r) / 2)
+ apply (weaksum_r (An_deriv An) (middle (Rabs x) (Rabs r))
       (Cv_radius_weak_derivable_compat An r Rho r'
       r'_bd) x).
  apply 0.
@@ -209,7 +175,7 @@ intros An r Pr x x_bd.
  unfold weaksum_r_derive ; case (Rlt_le_dec (Rabs x) r) ; intro s.
  rewrite <- Rabs_right in x_bd.
  apply weaksum_r_sums.
- apply (proj1 (Rpser_derivability_prelim _ _ x_bd)).
+ apply (middle_is_in_the_middle _ _ x_bd).
  apply Rle_ge ; apply Rle_trans with (Rabs x) ;
  [apply Rabs_pos | left ; assumption].
  assert (H : Rabs x < Rabs x) by (apply Rlt_le_trans with r ; assumption) ;
@@ -269,36 +235,21 @@ intros An r rho x x_bd.
  assert (x_bd' : Rabs x < Rabs r).
   apply Rlt_le_trans with r ; [assumption | right ; symmetry ; apply Rabs_right].
   apply Rle_ge ; apply Rle_trans with (Rabs x) ; [apply Rabs_pos | left ; assumption].
-assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
-  apply Rlt_le_trans with (- (Rabs x + Rabs x)/2).
-  unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
-  apply Ropp_gt_lt_contravar ; apply Rplus_lt_compat_l ; assumption.
-  unfold Rabs ; case (Rcase_abs x) ; intro H.
-  right ; field.
-  apply Rle_trans with 0.
-  unfold Rdiv ; rewrite Ropp_mult_distr_l_reverse ;
-  apply Rge_le ; apply Ropp_0_le_ge_contravar.
-  apply Rle_mult_inv_pos ; fourier.
-  intuition.
- assert (x_lt_ub : x < (Rabs x + Rabs r) / 2).
-  apply Rle_lt_trans with ((Rabs x + Rabs x)/2).
-  unfold Rabs ; case (Rcase_abs x) ; intro H.
-  apply Rle_trans with 0.
-  left ; assumption.
-  rewrite <- Ropp_plus_distr.
-  unfold Rdiv ; apply Rle_mult_inv_pos.
-  fourier.
-  fourier.
-  right ; field.
-  unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ; apply Rplus_lt_compat_l ;
-  assumption.
-    pose (r' := ((Rabs x + Rabs r)/2 + Rabs r)/2).
-    assert (r'_bd1 := proj2 (Rpser_derivability_prelim _ _ x_bd')).
-    replace ((Rabs x + Rabs r) / 2) with (Rabs ((Rabs x + Rabs r) / 2)) in r'_bd1 ; [| apply Rabs_right ;
+assert (lb_lt_x : - middle (Rabs x) (Rabs r) < x).
+  apply Rlt_le_trans with (- Rabs x).
+  apply Ropp_gt_lt_contravar ; apply Rlt_gt ;
+   apply middle_is_in_the_middle ; assumption.
+   apply Rabs_le.
+ assert (x_lt_ub : x < middle (Rabs x) (Rabs r)).
+  apply Rle_lt_trans with (Rabs x) ; [apply Rle_abs |
+  apply middle_is_in_the_middle] ; assumption.
+    pose (r' := middle (middle (Rabs x) (Rabs r)) (Rabs r)).
+    assert (r'_bd1 := proj2 (middle_is_in_the_middle _ _ x_bd')).
+    replace (middle (Rabs x) (Rabs r)) with (Rabs (middle (Rabs x) (Rabs r))) in r'_bd1 ; [| apply Rabs_right ;
     unfold r' ; apply Rle_ge ; unfold Rdiv ; apply Rle_mult_inv_pos ; [| fourier] ;
     apply Rplus_le_le_0_compat ; apply Rabs_pos].
-    assert (r'_bd := proj2 (Rpser_derivability_prelim _ _ r'_bd1)).
-    assert (Temp : (Rabs ((Rabs x + Rabs r) / 2) + Rabs r) / 2 = r').
+    assert (r'_bd := proj2 (middle_is_in_the_middle _ _ r'_bd1)).
+    assert (Temp : middle (Rabs (middle (Rabs x) (Rabs r))) (Rabs r) = r').
      unfold r' ; unfold Rdiv ; apply Rmult_eq_compat_r ; apply Rplus_eq_compat_r ;
      apply Rabs_right ; apply Rle_ge ; apply Rle_mult_inv_pos ; [| fourier] ;
      apply Rplus_le_le_0_compat ; apply Rabs_pos.
@@ -307,7 +258,7 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
     unfold r' ; apply Rle_ge ; unfold Rdiv ; apply Rle_mult_inv_pos ; [| fourier] ;
     apply Rplus_le_le_0_compat ; [| apply Rabs_pos] ; unfold Rdiv ;
     apply Rle_mult_inv_pos ; [| fourier] ; apply Rplus_le_le_0_compat ; apply Rabs_pos].
-    pose (r'' := ((Rabs x + Rabs r) / 2)).
+    pose (r'' := middle (Rabs x) (Rabs r)).
     assert (r''_pos : 0 < r'').
     unfold r''. apply Rlt_mult_inv_pos ; [| fourier] ;
      apply Rplus_le_lt_0_compat ; [| apply Rle_lt_trans with (Rabs x) ; [| assumption]] ;
@@ -315,69 +266,69 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
     assert (r''_bd : r'' < r').
      unfold r'', r'.
      unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ; apply Rplus_lt_compat_r.
-     apply Rabs_def1 ; [| rewrite <- Ropp_mult_distr_l_reverse] ; assumption.
+     apply middle_is_in_the_middle ; assumption.
     pose (myR := mkposreal r'' r''_pos).
     assert (myR_ub : myR < r') by intuition.
     assert (Abel2' := Rpser_abel2 (An_deriv An) r'
          (Cv_radius_weak_derivable_compat An r rho r' r'_bd) myR myR_ub).
-   assert (cv_interv : forall y : R, Boule 0 (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2)
-         ((Rabs x + Rabs r) / 2) lb_lt_x x_lt_ub) y ->
+   assert (cv_interv : forall y : R, Boule 0 (mkposreal_lb_ub x (- middle (Rabs x) (Rabs r))
+         (middle (Rabs x)(Rabs r)) lb_lt_x x_lt_ub) y ->
          {l : R | Un_cv (fun N : nat => SP
          (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n) N y) l}).
     intros y y_bd.
     exists (weaksum_r_derive An r rho y).
     assert (y_bd2 : Rabs y < r).
      unfold Boule, mkposreal_lb_ub in y_bd ; rewrite Rminus_0_r in y_bd.
-     apply Rlt_trans with (((Rabs x + Rabs r) / 2 - - (Rabs x + Rabs r) / 2) / 2).
-     assumption.
-     apply Rle_lt_trans with ((Rabs x + Rabs r) / 2).
-     right ; field.
-     destruct (middle_is_in_the_middle _ _ x_bd) as (_, Temp) ; unfold middle in Temp.
-     rewrite Rabs_right with r ; [assumption | apply Rle_ge ;
-     apply Rle_trans with (Rabs x) ; [apply Rabs_pos | intuition]].
-     intros alpha alpha_pos ; destruct (weaksum_r_derive_sums An r rho y y_bd2
+     apply Rlt_trans with (middle (middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))).
+     rewrite (middle_unfold (middle _ _ )), <- Rminus_opp ; assumption.
+     apply Rle_lt_trans with (middle (Rabs x) (Rabs r)).
+     right ; unfold middle ; field.
+     apply Rlt_le_trans with (Rabs r).
+      apply middle_is_in_the_middle ; assumption.
+      right ; apply Rabs_pos_eq ; left ; apply Rle_lt_trans with (Rabs x) ;
+       [apply Rabs_pos |] ; assumption.
+   intros alpha alpha_pos ; destruct (weaksum_r_derive_sums An r rho y y_bd2
            alpha alpha_pos) as (N, HN) ; exists N ; intros n n_lb ; apply HN ;
            assumption.
    assert (CVN : CVN_r (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n)
-         (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)
+         (mkposreal_lb_ub x (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))
          lb_lt_x x_lt_ub)).
     apply Rpser_abel2 with r'.
     apply Cv_radius_weak_derivable_compat with r ; assumption.
     unfold mkposreal_lb_ub.
     apply Rle_lt_trans with r'' ; [| assumption].
     right ; unfold r'' ; intuition.
-     assert (Temp : ((Rabs x + Rabs r) / 2 - - (Rabs x + Rabs r) / 2) / 2
-           = (Rabs x + Rabs r) / 2).
-       field.
-     intuition.
+     assert (Temp : (middle (Rabs x) (Rabs r) - - middle (Rabs x) (Rabs r)) / 2
+           = middle (Rabs x) (Rabs r)) by field.
+    intuition.
    assert (Main := CVN_CVU_interv (fun n x => gt_Pser (An_deriv An) x n)
-          (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)
+          (mkposreal_lb_ub x (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))
           lb_lt_x x_lt_ub) cv_interv CVN).
    assert (Main2 : RFseq_cvu (Rpser_partial_sum_derive An) (weaksum_r_derive An r rho)
-          ((- (Rabs x + Rabs r) / 2 + (Rabs x + Rabs r) / 2) / 2)
-          (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)
+          (middle (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r)))
+          (mkposreal_lb_ub x (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))
           lb_lt_x x_lt_ub)).
-    clear -Main x_bd; intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ;
+    clear -Main x_bd x_bd'; intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ;
     exists (S N) ; intros n y n_lb y_bd.
     assert (y_bd2 : Boule 0
-         (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)
+         (mkposreal_lb_ub x (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))
          lb_lt_x x_lt_ub) y).
-     unfold Boule in y_bd ; unfold Boule ; replace ((- (Rabs x + Rabs r) / 2
-          + (Rabs x + Rabs r) / 2)/2) with 0 in y_bd by field ; assumption.
+     unfold Boule in * ; rewrite middle_R0 in y_bd ; assumption.
     assert(n_lb2 : (N <= pred n)%nat) by intuition.
     assert (Temp := HN (pred n) y n_lb2 y_bd2).
     assert (T1 := SFL_interv_right (fun (n : nat) (x : R) => gt_Pser (An_deriv An) x n)
-            (mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2)
-            ((Rabs x + Rabs r) / 2) lb_lt_x x_lt_ub) cv_interv y y_bd2).
+            (mkposreal_lb_ub x (- middle (Rabs x) (Rabs r))
+            (middle (Rabs x) (Rabs r)) lb_lt_x x_lt_ub) cv_interv y y_bd2).
     assert (y_bd3 : Rabs y < r).
      unfold Boule, mkposreal_lb_ub in y_bd2 ; rewrite Rminus_0_r in y_bd2.
-     apply Rlt_trans with (((Rabs x + Rabs r) / 2 - - (Rabs x + Rabs r) / 2) / 2).
+     apply Rlt_trans with ((middle (Rabs x) (Rabs r) - - middle (Rabs x) (Rabs r)) / 2).
      assumption.
-     apply Rle_lt_trans with ((Rabs x + Rabs r) / 2).
+     apply Rle_lt_trans with (middle (Rabs x) (Rabs r)).
      right ; field.
-     destruct (middle_is_in_the_middle _ _ x_bd) as (_, Temp') ; unfold middle in Temp'.
-     rewrite Rabs_right with r ; [assumption | apply Rle_ge ;
-     apply Rle_trans with (Rabs x) ; [apply Rabs_pos | intuition]].
+     apply Rlt_le_trans with (Rabs r).
+      apply middle_is_in_the_middle ; assumption.
+      right ; apply Rabs_pos_eq ; apply Rle_trans with (Rabs x) ;
+       [apply Rabs_pos | left ; assumption].
     assert (T2_temp := weaksum_r_derive_sums An r rho y y_bd3).
     assert (T2 := Pser_Rseqcv_link _ _ _ T2_temp) ; clear T2_temp.
     assert (Hrew : (fun N : nat => sum_f_R0 (gt_Pser (An_deriv An) y) N)
@@ -391,26 +342,21 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
      apply S_pred with N ; intuition.
     rewrite Hrew.
     unfold R_dist ; rewrite Rabs_minus_sym ; apply Temp.
-  assert (Dfn_eq_fn' : forall (x0 : R) (n : nat), - (Rabs x + Rabs r) / 2 < x0 ->
-          x0 < (Rabs x + Rabs r) / 2 -> derivable_pt_lim
+  assert (Dfn_eq_fn' : forall (x0 : R) (n : nat), - middle (Rabs x) (Rabs r) < x0 ->
+          x0 < middle (Rabs x) (Rabs r) -> derivable_pt_lim
           ((fun (n0 : nat) (x : R) => sum_f_R0 (gt_Pser An x) n0) n) x0
           (Rpser_partial_sum_derive An n x0)).
    intros y n y_lb y_ub.
    apply derivable_pt_lim_finite_sum.
   assert (fn_cv_f : RFseq_cv_interv (fun (n : nat) (x : R) => sum_f_R0 (gt_Pser An x) n)
-          (weaksum_r An r rho) (- (Rabs x + Rabs r) / 2) ((Rabs x + Rabs r) / 2)).
+          (weaksum_r An r rho) (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))).
    intros y lb_lt_y y_lt_ub eps eps_pos.
     assert(y_bd1 : - Rabs r < y).
-     apply Rlt_trans with (- (Rabs x + Rabs r) / 2) ; [| assumption].
-     apply Rle_lt_trans with (- (Rabs r + Rabs r) / 2).
-     right ; field.
-     unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ; apply Ropp_lt_contravar ;
-     apply Rplus_lt_compat_r ; assumption.
+     apply Rlt_trans with (- middle (Rabs x) (Rabs r)) ; [| assumption].
+     apply Ropp_lt_contravar ; apply middle_is_in_the_middle ; assumption.
     assert(y_bd2 : y < Rabs r).
-     apply Rlt_trans with ((Rabs x + Rabs r) / 2) ; [assumption |] ;
-     apply Rlt_le_trans with ((Rabs r + Rabs r) / 2) ; [| right ; field].
-     unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ; apply Rplus_lt_compat_r ;
-     assumption.
+     apply Rlt_trans with (middle (Rabs x) (Rabs r)) ; [assumption |] ;
+      apply middle_is_in_the_middle ; assumption.
    assert (y_bd : Rabs y < Rabs r).
     apply Rabs_def1 ; assumption.
     replace (Rabs r) with r in y_bd ; [| symmetry ; apply Rabs_right ; apply Rle_ge ;
@@ -420,16 +366,18 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
     apply (RFseq_cvu_derivable (fun n x => sum_f_R0 (gt_Pser An x) n)
          (Rpser_partial_sum_derive An)
          (weaksum_r An r rho) (weaksum_r_derive An r rho) x
-         (- (Rabs x + Rabs r)/2) ((Rabs x + Rabs r)/2)
+         (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))
          lb_lt_x x_lt_ub Dfn_eq_fn' fn_cv_f Main2).
    intros y y_lb y_ub.
-   apply CVU_continuity with (fn:=Rpser_partial_sum_derive An) (x:=0) (r:=(mkposreal_lb_ub x (- (Rabs x + Rabs r) / 2)
-             ((Rabs x + Rabs r) / 2) lb_lt_x x_lt_ub)).
+   apply CVU_continuity with (fn:=Rpser_partial_sum_derive An) (x:=0)
+    (r:=(mkposreal_lb_ub x (- middle (Rabs x) (Rabs r))
+             (middle (Rabs x) (Rabs r)) lb_lt_x x_lt_ub)).
              intros eps eps_pos ; destruct (Main2 eps eps_pos) as (N, HN) ; exists N ; 
              intros n z n_lb z_bd.
              rewrite Rabs_minus_sym ; apply HN.
    assumption.
-   replace ((- (Rabs x + Rabs r) / 2 + (Rabs x + Rabs r) / 2) / 2) with 0 by field.
+   replace (middle (- middle (Rabs x) (Rabs r)) (middle (Rabs x) (Rabs r))) with 0
+    by (symmetry ; apply middle_R0).
    assumption.
    intros.
    destruct n.
@@ -438,12 +386,9 @@ assert (lb_lt_x : - (Rabs x + Rabs r) / 2 < x).
    unfold Rpser_partial_sum_derive ; apply continuity_finite_sum.
    unfold Boule ; rewrite Rminus_0_r.
    unfold mkposreal_lb_ub.
-   replace (((Rabs x + Rabs r) / 2 - - (Rabs x + Rabs r) / 2) / 2) with
-   ((Rabs x + Rabs r) / 2) by field.
+   replace ((middle (Rabs x) (Rabs r) - - middle (Rabs x) (Rabs r)) / 2) with
+   (middle (Rabs x) (Rabs r)) by field.
    apply Rabs_def1 ; intuition.
-   clear -y_lb ; apply Rle_lt_trans with (- (Rabs x + Rabs r) / 2).
-   right ; field.
-   assumption.
 Qed.
 
 Lemma derivable_pt_lim_sum_r : forall (An:nat->R) (r:R) (Pr : finite_cv_radius An r) z,
@@ -460,7 +405,7 @@ intros An r Rho z z_bd eps eps_pos.
  (proj1 (middle_is_in_the_middle _ _ z_bd)) _ eps_pos) as [delta Hdelta].
  pose (delta' := Rmin delta (((middle (Rabs z) r) - Rabs z) / 2)%R) ;
  assert (delta'_pos : 0 < delta').
-  apply Rmin_pos.
+  apply Rmin_pos_lt.
    apply delta.
    apply ub_lt_2_pos with (middle (Rabs z) (middle (Rabs z) r)) ;
    apply (middle_is_in_the_middle _ _ (proj1 (middle_is_in_the_middle _ _ z_bd))).
@@ -473,17 +418,16 @@ intros An r Rho z z_bd eps eps_pos.
   rewrite weaksum_r_unique with (Pr2 := proj1 Rho (middle (Rabs z) r) H).
   rewrite weaksum_r_unique_strong with (r2 := middle (Rabs z) r)
    (Pr2 := proj1 Rho (middle (Rabs z) r) H).
-  erewrite weaksum_r_unique_strong with (r2 := (Rabs z + Rabs (middle (Rabs z) r)) / 2)
-   (Pr2 := (Cv_radius_weak_derivable_compat An (middle (Rabs z) r) (proj1 Rho (middle (Rabs z) r) H)
-        ((Rabs z + Rabs (middle (Rabs z) r)) / 2) match Rpser_derivability_prelim2 z (middle (Rabs z) r)
-        (eq_ind_r (Rlt (Rabs z)) z_bd3 (Rabs_right (middle (Rabs z) r) (Rle_ge 0 (middle (Rabs z) r)
-        (Rle_trans 0 (Rabs z) (middle (Rabs z) r) (Rabs_pos z) (or_introl (Rabs z = middle (Rabs z) r)
-        z_bd3))))) with | conj _ H0 => H0 end)).
+  erewrite weaksum_r_unique_strong with (r2 := middle (Rabs z) (Rabs (middle (Rabs z) r)))
+   (Pr2 := Cv_radius_weak_derivable_compat An (middle (Rabs z) r) (proj1 Rho (middle (Rabs z)
+   r) H) (middle (Rabs z) (Rabs (middle (Rabs z) r))) match Rabs_middle_is_in_the_middle
+   (Rabs z) (Rabs (middle (Rabs z) r)) (Rabs_pos z) (eq_ind_r (Rlt (Rabs z)) z_bd3
+   (Rabs_right (middle (Rabs z) r) (Rle_ge 0 (middle (Rabs z) r) (Rle_trans 0 (Rabs z)
+   (middle (Rabs z) r) (Rabs_pos z) (or_introl (Rabs z = middle (Rabs z) r) z_bd3)))))
+   with | conj _ H0 => H0 end).
   apply Hdelta' ; clear Hdelta'.
   apply Rlt_le_trans with delta' ; [apply h_bd | unfold delta' ; apply Rmin_l].
   eapply middle_is_in_the_middle ; assumption.
-  replace ((Rabs z + Rabs (middle (Rabs z) r)) / 2) with (middle (Rabs z) (Rabs (middle (Rabs z) r)))
-  by reflexivity.
   eapply middle_is_in_the_middle.
   apply Rlt_le_trans with (middle (Rabs z) r) ; [ eapply middle_is_in_the_middle ; assumption |
   right ; symmetry ; apply Rabs_right ; apply Rle_ge ; left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans
@@ -527,19 +471,17 @@ intros An Pr z eps eps_pos.
  destruct (derivable_pt_lim_weaksum_r _ _ (Pr _) _ z_bd _ eps_pos) as [delta Hdelta].
  pose (delta' := Rmin delta (1 / 2)).
  assert (delta'_pos : 0 < delta').
-  unfold Rmin ; apply Rmin_pos ; [apply delta | fourier].
+  unfold Rmin ; apply Rmin_pos_lt ; [apply delta | fourier].
  exists (mkposreal delta' delta'_pos) ; intros h h_neq h_bd.
  rewrite weaksum_r_unique_strong with (r2 := Rabs z + 1) (Pr2 := Pr (Rabs z + 1)).
  unfold weaksum_r_derive in Hdelta.
  destruct (Rlt_le_dec (Rabs z) (Rabs z + 1)) as [tt | Hf].
  rewrite weaksum_r_unique_strong with (r2 :=  ((Rabs z + Rabs (Rabs z + 1)) / 2))
-    (Pr2 := (Cv_radius_weak_derivable_compat An (Rabs z + 1)
-    (Pr (Rabs z + 1)) ((Rabs z + Rabs (Rabs z + 1)) / 2)
-    match Rpser_derivability_prelim2 z (Rabs z + 1)
-    (eq_ind_r (Rlt (Rabs z)) tt (Rabs_right (Rabs z + 1)
-    (Rle_ge 0 (Rabs z + 1) (Rle_trans 0 (Rabs z) (Rabs z + 1) (Rabs_pos z)
-    (or_introl (Rabs z = Rabs z + 1) tt)))))
-    with | conj _ H0 => H0 end)).
+    (Pr2 := Cv_radius_weak_derivable_compat An (Rabs z + 1) (Pr (Rabs z + 1))
+    (middle (Rabs z) (Rabs (Rabs z + 1))) match Rabs_middle_is_in_the_middle (Rabs z)
+    (Rabs (Rabs z + 1)) (Rabs_pos z) (eq_ind_r (Rlt (Rabs z)) tt (Rabs_right (Rabs z + 1)
+    (Rle_ge 0 (Rabs z + 1) (Rle_trans 0 (Rabs z) (Rabs z + 1) (Rabs_pos z) (or_introl
+    (Rabs z = Rabs z + 1) tt))))) with | conj _ H0 => H0 end).
  apply Hdelta ; [| apply Rlt_le_trans with delta' ; [| apply Rmin_l]] ; assumption.
  fourier.
  apply Rlt_le_trans with (middle (Rabs z) (Rabs z + 1)).

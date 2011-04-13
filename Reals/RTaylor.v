@@ -41,7 +41,7 @@ intros f g x [alp1 [Halp1 H1]] H.
 intros eps Heps.
 destruct (H eps Heps) as [alp2 [Halp2 H2]].
 exists (Rmin alp1 alp2); split.
-apply Rmin_pos; assumption.
+apply Rmin_pos_lt; assumption.
 intros u Hu.
 repeat rewrite <- H1.
 apply H2.
@@ -262,7 +262,7 @@ destruct Rint_derive2
     pose (alp1 := u / 2 + / 2).
     pose (alp2 := /2 - u / 2).
     exists (Rmin alp1 alp2); split.
-    apply Rmin_pos.
+    apply Rmin_pos_lt.
       unfold alp1; fourier.
       unfold alp2; fourier.
     intros y Hy; symmetry.

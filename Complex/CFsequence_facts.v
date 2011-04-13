@@ -52,7 +52,7 @@ intros fn fn' f g z c r z_in Dfn_eq_fn' fn_cv_f fn'_cvu_g g_cont eps eps_pos.
  assert (eps_8_pos : 0 < eps / 8) by fourier.
  destruct (g_cont z z_in (eps/8)%R eps_8_pos) as [delta1 H] ; clear g_cont ; destruct H as [delta1_pos g_cont].
  assert (delta_pos : 0 < Rmin ((r - (Cnorm (z - c))) / 2) delta1).
-  apply Rmin_pos ; [| assumption].
+  apply Rmin_pos_lt ; [| assumption].
   unfold middle, Rdiv ; apply Rlt_mult_inv_pos ; [| fourier].
   apply Rlt_Rminus ; rewrite Cnorm_minus_sym ; apply z_in.
 
@@ -543,7 +543,7 @@ intros fn f c r fn_cvu fn_cont z z_in.
  destruct (fn_cont N z z_in _ eps_3_pos) as [delta1 [delta1_pos Hdelta]].
  pose (delta := Rmin delta1 ((r - Cnorm (c - z))/2)) ;
  assert (delta_pos : 0 < delta).
-  unfold delta ; apply Rmin_pos.
+  unfold delta ; apply Rmin_pos_lt.
   assumption.
   unfold Rdiv ; apply Rlt_mult_inv_pos ; [apply Rlt_Rminus ; apply z_in | fourier].
   exists delta ; split ; [assumption | intros x [_  Hx]].

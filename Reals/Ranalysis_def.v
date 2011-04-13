@@ -95,6 +95,16 @@ Proof.
 intros ; unfold middle ; field.
 Qed.
 
+Lemma middle_unfold : forall x y, middle x y = (x + y) / 2.
+Proof.
+intros ; reflexivity.
+Qed.
+
+Lemma middle_R0 : forall x, middle (- x) x = 0.
+Proof.
+intros ; unfold middle ; field.
+Qed.
+
 Lemma middle_is_in_the_middle : forall x y, x < y -> x < middle x y < y.
 Proof.
 intros x y x_lt_y ; split.
@@ -106,6 +116,19 @@ intros x y x_lt_y ; split.
  unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
  apply Rplus_lt_compat_r ; assumption.
  right ; apply middle_identity.
+Qed.
+
+Lemma Rabs_middle_is_in_the_middle : forall x y, 0 <= x -> x < y ->
+  x < Rabs (middle x y) < y.
+Proof.
+intros x y x_pos x_lt_y.
+ assert (mxy_pos : 0 < middle x y).
+  apply Rle_lt_trans with x ;
+  [| apply middle_is_in_the_middle] ;
+  assumption.
+ rewrite Rabs_pos_eq ;
+ [ apply middle_is_in_the_middle |] ;
+ intuition.
 Qed.
 
 Lemma middle_interval : forall lb ub x y, interval lb ub x -> interval lb ub y ->
