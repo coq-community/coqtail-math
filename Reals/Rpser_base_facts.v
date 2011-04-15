@@ -18,7 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
-
+Require Import Reals.
 Require Import Rpser_def.
 
 Require Import Ranalysis_def.
@@ -220,11 +220,41 @@ intros An Bn r1 r2 RhoA RhoB.
  unfold Rminus ; apply Cv_radius_weak_plus ; assumption.
 Qed.
 
+Section fcvr_properties.
+
+Variables (An : Rseq) (r : R).
+Hypotheses rAn : finite_cv_radius An r.
+
+(** The finite_cv_radius is exactly the upper bound. We choose our definitions
+because it gives more information (the convexity of the radius for example) *)
+
+Lemma finite_cv_radius_is_ub : is_lub (fun r' => has_ub (gt_abs_Pser An r')) r.
+Proof.
+destruct rAn as [rho rho_ub] ; split.
+
+ intros r' Hr' ; destruct (Rle_lt_dec r' r) as [r'ler | rltr'].
+  assumption.
+  destruct (rho_ub _ rltr' Hr').
+
+ intros r' Hr' ; destruct (Rle_lt_dec r r') as [rler' | r'ltr].
+  assumption.
+  assert (H : has_ub (gt_abs_Pser An (middle r' r))).
+   assert (r'_pos : 0 <= r').
+    apply Hr' ; apply Cv_radius_weak_0.
+   apply rho ; split ;
+   [apply middle_le_le_pos ; [| left ; apply Rle_lt_trans with r']
+   | apply middle_is_in_the_middle] ; assumption.
+   assert (Hf := Hr' _ H).
+   assert (Hf' : r' < middle r' r) by (apply middle_is_in_the_middle ;
+    assumption).
+   clear -Hf Hf' ; apply False_ind ; fourier.
+Qed.
+
 (** Compatibility of the finite_cv_radius concept with various operations. *)
 
-Lemma finite_cv_radius_pos : forall An r, finite_cv_radius An r -> 0 <= r.
+Lemma finite_cv_radius_pos : 0 <= r.
 Proof.
-intros An r [_ Hf].
+destruct rAn as [_ Hf].
  destruct(Rle_lt_dec 0 r).
   trivial.
 destruct (Hf 0).
@@ -232,14 +262,15 @@ trivial.
 apply Cv_radius_weak_0.
 Qed.
 
-Lemma finite_cv_radius_weakening : forall An r, finite_cv_radius An r ->
-      forall x, Rabs x < r -> Cv_radius_weak An x.
+Lemma finite_cv_radius_weakening : forall x, Rabs x < r -> Cv_radius_weak An x.
 Proof.
-intros An r [H_sup _] x Hx.
+destruct rAn as [H_sup _] ; intros x Hx.
  apply Cv_radius_weak_le_compat with (Rabs x).
   rewrite Rabs_Rabsolu ; right ; reflexivity.
   apply H_sup ; split ; [apply Rabs_pos | assumption].
 Qed.
+
+End fcvr_properties.
 
 (* TOOD: change name & Rpps_seqify *)
 
@@ -353,52 +384,3 @@ intros An Bn x l1 l2 An_eq_Bn Hl1 Hl2.
  assert (T4 := Rseq_cv_eq_compat _ _ _ T3 T1).
  eapply Rseq_cv_unique ; eassumption.
 Qed.
-
-(** Link between the finite_cv_radius and the upper bound *)
-
-Lemma finite_cv_radius_le : forall An r r', 
-  finite_cv_radius An r -> Cv_radius_weak An r' -> r' <= r.
-Proof.
-intros An r r' [_ Hf] Hr'.
- destruct(Rle_lt_dec r' r).
-  trivial.
-  apply False_ind; apply (Hf r' r0 Hr').
-Qed.
-
-Lemma finite_cv_radius_lub : forall An r, 
-  finite_cv_radius An r -> is_lub (fun r' => Cv_radius_weak An r') r.
-Proof.
-intros An r H.
-split; intros r' Hr'.
- apply finite_cv_radius_le with An; trivial.
-
- destruct H as [H1 H2].
- destruct (Rle_lt_dec r r').
-  trivial.
-
-  pose ((r+r')/2) as r1.
-  assert(r' < r1 < r).
-   assert(H : forall a, a = (a+a)/2) by (intro; field).
-   split; unfold r1; [rewrite (H r') at 1 | rewrite (H r) at 2];
-    apply Rmult_lt_compat_r; auto with *.
-
-destruct H as [H H'].
-destruct (Hr' r1).
- apply H1; split.
-  apply Rle_trans with r'.
-   apply Hr', Cv_radius_weak_0; auto with *.
-auto with *.
-trivial.
-
- apply False_ind, (Rlt_irrefl r'), Rlt_trans with r1; trivial.
-
- apply False_ind, (Rlt_irrefl r').
- rewrite <- H0 in *; trivial.
-Qed.
-
-(*
-Lemma finite_cv_radius_ex An r0 : 
- ~ Cv_radius_weak An r0 -> {r | finite_cv_radius An r}.
-Proof.
-
-needs classical *)

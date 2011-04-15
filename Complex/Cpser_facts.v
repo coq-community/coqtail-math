@@ -667,7 +667,7 @@ intros An r Rho z.
  destruct (Rlt_le_dec (Cnorm z) r) as [z_bd | z_gt].
  assert (H : 0 <= middle (Cnorm z) r < r).
   split.
-  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Cnorm z) ; [| assumption]] ;
+  left ; apply middle_le_lt_pos_lt ; [| apply Rle_lt_trans with (Cnorm z) ; [| assumption]] ;
   apply Cnorm_pos.
   apply (middle_is_in_the_middle _ _ z_bd).
  apply (weaksum_r_derive _ _ (proj1 Rho (middle (Cnorm z) r) H) z).
@@ -746,7 +746,7 @@ Proof.
 intros An r rho z z_bd.
  assert (r_pos : 0 < r) by (apply Rle_lt_trans with (Cnorm z) ; [apply Cnorm_pos | assumption]).
  pose (midd := middle (Cnorm z) r) ; assert (midd_pos : 0 < midd).
-  unfold midd ; apply middle_le_lt_pos ; [apply Cnorm_pos | assumption].
+  unfold midd ; apply middle_le_lt_pos_lt ; [apply Cnorm_pos | assumption].
  pose (r' := mkposreal midd midd_pos).
  assert (z_bd' : Cnorm z < midd).
   apply (middle_is_in_the_middle _ _ z_bd).
@@ -789,8 +789,8 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
   rewrite Rabs_right ; [rewrite Rabs_right |].
   apply (proj2 (middle_is_in_the_middle _ _ r'_ub)).
   left ; assumption.
-  left ; apply middle_le_lt_pos.
-  left ; unfold r' ; apply middle_le_lt_pos ; [apply Cnorm_pos | assumption].
+  left ; apply middle_le_lt_pos_lt.
+  left ; unfold r' ; apply middle_le_lt_pos_lt ; [apply Cnorm_pos | assumption].
   assumption.
 
   assert (rho_An' := Cv_radius_weak_derivable_compat An r rho (middle r' r) r''_comp).
@@ -845,7 +845,7 @@ Proof.
 intros An r Pr z z_bd eps eps_pos. 
  assert (H : 0 <= middle (Cnorm z) r < r).
   split.
-  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Cnorm z) ; [| assumption]] ;
+  left ; apply middle_le_lt_pos_lt ; [| apply Rle_lt_trans with (Cnorm z) ; [| assumption]] ;
   apply Cnorm_pos.
   apply (middle_is_in_the_middle _ _ z_bd).
  destruct (derivable_pt_lim_weaksum_r _ _ (proj1 Pr (middle (Cnorm z) r) H) _

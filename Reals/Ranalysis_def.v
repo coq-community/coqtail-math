@@ -142,42 +142,48 @@ intros lb ub x y x_in_I y_in_I.
  unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
 Qed.
 
-Lemma middle_lt_lt_pos : forall x y, 0 < x -> 0 < y -> 0 < middle x y.
+Lemma middle_le_le_pos : forall x y, 0 <= x -> 0 <= y -> 0 <= middle x y.
+Proof.
+intros x y x_pos y_pos ; unfold middle, Rdiv ;
+ apply Rle_mult_inv_pos ; fourier.
+Qed.
+
+Lemma middle_lt_lt_pos_lt : forall x y, 0 < x -> 0 < y -> 0 < middle x y.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
  apply Rlt_mult_inv_pos ; fourier.
 Qed.
 
-Lemma middle_le_lt_pos : forall x y, 0 <= x -> 0 < y -> 0 < middle x y.
+Lemma middle_le_lt_pos_lt : forall x y, 0 <= x -> 0 < y -> 0 < middle x y.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
  apply Rlt_mult_inv_pos ; fourier.
 Qed.
 
-Lemma middle_lt_le_pos : forall x y, 0 < x -> 0 <= y -> 0 < middle x y.
+Lemma middle_lt_le_pos_lt : forall x y, 0 < x -> 0 <= y -> 0 < middle x y.
 Proof.
 intros x y x_pos y_pos ; rewrite middle_comm ;
- apply middle_le_lt_pos ; assumption.
+ apply middle_le_lt_pos_lt ; assumption.
 Qed.
 
-Lemma middle_lt_lt_neg : forall x y, x < 0 -> y < 0 -> middle x y < 0.
+Lemma middle_lt_lt_neg_lt : forall x y, x < 0 -> y < 0 -> middle x y < 0.
 Proof.
 intros x y x_neg y_neg ; unfold middle, Rdiv ;
  replace 0 with ((x + y) * 0) by ring ;
  apply Rmult_lt_gt_compat_neg_l ; fourier.
 Qed.
 
-Lemma middle_le_lt_neg : forall x y, x <= 0 -> y < 0 -> middle x y < 0.
+Lemma middle_le_lt_neg_lt : forall x y, x <= 0 -> y < 0 -> middle x y < 0.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
   replace 0 with ((x + y) * 0) by ring ;
  apply Rmult_lt_gt_compat_neg_l ; fourier.
 Qed.
 
-Lemma middle_lt_le_neg : forall x y, x < 0 -> y <= 0 -> middle x y < 0.
+Lemma middle_lt_le_neg_lt : forall x y, x < 0 -> y <= 0 -> middle x y < 0.
 Proof.
 intros x y x_neg y_neg ; rewrite middle_comm ;
- apply middle_le_lt_neg ; assumption.
+ apply middle_le_lt_neg_lt ; assumption.
 Qed.
 
 Lemma interval_l : forall lb ub, lb <= ub -> interval lb ub lb.

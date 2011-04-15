@@ -1,5 +1,5 @@
 Require Import Reals Rpow_facts Ranalysis_def.
-Require Import Fourier.
+Require Import Fourier MyRIneq.
 
 Require Import Rsequence_facts RFsequence RFsequence_facts.
 Require Import Rpser_def Rpser_base_facts Rpser_radius_facts Rpser_sums.
@@ -78,6 +78,40 @@ intros An r rho r' r'_bd.
  rewrite <- Rabs_mult ; rewrite Rinv_l ; [| assumption] ; rewrite Rabs_R1 ; right ; trivial.
 Qed.
 
+Lemma Cv_radius_weak_derivable_compat_rev : forall An r,
+         Cv_radius_weak (An_deriv An) r -> forall r', Rabs r' < Rabs r ->
+         Cv_radius_weak An r'.
+Proof.
+intros An r [B HB] r' r'_bd ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
+ intros x [i Hi] ; subst.
+ destruct i.
+  unfold gt_abs_Pser ; simpl ; rewrite Rmult_1_r ; apply Rmax_r.
+
+ apply Rle_trans with (Rabs (An (S i) * r ^ (S i))).
+  unfold gt_abs_Pser ; do 2 rewrite Rabs_mult, <- RPow_abs ; apply Rmult_le_compat_l ;
+   [apply Rabs_pos | apply pow_incr] ; split ;
+   [apply Rabs_pos | left ; assumption].
+ apply Rle_trans with (Rabs (An (S i) * r ^ i) * Rabs r).
+  right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
+   simpl ; ring.
+ apply Rle_trans with (gt_abs_Pser (An_deriv An) r i * / INR (S i) * Rabs r).
+  unfold gt_abs_Pser, An_deriv ; rewrite <- (Rabs_pos_eq (/ INR (S i))),
+  <- (Rabs_mult _ (/ INR (S i))).
+  apply Rmult_le_compat_r ; [apply Rabs_pos |] ; right ; apply Rabs_eq_compat ;
+  field ; apply not_0_INR ; omega.
+  rewrite S_INR ; left ; apply RinvN_pos.
+ apply Rle_trans with (gt_abs_Pser (An_deriv An) r i * / 1 * Rabs r).
+  apply Rmult_le_compat_r ; [apply Rabs_pos |] ;
+  apply Rmult_le_compat_l ; [apply Rabs_pos |] ;
+  apply Rle_Rinv ; [fourier
+  | replace 0 with (INR O) by reflexivity ; apply lt_INR
+  | replace 1 with (INR 1) by reflexivity ; apply le_INR] ; omega.
+ rewrite Rinv_1, Rmult_1_r ; apply Rle_trans with (B * Rabs r).
+  apply Rmult_le_compat_r ; [apply Rabs_pos |] ;
+  apply HB ; exists i ; reflexivity.
+ apply Rmax_l.
+Qed.
+
 Lemma finite_cv_radius_derivable_compat : forall An r,
          finite_cv_radius An r ->
          finite_cv_radius (An_deriv An) r.
@@ -86,7 +120,7 @@ intros An r Rho ; split.
  intros r' (r'_lb, r'_ub) ; apply Cv_radius_weak_derivable_compat with
  (r := middle (Rabs r) (Rabs r')).
  apply (proj1 Rho) ; split.
- left ; apply middle_lt_le_pos.
+ left ; apply middle_lt_le_pos_lt.
  apply Rabs_pos_lt ; apply Rgt_not_eq ; apply Rlt_gt ;
  apply Rle_lt_trans with r' ; assumption.
  apply Rabs_pos.
@@ -105,10 +139,24 @@ intros An r Rho ; split.
  apply Rle_lt_trans with r' ; [right ; apply Rabs_right ; intuition |].
  apply Rlt_le_trans with r ; [assumption | right ; symmetry ; apply Rabs_right ;
  left ; apply Rle_lt_trans with r' ; assumption].
- left ; apply middle_lt_le_pos ;  [apply Rabs_pos_lt ; apply Rgt_not_eq ;
+ left ; apply middle_lt_le_pos_lt ;  [apply Rabs_pos_lt ; apply Rgt_not_eq ;
  apply Rlt_gt ; apply Rle_lt_trans with r' ; assumption | apply Rabs_pos].
-(* TODO: prove this*)
-Admitted.
+
+ intros r' rltr' Hf ; destruct Rho as [H_bd H_ub].
+  assert (H := proj1 (middle_is_in_the_middle _ _ rltr')).
+  apply (H_ub _ H) ; eapply Cv_radius_weak_derivable_compat_rev.
+  eassumption.
+  assert (r_pos : 0 <= r).
+   apply finite_cv_radius_pos with An ; split ;
+    [exact H_bd | exact H_ub].
+  assert (r'_pos : 0 <= r').
+   left ; apply Rle_lt_trans with r ; assumption.
+  assert (middle_pos : 0 <= middle r r').
+   apply middle_le_le_pos ; assumption.
+  do 2 (rewrite Rabs_pos_eq ; [| assumption]).
+  apply middle_is_in_the_middle ; assumption.
+Qed.
+
 
 Lemma infinite_cv_radius_derivable_compat : forall An,
          infinite_cv_radius An ->
@@ -398,7 +446,7 @@ intros An r Rho z z_bd eps eps_pos.
  unfold sum_r_derive, sum_r.
  assert (H : 0 <= middle (Rabs z) r < r).
   split.
-  left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans with (Rabs z) ; [| assumption]] ;
+  left ; apply middle_le_lt_pos_lt ; [| apply Rle_lt_trans with (Rabs z) ; [| assumption]] ;
   apply Rabs_pos.
   eapply middle_is_in_the_middle ; assumption.
  destruct (derivable_pt_lim_weaksum_r _ _ (proj1 Rho (middle (Rabs z) r) H) _
@@ -430,8 +478,8 @@ intros An r Rho z z_bd eps eps_pos.
   eapply middle_is_in_the_middle ; assumption.
   eapply middle_is_in_the_middle.
   apply Rlt_le_trans with (middle (Rabs z) r) ; [ eapply middle_is_in_the_middle ; assumption |
-  right ; symmetry ; apply Rabs_right ; apply Rle_ge ; left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans
-  with (Rabs z) ; [| assumption ]] ; apply Rabs_pos].
+  right ; symmetry ; apply Rabs_right ; apply Rle_ge ; left ; apply middle_le_lt_pos_lt ;
+  [| apply Rle_lt_trans with (Rabs z) ; [| assumption ]] ; apply Rabs_pos].
   eapply middle_is_in_the_middle ; assumption.
   apply Rle_lt_trans with (Rabs z + Rabs h) ; [apply Rabs_triang |].
   apply Rlt_le_trans with (Rabs z + delta') ; [apply Rplus_lt_compat_l ; apply h_bd |].
