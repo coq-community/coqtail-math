@@ -110,8 +110,158 @@ apply Hsolve. split. apply H1. apply H3. apply Rlt_le_trans with (Rmin alp (b'-a
 apply H2. apply Rmin_l.
 Qed.
 
+Lemma limit_div_pos_opp : forall a b g, limit_div_pos g (open_interval a b) b -> 
+  limit_div_pos (fun x : R => g (- x)) (open_interval (- b) (- a)) (- b). 
+Proof.
+intros.
+unfold limit_div_pos in *.
+intros m Hm. destruct (H m Hm) as [alp [Halp Hsolve]].
+exists alp. split. apply Halp. intros.
+assert (Hopen : open_interval a b (-x)). split; destruct H0; fourier.
+assert (Hdist : R_dist (-x) b < alp). unfold R_dist in *.
+replace (-x - b) with (- (x + b)) by ring.
+rewrite Rabs_Ropp. ring_simplify (x -- b) in H1. apply H1.
+specialize (Hsolve (-x) Hopen Hdist).
+apply Hsolve.
+Qed.
+
+Lemma limit_div_neg_opp : forall a b g, limit_div_neg g (open_interval a b) b -> 
+  limit_div_neg (fun x : R => g (- x)) (open_interval (- b) (- a)) (- b). 
+Proof.
+intros.
+unfold limit_div_neg in *.
+intros m Hm. destruct (H m Hm) as [alp [Halp Hsolve]].
+exists alp. split. apply Halp. intros.
+assert (Hopen : open_interval a b (-x)). split; destruct H0; fourier.
+assert (Hdist : R_dist (-x) b < alp). unfold R_dist in *.
+replace (-x - b) with (- (x + b)) by ring.
+rewrite Rabs_Ropp. ring_simplify (x -- b) in H1. apply H1.
+specialize (Hsolve (-x) Hopen Hdist).
+apply Hsolve.
+Qed.
+
+Lemma limit_div_pos_imp :
+forall (f : R -> R) (D D1 : R -> Prop) (l : R),
+  (forall x0 : R, D1 x0 -> D x0) -> limit_div_pos f D l -> limit_div_pos f D1 l.
+Proof.
+intros.
+unfold limit_div_pos in *.
+intros m Hm.
+specialize (H0 m Hm).
+destruct H0 as [alp [Halp Hsolve]].
+exists alp. split.
+apply Halp.
+intros. assert (D x).
+intuition.
+specialize (Hsolve x H2 H1). apply Hsolve.
+Qed.
+
+Lemma limit_div_neg_imp :
+forall (f : R -> R) (D D1 : R -> Prop) (l : R),
+  (forall x0 : R, D1 x0 -> D x0) -> limit_div_neg f D l -> limit_div_neg f D1 l.
+Proof.
+intros.
+intros m Hm.
+specialize (H0 m Hm).
+destruct H0 as [alp [Halp Hsolve]].
+exists alp. split.
+apply Halp.
+intros. assert (D x).
+intuition.
+specialize (Hsolve x H2 H1). apply Hsolve.
+Qed.
+
+
+Lemma limit_div_pos_comp_Ropp : 
+  forall (g : R -> R) (a b : R),
+    limit_div_pos g (open_interval (-a) (-b)) (-a) -> 
+      limit_div_pos (comp g (fun x => -x)) (open_interval b a) a.
+Proof.
+intros.
+intros m Hm.
+specialize (H m Hm).
+destruct H as [alp [Halp Hsolve]].
+exists alp. split. apply Halp.
+intros. specialize (Hsolve (-x)).
+apply Hsolve. split; destruct H; fourier.
+unfold R_dist in *. replace (- x - - a) with (- (x - a)) by ring.
+rewrite Rabs_Ropp. apply H0.
+Qed.
+
+Lemma limit_div_pos_comp_Ropp_l : 
+  forall (g : R -> R) (a b : R),
+    limit_div_pos g (open_interval (-a) (-b)) (-b) -> 
+      limit_div_pos (comp g (fun x => -x)) (open_interval b a) b.
+Proof.
+intros.
+intros m Hm.
+specialize (H m Hm).
+destruct H as [alp [Halp Hsolve]].
+exists alp. split. apply Halp.
+intros. specialize (Hsolve (-x)).
+apply Hsolve. split; destruct H; fourier.
+unfold R_dist in *. replace (- x - - b) with (- (x - b)) by ring.
+rewrite Rabs_Ropp. apply H0.
+Qed.
+
+Lemma limit_div_neg_comp_Ropp : 
+  forall (g : R -> R) (a b : R),
+    limit_div_neg g (open_interval (-a) (-b)) (-a) -> 
+      limit_div_neg (comp g (fun x => -x)) (open_interval b a) a.
+Proof.
+intros.
+intros m Hm.
+specialize (H m Hm).
+destruct H as [alp [Halp Hsolve]].
+exists alp. split. apply Halp.
+intros. specialize (Hsolve (-x)).
+apply Hsolve. split; destruct H; fourier.
+unfold R_dist in *. replace (- x - - a) with (- (x - a)) by ring.
+rewrite Rabs_Ropp. apply H0.
+Qed.
+
+Lemma limit_div_neg_comp_Ropp_l : 
+  forall (g : R -> R) (a b : R),
+    limit_div_neg g (open_interval (-a) (-b)) (-b) -> 
+      limit_div_neg (comp g (fun x => -x)) (open_interval b a) b.
+Proof.
+intros.
+intros m Hm.
+specialize (H m Hm).
+destruct H as [alp [Halp Hsolve]].
+exists alp. split. apply Halp.
+intros. specialize (Hsolve (-x)).
+apply Hsolve. split; destruct H; fourier.
+unfold R_dist in *. replace (- x - - b) with (- (x - b)) by ring.
+rewrite Rabs_Ropp. apply H0.
+Qed.
+
 End Definitions.
 
+Lemma derive_pt_comp_Ropp : forall a b f x (Df : forall x, open_interval a b x -> derivable_pt f x) 
+(Df' : forall x, open_interval (-b) (-a) x -> derivable_pt (fun x0 => f (- x0)) x) 
+  (H1 : open_interval (-b) (-a) x) (H2 : open_interval a b (-x)), - derive_pt f (- x) (Df (- x) H2) =
+   derive_pt (fun x0 : R => f (- x0)) x (Df' x H1).
+Proof.
+intros.
+assert (derivable_pt (comp f (fun x=> Ropp x)) x). reg. apply derivable_pt_opp. reg. 
+apply Df. apply H2.
+
+assert (Heq : forall x, (fun x0 => f (-x0)) x = (comp f (fun x => Ropp x)) x).
+intros. reflexivity.
+
+rewrite (derive_pt_ext (fun x0 => f (-x0)) (comp f (fun x => Ropp x)) Heq x (Df' (x) H1) H). 
+assert (derivable_pt (fun x => (-x)) x). reg.
+assert (derivable_pt f ((fun x => -x) x)). apply Df. apply H2.
+pose (p := derivable_pt_comp (fun x => (-x)) f x H0 H3).
+rewrite (pr_nu_var _ _ _ H p).
+unfold p.
+rewrite derive_pt_comp. replace (derive_pt (fun x0 : R => (- x0)%R) x H0) with (-1).
+ring_simplify. apply Ropp_eq_compat. apply pr_nu.
+rewrite <- derive_pt_id with x. rewrite <- derive_pt_opp.
+unfold id. apply pr_nu.
+reflexivity.
+Qed.
 
 Section FirstGenHopital.
 
@@ -941,6 +1091,131 @@ Qed.
 
 End SndGenHopital.
 
+Section SndGenHopital_left.
+
+(*
+Theoreme Hopital_infinite: 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b+} g = +infinity
+Hlimder: lim_{x -> b+} f' / g' = L    (with L \in R)
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+-----------------------------------------------------
+lim_{x -> a+} f / g = L
+
+
+*)
+Variables f g : R -> R.
+Variables a b L : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+
+(* TODO oulala... ca doit etre un gros craquage ca... *)
+(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
+
+Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
+Hypothesis (Hlimder : forall eps, eps > 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x b < alp -> 
+      R_dist (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)) L < eps)).
+
+
+Theorem Hopital_infinite_l : limit1_in (fun x => f x / g x) (open_interval a b) L b.
+Proof.
+  apply limit1_ext with (comp (fun x => f (-x) / g (-x)) (fun x => -x)).
+   intros. unfold comp. ring_simplify (--x). now reflexivity.
+   
+   apply limit1_imp with (Dgf (open_interval a b) (open_interval (-b) (-a)) (fun x => - x)).
+    intros. unfold Dgf. split.
+     now apply H.
+     
+     now destruct H; split; fourier.
+  
+  apply limit_comp with (-b).
+   unfold limit1_in, limit_in. intros. exists eps. split.
+    now assumption.
+    
+    intros. destruct H0. unfold dist in *. simpl in *. destruct H0. unfold R_dist in *.
+    replace (- x -- b) with (- (x - b)) by ring. rewrite Rabs_Ropp. now apply H1.
+  
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    
+    apply Hopital_infinite with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit_div_pos_opp. apply Zg.
+
+     intros.
+
+     (*assert (Hopenx : open_interval a b (-x)). split; destruct Hopen; fourier. 
+     destruct (g'_not_0 (-x) Hopenx). replace 0 with (--0) by ring.
+     replace 0 with (-0) in H by ring.*)
+     
+     
+     intros. assert (Hopen2: open_interval a b (-x)).
+      now destruct Hopen; split; fourier.
+
+(* TODO g'_not_zero *)
+      
+      intro. destruct (g'_not_0 (-x) Hopen2).
+       assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) Hopen2)).
+        reg.
+         apply Ropp_eq_compat. now apply pr_nu.
+         
+         apply Dg. now apply Hopen2.
+       
+       rewrite <- Ropp_involutive. symmetry. rewrite <- Ropp_involutive.
+       replace 0 with (- 0) in H by ring. 
+       apply Ropp_eq_compat. rewrite <- H. rewrite H0. reflexivity. 
+
+(* TODO end g'_not_zero *)
+intros eps Heps. specialize (Hlimder eps Heps).
+destruct Hlimder as [alp [Halp Hsolve]].
+exists alp. split. apply Halp.
+intros.
+assert (Hopenx : open_interval a b (-x)). split; destruct Hopen; fourier.
+assert (R_dist (-x) b < alp). unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring.
+ring_simplify (x--b) in H.
+rewrite Rabs_Ropp. apply H.
+specialize (Hsolve (-x) Hopenx H0).
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). apply Hsolve.
+
+field. apply g'_not_0.
+
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+Qed.
+
+
+End SndGenHopital_left.
+
 Section SndGenHopitalposneg.
 
 (*
@@ -1178,6 +1453,129 @@ Qed.
 
 End SndGenHopitalposneg.
 
+Section SndGenHopitalposneg_left.
+
+
+(*
+Theoreme Hopital_infinite_neg_l: 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b-} g = -infinity
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+Hlimder: lim_{x -> b-} f' / g' = L    (with L \in R)
+-----------------------------------------------------
+lim_{x -> b-} f / g = L
+
+
+*)
+
+Lemma Hopital_infinite_neg_l
+     : forall (f g : R -> R) (a b L : R),
+       a < b ->
+       forall (Df : forall x : R, open_interval a b x -> derivable_pt f x)
+         (Dg : forall x : R, open_interval a b x -> derivable_pt g x),
+       (forall x : R, a <= x <= b -> continuity_pt f x) ->
+       (forall x : R, a <= x <= b -> continuity_pt g x) ->
+       limit_div_neg g (open_interval a b) b ->
+       (forall (x : R) (Hopen : open_interval a b x),
+        derive_pt g x (Dg x Hopen) <> 0) ->
+       (forall eps : R,
+        eps > 0 ->
+        exists alp : R,
+          alp > 0 /\
+          (forall (x : R) (Hopen : open_interval a b x),
+           R_dist x b < alp ->
+           R_dist (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)) L <
+           eps)) ->
+       limit1_in (fun x : R => f x / g x) (open_interval a b) L b.
+Proof.
+intros f g a b L Hab Df Dg Cf Cg Hdiv_neg g'_not_0 Hlimder.
+  apply limit1_ext with (comp (fun x => f (-x) / g (-x)) (fun x => -x)).
+   intros. unfold comp. ring_simplify (--x). now reflexivity.
+   
+   apply limit1_imp with (Dgf (open_interval a b) (open_interval (-b) (-a)) (fun x => - x)).
+    intros. unfold Dgf. split.
+     now apply H.
+     
+     now destruct H; split; fourier.
+  
+  apply limit_comp with (-b).
+   unfold limit1_in, limit_in. intros. exists eps. split.
+    now assumption.
+    
+    intros. destruct H0. unfold dist in *. simpl in *. destruct H0. unfold R_dist in *.
+    replace (- x -- b) with (- (x - b)) by ring. rewrite Rabs_Ropp. now apply H1.
+  
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    
+    apply Hopital_infinite_neg with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit_div_neg_opp. apply Hdiv_neg.
+
+     intros.
+
+     (*assert (Hopenx : open_interval a b (-x)). split; destruct Hopen; fourier. 
+     destruct (g'_not_0 (-x) Hopenx). replace 0 with (--0) by ring.
+     replace 0 with (-0) in H by ring.*)
+     
+     
+     intros. assert (Hopen2: open_interval a b (-x)).
+      now destruct Hopen; split; fourier.
+
+(* TODO g'_not_zero *)
+      
+      intro. destruct (g'_not_0 (-x) Hopen2).
+       assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) Hopen2)).
+        reg.
+         apply Ropp_eq_compat. now apply pr_nu.
+         
+         apply Dg. now apply Hopen2.
+       
+       rewrite <- Ropp_involutive. symmetry. rewrite <- Ropp_involutive.
+       replace 0 with (- 0) in H by ring. 
+       apply Ropp_eq_compat. rewrite <- H. rewrite H0. reflexivity. 
+
+(* TODO end g'_not_zero *)
+intros eps Heps. specialize (Hlimder eps Heps).
+destruct Hlimder as [alp [Halp Hsolve]].
+exists alp. split. apply Halp.
+intros.
+assert (Hopenx : open_interval a b (-x)). split; destruct Hopen; fourier.
+assert (R_dist (-x) b < alp). unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring.
+ring_simplify (x--b) in H.
+rewrite Rabs_Ropp. apply H.
+specialize (Hsolve (-x) Hopenx H0).
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). apply Hsolve.
+
+field. apply g'_not_0.
+
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+Qed.
+
+
+End SndGenHopitalposneg_left.
+
 Section InfiniteLimiteHopital_pos.
 
 (*
@@ -1301,6 +1699,111 @@ Qed.
 
 End InfiniteLimiteHopital_pos.
 
+Section InfiniteLimiteHopital_pos_left.
+
+
+(*
+Theorem Infinite_Limit_Hopital_l: 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zf: lim_{x -> b-} f = 0
+Zg: lim_{x -> b-} g = 0
+Hlimder: lim_{x -> b-} f' / g' = +infinity
+-----------------------------------------------------
+lim_{x -> b-} f / g = +infinity
+
+*)
+
+(* TODO this proof has been done following the scheme of the first one... Maybe not optimal *)
+
+Variables f g : R -> R.
+Variables a b L : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 b). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zg : limit1_in g (open_interval a b) 0 b).
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
+Hypothesis (Hlimder : forall m, m > 0 -> 
+  exists alp,
+    alp > 0 /\ 
+      (forall x (Hopen: open_interval a b x), R_dist x b < alp ->
+        m < (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)))).
+
+Lemma Infinite_Limit_Hopital_l : limit_div_pos (fun x => f x / g x) (open_interval a b) b.
+Proof.
+apply limit_div_pos_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_pos_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Infinite_Limit_Hopital with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit1_ext with (comp f (fun x => -x)). intros. reflexivity.
+     apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
+     intros. split. apply H. destruct H; split; fourier.
+     apply limit_comp with b. unfold limit1_in, limit_in.
+     intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
+     ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
+     apply H0. apply Zf.
+
+     apply limit1_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
+     intros. split. apply H. destruct H; split; fourier.
+     apply limit_comp with b. unfold limit1_in, limit_in.
+     intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
+     ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
+     apply H0. apply Zg.
+
+     intros. split.
+     assert (Hopen' : open_interval a b (-x)).  split; destruct Hopen; fourier.
+     generalize (g_not_0 (-x) Hopen'). intros. intro. destruct H. destruct H.
+     erewrite <- (derive_pt_comp_Ropp a b g x Dg Dg' _ Hopen') in H0. replace 0 with (-0) by ring. 
+     rewrite <- H0. ring.
+
+     apply g_not_0. split; destruct Hopen; fourier.
+ 
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+apply Hm.
+Qed.
+
+
+End InfiniteLimiteHopital_pos_left.
 
 Section InfiniteLimiteHopital_neg.
 
@@ -1424,6 +1927,116 @@ Qed.
 
 
 End InfiniteLimiteHopital_neg.
+
+
+Section InfiniteLimiteHopital_neg_left.
+
+(*
+Theorem Infinite_Limit_Hopital_neg_l: 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zf: lim_{x -> b-} f = 0
+Zg: lim_{x -> b-} g = 0
+Hlimder: lim_{x -> b-} f' / g' = -infinity
+-----------------------------------------------------
+lim_{x -> b-} f / g = -infinity
+
+*)
+
+(* TODO this proof has been done following the scheme of the first one... Maybe not optimal *)
+
+Variables f g : R -> R.
+Variables a b L : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 b). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zg : limit1_in g (open_interval a b) 0 b).
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
+Hypothesis (Hlimder : forall m, m < 0 -> 
+  exists alp,
+    alp > 0 /\ 
+      (forall x (Hopen: open_interval a b x), R_dist x b < alp ->
+        m > (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)))).
+
+Lemma Infinite_Limit_Hopital_neg_l : limit_div_neg (fun x => f x / g x) (open_interval a b) b.
+(* TODO forall m, m < 0 -> 
+  exists alp,
+    alp > 0 /\ 
+      (forall x (Hopen: open_interval a b x), R_dist x b < alp ->
+        m > (f x) / (g x)).*)
+Proof.
+apply limit_div_neg_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_neg_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Infinite_Limit_Hopital_neg with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit1_ext with (comp f (fun x => -x)). intros. reflexivity.
+     apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
+     intros. split. apply H. destruct H; split; fourier.
+     apply limit_comp with b. unfold limit1_in, limit_in.
+     intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
+     ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
+     apply H0. apply Zf.
+
+     apply limit1_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
+     intros. split. apply H. destruct H; split; fourier.
+     apply limit_comp with b. unfold limit1_in, limit_in.
+     intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
+     ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
+     apply H0. apply Zg.
+
+     intros. split.
+     assert (Hopen' : open_interval a b (-x)).  split; destruct Hopen; fourier.
+     generalize (g_not_0 (-x) Hopen'). intros. intro. destruct H. destruct H.
+     erewrite <- (derive_pt_comp_Ropp a b g x Dg Dg' _ Hopen') in H0. replace 0 with (-0) by ring. 
+     rewrite <- H0. ring.
+
+     apply g_not_0. split; destruct Hopen; fourier.
+ 
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+fourier.
+Qed.
+
+End InfiniteLimiteHopital_neg_left.
 
 Section Hopital_infinite_pos.
 
@@ -1696,11 +2309,106 @@ Qed.
 
 End Hopital_infinite_pos.
 
+Section Hopital_infinite_pos_left.
+
+(*
+Theoreme Hopital_infinite_pos_l : 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b-} g = +infinity
+Hlimder: lim_{x -> b-} f' / g' = +infinity    (with L \in R)
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+-----------------------------------------------------
+lim_{x -> b-} f / g = +infinity
+
+*)
+
+Variables f g : R -> R.
+Variables a b : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+
+(* TODO oulala... ca doit etre un gros craquage ca... *)
+(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
+
+Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
+
+(* TODO warning this proof is copy and paste *)
+(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
+
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
+Hypothesis (Hlimder : forall m, m > 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x b < alp -> 
+      (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen) > m))).
+
+Theorem Hopital_infinite_inf_pos_l : limit_div_pos (fun x => f x / g x) (open_interval a b) b.
+Proof.
+apply limit_div_pos_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_pos_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Hopital_infinite_inf_pos with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit_div_pos_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit_div_pos_comp_Ropp_l. do 2  rewrite Ropp_involutive.
+     apply Zg.
+     
+     intros. assert (Hopen' : open_interval a b (-x)). 
+     destruct Hopen; split; fourier.
+     rewrite <- (derive_pt_comp_Ropp _ _ _ _ Dg _ _ Hopen'). replace 0 with (-0) by ring. 
+     intro. apply Ropp_eq_compat in H. do 2 rewrite Ropp_involutive in H. 
+     apply g'_not_0 in H. apply H.
+     
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g'_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+fourier.
+Qed.
+
+End Hopital_infinite_pos_left.
+
 
 Section Hopital_infinite_neg.
 
 (*
-Theoreme Hopital_infinite_pos : 
+Theoreme Hopital_infinite_inf_neg : 
 
 a, b \in R, 
 Hab: a < b
@@ -1968,7 +2676,101 @@ Qed.
  
 End Hopital_infinite_neg.
 
+Section Hopital_infinite_neg_left.
 
+
+(*
+Theoreme Hopital_infinite_inf_neg_l : 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b-} g = +infinity
+Hlimder: lim_{x -> b-} f' / g' = -infinity    (with L \in R)
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+-----------------------------------------------------
+lim_{x -> b-} f / g = -infinity
+
+*)
+
+Variables f g : R -> R.
+Variables a b : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+
+(* TODO oulala... ca doit etre un gros craquage ca... *)
+(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
+
+Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
+
+(* TODO warning this proof is copy and paste *)
+(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
+
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
+Hypothesis (Hlimder : forall m, m > 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x b < alp -> 
+      (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen) < -m))).
+
+Theorem Hopital_infinite_inf_neg_l : limit_div_neg (fun x => f x / g x) (open_interval a b) b.
+Proof.
+apply limit_div_neg_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_neg_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Hopital_infinite_inf_neg with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit_div_pos_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit_div_pos_comp_Ropp_l. do 2  rewrite Ropp_involutive.
+     apply Zg.
+     
+     intros. assert (Hopen' : open_interval a b (-x)). 
+     destruct Hopen; split; fourier.
+     rewrite <- (derive_pt_comp_Ropp _ _ _ _ Dg _ _ Hopen'). replace 0 with (-0) by ring. 
+     intro. apply Ropp_eq_compat in H. do 2 rewrite Ropp_involutive in H. 
+     apply g'_not_0 in H. apply H.
+     
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g'_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+fourier.
+Qed.
+
+End Hopital_infinite_neg_left.
 
 Section Useless.
 
@@ -2132,6 +2934,100 @@ Qed.
 
 End Hopital_infinite_neg_pos.
 
+Section Hopital_infinite_neg_pos_left.
+(*
+Theoreme Hopital_infinite_pos_l : 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b-} g = -infinity
+Hlimder: lim_{x -> b-} f' / g' = +infinity    (with L \in R)
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+-----------------------------------------------------
+lim_{x -> b-} f / g = +infinity
+
+*)
+
+Variables f g : R -> R.
+Variables a b : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+
+(* TODO oulala... ca doit etre un gros craquage ca... *)
+(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
+
+Hypothesis (Zg : limit_div_neg g (open_interval a b) b).
+
+(* TODO warning this proof is copy and paste *)
+(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
+
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
+Hypothesis (Hlimder : forall m, m > 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x b < alp -> 
+      (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen) > m))).
+
+Theorem Hopital_infinite_inf_neg_lpos_l : limit_div_pos (fun x => f x / g x) (open_interval a b) b.
+Proof.
+apply limit_div_pos_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_pos_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Hopital_infinite_inf_neg_lpos with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit_div_neg_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit_div_neg_comp_Ropp_l. do 2  rewrite Ropp_involutive.
+     apply Zg.
+     
+     intros. assert (Hopen' : open_interval a b (-x)). 
+     destruct Hopen; split; fourier.
+     rewrite <- (derive_pt_comp_Ropp _ _ _ _ Dg _ _ Hopen'). replace 0 with (-0) by ring. 
+     intro. apply Ropp_eq_compat in H. do 2 rewrite Ropp_involutive in H. 
+     apply g'_not_0 in H. apply H.
+     
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g'_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+fourier.
+Qed.
+
+End Hopital_infinite_neg_pos_left.
+
 Section Hopital_infinite_pos_g.
 
 (*
@@ -2196,6 +3092,101 @@ Qed.
 
 End Hopital_infinite_pos_g.
 
+Section Hopital_infinite_pos_g_left.
+
+(*
+Theoreme Hopital_infinite_pos_l : 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b-} g = -infinity
+Hlimder: lim_{x -> b-} f' / g' = +infinity    (with L \in R)
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+-----------------------------------------------------
+lim_{x -> b-} f / g = +infinity
+
+*)
+
+Variables f g : R -> R.
+Variables a b : R.
+
+Hypothesis Hab : a < b.
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+
+(* TODO oulala... ca doit etre un gros craquage ca... *)
+(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
+
+Hypothesis (Zg : limit_div_neg g (open_interval a b) b).
+
+(* TODO warning this proof is copy and paste *)
+(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
+
+
+(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
+Hypothesis (Hlimder : forall m, m < 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x b < alp -> 
+      (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen) < m))).
+
+Theorem Hopital_infinite_g_neg_lpos_l : limit_div_neg (fun x => f x / g x) (open_interval a b) b.
+Proof.
+apply limit_div_neg_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_neg_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Hopital_infinite_g_neg_lpos with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
+
+     apply limit_div_neg_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit_div_neg_comp_Ropp_l. do 2  rewrite Ropp_involutive.
+     apply Zg.
+     
+     intros. assert (Hopen' : open_interval a b (-x)). 
+     destruct Hopen; split; fourier.
+     rewrite <- (derive_pt_comp_Ropp _ _ _ _ Dg _ _ Hopen'). replace 0 with (-0) by ring. 
+     intro. apply Ropp_eq_compat in H. do 2 rewrite Ropp_involutive in H. 
+     apply g'_not_0 in H. apply H.
+     
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g'_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+fourier.
+Qed.
+
+
+End Hopital_infinite_pos_g_left.
 
 Section Hopital_infinite_neg_g.
 
@@ -2262,547 +3253,98 @@ Qed.
 End Hopital_infinite_neg_g.
 
 
+Section Hopital_infinite_neg_g_left.
+
 (*
- Section FirstGenHopital.
+Theoreme Hopital_infinite_pos_l : 
+
+a, b \in R, 
+Hab: a < b
+Cf, Cg: f and g continue on [a; b], 
+Df, Dg: f and g derivable on ]a; b[
+Zg: lim_{x -> b-} g = +infinity
+Hlimder: lim_{x -> b-} f' / g' = -infinity    (with L \in R)
+g'_not_zero: \forall x \in ]a; b[, g' (x) <> 0
+-----------------------------------------------------
+lim_{x -> b-} f / g = -infinity
+
+*)
 
 Variables f g : R -> R.
-Variables a b L : R.
+Variables a b : R.
 
 Hypothesis Hab : a < b.
-Hypotheses (Df : derivable f) (Dg : derivable g).
-Hypotheses (Zf : limit1_in f (D_x no_cond a) 0 a).
-Hypotheses (Zg : limit1_in g (D_x no_cond a) 0 a).
+Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x) 
+           (Dg : forall x, open_interval a b x -> derivable_pt g x).
+Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
+           (Cg : forall x, a <= x <= b -> continuity_pt g x).
+
+(* TODO oulala... ca doit etre un gros craquage ca... *)
+(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
+
+Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
+
+(* TODO warning this proof is copy and paste *)
+(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
+
+
 (* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
-Hypothesis (g_not_0 : forall x, open_interval a b x -> derive g Dg x <> 0 /\ g x <> 0).
-Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (open_interval a b) L a).
+Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
+Hypothesis (Hlimder : forall m, m > 0 ->
+  exists alp, 
+    alp > 0 /\
+    (forall x (Hopen : open_interval a b x), R_dist x b < alp -> 
+      (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen) > m))).
 
-Lemma f_a_zero : f a = 0.
+Theorem Hopital_infinite_g_pos_lneg_l : limit_div_pos (fun x => f x / g x) (open_interval a b) b.
 Proof.
- assert (continuity f).
-  apply derivable_continuous. apply Df.
+apply limit_div_pos_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+intros. unfold comp. ring_simplify (--x). reflexivity.
+apply limit_div_pos_comp_Ropp.
+  assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
+   intros. reg. apply Df. now destruct H; split; fourier.
+   
+   assert (Dg': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => g (- x)) x).
+    intros. reg. apply Dg. now destruct H; split; fourier.
+    intros m Hm.
+    apply Hopital_infinite_g_pos_lneg with Df' Dg'.
+     now intuition.
+     
+     intros. reg. apply Cf. now destruct H; split; fourier.
+     
+     intros. reg. apply Cg. now destruct H; split; fourier.
 
-  unfold continuity in H. unfold continuity_pt in H. unfold continue_in in H. specialize (H a).
-eapply single_limit; [ | apply H | apply Zf ].
-unfold adhDa. intros. exists (a + alp / 2).
-split.
-constructor. constructor.
-intro. fourier.
-unfold R_dist. ring_simplify (a + alp / 2 - a).
-rewrite Rabs_right; fourier.
+     apply limit_div_pos_ext with (comp g (fun x => -x)). intros. reflexivity.
+     apply limit_div_pos_comp_Ropp_l. do 2  rewrite Ropp_involutive.
+     apply Zg.
+     
+     intros. assert (Hopen' : open_interval a b (-x)). 
+     destruct Hopen; split; fourier.
+     rewrite <- (derive_pt_comp_Ropp _ _ _ _ Dg _ _ Hopen'). replace 0 with (-0) by ring. 
+     intro. apply Ropp_eq_compat in H. do 2 rewrite Ropp_involutive in H. 
+     apply g'_not_0 in H. apply H.
+     
+     intros m1 Hm1. specialize (Hlimder m1 Hm1).
+     destruct Hlimder as [alp [Halp Hsolve1]].
+     exists alp. split. apply Halp.
+     intros. 
+assert (Hopenx : open_interval a b (-x)). destruct Hopen; split; fourier.
+replace (derive_pt (fun x0 : R => f (- x0)) x (Df' x Hopen)) with 
+  (- derive_pt f (- x) (Df (- x) Hopenx)).
+replace (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen)) with 
+  (- derive_pt g (- x) (Dg (- x) Hopenx)).
+replace ((- derive_pt f (- x) (Df (- x) Hopenx) /
+      - derive_pt g (- x) (Dg (- x) Hopenx))) with
+((derive_pt f (- x) (Df (- x) Hopenx) /
+      derive_pt g (- x) (Dg (- x) Hopenx))). 
+apply Hsolve1. unfold R_dist in *.
+replace (- x - b) with (- (x + b)) by ring. ring_simplify (x -- b) in H.
+rewrite Rabs_Ropp. apply H.
+field. apply g'_not_0.
+apply derive_pt_comp_Ropp.
+apply derive_pt_comp_Ropp.
+fourier.
 Qed.
 
-Lemma g_a_zero : g a = 0.
-assert (continuity g). apply derivable_continuous. apply Dg. 
-unfold continuity in H. unfold continuity_pt in H. unfold continue_in in H.
-specialize (H a).
-eapply single_limit; [ | apply H | apply Zg ].
-unfold adhDa. intros. exists (a + alp / 2).
-split.
-constructor. constructor.
-intro. fourier.
-unfold R_dist. ring_simplify (a + alp / 2 - a).
-rewrite Rabs_right; fourier.
-Qed.
+End Hopital_infinite_neg_g_left.
 
-(*
-Lemma Rabs_div2 : forall a b c e, e > 0 ->
-  Rabs (a - b) < e / 2 ->
-  Rabs (b - c) < e / 2 ->
-    Rabs (a - c) < e.
-Proof.
-  intros x y z e epos Hxy Hyz.
-  replace (x - z) with ((x - y) + (y - z)) by ring.
-  replace e with (e / 2 + e / 2) by field.
-  eapply Rle_lt_trans.
-    apply Rabs_triang.
-    fourier.
-Qed.
-*)
-
-Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (open_interval a b) L a.
-Proof.
-unfold limit1_in, limit_in.
-intros.
-unfold limit1_in, limit_in in Hlimder.
-specialize (Hlimder eps H).
-destruct Hlimder as [alp [Halp Hlim]].
-exists alp. split. assumption.
-intros.
-assert (Hacc2 : forall x, open_interval a b x -> exists c, f x / g x = derive f Df c / derive g Dg c /\ a < c < x).
-generalize MVT.
-intros.
-specialize (H1 f g a x0).
-assert (forall c, a < c < x0 -> derivable_pt f c). intros. apply Df.
-assert (forall c, a < c < x0 -> derivable_pt g c). intros. apply Dg.
-specialize (H1 H3 H4).
-assert (a < x0); unfold open_interval in H2; intuition.
-assert (forall c : R, a <= c <= x0 -> continuity_pt f c).
-intros. apply (derivable_continuous _ Df).
-assert (forall c, a <= c <= x0 -> continuity_pt g c).
-intros. apply (derivable_continuous _ Dg).
-specialize (H2 H1 H9).
-destruct H2 as [c [P H2]].
-exists c. split.
-rewrite g_a_zero in H2. rewrite f_a_zero in H2. do 2 rewrite Rminus_0_r in H2.
-unfold derive.
-apply (Rmult_eq_reg_l (g x0)).
-rewrite (pr_nu f c _ (H3 c P)). unfold Rdiv. do 2 rewrite <- Rmult_assoc.
-rewrite H2. rewrite (pr_nu g c _ (Dg c)).
-field. generalize (g_not_0 c). generalize (g_not_0 x0).
-intros H01 H02.
-unfold open_interval in H01, H02.
-unfold derive in H01, H02.
-assert (c < b). eapply Rlt_trans with x0; intuition. destruct P; assumption.
-destruct P;
-intuition.
-specialize (g_not_0 x0). 
-unfold open_interval in g_not_0. intuition.
-apply P.
-
-destruct H0.
-specialize (Hacc2 x H0).
-destruct Hacc2 as (c, Haccc).
-specialize (Hlim c). simpl in *. unfold R_dist in *.
-assert (open_interval a b c /\ Rabs (c - a) < alp).
-split.
-unfold open_interval. split; intuition. apply Rlt_trans with x; intuition. apply H0.
-destruct Haccc. destruct H3.
-rewrite Rabs_right. rewrite Rabs_right in H1.
-fourier. fourier. fourier.
-specialize (Hlim H2).
-destruct Haccc.
-rewrite H3. apply Hlim.
-Qed.
-
-End FirstGenHopital.
-*)
-
-Section VerySimplHopital.
-
-Variables f g : R -> R.
-Variables a b c L : R.
-
-Hypothesis Hab : c < a < b.
-Hypotheses (Cf : C 1 f) (Cg : C 1 g).
-Definition Df := C_Sn_derivable f O Cf.
-Definition Dg := C_Sn_derivable g O Cg.
-
-(* Hypothesis (Zf : limit1_in f (D_x no_cond a) 0 a) (Zg : limit1_in g (D_x no_cond a) 0 a). *)
-Hypothesis f_a_zero : f a = 0.
-Hypothesis g_a_zero : g a = 0.
-Hypothesis g_not_zero : forall x, g x <> 0.
-Hypothesis (Hg_not_0 : derive g Dg a <> 0).
-
-Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) L a).
-
-
-Lemma f'a_lim : limit1_in (derive f Df) (D_x no_cond a) (derive f Df a) a.
-Proof.
- assert (continuity (derive f Df)).
-  inversion Cf. inversion H0. apply continuity_ext with (derive f pr).
-   intro. apply derive_ext. intro. reflexivity.
-
-   apply H1.
-
-  apply H.
-Qed.
-
-Lemma g'a_lim : limit1_in (derive g Dg) (D_x no_cond a) (derive g Dg a) a. Proof.
-Proof.
- assert (continuity (derive g Dg)).
-  inversion Cg. inversion H0. apply continuity_ext with (derive g pr).
-   intro. apply derive_ext. intro. reflexivity.
-
-   apply H1.
-
-  apply H.
-Qed.
-
-Lemma L_decomp : L = derive f Df a / derive g Dg a. Proof.
- assert (limit1_in (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) (derive f Df a / derive g Dg a) a).
-  unfold Rdiv. apply limit_mul.
-   apply f'a_lim.
-
-   apply limit_inv.
-    apply g'a_lim.
-
-    apply Hg_not_0.
-
-   eapply single_limit with (fun x => derive f Df x / derive g Dg x) (D_x no_cond a) a.
-    intros alp Halp. exists (a + alp / 2). split.
-     constructor.
-      constructor.
-
-      intro. fourier.
-
-     unfold R_dist. ring_simplify (a + alp / 2 - a). apply Rle_lt_trans with (alp / 2).
-      assert (alp / 2 > 0).
-       fourier.
-      
-       rewrite Rabs_right. 
-        intuition. 
-        
-        fourier.
-        
-        fourier.
-        
-        assumption.
-        
-        assumption.
-Qed.
-
-
-Theorem Hopital_finite_zero_weak' : limit1_in (fun x => f x / g x) (D_x no_cond a) L a.
-Proof.
- assert (Hder' : limit1_in (fun x : R => derive f Df x / derive g Dg x)
-      (D_x no_cond a) (derive f Df a / derive g Dg a) a).
-  apply limit_mul.
-   apply f'a_lim.
-
-   apply limit_inv.
-    apply g'a_lim.
-
-    apply Hg_not_0.
-
-   rewrite L_decomp. apply limit1_ext with (fun x : R => ((f x - f a) / (x - a)) * ((x - a) / (g x - g a))).
-    intros x (Hax, Hxb).
-      rewrite f_a_zero, g_a_zero. unfold Rdiv. rewrite <- Rmult_assoc. rewrite (Rmult_assoc (f x - R0)).
-      replace (/ (x - a) * (x - a)) with 1.
-      rewrite Rminus_0_r.
-     rewrite Rminus_0_r. ring.
-
-     intuition.
-
-    apply limit_mul.
-     (* f'(a) *)
-        generalize (Df a); intros (l, Hl).
-        intros e epos.
-        destruct (Hl e epos) as (d, dpos).
-        exists d; split.
-          apply d.
-          intros x (Hxab, Hxd).
-          assert (Nxa : x - a <> 0). destruct Hxab. intro. apply H0. intuition.
-          unfold dist in Hxd; simpl in Hxd; unfold R_dist in Hxd.
-          specialize (dpos (x - a) Nxa Hxd).
-          simpl.
-          assert (Hdl : derive f Df a = l).
-            unfold derive, derive_pt.
-            destruct (Df a). simpl. unfold derivable_pt_abs in *. apply uniqueness_limite with f a; assumption. 
-          
-          rewrite Hdl.
-          ring_simplify (a + (x - a)) in dpos.
-          apply dpos.
-        
-        (* g'(a) *)
-        apply limit1_ext with (fun x : R => / ((g x - g a) / (x - a))).
-          intros x (Hax, Hxb).
-          apply Rinv_Rdiv. 
-          rewrite g_a_zero.
-          rewrite Rminus_0_r.
-          apply g_not_zero; intuition.
-          intuition.
-
-          apply limit_inv.
-            generalize (Dg a); intros (l, Hl).
-        intros e epos.
-        destruct (Hl e epos) as (d, dpos).
-        exists d; split.
-          apply d.
-          intros x (Hxab, Hxd).
-          assert (Nxa : x - a <> 0). destruct Hxab. intro. apply H0. intuition.
-          unfold dist in Hxd; simpl in Hxd; unfold R_dist in Hxd.
-          specialize (dpos (x - a) Nxa Hxd).
-          simpl.
-          assert (Hdl : derive g Dg a = l).
-            unfold derive, derive_pt.
-            destruct (Dg a). simpl. unfold derivable_pt_abs in *. apply uniqueness_limite with g a; assumption. 
-          
-          rewrite Hdl.
-          ring_simplify (a + (x - a)) in dpos.
-          apply dpos.
-          apply Hg_not_0.
-Qed.
-
-End VerySimplHopital.
-
-(*
-Section SimplHopital.
-
-Variables f g : R -> R.
-Variables a b L : R.
-
-Hypothesis Hab : a < b.
-(* Hypotheses (Df : derivable f) (Dg : derivable g). *)
-Hypotheses (Cf : C 1 f) (Cg : C 1 g).
-Hypotheses g_not_zero : forall x, x <> a -> g x <> 0.
-Definition Df := C_Sn_derivable f O Cf.
-Definition Dg := C_Sn_derivable g O Cg.
-Hypotheses (Zf : limit1_in f no_cond 0 a).
-Hypotheses (Zg : limit1_in g no_cond 0 a).
-Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) no_cond L a).
-
-Lemma f_a_zero : f a = 0.
-Proof.
-symmetry. eapply tech_limit; [ | apply Zf].
-constructor.
-Qed.
-
-Lemma g_a_zero : g a = 0.
-Proof.
-symmetry. eapply tech_limit; [ | apply Zg].
-constructor.
-Qed.
-
-Lemma g'a_not_zero : derive g Dg a <> 0.
-Proof.
- intro.
-unfold derive, derive_pt, Dg in H.
-destruct (C_Sn_derivable g 0 Cg a).
-simpl in H. subst.
-
-
-
-Admitted.
-
-(*
-Lemma g_not_zero : { c | a < c /\ forall x, a < x <= c -> g x <> 0 }.
-Admitted.
-
-Definition c := projT1 g_not_zero.
-Definition Hc : a < c /\ forall x, a < x <= c -> g x <> 0 := projT2 g_not_zero.
-*)
-
-Lemma f'a_lim : limit1_in (derive f Df) (D_x no_cond a) (derive f Df a) a.
-Proof.
-assert (continuity (derive f Df)).
- inversion Cf. inversion H0. 
- apply continuity_ext with (derive f pr).
- intro. apply derive_ext.
- intro. reflexivity.
-  unfold derive, derive_pt, Df. simpl. simpl. admit.
- apply H.
-Qed.
-
-Lemma g'a_lim : limit1_in (derive g Dg) (D_x no_cond a) (derive g Dg a) a.
-Proof.
-assert (continuity (derive g Dg)).
- admit.
- apply H.
-Qed.
-
-Lemma L_decomp : L = derive f Df a / derive g Dg a.
-Admitted.
-
-Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (D_x no_cond a) L a.
-Proof.
-  assert (Hder' : limit1_in (fun x : R => derive f Df x / derive g Dg x)
-      (D_x no_cond a) (derive f Df a / derive g Dg a) a).
-    apply limit_mul.
-      apply f'a_lim.
-      apply limit_inv.
-        apply g'a_lim.
-        apply g'a_not_zero.
-    
-    rewrite L_decomp.
-    
-    apply limit1_ext with (fun x : R => ((f x - f a) / (x - a)) * ((x - a) / (g x - g a))).
-      intros x (Hax, Hxb).
-      rewrite f_a_zero, g_a_zero.
-      field; split.
-        
-        apply g_not_zero. intro; intuition.
-        intuition.
-      
-      apply limit_mul.
-        (* f'(a) *)
-        generalize (Df a); intros (l, Hl).
-        intros e epos.
-        destruct (Hl e epos) as (d, dpos).
-        exists d; split.
-          apply d.
-          intros x (Hxab, Hxd).
-          assert (Nxa : x - a <> 0). destruct Hxab. intro. apply H0. intuition.
-          unfold dist in Hxd; simpl in Hxd; unfold R_dist in Hxd.
-          specialize (dpos (x - a) Nxa Hxd).
-          simpl.
-          assert (Hdl : derive f Df a = l).
-            unfold derive, derive_pt.
-            admit (* blabla ~ Hl *).
-          
-          rewrite Hdl.
-          ring_simplify (a + (x - a)) in dpos.
-          apply dpos.
-        
-        (* g'(a) *)
-        apply limit1_ext with (fun x : R => / ((g x - g a) / (x - a))).
-          intros x (Hax, Hxb).
-          field.
-          split; [ | intro; intuition ].
-          rewrite g_a_zero.
-          rewrite Rminus_0_r.
-          apply g_not_zero; intuition.
-          
-          apply limit_inv.
-            admit. (* même chose que pour f'(a) : remplir le blabla ~ Hl d'abord *)
-            apply g'a_not_zero.
-Qed.
-
-
-
-End SimplHopital.
-*)
-(*
-Section Hopital.
-
-Variables f g : R -> R.
-Variables a b L : R.
-
-Hypothesis Hab : a < b.
-Hypotheses (Df : derivable f) (Dg : derivable g).
-Hypotheses (Zf : limit1_in f (open_interval a b) 0 a).
-Hypotheses (Zg : limit1_in g (open_interval a b) 0 a).
-Hypothesis (Hlimder : limit1_in (fun x => derive f Df x / derive g Dg x) (open_interval a b) L a).
-
-Lemma f_a_zero : f a = 0.
-Proof.
-Admitted.
-
-Lemma g_a_zero : g a = 0.
-Admitted.
-
-Lemma g'a_not_zero : derive g Dg a <> 0.
-Admitted.
-
-Lemma g_not_zero : { c | a < c /\ forall x, a < x <= c -> g x <> 0 }.
-Admitted.
-
-Definition c := projT1 g_not_zero.
-Definition Hc : a < c /\ forall x, a < x <= c -> g x <> 0 := projT2 g_not_zero.
-
-Lemma Rabs_div2 : forall a b c e, e > 0 ->
-  Rabs (a - b) < e / 2 ->
-  Rabs (b - c) < e / 2 ->
-    Rabs (a - c) < e.
-Proof.
-  intros x y z e epos Hxy Hyz.
-  replace (x - z) with ((x - y) + (y - z)) by ring.
-  replace e with (e / 2 + e / 2) by field.
-  eapply Rle_lt_trans.
-    apply Rabs_triang.
-    fourier.
-Qed.
-
-Lemma f'a_lim : limit1_in (derive f Df) (open_interval a b) (derive f Df a) a.
-Proof.
-  intros e epos.
-  pose (e' := e / 2).
-  assert (e'pos : e' > 0) by admit.
-  unfold derive, derive_pt.
-  
-  (* Distance between fx-fa/x-a and f'a *)
-  remember (Df a) as Dfa.
-  destruct Dfa as (f'a, Hf'a).
-  simpl.
-  generalize (Hf'a e' e'pos); intros Hffa.
-  destruct Hffa as (d1, Hd1).
-  
-  unfold dist; simpl; unfold R_dist.
-  
-  exists (d1 / 8); split.
-    admit (* OK *).
-    
-    intros x ((Hax, Hxb), Hxd).
-    apply Rabs_div2 with ((f x - f a) / (x - a)).
-      apply epos.
-      
-      (* faire ça avec x ... appliquer la compatibilité de la limite avec un truc compliqué ? *)
-      (* ou juste du découpage de epsilon ? *)
-      admit (* difficult part *).
-      
-      assert (Nax : x - a <> 0) by (intro; fourier).
-      assert (Hxdw : Rabs (x - a) < d1) by admit.
-      specialize (Hd1 (x - a) Nax Hxdw).
-      replace (a + (x - a)) with x in Hd1 by ring.
-      apply Hd1.
-Qed.
-
-Lemma g'a_lim : limit1_in (derive g Dg) (open_interval a b) (derive g Dg a) a.
-Admitted.
-
-Lemma L_decomp : L = derive f Df a / derive g Dg a.
-Admitted.
-
-Theorem Hopital_finite_zero_weak : limit1_in (fun x => f x / g x) (open_interval a c) L a.
-Proof.
-  assert (Hder' : limit1_in (fun x : R => derive f Df x / derive g Dg x)
-      (open_interval a b) (derive f Df a / derive g Dg a) a).
-    apply limit_mul.
-      apply f'a_lim.
-      apply limit_inv.
-        apply g'a_lim.
-        apply g'a_not_zero.
-    
-    rewrite L_decomp.
-    
-    apply limit1_ext with (fun x : R => ((f x - f a) / (x - a)) * ((x - a) / (g x - g a))).
-      intros x (Hax, Hxb).
-      rewrite f_a_zero, g_a_zero.
-      field; split.
-        apply Hc; split; fourier.
-        intro; fourier.
-      
-      apply limit_mul.
-        (* f'(a) *)
-        generalize (Df a); intros (l, Hl).
-        intros e epos.
-        destruct (Hl e epos) as (d, dpos).
-        exists d; split.
-          apply d.
-          intros x (Hxab, Hxd).
-          assert (Nxa : x - a <> 0) by (intro; destruct Hxab; fourier).
-          unfold dist in Hxd; simpl in Hxd; unfold R_dist in Hxd.
-          specialize (dpos (x - a) Nxa Hxd).
-          simpl.
-          assert (Hdl : derive f Df a = l).
-            unfold derive, derive_pt.
-            admit (* blabla ~ Hl *).
-          
-          rewrite Hdl.
-          ring_simplify (a + (x - a)) in dpos.
-          apply dpos.
-        
-        (* g'(a) *)
-        apply limit1_ext with (fun x : R => / ((g x - g a) / (x - a))).
-          intros x (Hax, Hxb).
-          field.
-          split; [ | intro; fourier ].
-          rewrite g_a_zero.
-          rewrite Rminus_0_r.
-          apply Hc; split; fourier.
-          
-          apply limit_inv.
-            admit. (* même chose que pour f'(a) : remplir le blabla ~ Hl d'abord *)
-            apply g'a_not_zero.
-Qed.
-
-Definition pderive a b (Hab : a < b) f
-  (Df : derivable_on_interval a b Hab f) x :=
-    match Rlt_le_dec a x with
-    | left Hax =>
-        match Rlt_le_dec x b with
-        | left Hxb => derive_pt f x (Df x (conj Hax Hxb))
-        | right _ => 0
-        end
-    | right _ => 0
-    end.
-
-Theorem Hopital_finite_zero :
-  forall f g c b (Hcb : c < b) L
-    (Df : derivable_on_interval c b Hcb f)
-    (Dg : derivable_on_interval c b Hcb g),
-    limit1_in f (open_interval c b) 0 c -> 
-    limit1_in g (open_interval c b) 0 c -> 
-    limit1_in (fun x => pderive c b Hcb f Df x / pderive c b Hcb g Dg x) (open_interval c b) L c ->
-      limit1_in (fun x => f x / g x) (open_interval c b) L c.
-Admitted.
-*)
