@@ -27,7 +27,7 @@ Require Import Max.
 Require Import Fourier.
 
 Require Import Rpser_def Rpser_base_facts Rpser_cv_facts.
-Require Import Rpser_sums Rpser_derivative.
+Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
 Require Import Functions.
 

@@ -2,6 +2,8 @@ Require Import Reals.
 Require Import Fourier.
 Require Import Rpow_facts.
 
+Require Import Ranalysis_def.
+Require Import Rsequence_facts RFsequence RFsequence_facts.
 Require Import Rpser_def Rpser_base_facts.
 Require Import Rpser_cv_facts Rpser_sums.
 
@@ -110,3 +112,152 @@ intro An.
   assert (Main := not_all_not_ex _ _ H).
   left.
 *)
+
+
+(** Caracterization of the cv radius of the formal derivative *)
+
+Lemma Cv_radius_weak_derivable_compat : forall An r,
+         Cv_radius_weak An r -> forall r', Rabs r' < Rabs r ->
+         Cv_radius_weak (An_deriv An) r'.
+Proof.
+intros An r rho r' r'_bd.
+ assert (Rabsr_pos : 0 < Rabs r).
+  apply Rle_lt_trans with (Rabs r') ; [apply Rabs_pos | assumption].
+ assert (x_lt_1 : Rabs (r'/ r) < 1).
+  unfold Rdiv ; rewrite Rabs_mult ; rewrite Rabs_Rinv.
+  replace 1 with (Rabs r *  / Rabs r).
+  apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+  apply Rinv_r ; apply Rgt_not_eq ; assumption.
+  intro Hf ; rewrite Hf, Rabs_R0 in Rabsr_pos ; apply (Rlt_irrefl _ Rabsr_pos).
+  destruct rho as (B,HB).
+  case (Req_or_neq r') ; intro r'_lb.
+  exists (Rabs (An 1%nat)) ; intros x Hx ; destruct Hx as (i, Hi) ;
+ rewrite Hi ; unfold gt_abs_Pser, An_deriv.
+ destruct i.
+ simpl ; rewrite Rmult_1_l ; rewrite Rmult_1_r ; apply Rle_refl.
+ rewrite r'_lb ; rewrite pow_i ; [| intuition] ; repeat (rewrite Rmult_0_r) ;
+ rewrite Rabs_R0 ; apply Rabs_pos.
+ assert (Rabsr'_pos : 0 < Rabs r') by (apply Rabs_pos_lt ; assumption). 
+ destruct (Rpser_cv_speed_pow_id (r' / r) x_lt_1 (Rabs r') Rabsr'_pos) as (N, HN).
+ destruct (Rseq_partial_bound (gt_abs_Pser (An_deriv An) r') N) as (B2, HB2).
+ exists (Rmax B B2) ; intros x Hx ; destruct Hx as (i, Hi) ;
+ rewrite Hi ; unfold gt_abs_Pser in * ; case (le_lt_dec i N) ; intro H.
+ rewrite <- Rabs_Rabsolu ; apply Rle_trans with B2 ; [apply HB2 | apply RmaxLess2] ;
+ assumption.
+ apply Rle_trans with (Rabs (/r' * (INR (S i) * (r' / r) ^ S i) * An (S i) * r ^ S i)).
+ right ; apply Rabs_eq_compat ; unfold An_deriv ; field_simplify.
+ unfold Rdiv ; repeat (rewrite Rmult_assoc) ; repeat (apply Rmult_eq_compat_l).
+ rewrite Rpow_mult_distr.
+ rewrite Rinv_1 ; rewrite Rmult_1_r.
+ rewrite Rmult_assoc.
+ replace ((/ r) ^ S i * (r ^ S i * / r')) with (/ r').
+ simpl ; field ; assumption.
+ field_simplify.
+ unfold Rdiv ; repeat (rewrite <- Rmult_assoc) ; apply Rmult_eq_compat_r.
+ rewrite <- Rinv_pow.
+ field.
+ apply pow_nonzero.
+ intro Hf ; rewrite Hf, Rabs_R0 in r'_bd.
+ assert (H0 : 0 < 0).
+ apply Rlt_trans with (Rabs r') ; assumption.
+ apply (Rlt_irrefl _ H0).
+ intro Hf ; rewrite Hf, Rabs_R0 in r'_bd.
+ assert (H0 : 0 < 0).
+ apply Rlt_trans with (Rabs r') ; assumption.
+ apply (Rlt_irrefl _ H0).
+ assumption.
+ assumption.
+ assumption.
+ rewrite Rmult_assoc ; rewrite Rabs_mult.
+ apply Rle_trans with (Rabs (/ r' * (INR (S i) * (r' / r) ^ S i)) * B).
+ apply Rmult_le_compat_l ; [apply Rabs_pos |] ; apply HB ; exists (S i) ; reflexivity.
+ apply Rle_trans with (1*B) ; [| rewrite Rmult_1_l ; apply RmaxLess1].
+ apply Rmult_le_compat_r.
+ apply Rle_trans with (Rabs (An 0%nat * r ^ 0)) ; [apply Rabs_pos |] ;
+ apply HB ; exists 0%nat ; reflexivity.
+ rewrite Rabs_mult ; apply Rle_trans with (Rabs (/r') * Rabs r').
+ apply Rmult_le_compat_l.
+ apply Rabs_pos.
+ apply Rle_trans with (R_dist (INR (S i) * (r' / r) ^ S i) 0) ;
+ [right ; unfold R_dist ; rewrite Rminus_0_r ; reflexivity |] ; left ; apply HN ;
+ intuition.
+ rewrite <- Rabs_mult ; rewrite Rinv_l ; [| assumption] ; rewrite Rabs_R1 ; right ; trivial.
+Qed.
+
+Lemma Cv_radius_weak_derivable_compat_rev : forall An r,
+         Cv_radius_weak (An_deriv An) r ->
+         Cv_radius_weak An r.
+Proof.
+intros An r [B HB] ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
+ intros x [i Hi] ; subst.
+ destruct i.
+  unfold gt_abs_Pser ; simpl ; rewrite Rmult_1_r ; apply Rmax_r.
+
+ apply Rle_trans with (Rabs (An (S i) * r ^ i) * Rabs r).
+  right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
+   simpl ; ring.
+ apply Rle_trans with (gt_abs_Pser (An_deriv An) r i * / INR (S i) * Rabs r).
+  unfold gt_abs_Pser, An_deriv ; rewrite <- (Rabs_pos_eq (/ INR (S i))),
+  <- (Rabs_mult _ (/ INR (S i))).
+  apply Rmult_le_compat_r ; [apply Rabs_pos |] ; right ; apply Rabs_eq_compat ;
+  field ; apply not_0_INR ; omega.
+  rewrite S_INR ; left ; apply RinvN_pos.
+ apply Rle_trans with (gt_abs_Pser (An_deriv An) r i * / 1 * Rabs r).
+  apply Rmult_le_compat_r ; [apply Rabs_pos |] ;
+  apply Rmult_le_compat_l ; [apply Rabs_pos |] ;
+  apply Rle_Rinv ; [fourier
+  | replace 0 with (INR O) by reflexivity ; apply lt_INR
+  | replace 1 with (INR 1) by reflexivity ; apply le_INR] ; omega.
+ rewrite Rinv_1, Rmult_1_r ; apply Rle_trans with (B * Rabs r).
+  apply Rmult_le_compat_r ; [apply Rabs_pos |] ;
+  apply HB ; exists i ; reflexivity.
+ apply Rmax_l.
+Qed.
+
+Lemma finite_cv_radius_derivable_compat : forall An r,
+         finite_cv_radius An r ->
+         finite_cv_radius (An_deriv An) r.
+Proof.
+intros An r Rho ; split.
+ intros r' (r'_lb, r'_ub) ; apply Cv_radius_weak_derivable_compat with
+ (r := middle (Rabs r) (Rabs r')).
+ apply (proj1 Rho) ; split.
+ left ; apply middle_lt_le_pos_lt.
+ apply Rabs_pos_lt ; apply Rgt_not_eq ; apply Rlt_gt ;
+ apply Rle_lt_trans with r' ; assumption.
+ apply Rabs_pos.
+ rewrite middle_comm ; apply Rlt_le_trans with (Rabs r).
+ eapply middle_is_in_the_middle.
+ apply Rle_lt_trans with r' ; [right ; apply Rabs_right ; intuition |].
+ apply Rlt_le_trans with r ; [assumption | right ; symmetry ; apply Rabs_right ;
+ left ; apply Rle_lt_trans with r' ; assumption].
+ right ; apply Rabs_right ; left ; apply Rle_lt_trans with r' ; assumption.
+ apply Rle_lt_trans with r'.
+ right ; apply Rabs_right ; intuition.
+ rewrite Rabs_right.
+ apply Rle_lt_trans with (Rabs r') ; [right ; symmetry ;apply Rabs_right ;
+ intuition | rewrite middle_comm].
+ eapply middle_is_in_the_middle.
+ apply Rle_lt_trans with r' ; [right ; apply Rabs_right ; intuition |].
+ apply Rlt_le_trans with r ; [assumption | right ; symmetry ; apply Rabs_right ;
+ left ; apply Rle_lt_trans with r' ; assumption].
+ left ; apply middle_lt_le_pos_lt ;  [apply Rabs_pos_lt ; apply Rgt_not_eq ;
+ apply Rlt_gt ; apply Rle_lt_trans with r' ; assumption | apply Rabs_pos].
+
+ intros r' rltr' Hf ; destruct Rho as [H_bd H_ub].
+  apply (H_ub _ rltr') ; apply Cv_radius_weak_derivable_compat_rev ;
+   assumption.
+Qed.
+
+
+Lemma infinite_cv_radius_derivable_compat : forall An,
+         infinite_cv_radius An ->
+         infinite_cv_radius (An_deriv An).
+Proof.
+intros An Rho r ; apply Cv_radius_weak_derivable_compat with (r := (Rabs r) + 1).
+ apply Rho.
+ replace (Rabs (Rabs r + 1)) with (Rabs r + 1).
+ fourier.
+ symmetry ; apply Rabs_right.
+ apply Rle_ge ; apply Rle_trans with (Rabs r) ; [apply Rabs_pos | fourier].
+Qed.

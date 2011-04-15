@@ -31,7 +31,9 @@ Definition gt_Pser (An : nat -> R) (x : R) := fun (n:nat) => (An n) * (x ^ n).
 
 Definition gt_abs_Pser (An : nat -> R) (x : R) := fun (n:nat) => Rabs(An n * x ^ n).
 
-Definition An_deriv (An:nat -> R) := fun n => INR (S n) * An (S n).
+Definition An_deriv (An : Rseq) := fun n => INR (S n) * An (S n).
+Definition An_nth_deriv (An : Rseq) (k : nat) :=
+  fun n => Rseq_fact (n + k) / Rseq_fact n * An (n + k)%nat.
 
 Definition gt_deriv_Pser (An : nat -> R) (x : R) := gt_Pser (An_deriv An) x.
 

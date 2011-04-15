@@ -3,6 +3,9 @@ Require Import Rfunction_facts.
 Require Import C_n_def C_n_facts.
 Require Import Rextensionality.
 
+Require Import Rpser_def.
+Require Import Rpser_def Rpser_cv_facts Rpser_sums Rpser_sums_facts Rpser_derivative.
+
 Open Local Scope R_scope.
 
 (** * Classification of common functions *)
@@ -116,8 +119,6 @@ Proof.
 Qed.
 
 (** Power series *)
-Require Import Rpser_def.
-Require Import Rpser_def Rpser_cv_facts Rpser_sums Rpser_derivative.
 
 Lemma C_infty_Rpser : forall (An  : nat -> R) (Rho : infinite_cv_radius An),
  C_infty (sum An Rho).
