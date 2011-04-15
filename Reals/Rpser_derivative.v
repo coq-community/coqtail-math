@@ -288,6 +288,8 @@ intros An r rho x x_bd.
  exists (weaksum_r_derive An r rho x) ; apply derivable_pt_lim_weaksum_r ; assumption.
 Qed.
 
+(* TODO: Lemma derive_pt_weaksum_r (see Lemma derive_pt_sum) *)
+
 Lemma continuity_pt_weaksum_r : forall (An:nat->R) (r:R) (Pr : Cv_radius_weak An r) x,
       Rabs x < r -> continuity_pt (weaksum_r An r Pr) x.
 Proof.
@@ -377,6 +379,8 @@ intros An r rho x x_bd.
  exists (sum_r_derive An r rho x) ; apply derivable_pt_lim_sum_r ; assumption.
 Qed.
 
+(* TODO: Lemma derive_pt_sum_r (see Lemma derive_pt_sum) *)
+
 Lemma continuity_pt_sum_r : forall (An:nat->R) (r:R) (Pr : finite_cv_radius An r) x,
       Rabs x < r -> continuity_pt (sum_r An r Pr) x.
 Proof.
@@ -425,11 +429,22 @@ Qed.
 
 (** This implies the derivability & continuity of the sums. *)
 
-Lemma derivable_pt_sum : forall (An:nat->R) (Pr : infinite_cv_radius An) x,
+Lemma derivable_pt_sum : forall (An : Rseq) (Pr : infinite_cv_radius An) x,
       derivable_pt (sum An Pr) x.
 Proof.
 intros An rho x.
  exists (sum_derive An rho x) ; apply derivable_pt_lim_sum ; assumption.
+Qed.
+
+Lemma derive_pt_sum : forall (An : Rseq)
+  (rAn : infinite_cv_radius An) (rdAn : infinite_cv_radius (An_deriv An)) x
+  (dAn : derivable_pt (sum An rAn) x),
+  derive_pt (sum An rAn) x dAn = sum (An_deriv An) rdAn x.
+Proof.
+intros ; rewrite derive_pt_eq.
+ replace (sum (An_deriv An) rdAn x) with (sum_derive An rAn x).
+ apply derivable_pt_lim_sum.
+ apply sum_unique.
 Qed.
 
 Lemma continuity_pt_sum : forall (An:nat->R) (Pr : infinite_cv_radius An) x,

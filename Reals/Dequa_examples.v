@@ -2,33 +2,11 @@ Require Import Ranalysis.
 Require Import Rpser.
 Require Import Rfunction_facts Rextensionality.
 Require Import C_n_def C_n_facts C_n_usual.
+Require Import Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def.
 Require Import List.
 
-Local Open Scope R_scope.
-
-Lemma nth_derive_ext : forall n f g (prf : C n f) (prg : C n g), f == g ->
-    nth_derive f prf == nth_derive g prg.
-Proof.
-intro n ; induction n ; intros f g prf prg f_eq_g x.
- simpl ; trivial.
- simpl ; apply IHn.
- intro a ; unfold derive ; rewrite derive_pt_eq.
- apply derivable_pt_lim_ext with g.
- intro ; symmetry ; auto.
- rewrite <- derive_pt_eq ; reflexivity.
-Qed.
-
-Lemma derivable_nth_derive : forall n f (pr : derivable f) (pr1 : C (S n) f)
- (pr2 : C n (derive f pr)) l x, nth_derive (derive f pr) pr2 x = l ->
- nth_derive f pr1 x = l.
-Proof.
-intros n f pr pr1 pr2 l x Hl.
- simpl.
-  rewrite nth_derive_ext with (g := derive f pr) (prg := pr2).
-  assumption.
-  intro ; unfold derive ; apply pr_nu_var ; reflexivity.
-Qed.
+Open Local Scope R_scope.
 
 Definition de_id : diff_equa := (y 0 1, cst 1)%de.
 Definition rho_de_id : list (sigT Cn) :=

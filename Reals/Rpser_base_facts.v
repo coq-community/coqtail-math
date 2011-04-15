@@ -55,6 +55,18 @@ intros An k n ; unfold An_nth_deriv, An_deriv, Rdiv ;
  apply Rmult_comm.
 Qed.
 
+Lemma An_nth_derive_S' : forall An k,
+ An_nth_deriv An (S k) == An_nth_deriv (An_deriv An) k.
+Proof.
+intros An k n ; unfold An_nth_deriv, An_deriv.
+ repeat rewrite <- Rmult_assoc ; rewrite <- plus_n_Sm ;
+ apply Rmult_eq_compat_r.
+ rewrite Rmult_comm ; unfold Rdiv ;
+ rewrite <- Rmult_assoc ; apply Rmult_eq_compat_r.
+ unfold Rseq_fact ; rewrite fact_simpl, mult_INR ;
+ reflexivity.
+Qed.
+
 Lemma An_nth_deriv_1 : forall An, An_nth_deriv An 1 == An_deriv An.
 Proof.
 intros An n ; rewrite An_nth_deriv_S ; unfold An_deriv ; 

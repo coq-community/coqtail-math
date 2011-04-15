@@ -2,7 +2,7 @@ Require Import Rsequence_def Rsequence_sums_facts.
 Require Import Rpser_def Rpser_base_facts Rpser_usual.
 Require Import Rpser_sums Rpser_derivative.
 Require Import Rfunction_facts Rextensionality.
-Require Import C_n_def C_n_facts.
+Require Import C_n_def C_n_facts Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def.
 Require Import List.
 Require Import Max.

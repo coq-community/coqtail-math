@@ -1,6 +1,5 @@
 Require Import Reals.
-Require Import Rfunction_facts.
-Require Import Rextensionality.
+Require Import Rfunction_facts Rextensionality.
 Require Import C_n_def.
 
 Local Open Scope R_scope.
@@ -182,58 +181,7 @@ Hint Resolve C_comp : C_hint.
 Lemma C_derive : forall n f (pr : derivable f),
   C (S n) f -> C n (derive f pr).
 Proof.
-intros n f pr Cnf ; inversion Cnf ;
+intros n f pr Cnf ; inversion Cnf.
  eapply C_ext ; [| eassumption] ;
  intro x ; eapply pr_nu ; reflexivity.
-Qed.
-
-(** * Definition of the nth derivative *)
-
-Program Fixpoint nth_derive {n : nat} (f : R -> R) (pr : C n f) : R -> R := match n with
-   | O   => f
-   | S n' => @nth_derive n' (derive f _) _
-end.
-Next Obligation.
-inversion pr ; assumption.
-Qed.
-Next Obligation.
-apply C_derive ; assumption.
-Qed.
-
-Definition nth_derive' {m : nat} (n : nat) (f : R -> R) (pr : C m f)
-          (nlem : (n <= m)%nat) : R -> R.
-Proof.
-intros ; eapply nth_derive ;
- [eapply C_le |] ; eassumption.
-Defined.
-
-Lemma nth_derive_ext : forall {n : nat} (f g : R -> R) (pr1 : C n f) (pr2 : C n g),
-  f == g ->
-  nth_derive f pr1 == nth_derive g pr2.
-Proof.
-intro n ; induction n ; intros.
- intro x ; auto.
- simpl ; apply IHn ; apply derive_ext ; assumption.
-Qed.
-
-Lemma nth_derive_PI : forall {n : nat} (f : R -> R) (pr1 pr2 : C n f),
-  nth_derive f pr1 == nth_derive f pr2.
-Proof.
-intros ; apply nth_derive_ext ; intro x ; reflexivity.
-Qed.
-
-Lemma nth_derive'_ext : forall {k m n : nat} (f g : R -> R)
- (pr1 : C k f) (pr2 : C m g) (nlek : (n <= k)%nat) (nlem : (n <= m)%nat),
-  f == g ->
-  nth_derive' n f pr1 nlek == nth_derive' n g pr2 nlem.
-Proof.
-intros ; unfold nth_derive' ; intro x ; apply nth_derive_ext ;
- assumption.
-Qed.
-
-Lemma nth_derive'_PI : forall {k m n : nat} (f : R -> R)
- (pr1 : C k f) (pr2 : C m f) (nlek : (n <= k)%nat) (nlem : (n <= m)%nat),
-  nth_derive' n f pr1 nlek == nth_derive' n f pr2 nlem.
-Proof.
-intros ; apply nth_derive'_ext ; intro x ; reflexivity.
 Qed.

@@ -4,6 +4,8 @@ Require Import Rpser_def Rpser_base_facts Rpser_sums Rpser_cv_facts.
 Require Import Rfunction_facts.
 Require Import Ass_handling.
 
+(** * Extensionality of the common properties of functions. *)
+
 Section Functions_extensionality.
 
 Variables f g : R -> R.
@@ -48,6 +50,8 @@ intro x ; unfold derive ; apply derive_pt_ext.
 Qed.
 
 End Functions_extensionality.
+
+(** * Extensionality of power serie related concepts. *)
 
 Section Rpser_extensionality.
 
