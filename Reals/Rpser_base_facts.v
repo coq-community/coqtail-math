@@ -26,11 +26,40 @@ Require Import Rsequence_def Rsequence_base_facts.
 Require Import Rsequence_cv_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
-Require Import Fourier.
+Require Import Fourier MyRIneq.
 
 Open Local Scope R_scope.
 
 (** * Some lemmas manipulating the definitions. *)
+
+(** Relation between An_nth_deriv & An_deriv. *)
+
+Lemma An_nth_deriv_0 : forall An, An_nth_deriv An 0 == An.
+Proof.
+ intros An n ; unfold An_nth_deriv, Rdiv ; rewrite plus_0_r,
+  Rinv_r_simpl_r ; auto ; apply not_0_INR ; apply fact_neq_0.
+Qed.
+
+Lemma An_nth_deriv_S : forall An k,
+ An_nth_deriv An (S k) == An_deriv (An_nth_deriv An k).
+Proof.
+assert (Hrew : forall n, / Rseq_fact n = INR (S n) * / Rseq_fact (S n)).
+ intro n ; unfold Rseq_fact ; rewrite fact_simpl, mult_INR, Rinv_mult_distr,
+ <- Rmult_assoc.
+ symmetry ; apply Rinv_r_simpl_r ; apply not_0_INR ; omega.
+ apply not_0_INR ; omega.
+ apply INR_fact_neq_0.
+intros An k n ; unfold An_nth_deriv, An_deriv, Rdiv ;
+ rewrite Hrew, <- plus_n_Sm.
+ do 2 (repeat rewrite <- Rmult_assoc ; apply Rmult_eq_compat_r) ;
+ apply Rmult_comm.
+Qed.
+
+Lemma An_nth_deriv_1 : forall An, An_nth_deriv An 1 == An_deriv An.
+Proof.
+intros An n ; rewrite An_nth_deriv_S ; unfold An_deriv ; 
+ rewrite An_nth_deriv_0 ; reflexivity.
+Qed.
 
 (** Compatibility of the Cv_radius_weak concept with various operations. *)
 
@@ -141,7 +170,6 @@ intros An r Rho N.
  rewrite <- Rabs_mult ; apply Rabs_eq_compat.
  symmetry ; apply pow_add.
 Qed.
-
 
 Lemma Cv_radius_weak_padding_neg_compat : forall (An : nat -> R) (r : R) (N : nat),
      Cv_radius_weak (fun n => An (n + N)%nat) r -> Cv_radius_weak An r.

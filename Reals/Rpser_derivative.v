@@ -43,13 +43,13 @@ Defined.
 Definition sum_r_derive : forall (An : nat -> R) (r : R) (Rho : finite_cv_radius An r) (x : R), R.
 Proof.
 intros An r Rho.
- apply (sum_r (An_deriv An) r (finite_cv_radius_derivable_compat An r Rho)).
+ apply (sum_r (An_deriv An) r (proj1 (finite_cv_radius_derivable_compat An r) Rho)).
 Defined.
 
 Definition sum_derive : forall (An : nat -> R) (Rho : infinite_cv_radius An) (z : R), R.
 Proof.
 intros An Rho.
- apply (sum (An_deriv An) (infinite_cv_radius_derivable_compat An Rho)). 
+ apply (sum (An_deriv An) (proj1 (infinite_cv_radius_derivable_compat An) Rho)).
 Defined.
 
 (** Proof that it is really the sum *)

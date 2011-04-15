@@ -2,7 +2,7 @@ Require Import Reals.
 Require Import Fourier.
 Require Import Rpow_facts.
 
-Require Import Ranalysis_def.
+Require Import Ranalysis_def Rextensionality.
 Require Import Rsequence_facts RFsequence RFsequence_facts.
 Require Import Rpser_def Rpser_base_facts.
 Require Import Rpser_cv_facts Rpser_sums.
@@ -114,7 +114,7 @@ intro An.
 *)
 
 
-(** Caracterization of the cv radius of the formal derivative *)
+(** * Caracterization of the cv radius of the formal derivative *)
 
 Lemma Cv_radius_weak_derivable_compat : forall An r,
          Cv_radius_weak An r -> forall r', Rabs r' < Rabs r ->
@@ -215,13 +215,15 @@ intros An r [B HB] ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
 Qed.
 
 Lemma finite_cv_radius_derivable_compat : forall An r,
-         finite_cv_radius An r ->
+         finite_cv_radius An r <->
          finite_cv_radius (An_deriv An) r.
 Proof.
-intros An r Rho ; split.
+intros An r ; split.
+
+intros [H_ub H_lub] ; split.
  intros r' (r'_lb, r'_ub) ; apply Cv_radius_weak_derivable_compat with
  (r := middle (Rabs r) (Rabs r')).
- apply (proj1 Rho) ; split.
+ apply H_ub ; split.
  left ; apply middle_lt_le_pos_lt.
  apply Rabs_pos_lt ; apply Rgt_not_eq ; apply Rlt_gt ;
  apply Rle_lt_trans with r' ; assumption.
@@ -244,20 +246,105 @@ intros An r Rho ; split.
  left ; apply middle_lt_le_pos_lt ;  [apply Rabs_pos_lt ; apply Rgt_not_eq ;
  apply Rlt_gt ; apply Rle_lt_trans with r' ; assumption | apply Rabs_pos].
 
- intros r' rltr' Hf ; destruct Rho as [H_bd H_ub].
-  apply (H_ub _ rltr') ; apply Cv_radius_weak_derivable_compat_rev ;
-   assumption.
+ intros r' rltr' Hf ; apply (H_lub _ rltr') ;
+  apply Cv_radius_weak_derivable_compat_rev ; assumption.
+
+intros [H_ub H_lub] ; split.
+ intros r' r'_bd ; apply Cv_radius_weak_derivable_compat_rev ;
+  apply H_ub ; assumption.
+
+ intros r' rltr' Hf.
+  assert (r0_bd : r < middle r r') by
+   (apply middle_is_in_the_middle ; assumption).
+  apply (H_lub _ r0_bd) ; eapply Cv_radius_weak_derivable_compat.
+  eassumption.
+  assert (r_pos : 0 <= r).
+   eapply finite_cv_radius_pos ; split ; [apply H_ub | apply H_lub].
+  assert (r'_pos : 0 <= r') by (left ; apply Rle_lt_trans with r ; assumption).
+  assert (middle_pos : 0 <= middle r r') by
+   (apply middle_le_le_pos ; assumption).
+  do 2 (rewrite Rabs_pos_eq ; [| assumption]) ; apply middle_is_in_the_middle ;
+  assumption.
 Qed.
 
-
 Lemma infinite_cv_radius_derivable_compat : forall An,
-         infinite_cv_radius An ->
+         infinite_cv_radius An <->
          infinite_cv_radius (An_deriv An).
 Proof.
-intros An Rho r ; apply Cv_radius_weak_derivable_compat with (r := (Rabs r) + 1).
+intro An ; split.
+intros Rho r ; apply Cv_radius_weak_derivable_compat with (r := (Rabs r) + 1).
  apply Rho.
  replace (Rabs (Rabs r + 1)) with (Rabs r + 1).
  fourier.
  symmetry ; apply Rabs_right.
  apply Rle_ge ; apply Rle_trans with (Rabs r) ; [apply Rabs_pos | fourier].
+
+intros Rho r ; apply Cv_radius_weak_derivable_compat_rev ; apply Rho.
+Qed.
+
+(** Same thing but for the nth derivative. *)
+
+Lemma Cv_radius_weak_nth_derivable_compat (k : nat) : forall An r,
+         Cv_radius_weak An r -> forall r', Rabs r' < Rabs r ->
+         Cv_radius_weak (An_nth_deriv An k) r'.
+Proof.
+induction k ; intros An r rAn r' r'_bd.
+
+ erewrite Cv_radius_weak_ext ; [| apply An_nth_deriv_0].
+  eapply Cv_radius_weak_le_compat ; [left |] ; eassumption.
+
+ assert (Hrew : Rabs (middle (Rabs r') (Rabs r)) = middle (Rabs r') (Rabs r)).
+  apply Rabs_pos_eq ; apply middle_le_le_pos ; apply Rabs_pos.
+ erewrite Cv_radius_weak_ext ; [| apply An_nth_deriv_S] ;
+  apply Cv_radius_weak_derivable_compat with (middle (Rabs r') (Rabs r)).
+ apply IHk with r ; [| rewrite Hrew ; apply middle_is_in_the_middle] ;
+  assumption.
+ rewrite Hrew ; apply middle_is_in_the_middle ; assumption.
+Qed.
+
+Lemma Cv_radius_weak_nth_derivable_compat_rev (k : nat) : forall An r,
+         Cv_radius_weak (An_nth_deriv An k) r ->
+         Cv_radius_weak An r.
+Proof.
+induction k ; intros An r rAn.
+
+ erewrite Cv_radius_weak_ext.
+  eassumption.
+  symmetry ; apply An_nth_deriv_0.
+
+ apply IHk ; apply Cv_radius_weak_derivable_compat_rev ;
+  erewrite Cv_radius_weak_ext.
+  eassumption.
+  symmetry ; apply An_nth_deriv_S.
+Qed.
+
+Lemma finite_cv_radius_nth_derivable_compat (k : nat) : forall An r,
+         finite_cv_radius An r <->
+         finite_cv_radius (An_nth_deriv An k) r.
+Proof.
+induction k ; intros An r.
+rewrite <- finite_cv_radius_ext ;
+ [reflexivity | apply An_nth_deriv_0].
+
+split ; intro Rho.
+ rewrite finite_cv_radius_ext ; [| eapply An_nth_deriv_S].
+  rewrite <- finite_cv_radius_derivable_compat, <- IHk ; assumption.
+ rewrite IHk, finite_cv_radius_derivable_compat ;
+  rewrite <- finite_cv_radius_ext ;
+  [| eapply An_nth_deriv_S] ; assumption.
+Qed.
+
+Lemma infinite_cv_radius_nth_derivable_compat (k : nat) : forall An,
+         infinite_cv_radius An <->
+         infinite_cv_radius (An_nth_deriv An k).
+Proof.
+induction k ; intro An.
+rewrite <- infinite_cv_radius_ext ;
+ [| eapply An_nth_deriv_0] ; reflexivity.
+
+split ; intro Rho.
+ rewrite infinite_cv_radius_ext ; [| eapply An_nth_deriv_S].
+  rewrite <- infinite_cv_radius_derivable_compat, <- IHk ; assumption.
+ rewrite IHk, infinite_cv_radius_derivable_compat,
+  <- infinite_cv_radius_ext ; [| eapply An_nth_deriv_S] ; assumption.
 Qed.
