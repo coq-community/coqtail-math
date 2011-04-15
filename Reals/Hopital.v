@@ -5,6 +5,11 @@ Require Import Cauchy_lipschitz. (* TODO on importe des trucs qui parlent de Cn 
 Require Import Rextensionality.
 Open Scope R_scope.
 
+(*
+TODO check, rename, indent, and comment
+*)
+
+
 Definition derivable_on_interval a b (Hab : a < b) f :=
   forall x, open_interval a b x -> derivable_pt f x.
 
@@ -289,10 +294,10 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
            (Dg : forall x, open_interval a b x -> derivable_pt g x).
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
-Hypothesis (Zf : limit1_in f (open_interval a b) 0 a). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 a).
 Hypothesis (Zg : limit1_in g (open_interval a b) 0 a).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : forall eps, eps > 0 ->
   exists alp, 
@@ -300,8 +305,6 @@ Hypothesis (Hlimder : forall eps, eps > 0 ->
     (forall x (Hopen : open_interval a b x), R_dist x a < alp -> 
       R_dist (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)) L < eps)).
 
-(* Ancienne hypothese :
-limit1_in (fun x => derive_pt f Df x / derive g Dg x) (open_interval a b) L a).*)
 
 Lemma limit_open : forall f a b, 
   limit1_in f (D_x no_cond a) (f a) a -> limit1_in f (open_interval a b) (f a) a.
@@ -505,10 +508,9 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
            (Dg : forall x, open_interval a b x -> derivable_pt g x).
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
-Hypothesis (Zf : limit1_in f (open_interval a b) 0 b). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 b).
 Hypothesis (Zg : limit1_in g (open_interval a b) 0 b).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : forall eps, eps > 0 ->
   exists alp, 
@@ -646,12 +648,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) a).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall eps, eps > 0 ->
   exists alp, 
@@ -682,7 +680,7 @@ Proof.
     fourier.
 Qed.
 
-(* TODO reecrire cette preuve un peu partout *)  
+
 Lemma g_not_zero : exists a', open_interval a b a' /\ forall x, open_interval a a' x -> g x <> 0.
 Proof.
   unfold limit_div_pos in Zg. assert (1 > 0) by fourier. specialize (Zg 1 H). destruct Zg as [alp [Halp H3]].
@@ -783,22 +781,6 @@ Proof.
    apply P.
 Qed.
 
-(*
-Lemma open_interval_min : forall a b x c, 
-  c > 0 -> a < b -> a < x ->  R_dist x a < Rmin ((b- a) / 2) c -> open_interval a b x. Proof.
-intros.
-unfold R_dist in H2.
-split. apply H1.
-rewrite Rabs_right in H2.
-assert (x - a0 < (b0 - a0) / 2).
-admit.
-
-
-Qed.
-*)
-(* TODO constructif si on sait si L <> 0 ou L = 0 je crois...
-Faire les deux cas... 
-Si on ne sait pas, la preuve ne l'est pas *)
 
 Theorem Hopital_infinite : limit1_in (fun x => f x / g x) (open_interval a b) L a.
 Proof.
@@ -1117,12 +1099,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall eps, eps > 0 ->
   exists alp, 
@@ -1165,17 +1143,10 @@ Proof.
      apply limit_div_pos_opp. apply Zg.
 
      intros.
-
-     (*assert (Hopenx : open_interval a b (-x)). split; destruct Hopen; fourier. 
-     destruct (g'_not_0 (-x) Hopenx). replace 0 with (--0) by ring.
-     replace 0 with (-0) in H by ring.*)
-     
      
      intros. assert (Hopen2: open_interval a b (-x)).
       now destruct Hopen; split; fourier.
 
-(* TODO g'_not_zero *)
-      
       intro. destruct (g'_not_0 (-x) Hopen2).
        assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) Hopen2)).
         reg.
@@ -1187,7 +1158,6 @@ Proof.
        replace 0 with (- 0) in H by ring. 
        apply Ropp_eq_compat. rewrite <- H. rewrite H0. reflexivity. 
 
-(* TODO end g'_not_zero *)
 intros eps Heps. specialize (Hlimder eps Heps).
 destruct Hlimder as [alp [Halp Hsolve]].
 exists alp. split. apply Halp.
@@ -1525,16 +1495,9 @@ intros f g a b L Hab Df Dg Cf Cg Hdiv_neg g'_not_0 Hlimder.
      apply limit_div_neg_opp. apply Hdiv_neg.
 
      intros.
-
-     (*assert (Hopenx : open_interval a b (-x)). split; destruct Hopen; fourier. 
-     destruct (g'_not_0 (-x) Hopenx). replace 0 with (--0) by ring.
-     replace 0 with (-0) in H by ring.*)
-     
      
      intros. assert (Hopen2: open_interval a b (-x)).
       now destruct Hopen; split; fourier.
-
-(* TODO g'_not_zero *)
       
       intro. destruct (g'_not_0 (-x) Hopen2).
        assert (derive_pt (fun x0 : R => g (- x0)) x (Dg' x Hopen) = - derive_pt g (- x) (Dg (- x) Hopen2)).
@@ -1547,7 +1510,6 @@ intros f g a b L Hab Df Dg Cf Cg Hdiv_neg g'_not_0 Hlimder.
        replace 0 with (- 0) in H by ring. 
        apply Ropp_eq_compat. rewrite <- H. rewrite H0. reflexivity. 
 
-(* TODO end g'_not_zero *)
 intros eps Heps. specialize (Hlimder eps Heps).
 destruct Hlimder as [alp [Halp Hsolve]].
 exists alp. split. apply Halp.
@@ -1593,8 +1555,6 @@ lim_{x -> a+} f / g = +infinity
 
 *)
 
-(* TODO this proof has been done following the scheme of the first one... Maybe not optimal *)
-
 Variables f g : R -> R.
 Variables a b L : R.
 
@@ -1603,10 +1563,9 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
            (Dg : forall x, open_interval a b x -> derivable_pt g x).
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
-Hypothesis (Zf : limit1_in f (open_interval a b) 0 a). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 a).
 Hypothesis (Zg : limit1_in g (open_interval a b) 0 a).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : forall m, m > 0 -> 
   exists alp,
@@ -1717,8 +1676,6 @@ lim_{x -> b-} f / g = +infinity
 
 *)
 
-(* TODO this proof has been done following the scheme of the first one... Maybe not optimal *)
-
 Variables f g : R -> R.
 Variables a b L : R.
 
@@ -1727,10 +1684,10 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
            (Dg : forall x, open_interval a b x -> derivable_pt g x).
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
-Hypothesis (Zf : limit1_in f (open_interval a b) 0 b). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 b).
 Hypothesis (Zg : limit1_in g (open_interval a b) 0 b).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
+
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : forall m, m > 0 -> 
   exists alp,
@@ -1822,8 +1779,6 @@ lim_{x -> a+} f / g = -infinity
 
 *)
 
-(* TODO this proof has been done following the scheme of the first one... Maybe not optimal *)
-
 Variables f g : R -> R.
 Variables a b L : R.
 
@@ -1832,10 +1787,9 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
            (Dg : forall x, open_interval a b x -> derivable_pt g x).
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
-Hypothesis (Zf : limit1_in f (open_interval a b) 0 a). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 a).
 Hypothesis (Zg : limit1_in g (open_interval a b) 0 a).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : forall m, m < 0 -> 
   exists alp,
@@ -1946,8 +1900,6 @@ lim_{x -> b-} f / g = -infinity
 
 *)
 
-(* TODO this proof has been done following the scheme of the first one... Maybe not optimal *)
-
 Variables f g : R -> R.
 Variables a b L : R.
 
@@ -1956,10 +1908,9 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
            (Dg : forall x, open_interval a b x -> derivable_pt g x).
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
-Hypothesis (Zf : limit1_in f (open_interval a b) 0 b). (* TODO en a t on vraiment besoin ? *)
+Hypothesis (Zf : limit1_in f (open_interval a b) 0 b).
 Hypothesis (Zg : limit1_in g (open_interval a b) 0 b).
 
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0 /\ g x <> 0).
 Hypothesis (Hlimder : forall m, m < 0 -> 
   exists alp,
@@ -1968,11 +1919,6 @@ Hypothesis (Hlimder : forall m, m < 0 ->
         m > (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen)))).
 
 Lemma Infinite_Limit_Hopital_neg_l : limit_div_neg (fun x => f x / g x) (open_interval a b) b.
-(* TODO forall m, m < 0 -> 
-  exists alp,
-    alp > 0 /\ 
-      (forall x (Hopen: open_interval a b x), R_dist x b < alp ->
-        m > (f x) / (g x)).*)
 Proof.
 apply limit_div_neg_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
 intros. unfold comp. ring_simplify (--x). reflexivity.
@@ -2064,16 +2010,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) a).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2185,9 +2123,7 @@ Proof.
     now fourier.
     
     intro. now fourier.
-  
-(*  assert (Heps4 : eps / 4 > 0) by fourier.*)
-  
+    
   specialize (H0 (eps) H). destruct H0 as [y [open H0]]. assert (Hdeb3 : 2 * eps  + 2> 0) by fourier.
   specialize (Hlimder (2 * eps + 2) Hdeb3).
   destruct Hlimder as [alp1 [Halp1 Hlim2]]. assert (Hdeb : 1 > 0) by fourier. generalize (H15 (f y) (1) Hdeb).
@@ -2335,16 +2271,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2431,16 +2359,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) a).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2552,8 +2472,6 @@ Proof.
     now fourier.
     
     intro. now fourier.
-  
-(*  assert (Heps4 : eps / 4 > 0) by fourier.*)
   
   specialize (H0 (eps) H). destruct H0 as [y [open H0]]. assert (Hdeb3 : 2 * eps  + 2> 0) by fourier.
   specialize (Hlimder (2 * eps + 2) Hdeb3).
@@ -2703,16 +2621,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2799,16 +2709,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_neg g (open_interval a b) a).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2816,7 +2718,6 @@ Hypothesis (Hlimder : forall m, m > 0 ->
     (forall x (Hopen : open_interval a b x), R_dist x a < alp -> 
       (derive_pt f x (Df x Hopen) / derive_pt g x (Dg x Hopen) > m))).
 
-(* TODO retirer cette hypothese *)
 Hypothesis (g_not_0 : forall x (Hopen: open_interval a b x), g x <> 0).
 
 Theorem Hopital_infinite_inf_neg_lpos_useless : limit_div_pos (fun x => f x / g x) (open_interval a b) a.
@@ -2866,16 +2767,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_neg g (open_interval a b) a).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2959,16 +2852,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_neg g (open_interval a b) b).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -2978,7 +2863,7 @@ Hypothesis (Hlimder : forall m, m > 0 ->
 
 Theorem Hopital_infinite_inf_neg_lpos_l : limit_div_pos (fun x => f x / g x) (open_interval a b) b.
 Proof.
-apply limit_div_pos_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)). 
+apply limit_div_pos_ext with (comp (fun x => f (- x) / g (- x)) (fun x => -x)).
 intros. unfold comp. ring_simplify (--x). reflexivity.
 apply limit_div_pos_comp_Ropp.
   assert (Df': forall x, open_interval (-b) (-a) x -> derivable_pt (fun x => f (- x)) x).
@@ -3054,16 +2939,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_neg g (open_interval a b) a).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m < 0 ->
   exists alp, 
@@ -3118,16 +2995,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_neg g (open_interval a b) b).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m < 0 ->
   exists alp, 
@@ -3214,16 +3083,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) a).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
@@ -3279,16 +3140,8 @@ Hypotheses (Df : forall x, open_interval a b x -> derivable_pt f x)
 Hypotheses (Cf : forall x, a <= x <= b -> continuity_pt f x)
            (Cg : forall x, a <= x <= b -> continuity_pt g x).
 
-(* TODO oulala... ca doit etre un gros craquage ca... *)
-(* Hypothesis (Zf : limit_div_pos f (open_interval a b) a).*)
-
 Hypothesis (Zg : limit_div_pos g (open_interval a b) b).
 
-(* TODO warning this proof is copy and paste *)
-(* TODO preuve à rendre propre... Print assumptiosn a la fin... *)
-
-
-(* TODO on a besoin de l'hypothese en g car g' n'est pas continue. *)
 Hypothesis (g'_not_0 : forall x (Hopen: open_interval a b x),  derive_pt g x (Dg x Hopen) <> 0).
 Hypothesis (Hlimder : forall m, m > 0 ->
   exists alp, 
