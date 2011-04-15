@@ -79,18 +79,14 @@ intros An r rho r' r'_bd.
 Qed.
 
 Lemma Cv_radius_weak_derivable_compat_rev : forall An r,
-         Cv_radius_weak (An_deriv An) r -> forall r', Rabs r' < Rabs r ->
-         Cv_radius_weak An r'.
+         Cv_radius_weak (An_deriv An) r ->
+         Cv_radius_weak An r.
 Proof.
-intros An r [B HB] r' r'_bd ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
+intros An r [B HB] ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
  intros x [i Hi] ; subst.
  destruct i.
   unfold gt_abs_Pser ; simpl ; rewrite Rmult_1_r ; apply Rmax_r.
 
- apply Rle_trans with (Rabs (An (S i) * r ^ (S i))).
-  unfold gt_abs_Pser ; do 2 rewrite Rabs_mult, <- RPow_abs ; apply Rmult_le_compat_l ;
-   [apply Rabs_pos | apply pow_incr] ; split ;
-   [apply Rabs_pos | left ; assumption].
  apply Rle_trans with (Rabs (An (S i) * r ^ i) * Rabs r).
   right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
    simpl ; ring.
@@ -143,18 +139,8 @@ intros An r Rho ; split.
  apply Rlt_gt ; apply Rle_lt_trans with r' ; assumption | apply Rabs_pos].
 
  intros r' rltr' Hf ; destruct Rho as [H_bd H_ub].
-  assert (H := proj1 (middle_is_in_the_middle _ _ rltr')).
-  apply (H_ub _ H) ; eapply Cv_radius_weak_derivable_compat_rev.
-  eassumption.
-  assert (r_pos : 0 <= r).
-   apply finite_cv_radius_pos with An ; split ;
-    [exact H_bd | exact H_ub].
-  assert (r'_pos : 0 <= r').
-   left ; apply Rle_lt_trans with r ; assumption.
-  assert (middle_pos : 0 <= middle r r').
-   apply middle_le_le_pos ; assumption.
-  do 2 (rewrite Rabs_pos_eq ; [| assumption]).
-  apply middle_is_in_the_middle ; assumption.
+  apply (H_ub _ rltr') ; apply Cv_radius_weak_derivable_compat_rev ;
+   assumption.
 Qed.
 
 
@@ -446,7 +432,7 @@ intros An r Rho z z_bd eps eps_pos.
  unfold sum_r_derive, sum_r.
  assert (H : 0 <= middle (Rabs z) r < r).
   split.
-  left ; apply middle_le_lt_pos_lt ; [| apply Rle_lt_trans with (Rabs z) ; [| assumption]] ;
+  left ; apply middle_le_lt_pos_ ; [| apply Rle_lt_trans with (Rabs z) ; [| assumption]] ;
   apply Rabs_pos.
   eapply middle_is_in_the_middle ; assumption.
  destruct (derivable_pt_lim_weaksum_r _ _ (proj1 Rho (middle (Rabs z) r) H) _
@@ -478,8 +464,8 @@ intros An r Rho z z_bd eps eps_pos.
   eapply middle_is_in_the_middle ; assumption.
   eapply middle_is_in_the_middle.
   apply Rlt_le_trans with (middle (Rabs z) r) ; [ eapply middle_is_in_the_middle ; assumption |
-  right ; symmetry ; apply Rabs_right ; apply Rle_ge ; left ; apply middle_le_lt_pos_lt ;
-  [| apply Rle_lt_trans with (Rabs z) ; [| assumption ]] ; apply Rabs_pos].
+  right ; symmetry ; apply Rabs_right ; apply Rle_ge ; left ; apply middle_le_lt_pos ; [| apply Rle_lt_trans
+  with (Rabs z) ; [| assumption ]] ; apply Rabs_pos].
   eapply middle_is_in_the_middle ; assumption.
   apply Rle_lt_trans with (Rabs z + Rabs h) ; [apply Rabs_triang |].
   apply Rlt_le_trans with (Rabs z + delta') ; [apply Rplus_lt_compat_l ; apply h_bd |].
