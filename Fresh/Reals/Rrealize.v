@@ -156,7 +156,7 @@ Module Rrealize : Raxiom.CReals.
           <= (u q * P2 p - u p * P2 q) * P2 neps)) /\
           forall n, le N n -> 0 < u n}).
         admit.
-      Check epscut. (* endassert →→ tactique "now" ? *)
+      (* Check epscut.*) (* endassert →→ tactique "now" ? *)
       
       destruct epscut as (N, (HN, upos)).
       exists N.
