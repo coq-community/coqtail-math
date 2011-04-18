@@ -7,7 +7,7 @@
 # And for each of them, displays the concerned lines,
 # highlighting the matched strings.
 
-discard="\(\.svn\|\.v\.d$\|\.vo$\|\.glob\|#$\)"
+discard="\(\.svn\|\.v\.d$\|\.vo$\|\.glob\|\.crashcoqide\|#$\)"
 query='\(Admitted\)\|\(admit\)\|\(TODO\)'
 opt="-i"
 
