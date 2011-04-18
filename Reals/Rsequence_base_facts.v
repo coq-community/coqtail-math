@@ -59,6 +59,14 @@ split.
   exact Rseq_eq_trans.
 Qed.
 
+(** * Rseq_opp is involutive. *)
+
+Lemma Rseq_opp_invol : forall Un, - - Un == Un.
+Proof.
+intros Un n ; unfold Rseq_opp ; rewrite Ropp_involutive ;
+ reflexivity.
+Qed.
+
 (** * Compatibility of extensional equality with convergence. *)
 
 (**********)

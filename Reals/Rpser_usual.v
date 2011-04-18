@@ -29,7 +29,7 @@ Require Import Fourier.
 Require Import Rpser_def Rpser_base_facts Rpser_cv_facts.
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
-Require Import Functions.
+Require Import Rfunction_def Functions.
 
 Open Scope R_scope.
 
@@ -61,8 +61,8 @@ Qed.
 Definition constant (r : R) : R -> R :=
   sum _ (cst_infinite_cv_radius r).
 
-Lemma constant_is_cst : forall (r : R) (x : R),
-  constant r x = r.
+Lemma constant_is_cst : forall (r : R),
+  constant r == (fun _ => r).
 Proof.
 intros r x ;
  assert (Hl := sum_sums _ (cst_infinite_cv_radius r) x) ;

@@ -2,7 +2,7 @@ Require Import Reals.
 Require Import Rpser_def Rpser_sums Rpser_usual Rpser_derivative.
 Require Import C_n_def C_n_usual C_n_facts.
 Require Import Nth_derivative_def.
-Require Import Functions.
+Require Import Rfunction_def Functions.
 Require Import Rsequence_def.
 Require Import List.
 Require Import Ass_handling.
@@ -61,7 +61,7 @@ Fixpoint interp_side_equa_in_N (s : side_equa)
 destruct_eq s.
  exact (Some (cst_seq r)).
  destruct (nth_error rho p) as [un |].
-   exact (Some (fun n => INR (fact (n + k)) / INR (fact n) * un (n + k)%nat)).
+   exact (Some (An_nth_deriv un k)).
    exact None.
  destruct (interp_side_equa_in_N b rho) as [un |] ;
   [apply Some ; apply Rseq_opp ; exact un |
@@ -77,8 +77,7 @@ Fixpoint interp_side_equa_in_SN (s : side_equa)
 destruct_eq s.
  exact (Some (fun n x => Rseq_pps (fun n => if eq_nat_dec n 0 then r else 0) x n)).
  destruct (nth_error rho p) as [un |].
-   exact (Some (fun n x => Rseq_pps (fun n => INR (fact (n + k))
-           / INR (fact n) * un (n + k)%nat) x n)).
+   exact (Some (fun n x => Rseq_pps (An_nth_deriv un k) x n)).
    exact None.
  destruct (interp_side_equa_in_SN b rho) as [un |].
    exact (Some (fun n => - (un n))%F).
@@ -120,16 +119,16 @@ end.
 Implicit Arguments interp[A B].
 
 Definition interp_in_R (e : diff_equa) (rho : list (sigT Cn)) : Prop :=
-  interp e rho interp_side_equa_in_R (fun f1 f2 => forall (x : R), f1 x = f2 x).
+  interp e rho interp_side_equa_in_R Rfun_eq.
 
 Definition interp_in_R2 (e : diff_equa) (rho : list Cinfty) : Prop :=
-  interp e rho interp_side_equa_in_R2 (fun f1 f2 => forall (x : R), f1 x = f2 x).
+  interp e rho interp_side_equa_in_R2 Rfun_eq.
 
 Definition interp_in_R3 (e : diff_equa) (rho : list (sigT infinite_cv_radius)) : Prop :=
-  interp e rho interp_side_equa_in_R3 (fun f1 f2 => forall (x : R), f1 x = f2 x).
+  interp e rho interp_side_equa_in_R3 Rfun_eq.
 
 Definition interp_in_N (e : diff_equa) (rho : list Rseq) : Prop :=
-  interp e rho interp_side_equa_in_N (fun un vn => forall (n : nat), un n = vn n).
+  interp e rho interp_side_equa_in_N Rseq_eq.
 
 Definition interp_in_SN (e : diff_equa) (rho : list Rseq) : Prop :=
   interp e rho interp_side_equa_in_SN (fun un vn => forall (n : nat) (x : R), un n x = vn n x).

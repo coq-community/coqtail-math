@@ -42,15 +42,6 @@ match Oa with
   | Some a => P a
 end.
 
-Definition corresponding_Rpser (l : list Rseq)
- (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)) : list Cinfty.
-induction l.
- apply nil.
- apply cons.
-  assert (H := cvl O) ; simpl in H ; exists (sum a H) ; apply C_infty_Rpser.
-  apply IHl ; intro n ; apply (cvl (S n)).
-Defined.
-
 (*
 Lemma diff_sequences_functions : forall (e : diff_equa) (l : list Rseq)
   (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)),

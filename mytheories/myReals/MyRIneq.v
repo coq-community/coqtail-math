@@ -47,6 +47,11 @@ replace (Rmin r1 r2) with (Rmin (--r1) (--r2)) by (rewrite Ropp_involutive ; int
  rewrite Rmin_opp_opp_Rmax ; rewrite Ropp_involutive ; reflexivity.
 Qed.
 
+Lemma Rmin_diag : forall r, Rmin r r = r.
+Proof.
+intro r ; unfold Rmin ; destruct (Rle_dec r r) ; auto.
+Qed.
+
 Lemma Rmin_eq_l : forall r1 r2, r1 <= r2 -> Rmin r1 r2 = r1.
 Proof.
 intros r1 r2 r1_le_r2 ; unfold Rmin ; destruct (Rle_dec r1 r2).
@@ -58,6 +63,11 @@ Lemma Rmin_eq_r : forall r1 r2, r1 <= r2 -> Rmin r2 r1 = r1.
 Proof.
 intros r1 r2 r1_le_r2 ; rewrite Rmin_comm ;
  apply Rmin_eq_l ; assumption.
+Qed.
+
+Lemma Rmax_diag : forall r, Rmax r r = r.
+Proof.
+intro r ; unfold Rmax ; destruct (Rle_dec r r) ; auto.
 Qed.
 
 Lemma Rmax_eq_l : forall r1 r2, r2 <= r1 -> Rmax r1 r2 = r1.

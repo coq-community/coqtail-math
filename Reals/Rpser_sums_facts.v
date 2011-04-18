@@ -9,13 +9,13 @@ Open Local Scope R_scope.
 
 Section sum_compatibilities.
 
-Variables An Bn : R.
+Variables An Bn : Rseq.
 Hypotheses
   (rAn : infinite_cv_radius An)
   (rBn : infinite_cv_radius Bn).
 
 Lemma sum_opp_compat : forall (rAn' : infinite_cv_radius (- An)),
-  (sum (- An)%Rseq rAn' == - sum An rAn)%F.
+  sum (- An)%Rseq rAn' == (- sum An rAn)%F.
 Proof.
 intros rAn' x.
  assert (H1 := sum_sums (- An)%Rseq rAn' x) ;
@@ -24,7 +24,7 @@ intros rAn' x.
 Qed.
 
 Lemma sum_plus_compat : forall (rAnBn : infinite_cv_radius (An + Bn)),
-  (sum (An + Bn)%Rseq rAnBn == sum An rAn + sum Bn rBn)%F.
+  sum (An + Bn)%Rseq rAnBn == (sum An rAn + sum Bn rBn)%F.
 Proof.
 intros rAnBn x.
  assert (Ha := sum_sums An rAn x) ;
@@ -35,7 +35,7 @@ intros rAnBn x.
 Qed.
 
 Lemma sum_minus_compat : forall (rAnBn : infinite_cv_radius (An - Bn)),
-  (sum (An - Bn)%Rseq rAnBn == sum An rAn - sum Bn rBn)%F.
+  sum (An - Bn)%Rseq rAnBn == (sum An rAn - sum Bn rBn)%F.
 Proof.
 intros rAnBn x.
  assert (Ha := sum_sums An rAn x) ;

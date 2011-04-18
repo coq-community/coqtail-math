@@ -217,9 +217,22 @@ intros An r N Rho.
    apply Rabs_no_R0 ; assumption.
 Qed.
 
+Lemma Cv_radius_weak_Rabs : forall (An : Rseq) (r : R),
+  Cv_radius_weak An (Rabs r) <-> Cv_radius_weak An r.
+Proof.
+intros An r ; split ; intros [B HB] ;
+ exists B ; intros y [i Hi] ; subst ; unfold gt_abs_Pser.
+
+  rewrite Rabs_mult, <- RPow_abs, <- (Rabs_Rabsolu r),
+  RPow_abs, <- Rabs_mult ; apply HB ; exists i ; reflexivity.
+  
+  rewrite Rabs_mult, RPow_abs, Rabs_Rabsolu, <- Rabs_mult ;
+  apply HB ; exists i ; reflexivity.
+Qed.
+
 Lemma Cv_radius_weak_plus : forall (An Bn : nat -> R) (r1 r2 : R),
        Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
-       Cv_radius_weak (fun n => An n + Bn n) (Rmin (Rabs r1) (Rabs r2)).
+       Cv_radius_weak (An + Bn)%Rseq (Rmin (Rabs r1) (Rabs r2)).
 Proof.
 intros An Bn r1 r2 RhoA RhoB.
 assert (r''_bd1 : Rabs (Rmin (Rabs r1) (Rabs r2)) <= Rabs r1).
@@ -233,7 +246,7 @@ assert (Rho'B := Cv_radius_weak_le_compat Bn _ _ r''_bd2 RhoB).
  destruct Rho'A as (C, HC) ;
  destruct Rho'B as (C', HC') ;
  exists (C + C').
- intros x Hx ; destruct Hx as (i, Hi) ; rewrite Hi ; unfold gt_abs_Pser.
+ intros x Hx ; destruct Hx as (i, Hi) ; rewrite Hi ; unfold gt_abs_Pser, Rseq_plus.
  rewrite Rmult_plus_distr_r ; apply Rle_trans with (Rabs (An i *  Rmin (Rabs r1)
          (Rabs r2) ^ i) + Rabs (Bn i * Rmin (Rabs r1) (Rabs r2) ^ i)) ; [apply Rabs_triang |].
  apply Rle_trans with (Rabs (An i * Rmin (Rabs r1) (Rabs r2) ^ i) + C') ;
@@ -241,22 +254,26 @@ assert (Rho'B := Cv_radius_weak_le_compat Bn _ _ r''_bd2 RhoB).
  exists i ; intuition.
 Qed.
 
-Lemma Cv_radius_weak_opp : forall (An : nat -> R) (r : R),
-       Cv_radius_weak An r ->
-       Cv_radius_weak (fun n => - An n) r.
+Lemma Cv_radius_weak_opp : forall (An : Rseq) (r : R),
+       Cv_radius_weak An r <->
+       Cv_radius_weak (- An)%Rseq r.
 Proof.
-intros An r Rho.
- destruct Rho as (C, HC) ; exists C ; intros x Hx ; destruct Hx as (i,Hi) ; rewrite Hi ;
- unfold gt_abs_Pser ; rewrite Ropp_mult_distr_l_reverse ; rewrite Rabs_Ropp ;
- apply HC ; exists i ; intuition.
+intros An r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
+ unfold gt_abs_Pser.
+
+ unfold Rseq_opp ; rewrite Ropp_mult_distr_l_reverse, Rabs_Ropp ;
+ apply HB ; exists i ; reflexivity.
+
+ rewrite <- Rabs_Ropp, <- Ropp_mult_distr_l_reverse ; apply HB ;
+ exists i ; reflexivity.
 Qed.
 
 Lemma Cv_radius_weak_minus : forall (An Bn : nat -> R) (r1 r2 : R),
        Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
-       Cv_radius_weak (fun n => An n - Bn n) (Rmin (Rabs r1) (Rabs r2)).
+       Cv_radius_weak (An - Bn)%Rseq (Rmin (Rabs r1) (Rabs r2)).
 Proof.
 intros An Bn r1 r2 RhoA RhoB.
- assert (Rho'B := Cv_radius_weak_opp Bn _ RhoB).
+ assert (Rho'B := proj1 (Cv_radius_weak_opp Bn _) RhoB).
  unfold Rminus ; apply Cv_radius_weak_plus ; assumption.
 Qed.
 
@@ -311,6 +328,35 @@ destruct rAn as [H_sup _] ; intros x Hx.
 Qed.
 
 End fcvr_properties.
+
+Lemma infinite_cv_radius_opp_compat : forall (An : Rseq),
+  infinite_cv_radius (- An) <-> infinite_cv_radius An.
+Proof.
+intros An ; split ; intros H r ; rewrite Cv_radius_weak_opp.
+ apply H.
+ destruct (H r) as [B HB] ; exists B ; intros Heq [i Hi] ; subst ;
+ unfold gt_abs_Pser ; rewrite Rseq_opp_invol ; apply HB ; exists i ;
+ reflexivity.
+Qed.
+
+Section icvr_properties.
+
+Variables (An Bn : Rseq).
+Hypotheses (rAn : infinite_cv_radius An) (rBn : infinite_cv_radius Bn).
+
+Lemma infinite_cv_radius_plus_compat : infinite_cv_radius (An + Bn).
+Proof.
+intro r ; rewrite <- Cv_radius_weak_Rabs, <- Rmin_diag ;
+ apply Cv_radius_weak_plus ; [apply rAn | apply rBn].
+Qed.
+
+Lemma infinite_cv_radius_minus_compat : infinite_cv_radius (An - Bn).
+Proof.
+intro r ; rewrite <- Cv_radius_weak_Rabs, <- Rmin_diag ;
+ apply Cv_radius_weak_minus ; [apply rAn | apply rBn].
+Qed.
+
+End icvr_properties.
 
 (* TOOD: change name & Rpps_seqify *)
 

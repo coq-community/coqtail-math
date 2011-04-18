@@ -1,8 +1,8 @@
 Require Import Rsequence_def Rsequence_sums_facts.
-Require Import Rpser_def Rpser_base_facts Rpser_usual.
-Require Import Rpser_sums Rpser_derivative.
+Require Import Rpser.
 Require Import Rfunction_facts Rextensionality.
-Require Import C_n_def C_n_facts Nth_derivative_def Nth_derivative_facts.
+Require Import C_n_def C_n_facts C_n_usual.
+Require Import Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def.
 Require Import List.
 Require Import Max.
@@ -189,31 +189,123 @@ Lemma interp_side_equa_in_N_R3 : forall (s : side_equa)
   (l : list (sigT infinite_cv_radius)) (Un : Rseq) (f : R -> R),
   interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l) = Some Un ->
   interp_side_equa_in_R3 s l = Some f ->
-  forall (pr : infinite_cv_radius Un),
-  sum Un pr == f.
+  {pr : infinite_cv_radius Un | sum Un pr == f}.
 Proof.
-intro s ; induction s ; simpl ; intros l Un f HN HR3 pr.
+intro s ; induction s ; simpl ; intros l Un f HN HR3.
 
- inversion HN ; inversion HR3 ; subst.
-  intro x ; rewrite <- (constant_is_cst r x) ; unfold constant ;
-   apply sum_unique.
+ inversion HN ; inversion HR3 ; subst ; exists (cst_infinite_cv_radius r) ;
+  apply constant_is_cst.
 
- destruct (nth_error (map (@projT1 _ infinite_cv_radius) l) p) as [un |].
-  destruct (nth_error l p) as [[An rAn] |].
-   admit.
-  inversion HR3.
- inversion HN.
+ assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;
+ destruct (nth_error l p).
+  specify2 Hrew s (eq_refl (Some s)) ; destruct s as [An rAn] ;
+  rewrite Hrew in HN ; inversion HN as [HN0] ; destruct HN0 ;
+  inversion HR3 as [HR30] ; destruct HR30.
+  assert (pr : infinite_cv_radius (An_nth_deriv An k)).
+   rewrite <- infinite_cv_radius_nth_derivable_compat ; assumption.
+  exists pr ; symmetry ; apply nth_derive_sum_explicit.
+ inversion HR3.
 
  destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)).
   destruct_eq (interp_side_equa_in_R3 s l).
-   inversion HN ; inversion HR3.
-   admit.
+   symmetry in Heqb ; symmetry in Heqb0 ; specify5 IHs l r r0 Heqb Heqb0.
+   inversion HR3 as [Hrew] ; destruct Hrew.
+   inversion HN as [Hrew] ; destruct Hrew.
+   destruct IHs as [rho Hrho].
+   assert (pr : infinite_cv_radius (- r)) by
+    (rewrite infinite_cv_radius_opp_compat ; assumption).
+   exists pr ; intro x ; unfold opp_fct ; rewrite <- Hrho ;
+   apply sum_opp_compat.
   inversion HR3.
  inversion HN.
-Admitted.
+
+ destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
+  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
+   destruct_eq (interp_side_equa_in_R3 s1 l).
+    destruct_eq (interp_side_equa_in_R3 s2 l).
+     inversion HN as [Hrew] ; destruct Hrew ;
+     inversion HR3 as [Hrew] ; destruct Hrew.
+     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
+     specify5 IHs1 l r r1 Heqb Heqb1 ;
+     specify5 IHs2 l r0 r2 Heqb0 Heqb2.
+     destruct IHs1 as [rho1 Hrho1] ;
+     destruct IHs2 as [rho2 Hrho2].
+     assert (pr : infinite_cv_radius (r + r0)).
+      apply infinite_cv_radius_plus_compat ; assumption.
+     exists pr.
+     intro x ; unfold plus_fct ; rewrite <- Hrho1, <- Hrho2 ;
+     apply sum_plus_compat.
+    inversion HR3.
+   inversion HR3.
+  inversion HN.
+ inversion HN.
+Qed.
+
+Lemma map_nth_error2 {A B : Type} : forall f l p,
+  nth_error l p = @None A -> nth_error (map f l) p = @None B.
+Proof.
+intros f l p ; revert l ; induction p ; intro l ; destruct l.
+ trivial.
+ intro Hf ; inversion Hf.
+ trivial.
+ simpl ; apply IHp.
+Qed.
+
+Lemma interp_side_equa_in_N_R3_compat : forall s l un,
+  interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l) = Some un ->
+  {f | interp_side_equa_in_R3 s l = Some f}.
+Proof.
+intro s ; induction s ; intros l un H.
+ exists (fun _ => r) ; reflexivity.
+
+ assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;
+ destruct_eq (nth_error l p).
+  specify2 Hrew s (eq_refl (Some s)).
+  destruct s as [An rAn] ; simpl in H, Hrew ; rewrite Hrew in H.
+  exists (nth_derive (sum An rAn) (C_infty_Rpser An rAn k)).
+  simpl ; rewrite <- Heqb ; reflexivity.
+ symmetry in Heqb ; simpl in H.
+ assert (T := map_nth_error2 (@projT1 _ infinite_cv_radius) _ _ Heqb).
+ rewrite T in H ; inversion H.
+
+ simpl in * ;
+  destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)) ;
+  symmetry in Heqb.
+   specify3 IHs l r Heqb ; destruct IHs as [f Hf].
+   exists (- f)%F ; rewrite Hf ; reflexivity.
+ inversion H.
+
+ simpl in *.
+  destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;
+  symmetry in Heqb.
+   destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) ;
+   symmetry in Heqb0.
+    specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
+    specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
+    exists (f + g)%F ; rewrite Hf, Hg ; reflexivity.
+   inversion H.
+  inversion H.
+Qed.
 
 Lemma interp_equa_in_N_R3 : forall (e : diff_equa)
   (l : list (sigT infinite_cv_radius)),
   [| e |]N (map (@projT1 _ infinite_cv_radius) l) -> [| e |]R3 l.
 Proof.
-Admitted.
+intros [s1 s2] l H ; simpl in *.
+ destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
+  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
+   destruct_eq (interp_side_equa_in_R3 s1 l).
+    destruct_eq (interp_side_equa_in_R3 s2 l).
+     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
+     destruct (interp_side_equa_in_N_R3 s1 l r r1 Heqb Heqb1) as [rho1 Hrho1].
+     destruct (interp_side_equa_in_N_R3 s2 l r0 r2 Heqb0 Heqb2) as [rho2 Hrho2].
+     rewrite <- Hrho1, <- Hrho2 ; apply sum_ext ; assumption.
+    symmetry in Heqb0 ;
+    destruct (interp_side_equa_in_N_R3_compat _ _ _ Heqb0) as [f Hf] ;
+    rewrite Hf in Heqb2 ; inversion Heqb2.
+   symmetry in Heqb ;
+   destruct (interp_side_equa_in_N_R3_compat _ _ _ Heqb) as [f Hf] ;
+   rewrite Hf in Heqb1 ; inversion Heqb1.
+  inversion H.
+ inversion H.
+Qed.

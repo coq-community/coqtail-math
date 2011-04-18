@@ -28,3 +28,26 @@ Open Scope Rfun_scope.
 Definition Rfun_eq (f g : R -> R) := forall x, f x = g x.
 
 Infix "==" := Rfun_eq (at level 70, no associativity) : Rfun_scope.
+
+Lemma Rfun_eq_refl : forall f, f == f.
+Proof.
+intros f x ; reflexivity.
+Qed.
+
+Lemma Rfun_eq_sym : forall f g, f == g -> g == f.
+Proof.
+intros f g H x ; auto.
+Qed.
+
+Lemma Rfun_eq_trans : forall f g h, f == g -> g == h -> f == h.
+Proof.
+intros f g h Hfg Hgh ; intro x ; rewrite Hfg, Hgh ; reflexivity.
+Qed.
+
+Require Setoid.
+
+Add Parametric Relation : (R -> R) Rfun_eq
+reflexivity proved by Rfun_eq_refl
+symmetry proved by Rfun_eq_sym
+transitivity proved by Rfun_eq_trans
+as Rf_eq.
