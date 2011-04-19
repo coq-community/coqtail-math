@@ -193,7 +193,7 @@ Lemma interp_side_equa_in_N_R3 : forall (s : side_equa)
 Proof.
 intro s ; induction s ; simpl ; intros l Un f HN HR3.
 
- inversion HN ; inversion HR3 ; subst ; exists (cst_infinite_cv_radius r) ;
+ inversion HN ; inversion HR3 ; subst ; exists (constant_infinite_cv_radius r) ;
   apply constant_is_cst.
 
  assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;

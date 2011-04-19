@@ -35,40 +35,53 @@ Open Scope R_scope.
 
 (** * Definition of the constant *)
 
-Definition cst_seq (r : R) (n : nat) := if eq_nat_dec n 0 then r else 0.
+Definition constant_seq (r : R) (n : nat) := if eq_nat_dec n 0 then r else 0.
 
-Lemma Pser_cst_seq : forall (r : R) (x : R), Pser (cst_seq r) x r.
+Lemma Pser_constant_seq : forall (r : R) (x : R), Pser (constant_seq r) x r.
 Proof.
 intros r x.
-  assert (Hrew : forall n, sum_f_R0 (fun n => (cst_seq r) n * x ^ n) n = r).
+  assert (Hrew : forall n, sum_f_R0 (fun n => (constant_seq r) n * x ^ n) n = r).
    induction n.
-   unfold cst_seq ; simpl ; apply Rmult_1_r.
-   simpl ; rewrite IHn ; unfold cst_seq ; simpl ; rewrite Rmult_0_l, Rplus_0_r ;
+   unfold constant_seq ; simpl ; apply Rmult_1_r.
+   simpl ; rewrite IHn ; unfold constant_seq ; simpl ; rewrite Rmult_0_l, Rplus_0_r ;
    reflexivity.
 intros eps eps_pos ; exists O ; intros n n_lb ; rewrite Hrew, R_dist_eq ;
  assumption.
 Qed.
 
-Lemma cst_infinite_cv_radius : forall (r : R),
-  infinite_cv_radius (cst_seq r).
+Lemma constant_infinite_cv_radius : forall (r : R),
+  infinite_cv_radius (constant_seq r).
 Proof.
 intros r n ; exists (Rabs r) ; intros x [i Hi] ; subst ;
- unfold gt_abs_Pser, cst_seq ; destruct i ; simpl ;
+ unfold gt_abs_Pser, constant_seq ; destruct i ; simpl ;
  [rewrite Rmult_1_r ; right ; reflexivity |
  rewrite Rmult_0_l, Rabs_R0 ; apply Rabs_pos].
 Qed.
 
-Definition constant (r : R) : R -> R :=
-  sum _ (cst_infinite_cv_radius r).
+Definition constant (r : R) := sum _ (constant_infinite_cv_radius r).
 
 Lemma constant_is_cst : forall (r : R),
   constant r == (fun _ => r).
 Proof.
 intros r x ;
- assert (Hl := sum_sums _ (cst_infinite_cv_radius r) x) ;
- assert (Hr := Pser_cst_seq r x) ;
+ assert (Hl := sum_sums _ (constant_infinite_cv_radius r) x) ;
+ assert (Hr := Pser_constant_seq r x) ;
  apply (Pser_unique _ _ _ _ Hl Hr).
 Qed.
+
+(** * Definition of the identity *)
+
+Definition identity_seq (n : nat) := if eq_nat_dec n 1 then 1 else 0.
+
+Lemma identity_infinite_cv_radius : infinite_cv_radius identity_seq.
+Proof.
+intros r ; exists (Rabs r) ; intros x [i Hi] ; subst ;
+unfold gt_abs_Pser, identity_seq ; destruct (eq_nat_dec i 1) as [Heq|Hneq].
+ rewrite Heq ; right ; apply Rabs_eq_compat ; ring.
+ rewrite Rmult_0_l, Rabs_R0 ; apply Rabs_pos.
+Qed.
+
+Definition identity := sum _ identity_infinite_cv_radius.
 
 (** * Definition of exp, cosine and sine *)
 
@@ -78,7 +91,7 @@ Definition exp_seq (n : nat) := / INR (fact n).
 
 Definition cos_seq : nat -> R.
 Proof.
-intro n ; destruct (n_modulo_2 n) as [ [p Hp] | [p Hp]].
+intro n ; case (n_modulo_2 n) ; intros [p Hp].
  apply ((-1) ^ p / INR (fact n)).
  apply 0.
 Defined.
@@ -162,7 +175,7 @@ Definition sine (x : R) : R := sum _ sin_infinite_cv_radius x.
 
 (** Links between the sequences *)
 
-Lemma Deriv_exp_seq_simpl : forall n, An_deriv exp_seq n = exp_seq n.
+Lemma Deriv_exp_seq_simpl : (An_deriv exp_seq == exp_seq)%Rseq.
 Proof.
 intro n ; unfold exp_seq, An_deriv.
  replace (fact (S n))%nat with ((S n) * fact n)%nat by reflexivity.
@@ -171,7 +184,8 @@ intro n ; unfold exp_seq, An_deriv.
  try apply fact_neq_0 ; intuition.
 Qed.
 
-Lemma Deriv_cos_seq_simpl : forall n, An_deriv cos_seq n = (- sin_seq)%Rseq n.
+Lemma Deriv_cos_seq_simpl : (An_deriv cos_seq == - sin_seq)%Rseq.
+Proof.
 intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_opp ;
  case (n_modulo_2 n) ; intros [p Hp] ;
  case (n_modulo_2 (S n)) ; intros [p' Hp'].
@@ -185,7 +199,7 @@ intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_opp ;
  apply False_ind ; omega.
 Qed.
 
-Lemma Deriv_sin_seq_simpl : forall n, An_deriv sin_seq n = cos_seq n.
+Lemma Deriv_sin_seq_simpl : (An_deriv sin_seq == cos_seq)%Rseq.
 intro n ; unfold cos_seq, sin_seq, An_deriv ;
  case (n_modulo_2 n) ; intros [p Hp] ;
  case (n_modulo_2 (S n)) ; intros [p' Hp'].

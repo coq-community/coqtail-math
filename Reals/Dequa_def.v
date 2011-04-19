@@ -59,7 +59,7 @@ Defined.
 Fixpoint interp_side_equa_in_N (s : side_equa)
  (rho : list Rseq) : option (nat -> R).
 destruct_eq s.
- exact (Some (cst_seq r)).
+ exact (Some (constant_seq r)).
  destruct (nth_error rho p) as [un |].
    exact (Some (An_nth_deriv un k)).
    exact None.
@@ -144,6 +144,7 @@ Notation "`c k" := (cst k) (at level 40) : de_scope.
 Notation "- y" := (opp y) : de_scope.
 Infix "+" := plus : de_scope.
 Infix "-" := minus : de_scope.
+Infix ":=:" := (@pair side_equa side_equa) (at level 50): de_scope.
 
 Notation "[| e |]R" := (interp_in_R e%de) (at level 69).
 Notation "[| e |]R2" := (interp_in_R2 e%de) (at level 69).

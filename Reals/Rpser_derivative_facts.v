@@ -29,7 +29,7 @@ induction k ; intros An rAn rAnk rdAn x.
  assert (rAnk' : infinite_cv_radius (An_nth_deriv (An_deriv An) k)) by
   (rewrite <- infinite_cv_radius_nth_derivable_compat ; assumption).
  rewrite (IHk _ _ rAnk').
- erewrite <- sum_ext ; [| eapply An_nth_derive_S'] ; reflexivity.
+ erewrite <- sum_ext ; [| eapply An_nth_deriv_S'] ; reflexivity.
 
  intro ; unfold derive ; apply derive_pt_sum.
 Qed.

@@ -68,6 +68,16 @@ Proof.
 intros x n ; unfold gt_abs_Pser ; rewrite AnBn_ext ; reflexivity.
 Qed.
 
+Lemma An_deriv_ext : (An_deriv An == An_deriv Bn)%Rseq.
+Proof.
+intro n ; unfold An_deriv ; rewrite AnBn_ext ; reflexivity.
+Qed.
+
+Lemma An_nth_deriv_ext : forall k, (An_nth_deriv An k == An_nth_deriv Bn k)%Rseq.
+Proof.
+intros n k ; unfold An_nth_deriv ; rewrite AnBn_ext ; reflexivity.
+Qed.
+
 Lemma Cv_radius_weak_ext : forall r, Cv_radius_weak An r <-> Cv_radius_weak Bn r.
 Proof.
 intro r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;

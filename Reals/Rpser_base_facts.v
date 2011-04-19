@@ -55,7 +55,7 @@ intros An k n ; unfold An_nth_deriv, An_deriv, Rdiv ;
  apply Rmult_comm.
 Qed.
 
-Lemma An_nth_derive_S' : forall An k,
+Lemma An_nth_deriv_S' : forall An k,
  An_nth_deriv An (S k) == An_nth_deriv (An_deriv An) k.
 Proof.
 intros An k n ; unfold An_nth_deriv, An_deriv.
@@ -71,6 +71,15 @@ Lemma An_nth_deriv_1 : forall An, An_nth_deriv An 1 == An_deriv An.
 Proof.
 intros An n ; rewrite An_nth_deriv_S ; unfold An_deriv ; 
  rewrite An_nth_deriv_0 ; reflexivity.
+Qed.
+
+(** TODO: add all the relations. *)
+
+Lemma An_deriv_opp_compat : forall An,
+  An_deriv (- An) == - An_deriv An.
+Proof.
+intros An n ; unfold Rseq_opp, An_deriv ;
+ rewrite Ropp_mult_distr_r_reverse ; reflexivity.
 Qed.
 
 (** Compatibility of the Cv_radius_weak concept with various operations. *)

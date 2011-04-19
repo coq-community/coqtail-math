@@ -1,60 +1,58 @@
-Require Import Ranalysis.
-Require Import Rpser.
-Require Import Rfunction_facts Rextensionality.
-Require Import C_n_def C_n_facts C_n_usual.
+Require Import Reals Rfunction_def Rfunction_facts Rextensionality.
+Require Import Rsequence_def Rsequence_base_facts.
+
 Require Import Nth_derivative_def Nth_derivative_facts.
-Require Import Dequa_def.
+Require Import Rpser.
+Require Import C_n_def C_n_facts C_n_usual.
+
+Require Import Dequa_def Dequa_facts.
 Require Import List.
 
-Open Local Scope R_scope.
+Require Import LegacyField_Theory.
 
-Definition de_id : diff_equa := (y 0 1, cst 1)%de.
-Definition rho_de_id : list (sigT Cn) :=
-  (existT _ 1%nat (existT _ id (C_infty_id 1%nat))) :: nil.
+Open Local Scope de_scope.
 
-Lemma diff_equa_id : [| de_id |]R rho_de_id.
+Lemma constant_is_cst : forall r, 
+ [| y 0 0 :=: `c r |]R3 ((existT _ _ (constant_infinite_cv_radius r)) :: nil).
 Proof.
-intro x ; unfold nth_derive', nth_derive, derive.
- rewrite derive_pt_eq ; apply derivable_pt_lim_id.
+intros r ; apply interp_equa_in_N_R3 ; simpl ; apply An_nth_deriv_0.
 Qed.
 
-Definition de_cos : diff_equa := (y 0 2, - y 0 0)%de.
-Definition rho_de_cos : list (sigT Cn) :=
-  (existT _ 2%nat (existT (C 2) cosine (C_infty_Rpser _ _ 2%nat))) :: nil.
-
-Lemma diff_equa_cos : [| de_cos |]R rho_de_cos.
+Lemma identity_is_id :
+ [| y 0 1 :=: cst 1 |]R3 ((existT _ _ identity_infinite_cv_radius) :: nil).
 Proof.
-intro x ; unfold nth_derive' ; simpl ; unfold derive.
- replace ((- cosine)%F x) with
- (derive_pt (- sine) x (derivable_pt_opp _ _ (derivable_pt_sine x))).
- rewrite derive_pt_eq.
- apply derivable_pt_lim_ext with (- sine)%F.
- intro a ; simpl ; symmetry ; rewrite derive_pt_eq ; apply derivable_pt_lim_cosine.
- apply derivable_pt_lim_opp ; apply derivable_pt_lim_sine.
- rewrite derive_pt_eq ; apply derivable_pt_lim_opp ; apply derivable_pt_lim_sine.
+apply interp_equa_in_N_R3 ; simpl ; rewrite An_nth_deriv_1.
+intro n ; unfold An_deriv, constant_seq, identity_seq.
+ destruct (eq_nat_dec n 0) ; destruct (eq_nat_dec (S n) 1).
+   subst ; rewrite Rmult_1_r ; reflexivity.
+   subst ; destruct (f (eq_refl 1%nat)).
+  inversion e as [H] ; destruct (f H).
+  rewrite Rmult_0_r ; reflexivity.
 Qed.
 
-Require Import Rsequence_def.
-
-Definition Option_app_Prop {A : Type} (P : A -> Prop) (Oa : option A) : Prop :=
-match Oa with
-  | None   => True
-  | Some a => P a
-end.
-
-(*
-Lemma diff_sequences_functions : forall (e : diff_equa) (l : list Rseq)
-  (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n)),
-  [| e |]N l ->
-  [| e |]R2 (corresponding_Rpser l cvl).
+Lemma diff_equa_cos :
+ [| y 0 2 :=: - y 0 0 |]R3 ((existT _ _ cos_infinite_cv_radius) :: nil).
 Proof.
-intros [s1 s2] l cvl Heq.
- destruct s1.
- simpl in *.
-
+apply interp_equa_in_N_R3 ; simpl.
+ do 2 rewrite An_nth_deriv_S' ; do 2 rewrite An_nth_deriv_0.
+ intro n ; rewrite (An_deriv_ext _ (- sin_seq)%Rseq) ;
+  [ | apply Deriv_cos_seq_simpl] ; rewrite An_deriv_opp_compat ;
+  unfold Rseq_opp ; apply Ropp_eq_compat ;
+  apply Deriv_sin_seq_simpl.
 Qed.
 
-Lemma side_sequences_functions : forall (s : side_equa) (l : list Rseq)
- (cvl : forall n, Option_app_Prop infinite_cv_radius (nth_error l n))
+Lemma diff_equa_sin :
+ [| y 0 2 :=: - y 0 0 |]R3 ((existT _ _ sin_infinite_cv_radius) :: nil).
+Proof.
+apply interp_equa_in_N_R3 ; simpl.
+ do 2 rewrite An_nth_deriv_S' ; do 2 rewrite An_nth_deriv_0.
+ intro n ; rewrite (An_deriv_ext _ (cos_seq)%Rseq) ;
+  [apply Deriv_cos_seq_simpl | apply Deriv_sin_seq_simpl].
+Qed.
 
-*)
+Lemma diff_equa_exp : forall n,
+ [| y 0 (S n) :=: y 0 n |]R3 ((existT _ _ exp_infinite_cv_radius) :: nil).
+intro n ; apply interp_equa_in_N_R3 ; simpl ;
+ rewrite An_nth_deriv_S', (An_nth_deriv_ext _ exp_seq) ;
+ [reflexivity | apply Deriv_exp_seq_simpl].
+Qed.
