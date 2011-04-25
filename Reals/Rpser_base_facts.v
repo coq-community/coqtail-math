@@ -286,17 +286,14 @@ intros An Bn r1 r2 RhoA RhoB.
  unfold Rminus ; apply Cv_radius_weak_plus ; assumption.
 Qed.
 
-Section fcvr_properties.
-
-Variables (An : Rseq) (r : R).
-Hypotheses rAn : finite_cv_radius An r.
-
 (** The finite_cv_radius is exactly the upper bound. We choose our definitions
-because it gives more information (the convexity of the radius for example) *)
+because it gives more information (the convexity of the radius for example). *)
 
-Lemma finite_cv_radius_is_ub : is_lub (fun r' => has_ub (gt_abs_Pser An r')) r.
+Lemma finite_cv_radius_is_lub : forall (An : Rseq) (r : R),
+  finite_cv_radius An r ->
+  is_lub (fun r' => has_ub (gt_abs_Pser An r')) r.
 Proof.
-destruct rAn as [rho rho_ub] ; split.
+intros An r [rho rho_ub] ; split.
 
  intros r' Hr' ; destruct (Rle_lt_dec r' r) as [r'ler | rltr'].
   assumption.
@@ -315,6 +312,37 @@ destruct rAn as [rho rho_ub] ; split.
     assumption).
    clear -Hf Hf' ; apply False_ind ; fourier.
 Qed.
+
+(** The reciprocal implication needs the EM axiom because is_lub is not informative
+enough. *)
+
+Lemma lub_is_finite_cv_radius : (forall (P : Prop), P \/ ~P) ->
+  forall (An : Rseq) (r : R),
+  is_lub (fun r' => has_ub (gt_abs_Pser An r')) r ->
+  finite_cv_radius An r.
+Proof.
+intros EM An r [rho_ub rho_l] ; split.
+
+ intros r' [r'_pos r'_bd].
+ destruct (EM (Cv_radius_weak An r')) as [P | nP].
+  assumption.
+  destruct (Rlt_irrefl r); apply Rle_lt_trans with r' ;
+  [apply rho_l | assumption] ;
+  intros b Hf ; fold (Cv_radius_weak An b) in Hf ;
+  destruct (Rle_lt_dec b r') as [b_le_r' | r'_lt_b] ;
+  [assumption | destruct nP] ; apply Cv_radius_weak_le_compat with b.
+   rewrite Rabs_pos_eq ; [rewrite Rabs_pos_eq |] ; [left | left ;
+   apply Rle_lt_trans with r' |] ; assumption.
+   assumption.
+
+ intros r' r'_lb Hf ; apply (Rlt_irrefl r) ; apply Rlt_le_trans with r' ;
+  [| apply rho_ub] ; assumption.
+Qed.
+
+Section fcvr_properties.
+
+Variables (An : Rseq) (r : R).
+Hypotheses rAn : finite_cv_radius An r.
 
 (** Compatibility of the finite_cv_radius concept with various operations. *)
 

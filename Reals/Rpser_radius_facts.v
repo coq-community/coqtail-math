@@ -86,34 +86,6 @@ intros An weaksum r ; destruct (weaksum r) as (l, Hl) ; apply Rpser_bound_criter
  assumption.
 Qed.
 
-(*
-  The following lemma uses classical propositions
-Require Import Classical.
-
-Lemma cv_radius_decidability : forall An,
-     (exists r, finite_cv_radius An r) \/ (infinite_cv_radius An).
-Proof.
-intro An.
- case (classic (forall r, Cv_radius_weak An r)) ; intro Hyp.
- right ; apply infinite_cv_radius_caracterization ; intro x ; apply Abel with (2* (Rabs x) + 1).
- apply Hyp.
- case (Req_or_neq (Rabs x)) ; intro H.
-  rewrite H ; intuition.
-  apply Rlt_trans with (2 * Rabs x).
-  replace (2 * Rabs x) with (Rabs x + Rabs x) by field.
-  apply Rle_lt_trans with (Rabs x + 0).
-  intuition.
-  apply Rplus_lt_compat_l ; apply Rabs_pos_lt.
-  intro Hf ; apply H ; rewrite Hf ; apply Rabs_R0.
-  intuition.
-  assert (H : ~ (forall r:R, ~~Cv_radius_weak An r)).
-   intros Hf ; apply Hyp ; intros r.
-  apply (NNPP (Cv_radius_weak An r) (Hf r)).
-  assert (Main := not_all_not_ex _ _ H).
-  left.
-*)
-
-
 (** * Caracterization of the cv radius of the formal derivative *)
 
 Lemma Cv_radius_weak_derivable_compat : forall An r,
