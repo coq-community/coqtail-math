@@ -239,3 +239,17 @@ intros m n Hyp. unfold Rle in Hyp.
  intuition.
  intro Hfalse ; apply False_ind ; apply Hyp2 ; exact Hfalse.
 Qed.
+
+Lemma Rlt_1_mult_inv : forall  x y, 0 < y ->
+  y < x -> 1 < x * / y.
+intros x y y_pos y_lb ; apply Rle_lt_trans with (y * / y).
+ right ; symmetry ; apply Rinv_r ; apply Rgt_not_eq ; assumption.
+ apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+Qed.
+
+
+Require Setoid.
+
+Add Parametric Relation : R Rle
+reflexivity proved by Rle_refl
+transitivity proved by Rle_trans as Rle.

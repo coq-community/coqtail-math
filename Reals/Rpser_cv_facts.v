@@ -26,7 +26,7 @@ Require Import Rpow_facts.
 Require Import Fourier.
 
 Require Import Max Min.
-Require Import RIneq.
+Require Import MyRIneq MyNeq.
 Require Import Ranalysis_def.
 Require Import RFsequence RFsequence_facts.
 
@@ -111,7 +111,8 @@ assert (Rabsx_r_lt_1 : Rabs x / r < 1).
    apply Temp.
   assert (Main :  exists M : R, forall m n : nat, m <> n ->
         R_dist (sum_f_R0 (gt_Pser An x) n) (sum_f_R0 (gt_Pser An x) m) <=
-        M * ((Rabs x / r) ^ (S (min m n)) * (1 - (Rabs x / r) ^ (S (max m n - S (min m n)))) / (1 - (Rabs x / r)))).
+        M * ((Rabs x / r) ^ (S (min m n)) * (1 - (Rabs x / r)
+        ^ (S (max m n - S (min m n)))) / (1 - (Rabs x / r)))).
    elim Hineq ; intros M HM ; exists M ; intros m n m_neq_n.
    assert (HM' := HM m n m_neq_n).
    rewrite sum_pow in HM'. apply HM'.
@@ -252,6 +253,23 @@ intros An M M_pos An_neq An_frac_ub r r_bd.
   apply T ; symmetry ; assumption.
 Qed.
 
+(*TODO : prove & move*)
+
+Lemma Rseq_cv_bounded : forall Un l, Rseq_cv Un l ->
+  forall k, 1 < k ->
+  Rseq_eventually (fun un => forall n, (Rabs l) / k < Rabs (un n)) Un.
+Admitted.
+
+(* TODO: move *)
+Lemma Rseq_cv_pos_infty_le_compat : forall Un Vn,
+  (forall n, Un n <= Vn n) -> Rseq_cv_pos_infty Un ->
+  Rseq_cv_pos_infty Vn.
+Proof.
+intros Un Vn Hle Un_inf M ; destruct (Un_inf M) as [N HN] ; exists N ;
+ intros n n_lb ; apply Rlt_le_trans with (Un n) ;
+ [apply HN | apply Hle] ; assumption.
+Qed.
+
 Lemma Rpser_alembert_prelim2 : forall (An : nat -> R) (M : R),
        0 < M -> (forall n : nat, An n <> 0) ->
        Rseq_eventually (fun Un => Rseq_bound Un M) (fun n => (An (S n) / An n)) ->
@@ -259,71 +277,220 @@ Lemma Rpser_alembert_prelim2 : forall (An : nat -> R) (M : R),
 Proof.
 intros An M M_pos An_neq An_frac_event r r_bd.
 destruct An_frac_event as [N HN].
- assert (Rho : Cv_radius_weak (fun n => (An (N + n)%nat)) r).
+ assert (Rho : Cv_radius_weak (Rseq_shifts An N) r).
   apply Rpser_alembert_prelim with M.
   assumption.
   intro n ; apply An_neq.
-  intro n ; replace (N + S n)%nat with (S (N + n)) by intuition ; apply HN.
+  intro n ; unfold Rseq_shifts ; replace (N + S n)%nat
+   with (S (N + n)) by intuition ; apply HN.
   assumption.
   apply Cv_radius_weak_padding_neg_compat with N ;
  destruct Rho as [T HT] ; exists T ; intros u Hu ; destruct Hu as [n Hn] ;
- rewrite Hn ; unfold gt_abs_Pser ; rewrite plus_comm ; apply HT ;
- exists n ; reflexivity.
+ rewrite Hn ; apply HT ; exists n ; reflexivity.
 Qed.
 
-Lemma Rpser_alembert_prelim3 : forall (An : nat -> R) (lambda : R),
-       0 < Rabs (lambda) -> (forall n : nat, An n <> 0) ->
-       Rseq_cv (fun n : nat => Rabs (An (S n) / An n)) (Rabs lambda) -> forall r,
-       Rabs r < / (Rabs lambda) -> Cv_radius_weak An r.
+Lemma Rpser_alembert_weak : forall (An : Rseq) (lambda : R),
+  lambda <> 0 -> (forall n : nat, An n <> 0) ->
+  Rseq_cv (fun n : nat => Rabs (An (S n) / An n)) lambda -> forall r,
+  Rabs r < / lambda -> Cv_radius_weak An r.
 Proof.
-intros An lam lam_pos An_neq An_frac_cv r r_bd.
+intros An lam lam_neq An_neq An_frac_cv r r_bd.
+ assert (lam_pos : 0 < lam).
+  apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+  eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
+  (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
+  does. Using [compute] to avoid the problem. *)
+  apply Rabs_pos.
  assert (middle_lb := proj1 (middle_is_in_the_middle _ _ r_bd)).
  assert (middle_ub := proj2 (middle_is_in_the_middle _ _ r_bd)).
- assert (middle_pos : 0 < middle (Rabs r) (/ Rabs lam)).
+ assert (middle_pos : 0 < middle (Rabs r) (/ lam)).
   apply Rle_lt_trans with (Rabs r) ; [apply Rabs_pos | assumption].
- pose (eps := (/ (middle (Rabs r) (/ Rabs lam)) - Rabs lam)%R).
+ pose (eps := (/ (middle (Rabs r) (/ lam)) - lam)%R).
  assert (eps_pos : 0 < eps).
   apply Rgt_minus ; rewrite <- Rinv_involutive.
   apply Rinv_lt_contravar.
   apply Rmult_lt_0_compat ; [| apply Rinv_0_lt_compat] ; assumption.
   assumption.
   apply Rgt_not_eq ; assumption.
- apply Rpser_alembert_prelim2 with (Rabs lam + eps)%R.
+ apply Rpser_alembert_prelim2 with (lam + eps)%R.
  fourier.
  apply An_neq.
- destruct (An_frac_cv (/ (middle (Rabs r) (/ Rabs lam)) - Rabs lam))%R as [N HN].
+ destruct (An_frac_cv (/ (middle (Rabs r) (/ lam)) - lam))%R as [N HN].
  assumption.
  exists N ; intro n.
- apply Rle_trans with (Rabs lam + (Rabs (An (S (N + n)) / An (N + n)%nat)
-      - Rabs lam))%R.
+ apply Rle_trans with (lam + (Rabs (An (S (N + n)) / An (N + n)%nat)
+      - lam))%R.
  right ; ring.
  apply Rplus_le_compat_l ; apply Rle_trans with
-   (R_dist (Rabs (An (S (N + n)) / An (N + n)%nat)) (Rabs lam))%R.
+   (R_dist (Rabs (An (S (N + n)) / An (N + n)%nat)) lam)%R.
  apply RRle_abs.
  left ; apply HN ; intuition.
- replace (Rabs lam + eps)%R with (/ (middle (Rabs r) (/ Rabs lam)))%R.
+ replace (lam + eps)%R with (/ (middle (Rabs r) (/ lam)))%R.
  rewrite Rinv_involutive ; [| apply Rgt_not_eq] ; assumption.
  unfold eps ; ring.
 Qed.
 
-Lemma Rpser_alembert_prelim4 : forall (An : nat -> R),
-       (forall n : nat, An n <> 0) ->
+
+Lemma Rpser_alembert_weak_reciprocal : forall (An : nat -> R) (lambda : R),
+       lambda <> 0 -> (forall n : nat, An n <> 0) ->
+       Rseq_cv (fun n => Rabs (An (S n) / An n)) lambda -> forall r,
+       / lambda < Rabs r -> ~ Cv_radius_weak An r.
+Proof.
+intros An lam lam_neq An_neq An_frac_ub r r_ld Hf ;
+pose (l' := middle 1 (Rabs r * lam)).
+assert (lam_pos : 0 < lam).
+ apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+ eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
+  (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
+  does. Using [compute] to avoid the problem. *)
+ apply Rabs_pos.
+assert (rlam_lb : 1 < Rabs r * lam).
+ apply Rle_lt_trans with (/ lam * lam).
+ right ; field ; apply Rgt_not_eq ; assumption.
+ apply Rmult_lt_compat_r ; assumption.
+assert (lam_l'_pos : 0 <= lam / l').
+ apply Rle_mult_inv_pos ; [| apply Rlt_trans with 1;
+ [| apply middle_is_in_the_middle]] ; fourier.
+destruct (Rseq_cv_bounded _ _ An_frac_ub l') as [N H].
+ apply middle_is_in_the_middle ; assumption. 
+assert (HN : forall n, Rabs (An N) * (lam / l') ^ n <= Rabs (An (N + n)%nat)).
+ clear -H lam_pos lam_l'_pos An_neq ; intro n ; induction n.
+  simpl ; rewrite plus_0_r, Rmult_1_r ; reflexivity.
+  apply Rle_trans with (Rabs (An N) * (lam / l') ^ n * (lam / l')).
+  right ; simpl ; ring.
+  apply Rle_trans with (Rabs (An (N + n)%nat) * (lam / l')).
+  apply Rmult_le_compat_r ; assumption.
+  apply Rle_trans with (Rabs (An (N + n)%nat) *
+   Rabs (An (N + S n)%nat) * / Rabs (An (N + n)%nat)).
+  rewrite Rmult_assoc ; apply Rmult_le_compat_l ; [apply Rabs_pos |].
+  rewrite <- Rabs_Rinv, <- Rabs_mult ; [| apply An_neq].
+  rewrite <- (Rabs_pos_eq lam), <- (Rabs_Rabsolu ((An (N + S n)%nat)
+   * / An (N + n)%nat)), <-plus_n_Sm ; left ; [apply H | assumption].
+  right ; field ; apply Rabs_no_R0 ; apply An_neq.
+clear H.
+assert (r_gt_1: 1 < (lam / l') * Rabs r).
+ apply Rlt_le_trans with (Rabs r * lam * / l') ; [| right ; unfold Rdiv ; ring].
+ apply Rlt_1_mult_inv ; [apply Rlt_trans with 1 ; [fourier |]|] ;
+ apply middle_is_in_the_middle ; assumption.
+assert (Hinfty : Rseq_cv_pos_infty (gt_abs_Pser An r)).
+ apply Rseq_cv_pos_infty_shifts_compat with N.
+ apply Rseq_cv_pos_infty_le_compat with (Rseq_mult (Rseq_constant (Rabs (An N) * Rabs r ^ N))
+  (Rseq_pow (lam / l' * Rabs r))).
+ intro n ; unfold Rseq_pow, Rseq_shifts, Rseq_mult, Rseq_constant, gt_abs_Pser.
+ apply Rle_trans with ((Rabs (An N) * (lam / l') ^ n) * Rabs r ^ (n + N)).
+ right; repeat rewrite Rmult_assoc ; apply Rmult_eq_compat_l.
+ rewrite Rpow_mult_distr, pow_add ; ring.
+ rewrite Rabs_mult, RPow_abs ; rewrite plus_comm ; apply Rmult_le_compat_r ;
+ [apply Rabs_pos |] ; apply HN.
+ apply Rseq_cv_finite_pos_mult_pos_infty_r with (Rabs (An N) * Rabs r ^ N).
+ rewrite RPow_abs, <- Rabs_mult ; apply Rabs_pos_lt ;
+ apply Rmult_integral_contrapositive_currified ; [apply An_neq | apply pow_nonzero].
+ intro r_eq ; rewrite r_eq, Rabs_R0, Rmult_0_l in rlam_lb ; clear -rlam_lb ; fourier.
+ apply Rseq_constant_cv.
+ apply Rseq_pow_gt_1_cv ; assumption.
+destruct Hf as [B HB].
+destruct (Hinfty B) as [M HM].
+apply (Rlt_irrefl (gt_abs_Pser An r M)).
+apply Rle_lt_trans with B ; [apply HB ; exists M | apply HM] ; auto.
+Qed.
+
+Theorem Rpser_alembert_weak_eventually : forall (An : Rseq) (lambda : R),
+  lambda <> 0 -> Rseq_eventually (fun un => forall n : nat, un n <> 0) An ->
+  Rseq_cv (fun n : nat => Rabs (An (S n) / An n)) lambda -> forall r,
+  Rabs r < / lambda -> Cv_radius_weak An r.
+Proof.
+intros An lam lam_neq [N An_neq] An_frac_cv r r_bd.
+ apply Cv_radius_weak_padding_neg_compat with N ;
+ apply Rpser_alembert_weak with lam ; try assumption.
+ apply Rseq_cv_eq_compat with (Rseq_shifts (fun n => Rabs (An (S n) / An n)) N).
+ intro n ; unfold Rseq_shifts ; rewrite plus_n_Sm ; reflexivity.
+ apply Rseq_cv_shifts_compat_reciprocal ; assumption.
+Qed.
+
+Theorem Rpser_alembert_weak_reciprocal_eventually : forall (An : Rseq) (lambda : R),
+  lambda <> 0 -> Rseq_eventually (fun un => forall n : nat, un n <> 0) An ->
+  Rseq_cv (fun n : nat => Rabs (An (S n) / An n)) lambda -> forall r,
+  / lambda < Rabs r -> ~ Cv_radius_weak An r.
+Proof.
+intros An lam lam_neq [N An_neq] An_frac_cv r r_bd Hf.
+ assert (H := Cv_radius_weak_shifts_compat _ _ Hf N).
+ revert H.
+ apply Rpser_alembert_weak_reciprocal with lam ; try assumption.
+ apply Rseq_cv_eq_compat with (Rseq_shifts (fun n => Rabs (An (S n) / An n)) N).
+ intro n ; unfold Rseq_shifts ; rewrite plus_n_Sm ; reflexivity.
+ apply Rseq_cv_shifts_compat_reciprocal ; assumption.
+Qed.
+
+Lemma Rpser_alembert_finite : forall (An : Rseq) (lambda : R),
+  lambda <> 0 -> (forall n, An n <> 0) ->
+  Rseq_cv (fun n => Rabs (An (S n) / An n)) lambda ->
+  finite_cv_radius An (/ lambda).
+Proof.
+intros An lam lam_neq An_neq An_l.
+assert (lam_pos : 0 < / lam).
+ apply Rinv_0_lt_compat ; apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+ eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
+  (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
+  does. Using [compute] to avoid the problem. *)
+ apply Rabs_pos.
+split.
+ intros r' [r'_pos r'_bd] ; apply Rpser_alembert_weak with lam ;
+  [| | | rewrite Rabs_pos_eq] ; assumption.
+ intros r' r'_lb ; apply Rpser_alembert_weak_reciprocal with lam ;
+  [| | | rewrite Rabs_pos_eq ; [| left ; apply Rlt_trans with (/ lam)] ] ; assumption.
+Qed.
+
+Lemma Rpser_alembert_finite_eventually : forall (An : Rseq) (lambda : R),
+  lambda <> 0 -> Rseq_eventually (fun un => forall n, un n <> 0) An ->
+  Rseq_cv (fun n => Rabs (An (S n) / An n)) lambda ->
+  finite_cv_radius An (/ lambda).
+Proof.
+intros An lam lam_neq An_neq An_l.
+assert (lam_pos : 0 < / lam).
+ apply Rinv_0_lt_compat ; apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+ eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
+  (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
+  does. Using [compute] to avoid the problem. *)
+ apply Rabs_pos.
+split.
+ intros r' [r'_pos r'_bd] ; apply Rpser_alembert_weak_eventually with lam ;
+  [| | | rewrite Rabs_pos_eq] ; assumption.
+ intros r' r'_lb ; apply Rpser_alembert_weak_reciprocal_eventually with lam ;
+  [| | | rewrite Rabs_pos_eq ; [| left ; apply Rlt_trans with (/ lam)] ] ; assumption.
+Qed.
+
+(* TODO: move *)
+Lemma max_explicit : forall m n, { p | max m n = (m + p)%nat}.
+Proof.
+intros m n ; destruct (lt_dec m n) ;
+ [exists (n - m)%nat | exists 0%nat] ;
+ destruct (max_spec m n) ; omega.
+Qed.
+
+Lemma Rpser_alembert_infinite : forall (An : Rseq),
+       Rseq_eventually (fun un => forall n, un n <> 0) An ->
        Rseq_cv (fun n : nat => Rabs (An (S n) / An n)) R0 ->
        infinite_cv_radius An.
 Proof.
-intros An An_neq An_frac_0 r.
- assert (eps_pos : 0 < /(Rabs r + 1)).
-  apply Rinv_0_lt_compat ; apply Rplus_le_lt_0_compat ; [apply Rabs_pos |
-  apply Rlt_0_1].
- apply Rpser_alembert_prelim2 with (/(Rabs r + 1))%R.
- assumption.
- apply An_neq.
- destruct (An_frac_0 (/ (Rabs r + 1))%R eps_pos) as [N HN] ; exists N ; intro n.
- apply Rle_trans with (R_dist (Rabs (An (S (N + n)) / An (N + n)%nat)) 0) ; [right |].
- unfold R_dist in |-* ; rewrite Rminus_0_r, Rabs_Rabsolu ; reflexivity.
- left ; apply HN ; intuition.
- rewrite Rinv_involutive ; [fourier |] ; apply Rgt_not_eq ;
- apply Rplus_le_lt_0_compat ; [apply Rabs_pos | apply Rlt_0_1].
+intros An [N1 HN1] An_frac_0 r.
+assert (eps_pos : 0 < /(Rabs r + 1)).
+ apply Rinv_0_lt_compat ; apply Rplus_le_lt_0_compat ; [apply Rabs_pos |
+ apply Rlt_0_1].
+destruct (An_frac_0 (/ (Rabs r + 1))%R eps_pos) as [N2 HN2].
+apply Cv_radius_weak_padding_neg_compat with (max N1 N2).
+apply Rpser_alembert_prelim with (/ (Rabs r + 1)).
+assumption.
+intro n ; unfold Rseq_shifts.
+destruct (max_explicit N1 N2) as [p Hp] ; rewrite Hp, <- plus_assoc ; apply HN1.
+intro n ; unfold Rseq_shifts ; rewrite max_comm ;
+ destruct (max_explicit N2 N1) as [p Hp] ; rewrite Hp, <- Rabs_Rabsolu ;
+ replace (N2 + p + S n)%nat with (S (N2 + p + n)) by ring ;
+ assert (Hyp := HN2 (N2 + p + n)%nat) ; unfold R_dist, Rminus in Hyp ;
+ rewrite Ropp_0, Rplus_0_r in Hyp ; left ; apply Hyp.
+omega.
+rewrite Rinv_involutive ; [intuition |].
+apply Rgt_not_eq ; apply Rlt_le_trans with (0 + 1) ;
+ [| apply Rplus_le_compat_r ; apply Rabs_pos] ; intuition.
 Qed.
 
 (** A kind of reciprocal for the Abel's lemma*)
@@ -336,7 +503,8 @@ intros An x l Hxl.
   intros n Hn ; case_eq n ; unfold gt_abs_Pser.
   intro H ; simpl ; rewrite Rmult_1_r ; apply Rle_trans with (Rabs (An 0%nat) +1) ;
    [intuition | apply RmaxLess2].
-   intros m Hrew ; replace (Rabs (An (S m) * Rabs x ^ S m)) with (Rabs ((sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) (S m) - l) +
+   intros m Hrew ; replace (Rabs (An (S m) * Rabs x ^ S m))
+    with (Rabs ((sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) (S m) - l) +
          (l - sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m))).
    apply Rle_trans with (Rabs (sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) (S m) - l)
          + Rabs (l - sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m)).

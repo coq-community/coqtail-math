@@ -164,38 +164,41 @@ intros An r r' r'_bd Rho.
   field ; apply pow_nonzero ; assumption.
 Qed.
 
-Lemma Cv_radius_weak_padding_pos_compat : forall (An : nat -> R) (r : R),
-     Cv_radius_weak An r -> forall N, Cv_radius_weak (fun n => An (n + N)%nat) r.
+Lemma Cv_radius_weak_shifts_compat : forall (An : nat -> R) (r : R),
+  Cv_radius_weak An r ->
+  forall N, Cv_radius_weak (Rseq_shifts An N) r.
 Proof.
-intros An r Rho N.
+intros An r Rho N ; unfold Rseq_shifts.
  destruct (Req_dec r 0) as [r_eq | r_neq].
   rewrite r_eq ; exists (Rabs (An N)).
   intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn ; unfold gt_abs_Pser ; destruct n.
-  simpl ; rewrite Rmult_1_r ; right ; reflexivity.
+  simpl ; rewrite Rmult_1_r, plus_0_r ; right ; reflexivity.
   rewrite Rabs_mult, pow_i,
   Rabs_R0, Rmult_0_r ; [apply Rabs_pos | intuition].
  destruct Rho as [M HM].
  exists (M * (/ Rabs r) ^ N)%R.
  intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
  unfold gt_abs_Pser ; simpl.
- rewrite Rabs_mult ; apply Rle_trans with (Rabs (An (n + N)%nat) * Rabs (r ^ n) *
- (Rabs r ^ N) * ((/Rabs r) ^ N))%R.
+ rewrite Rabs_mult ; apply Rle_trans with (Rabs (An (N + n)%nat) * Rabs (r ^ N) *
+ (Rabs r ^ n) * ((/Rabs r) ^ N))%R.
  right ; repeat rewrite Rmult_assoc ; repeat apply Rmult_eq_compat_l.
- rewrite <- Rpow_mult_distr, Rinv_r, pow1, Rmult_1_r ; [reflexivity |
- apply Rabs_no_R0 ; assumption].
+ rewrite RPow_abs, <- Rinv_pow ; [| apply Rgt_not_eq ;
+ apply Rabs_pos_lt ; assumption] ; rewrite RPow_abs ;
+ rewrite (Rmult_comm (Rabs (r ^ n))), <- Rmult_assoc, Rinv_r, Rmult_1_l ;
+ [reflexivity | apply Rabs_no_R0 ; apply pow_nonzero ; assumption].
  apply Rmult_le_compat_r.
  apply pow_le ; left ; apply Rinv_0_lt_compat ; apply Rabs_pos_lt ; assumption.
  rewrite Rmult_assoc, RPow_abs ; apply HM.
- exists (n + N)%nat ; unfold gt_abs_Pser.
+ exists (N + n)%nat ; unfold gt_abs_Pser.
  repeat rewrite Rabs_mult ; apply Rmult_eq_compat_l ;
  rewrite <- Rabs_mult ; apply Rabs_eq_compat.
  symmetry ; apply pow_add.
 Qed.
 
 Lemma Cv_radius_weak_padding_neg_compat : forall (An : nat -> R) (r : R) (N : nat),
-     Cv_radius_weak (fun n => An (n + N)%nat) r -> Cv_radius_weak An r.
+     Cv_radius_weak (Rseq_shifts An N) r -> Cv_radius_weak An r.
 Proof.
-intros An r N Rho.
+unfold Rseq_shifts ; intros An r N Rho.
  destruct Rho as [M HM].
  destruct (Rseq_partial_bound (fun n => (An n) * r ^ n) N) as [M' HM'].
  destruct (Req_dec r 0) as [r_eq | r_neq].
@@ -215,15 +218,16 @@ intros An r N Rho.
   unfold gt_abs_Pser.
   rewrite <- RPow_abs, Rinv_pow, <- Rabs_Rinv, RPow_abs, <- Rabs_mult,
   <- Rinv_pow.
-  assert (Hrew : (n = n - N + N)%nat).
-   intuition.
-   repeat rewrite Rabs_mult ; rewrite Hrew at 1 ; rewrite Rmult_assoc ;
-   apply Rmult_eq_compat_l ; rewrite <- Rabs_mult ; apply Rabs_eq_compat.
-   rewrite Hrew at 1 ; rewrite pow_add, Rmult_assoc, Rinv_r, Rmult_1_r ;
-   [reflexivity | apply pow_nonzero ; assumption].
-   assumption.
-   assumption.
-   apply Rabs_no_R0 ; assumption.
+  assert (Hrew : (n = N + (n - N))%nat) by intuition.
+  repeat rewrite Rabs_mult ; rewrite Hrew at 1 ; rewrite Rmult_assoc ;
+  apply Rmult_eq_compat_l ; rewrite <- Rabs_mult ; apply Rabs_eq_compat.
+  unfold Rdiv ; rewrite (pow_RN_plus _ (n - N) N).
+  replace (n - N + N)%nat with n by intuition.
+  reflexivity.
+  assumption.
+  assumption.
+  assumption.
+  apply Rabs_no_R0 ; assumption.
 Qed.
 
 Lemma Cv_radius_weak_Rabs : forall (An : Rseq) (r : R),
@@ -291,7 +295,7 @@ because it gives more information (the convexity of the radius for example). *)
 
 Lemma finite_cv_radius_is_lub : forall (An : Rseq) (r : R),
   finite_cv_radius An r ->
-  is_lub (fun r' => has_ub (gt_abs_Pser An r')) r.
+  is_lub (Cv_radius_weak An) r.
 Proof.
 intros An r [rho rho_ub] ; split.
 
@@ -318,7 +322,7 @@ enough. *)
 
 Lemma lub_is_finite_cv_radius : (forall (P : Prop), P \/ ~P) ->
   forall (An : Rseq) (r : R),
-  is_lub (fun r' => has_ub (gt_abs_Pser An r')) r ->
+  is_lub (Cv_radius_weak An) r ->
   finite_cv_radius An r.
 Proof.
 intros EM An r [rho_ub rho_l] ; split.

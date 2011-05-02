@@ -96,6 +96,7 @@ Definition Rseq_bound Un M := forall n, Rabs (Un n) <= M.
 Definition Rseq_le Un Vn := forall n, Un n <= Vn n.
 
 Definition Rseq_shift Un n := Un (S n).
+Definition Rseq_shifts Un N n := Un (N + n)%nat.
 
 (** * Convergence of sequences. *)
 
