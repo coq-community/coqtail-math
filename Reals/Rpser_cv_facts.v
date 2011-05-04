@@ -255,10 +255,25 @@ Qed.
 
 (*TODO : prove & move*)
 
-Lemma Rseq_cv_bounded : forall Un l, Rseq_cv Un l ->
-  forall k, 1 < k ->
+Lemma Rseq_cv_bounded : forall Un l, l <> 0 ->
+  Rseq_cv Un l -> forall k, 1 < k ->
   Rseq_eventually (fun un => forall n, (Rabs l) / k < Rabs (un n)) Un.
-Admitted.
+Proof.
+intros Un l l_neq Hl k k_lb.
+pose (eps := (k - 1) / k * Rabs l).
+assert (eps_pos : 0 < eps).
+ unfold eps ; apply Rmult_lt_0_compat ;
+ [unfold Rdiv ; apply Rlt_mult_inv_pos ;
+ [ | apply Rlt_trans with 1] | apply Rabs_pos_lt] ;
+ intuition ; fourier.
+destruct (Hl _ eps_pos) as [N HN] ; exists N ; intros n.
+apply Rle_lt_trans with (Rabs l - eps).
+unfold eps, Rdiv ; right ; field ; apply Rgt_not_eq ;
+ apply Rlt_trans with 1 ; fourier.
+apply R_dist_gt_r ; apply HN ; intuition.
+Qed.
+
+
 
 (* TODO: move *)
 Lemma Rseq_cv_pos_infty_le_compat : forall Un Vn,
@@ -351,7 +366,7 @@ assert (rlam_lb : 1 < Rabs r * lam).
 assert (lam_l'_pos : 0 <= lam / l').
  apply Rle_mult_inv_pos ; [| apply Rlt_trans with 1;
  [| apply middle_is_in_the_middle]] ; fourier.
-destruct (Rseq_cv_bounded _ _ An_frac_ub l') as [N H].
+destruct (Rseq_cv_bounded _ _ lam_neq An_frac_ub l') as [N H].
  apply middle_is_in_the_middle ; assumption. 
 assert (HN : forall n, Rabs (An N) * (lam / l') ^ n <= Rabs (An (N + n)%nat)).
  clear -H lam_pos lam_l'_pos An_neq ; intro n ; induction n.
