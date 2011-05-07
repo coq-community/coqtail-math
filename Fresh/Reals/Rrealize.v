@@ -5,7 +5,7 @@ Require Import ZArith.
 
 Definition pow2 : nat -> positive := fix f n := match n with O => xH |  S n' => xO (f n') end.
 
-Definition Zseq_Cauchy (Un : nat -> Z) : Type := forall neps : nat,
+Print pow2. Definition Zseq_Cauchy (Un : nat -> Z) : Type := forall neps : nat,
   {N : nat & forall p q, (N <= p)%nat -> (N <= q)%nat -> 
     (
       Zneg (pow2 p * pow2 q)  <=

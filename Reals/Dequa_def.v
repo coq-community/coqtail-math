@@ -24,6 +24,7 @@ Definition diff_equa : Set := prod (side_equa) (side_equa).
 
 Fixpoint interp_side_equa_in_R (s : side_equa)
  (rho : list (sigT Cn)) : option (R -> R).
+Proof.
 destruct_eq s.
  exact (Some (fun _ => r)).
  destruct (nth_error rho p) as [[l [f Clf]] |].
