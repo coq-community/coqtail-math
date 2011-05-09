@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-(*
+
 (** Proof of Stirling equivalence of factorial. *)
 
 Require Import Reals.
@@ -154,6 +154,7 @@ eapply Rseq_big_O_eq_compat.
   intros n.
   rewrite <- ln_plus_taylor_sum.
   unfold Tn; apply Rplus_eq_compat_l.
+  unfold Rseq_pps. unfold Rseq_sum. unfold gt_pser. unfold Rseq_mult.
   simpl; destruct n; simpl; field.
   destruct n; intros Hc.
     fourier.
@@ -412,4 +413,3 @@ unfold Rdiv, Rsqr; field; auto with *.
 Qed.
 
 End Stirling.
-*)

@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-(*
+
 Require Import Reals.
 Require Import Rseries_RiemannInt.
 Require Import Rseries_facts.
@@ -143,7 +143,7 @@ Proof.
   2:apply (Rseq_cv_minus_compat (fun _ => 1) (Rseq_shift inv_sn)).
    intro n.
    unfold Rseq_minus.
-   symmetry.
+   unfold Rseq_shift.
    apply sum_inv_snssn.
    
    apply Rseq_constant_cv.
@@ -168,4 +168,3 @@ Proof.
    auto with *.
    apply ser_cv_inv_snssn.
 Qed.
-*)

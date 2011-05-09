@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-(*
+
 Require Import Reals.
 Require Import Fourier.
 Require Import Rsequence_facts.
@@ -133,7 +133,7 @@ intros Un lo [lu Hu] Ho.
 replace lo with (lu - (lu - lo)) by ring.
 apply Rser_cv_minus_compat; try assumption.
 apply Rseq_cv_eq_compat with ((fun n => sum_f_R0 Un (S (2 * n))) - sum_f_R0 (odds Un))%Rseq.
- intro n.
+ intro n. symmetry.
  assert (REW : forall a b c, a - b = c -> a - c = b) by (intros; subst; ring); apply REW.
  rewrite (sum_odd_even_split); trivial.
  
@@ -171,6 +171,7 @@ eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
 Qed.
 
 Lemma antg_shift_neg_compat : Rseq_shift antg_neg == antg.
+Proof.
 intro n.
 unfold Rseq_shift.
 unfold antg.
@@ -539,7 +540,7 @@ eapply Rseq_cv_eq_compat.
   3: apply Rseq_cv_minus_compat.
    3: apply Sum_antg_neg.
    3: apply Rseq_constant_cv.
- apply bisum_anz_antg.
+ symmetry. apply bisum_anz_antg.
  intro; trivial.
 Qed.
 
@@ -1760,7 +1761,7 @@ Qed.
 
 Lemma Sum_bnz : Rseq_cv Bn (2 * sumbntg).
 Proof.
-eapply Rseq_cv_eq_compat; [apply bisum_bnz_bntg | ].
+eapply Rseq_cv_eq_compat; [symmetry; apply bisum_bnz_bntg | ].
 replace (2 * sumbntg) with (sumbntg + ((sumbntg + 1) - 1)) by field.
 apply Rseq_cv_plus_compat; [apply Sum_bntg | ].
 apply Rseq_cv_minus_compat; [ | apply Rseq_constant_cv].
@@ -1863,4 +1864,3 @@ eapply Rser_cv_eq_compat.
  field.
  INR_solve.
 Qed.
-*)

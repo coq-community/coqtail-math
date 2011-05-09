@@ -132,32 +132,36 @@ Proof.
  simpl pred.
  clear ; induction n.
   compute ; field.
+  unfold Rseq_pps, Rseq_sum in *.
   rewrite tech5.
   repeat rewrite Ropp_plus_distr in *.
-Admitted.
-(*
   rewrite <- Rplus_assoc.
   rewrite IHn.
   unfold Rminus ; rewrite tech5.
   repeat rewrite Rplus_assoc ; apply Rplus_eq_compat_l.
   rewrite Rplus_comm ; apply Rplus_eq_compat_r.
-  unfold Rseq_opp ;  simpl pow ;  ring.
+  unfold gt_pser. unfold Rseq_mult. simpl pow. ring.
   apply HN ; intuition.
 
- unfold Pser_abs, Pser.
+ intros M Hconv.
+ unfold Rpser_abs in *.
+(*
  rewrite Rabs_Ropp; rewrite Rabs_R1.
  intros M Hconv.
- pose (fun n => match n with O => 0 | S _ => / INR n end) as An.
+*) pose (fun n => match n with O => 0 | S _ => / INR n end) as An.
  apply Rseq_cv_not_infty with (sum_f_R0 An); split.
   exists M.
   refine (Rser_cv_eq_compat _ An M _ Hconv).
   intros [|n].
-   simpl; rewrite Rabs_R0; ring.
+   simpl. unfold gt_abs_pser. unfold Rseq_abs. unfold gt_pser. 
+   unfold Rseq_mult. simpl. rewrite Rmult_0_l. rewrite Rabs_R0. reflexivity.
    
    unfold Un, An.
-   rewrite Rabs_Ropp.
+   unfold gt_abs_pser. unfold Rseq_abs. unfold gt_pser. 
+   unfold Rseq_mult. rewrite Rabs_mult.
+   rewrite pow_1_abs.
+   rewrite Rabs_Ropp. 
    rewrite Rabs_pos_eq; [ | apply Rlt_le; apply Rinv_0_lt_compat; INR_solve].
-   rewrite pow1.
    ring.
  
  apply Rseq_cv_pos_infty_shift_compat.
@@ -231,13 +235,16 @@ assert (Heq : forall u, -1 < u < 1 -> dg u = df u).
       sum_f_R0 (fun n => An_deriv Un n * u ^ n)).
       unfold An_deriv.
       unfold Rseq_opp; intros n; induction n.
-        simpl; field.
+        simpl; unfold Rseq_shift, Rseq_mult; simpl; field.
         simpl sum_f_R0 at 1; rewrite Ropp_plus_distr.
         rewrite IHn.
         simpl; apply Rplus_eq_compat_l; destruct n.
-          field.
-          field; assert (H := pos_INR (S n)); intros Hc; fourier.
-    eapply Rseq_cv_eq_compat; [apply Hrw|apply Rseq_cv_opp_compat; apply Hser2].
+          simpl. unfold Rseq_shift, Rseq_mult; simpl; field.
+          unfold Rseq_shift. unfold Rseq_mult. unfold Un.
+          field; assert (H := pos_INR (S n)); intros Hc. do 2 rewrite S_INR in Hc.
+          fourier.
+    eapply Rseq_cv_eq_compat; unfold Rseq_pps, Rseq_sum, gt_pser. 
+    erewrite <- Hrw. reflexivity. apply Rseq_cv_opp_compat; apply Hser2.
 edestruct Rint_eq_compat
   with (f := df) (g := dg) (a := 0) (b := x) as [pr2 HI2].
   intros u Hu.
@@ -295,10 +302,13 @@ symmetry.
 eapply Rseq_cv_unique.
 apply weaksum_r_sums; rewrite Rabs_R0; fourier.
 intros eps Heps; exists 0%nat; intros n _.
+unfold Rseq_pps, gt_pser.
 rewrite sum_eq_R0.
 rewrite R_dist_eq; assumption.
 intros m _; unfold Un; destruct m.
+  unfold Rseq_mult.
   field.
+  unfold Rseq_mult.
   rewrite pow_ne_zero; [field|].
     apply not_0_INR; auto.
     auto.
@@ -311,10 +321,10 @@ intros x Hx.
 rewrite <- ln_minus_taylor_sum; [|assumption].
 apply weaksum_r_sums; assumption.
 Qed.
-*)
+
 End ln_minus.
 
-(*
+
 (** * Taylor series of ln (1 + x) *)
 
 Section ln_plus.
@@ -326,8 +336,9 @@ match n with
 end.
 
 Lemma ln_plus_cv_radius : Cv_radius_weak Un 1.
+Proof.
 exists 1; intros m [n Hn]; subst m.
-unfold gt_abs_pser.
+unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
 rewrite pow1; rewrite Rmult_1_r.
 unfold Un; destruct n.
   rewrite Rabs_R0; apply Rle_0_1.
@@ -358,6 +369,7 @@ eapply Rseq_cv_unique.
   apply weaksum_r_sums; assumption.
 eapply Rseq_cv_eq_compat; [|apply weaksum_r_sums; assumption].
 intros n; apply sum_eq; intros i Hi; unfold Un.
+unfold gt_pser. unfold Rseq_mult.
 destruct i; [field|].
 replace (- x) with (- 1 * x) by ring.
 rewrite Rpow_mult_distr.
@@ -374,4 +386,3 @@ apply weaksum_r_sums; assumption.
 Qed.
 
 End ln_plus.
-*)

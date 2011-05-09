@@ -18,7 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
-(*
+
 Require Import Max.
 Require Import Reals.
 Require Import Rintegral.
@@ -786,8 +786,8 @@ eapply Rseq_equiv_cv_compat.
 apply Rseq_cv_eq_compat with (Rsqr l / (2 * PI)).
 intro. unfold Rseq_mult, Rseq_plus, Rseq_constant, Rseq_div, Rseq_inv.
 field. split. 
-intro. generalize (exp_pos 1) ; intros ; fourier.
 apply PI_neq0.
+intro. generalize (exp_pos 1) ; intros ; fourier.
 intros eps Heps. exists O. intros n Hn.
 unfold R_dist. unfold Rseq_constant, Rseq_div, Rseq_inv, Rseq_mult.
 unfold Rdiv, Rsqr. rewrite Rminus_diag_eq.
@@ -796,4 +796,3 @@ ring.
 Qed.
 
 End Wallis.
-*)
