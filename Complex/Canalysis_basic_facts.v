@@ -19,10 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Cfunctions.
-Require Import Cpow.
+Require Import Cprop_base Ctacfield.
+Require Import Cfunctions Cpow.
 
-Require Import Cpser_def.
+Require Import Csequence_def.
+Require Import Cpser_def Cpser_base_facts.
 
 Require Import Canalysis_def.
 Require Import Canalysis_deriv.
@@ -50,10 +51,10 @@ Proof.
  reflexivity.
 Qed.
 
-Lemma derivable_pt_lim_gt_Pser : forall An z n,
-  derivable_pt_lim (fun x : C => gt_Pser An x (S n)) z (gt_Pser (An_deriv An) z n).
+Lemma derivable_pt_lim_gt_pser : forall An z n,
+  derivable_pt_lim (fun x : C => gt_pser An x (S n)) z (gt_pser (An_deriv An) z n).
 Proof.
-intros An z n ; unfold gt_Pser, An_deriv ; induction n.
+intros An z n ; unfold An_deriv, gt_pser, Cseq_mult, Cseq_shift ; induction n.
  simpl ; intros eps eps_pos ; exists  (mkposreal 1 Rlt_0_1) ;
    intros ; apply Rle_lt_trans with (Cnorm 0) ; [right ;
    apply Cnorm_eq_compat ; field | rewrite Cnorm_C0] ; assumption.
@@ -75,22 +76,22 @@ intros An Bn An_deriv z n ; induction n.
 Qed.
 
 Lemma derivable_pt_lim_partial_sum : forall (An : nat -> C) (z : C) (n : nat),
-     derivable_pt_lim (fun z => sum_f_C0 (gt_Pser An z) n) z (match n with
+     derivable_pt_lim (fun z => sum_f_C0 (gt_pser An z) n) z (match n with
      | O => 0
-     | S _ => sum_f_C0 (gt_Pser (An_deriv An) z) (pred n)
+     | S _ => sum_f_C0 (gt_pser (An_deriv An) z) (pred n)
          end).
 Proof.
  intros An z n ; induction n.
-  unfold gt_Pser ; simpl ; apply derivable_pt_lim_const.
+  unfold gt_pser, Cseq_mult ; simpl ; apply derivable_pt_lim_const.
   destruct n.
    simpl ; rewrite <- Cadd_0_l ; apply derivable_pt_lim_add ; [apply IHn |].
-   unfold gt_Pser, An_deriv ; simpl ;  rewrite Cmult_1_r, Cmult_1_l.
+   unfold gt_pser, An_deriv, Cseq_mult, Cseq_shift ; simpl ;  rewrite Cmult_1_r, Cmult_1_l.
    intros eps eps_pos ; exists  (mkposreal 1 Rlt_0_1) ;
    intros ; apply Rle_lt_trans with (Cnorm 0) ; [right ;
    apply Cnorm_eq_compat ; field | rewrite Cnorm_C0] ; assumption.
    simpl ; apply derivable_pt_lim_add.
    apply IHn.
-   apply derivable_pt_lim_gt_Pser.
+   apply derivable_pt_lim_gt_pser.
 Qed.
 
 (****************************)

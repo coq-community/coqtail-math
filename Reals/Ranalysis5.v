@@ -101,13 +101,13 @@ intros f g lb ub lb_le_ub f_incr f_eq_g f_cont_interv b b_encad.
      assert (Temp' : b <> f lb).
       apply Rgt_not_eq ; exact (proj1 b_encad2).
      apply Temp' ; symmetry ; assumption.
-    apply Rle_neq_lt ; split ; unfold interval in * ; intuition.
+    apply Rle_neq_lt ; unfold interval in * ; intuition.
     assert (Temp : x <> ub).
     intro Hfalse ; rewrite Hfalse in f_x_b.
     assert (Temp' : b <> f ub).
      apply Rlt_not_eq ; exact (proj2 b_encad2).
     apply Temp' ; symmetry ; assumption.
-    apply Rle_neq_lt ; split ; unfold interval in * ; intuition.
+    apply Rle_neq_lt ; unfold interval in * ; intuition.
    pose (x1 := Rmax (x - eps) lb).
    pose (x2 := Rmin (x + eps) ub).
    assert (x1_encad : interval lb ub x1).
@@ -191,26 +191,22 @@ intros f g lb ub lb_le_ub f_incr f_eq_g f_cont_interv b b_encad.
       rewrite Rabs_minus_sym ; apply RRle_abs.
       assumption.
       elim (Rlt_irrefl _ Hfin).
-           assert (x'_lb : x - eps < x').
-    apply Rle_neq_lt.
-      split ; unfold interval in *. intuition. apply Rlt_not_eq.
-      apply Rle_lt_trans with (r2:=x1) ; [ apply RmaxLess1|].
-      apply Rle_neq_lt ; split ; intuition.
-      assert (x2_neq_x' : x2 <> x').
-      intro Hfalse ; assert (Hf : Rabs (y - f x) < y - f x).
-      rewrite Hfalse, f_x'_y in y_cond.
+    assert (x'_lb : x - eps < x').
+     apply Rle_lt_trans with x1 ; [apply Rmax_l |].
+     apply Rle_neq_lt ; [apply x'_encad | assumption].
+    assert (x2_neq_x' : x' <> x2).
+     intro Hfalse ; assert (Hf : Rabs (y - f x) < y - f x).
+      rewrite <- Hfalse, f_x'_y in y_cond.
       apply Rlt_le_trans with (r2:=Rmin (f x - f x1) (y - f x)). fourier.
-       apply Rmin_r.
+      apply Rmin_r.
       assert(Hfin : y - f x < y - f x).
        apply Rle_lt_trans with (r2:=Rabs (y - f x)). apply RRle_abs. fourier.
       elim (Rlt_irrefl _ Hfin).
      assert (x'_ub : x' < x + eps).
-   apply Rle_neq_lt.
-      split ; unfold interval in *. intuition. apply Rlt_not_eq.
-      apply Rlt_le_trans with (r2:=x2).
-      apply Rle_neq_lt ; split ; intuition.
-      apply Rmin_l.
-    apply Rabs_def1 ; fourier.
+     apply Rlt_le_trans with (r2:=x2).
+     apply Rle_neq_lt ; [apply x'_encad | apply x2_neq_x'].
+     apply Rmin_l.
+     apply Rabs_def1 ; clear -x'_lb x'_ub ; fourier.
     assumption.
     split ; [apply Rle_trans with x1 | apply Rle_trans with x2] ; unfold interval in * ;
     intuition.

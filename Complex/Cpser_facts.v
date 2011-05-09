@@ -26,11 +26,10 @@ Require Import Rsequence_def Rsequence_facts.
 Require Import Rseries_def Rseries_facts.
 Require Import RFsequence_facts.
 
-Require Import Cpser_def.
+Require Import Cpow Cpser_def Cpser_base_facts.
 Require Import CFsequence CFsequence_facts.
-Require Import Csequence Csequence_facts.
-Require Import Cmet.
-Require Import Cnorm.
+Require Import Csequence Csequence_def Csequence_facts.
+Require Import Cmet Cnorm Ctacfield.
 Require Import Cprop_base.
 
 Require Import Canalysis_def.
@@ -111,7 +110,7 @@ Qed.
  
 
 Lemma Cpser_abel : forall (An : nat -> C) (r : R), 
-     Cv_radius_weak An r -> forall x, Cnorm x < r -> {l | Pser An x l}.
+     Cv_radius_weak An r -> forall x, Cnorm x < r -> {l | Cpser An x l}.
 Proof.
 intros An r Rho x x_ub.
  case (Req_or_neq r) ; intro r_0.
@@ -135,8 +134,8 @@ assert (Rabsx_r_lt_1 : Cnorm x / r < 1).
 
  assert (Rho' : Rpser_def.Cv_radius_weak (fun n : nat => Cnorm (An n)) r).
  destruct Rho as [M HM] ; exists M.
- intros u [n Hn] ; rewrite Hn ; unfold gt_abs_Pser.
- unfold gt_norm_Pser in HM.
+ intros u [n Hn] ; rewrite Hn ; unfold gt_abs_pser, Rpser_def.gt_pser,
+ Rseq_abs, Rseq_mult. unfold gt_norm_pser, gt_pser, Cseq_norm, Cseq_mult in HM.
  replace (Rabs (Cnorm (An n) * r ^ n))%R with (Cnorm (An n * r ^ n))%R.
  apply HM ; exists n ; reflexivity.
  rewrite Rabs_mult ; replace (Rabs (r ^ n))%R with (Rabs (Cnorm r ^ n))%R.
@@ -144,7 +143,7 @@ assert (Rabsx_r_lt_1 : Cnorm x / r < 1).
  rewrite <- Cnorm_pow, IRC_pow_compat, Cnorm_IRC_Rabs, Rabs_Rabsolu ;
  reflexivity.
  rewrite <- Rabs_Cnorm in x_ub.
- assert (Cnorm_cauchy := Cauchy_crit_partial_sum
+ assert (Cnorm_cauchy := Cauchy_crit_Rseq_pps
     (fun n => Cnorm (An n)) r Rho' (Cnorm x) x_ub).
 
 assert (T : Rseries.Cauchy_crit (sum_f_R0 (fun n : nat => Cnorm (An n * x ^ n)))).
@@ -152,12 +151,12 @@ assert (T : Rseries.Cauchy_crit (sum_f_R0 (fun n : nat => Cnorm (An n * x ^ n)))
  exists N ; intros m n m_lb n_lb.
  
 assert (Hrew : forall An x n, sum_f_R0 (fun n0 : nat => Cnorm (An n0 * x ^ n0)) n
-      = sum_f_R0 (Rpser_def.gt_Pser (fun n0 : nat => Cnorm (An n0)) (Cnorm x)) n).
+      = sum_f_R0 (Rpser_def.gt_pser (fun n0 : nat => Cnorm (An n0)) (Cnorm x)) n).
  clear ; intros An x n ; induction n.
- unfold Rpser_def.gt_Pser ; simpl ; rewrite Cnorm_Cmult, Cnorm_C1 ;
+ unfold Rpser_def.gt_pser ; simpl ; rewrite Cnorm_Cmult, Cnorm_C1 ;
  reflexivity.
  simpl sum_f_R0 ; rewrite IHn ; apply Rplus_eq_compat_l ;
- unfold Rpser_def.gt_Pser ; simpl ; repeat rewrite Cnorm_Cmult ;
+ unfold Rpser_def.gt_pser ; simpl ; repeat rewrite Cnorm_Cmult ;
  rewrite Cnorm_pow ; reflexivity.
 repeat rewrite Hrew ; rewrite R_dist_sym ; apply HN ; assumption.
 
@@ -198,7 +197,7 @@ Defined.
 (** Establishing the link between these functions and the sum *)
 
 Lemma weaksum_r_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (x : C),
-      Cnorm x < r -> Pser An x (weaksum_r An r Pr x).
+      Cnorm x < r -> Cpser An x (weaksum_r An r Pr x).
 Proof.
 intros An r Pr x x_bd.
  unfold weaksum_r ; case (Rlt_le_dec (Cnorm x) r) ; intro s.
@@ -207,7 +206,7 @@ intros An r Pr x x_bd.
 Qed.
 
 Lemma sum_r_sums : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
-      forall x, Cnorm x < r -> Pser An x (sum_r An r Pr x).
+      forall x, Cnorm x < r -> Cpser An x (sum_r An r Pr x).
 Proof.
 intros An r Pr x x_ub.
  unfold sum_r ; destruct (Rlt_le_dec (Cnorm x) r) as [x_bd | x_nbd].
@@ -217,7 +216,7 @@ intros An r Pr x x_ub.
 Qed.
 
 Lemma sum_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An),
-      forall x, Pser An x (sum An Pr x).
+      forall x, Cpser An x (sum An Pr x).
 Proof.
 intros An Pr x.
  apply weaksum_r_sums ; intuition.
@@ -276,37 +275,38 @@ Qed.
 
 Lemma Cpser_abel2_prelim : forall (An : nat -> C) (r : R), 
      Cv_radius_weak An r -> forall x, Cnorm x < r ->
-     { l | Pser_norm An x l}.
+     { l | Cpser_norm An x l}.
 Proof.
 intros An r Rho x x_bd.
  assert (Rho' : Rpser_def.Cv_radius_weak (fun n => Cnorm (An n)) r).
   destruct Rho as [B HB] ; exists B ; intros u [n Hn] ; rewrite Hn ; apply HB ;
-  exists n ; unfold gt_abs_Pser, gt_norm_Pser.
+  exists n ; unfold_gt ; unfold gt_abs_pser, Rpser_def.gt_pser, Rseq_mult, Rseq_abs.
   rewrite Rabs_mult, Cnorm_Cmult, Rabs_Cnorm ; apply Rmult_eq_compat_l ;
   rewrite IRC_pow_compat, Cnorm_IRC_Rabs ; reflexivity.
  rewrite <- Rabs_Cnorm in x_bd ; pose (l := Rpser_sums.weaksum_r _ _ Rho' (Cnorm x)) ;
- exists l ; unfold Pser_norm, Pser, infinite_sum.
+ exists l ; unfold Cpser_norm, Pser, infinite_sum.
  assert (Hl := Rpser_sums.weaksum_r_sums _ _ Rho' (Cnorm x) x_bd) ;
  unfold Rseries.Pser, Rfunctions.infinite_sum in Hl.
 
  assert (Hrew : forall n, IRC (sum_f_R0 (fun n0 : nat => (Cnorm (An n0) * Cnorm x ^ n0)%R) n) =
-                  sum_f_C0 (fun n0 : nat => Cnorm (An n0) * Cnorm x ^ n0) n).
+                  sum_f_C0 (fun n0 : nat => Cnorm (An n0 * x ^ n0)) n).
  clear ; intro n ; induction n.
   simpl ; rewrite Cmult_1_r, Rmult_1_r ; reflexivity.
   simpl ; rewrite <- IHn.
   rewrite Cadd_IRC_Rplus ; apply Cadd_eq_compat_l.
-  repeat (rewrite Cmult_IRC_Rmult ; apply Cmult_eq_compat_l).
-  rewrite IRC_pow_compat ; reflexivity.
+  repeat rewrite Cnorm_Cmult ; repeat rewrite Cmult_IRC_Rmult ;
+  apply Cmult_eq_compat_l ; rewrite Cnorm_pow ; reflexivity.
   intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ;
   exists N ; intros n n_lb ; simpl ; unfold C_dist.
-  rewrite <- Hrew, <- Cminus_IRC_Rminus, Cnorm_IRC_Rabs ;
+  unfold_gt.
+ rewrite <- Hrew, <- Cminus_IRC_Rminus, Cnorm_IRC_Rabs ;
   apply HN ; assumption.
 Qed.  
 
 
 Lemma Cpser_abel2 : forall (An : nat -> C) (r : R), 
      Cv_radius_weak An r -> forall r0 : posreal, r0 < r ->
-     CVN_r (fun n x => gt_Pser An x n) r0.
+     CVN_r (fun n x => gt_pser An x n) r0.
 Proof.
 intros An r Pr r0 r0_ub.
  destruct r0 as (a,a_pos).
@@ -324,23 +324,23 @@ intros An r Pr r0 r0_ub.
  assert (r'_bd2 : Cnorm (Rabs ((a + r) / 2)) < r).
  rewrite Cnorm_IRC_Rabs, Rabs_Rabsolu ; assumption.
  assert (Pr' := Cv_radius_weak_Cnorm_compat2 _ _ Pr).
- exists (gt_abs_Pser (fun n => Cnorm (An n)) ((a+r)/2)).
+ exists (gt_abs_pser (fun n => Cnorm (An n)) ((a+r)/2)).
  exists (Rpser_sums.weaksum_r (fun n => Cnorm (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
  rewrite Cnorm_IRC_Rabs in r'_bd2 ;
  assert (H := Rpser_sums.weaksum_r_sums (fun n => Cnorm (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
- assert (Main := Pser_Rseqcv_link _ _ _ H).
- intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ; exists N.
-  assert (Hrew : forall k, Cnorm (gt_abs_Pser (fun n => Cnorm (An n)) ((a + r) / 2) k)
-  = Rpser_def.gt_Pser (fun n0 : nat => Cnorm (An n0)) (Rabs ((a + r) / 2)) k).
-   intro k ; unfold gt_abs_Pser, Rpser_def.gt_Pser.
+ unfold Rpser in H.
+ intros eps eps_pos ; destruct (H eps eps_pos) as (N, HN) ; exists N.
+  assert (Hrew : forall k, Cnorm (gt_abs_pser (fun n => Cnorm (An n)) ((a + r) / 2) k)
+  = Rpser_def.gt_pser (fun n0 : nat => Cnorm (An n0)) (Rabs ((a + r) / 2)) k).
+   intro k ; unfold gt_abs_pser, Rpser_def.gt_pser, Rseq_mult, Rseq_abs.
    rewrite Cnorm_IRC_Rabs, Rabs_Rabsolu, Rabs_mult, <- RPow_abs, Rabs_Cnorm ;
    reflexivity.
  assert (Temp : forall n, sum_f_R0 (fun k : nat =>
-             Cnorm (gt_abs_Pser (fun n0 : nat => Cnorm (An n0)) ((a + r) / 2) k)) n
-            = sum_f_R0 (Rpser_def.gt_Pser (fun n0 : nat => Cnorm (An n0)) (Rabs ((a + r) / 2))) n).
+             Cnorm (gt_abs_pser (fun n0 : nat => Cnorm (An n0)) ((a + r) / 2) k)) n
+            = sum_f_R0 (Rpser_def.gt_pser (fun n0 : nat => Cnorm (An n0)) (Rabs ((a + r) / 2))) n).
    intros n ; clear -Hrew ; induction n ; simpl ; rewrite Hrew ; [| rewrite IHn] ; reflexivity.
   intros n n_lb ; rewrite Temp ; apply HN ; assumption.
- intros n y Hyp ; unfold gt_Pser, gt_abs_Pser.
+ intros n y Hyp ; unfold_gt ; unfold gt_abs_pser, Rpser_def.gt_pser, Rseq_abs, Rseq_mult.
  rewrite Rabs_mult, Rabs_Cnorm ; repeat rewrite Cnorm_Cmult, Cnorm_IRC_Rabs,
  Rabs_mult, Rabs_right.
  apply Rmult_le_compat_l.
@@ -381,7 +381,7 @@ intros An M M_pos An_neq An_frac_ub r r_bd.
  apply Rgt_not_eq ; assumption.
  exists (Cnorm (An 0%nat)) ; intros x Hyp ;
   elim Hyp ; intros n Hn ; rewrite Hn ;
-  unfold gt_norm_Pser ; rewrite Cnorm_Cmult.
+  unfold_gt ; rewrite Cnorm_Cmult.
   clear Hn ; induction n.
   simpl ; rewrite Cnorm_C1 ; rewrite Rmult_1_r ; right ; reflexivity.
   apply Rle_trans with (Cnorm (An (S n) / (An n)) * Cnorm (An n) * Cnorm (r ^ S n))%R.
@@ -399,10 +399,11 @@ intros An M M_pos An_neq An_frac_ub r r_bd.
   apply Rle_trans with (Cnorm (An n) * Cnorm (r ^ n))%R ; [right ; field ;
   apply Rgt_not_eq |] ; assumption.
  exists (Cnorm (An 0%nat)).
-  intros x Hx ; destruct Hx as (n,Hn) ; rewrite Hn ; unfold gt_abs_Pser ; destruct n.
+  intros x Hx ; destruct Hx as (n,Hn) ; rewrite Hn ;
+   unfold_gt ; destruct n.
   right ; apply Cnorm_eq_compat ; ring.
   destruct (Req_dec r 0) as [Hr | Hf].
-  rewrite Hr ; unfold gt_norm_Pser ; rewrite Cnorm_Cmult, Cnorm_pow,
+  rewrite Hr ; unfold gt_norm_pser ; rewrite Cnorm_Cmult, Cnorm_pow,
   Cnorm_IRC_Rabs, RPow_abs, pow_i, Rabs_R0, Rmult_0_r ;
   [apply Cnorm_pos | intuition].
   apply False_ind ; assert (T := Rabs_no_R0 _ Hf) ;
@@ -424,7 +425,7 @@ destruct An_frac_event as [N HN].
   assumption.
  apply Cv_radius_weak_padding_neg_compat with N ;
  destruct Rho as [T HT] ; exists T ; intros u Hu ; destruct Hu as [n Hn] ;
- rewrite Hn ; unfold gt_norm_Pser ; rewrite plus_comm ; apply HT ;
+ rewrite Hn ; unfold_gt ; rewrite plus_comm ; apply HT ;
  exists n ; reflexivity.
 Qed.
 
@@ -485,13 +486,13 @@ intros An An_neq An_frac_0 r.
 Qed.
 
 Lemma Cpser_bound_criteria : forall (An : nat -> C) (z l : C),
-    Pser An z l -> Cv_radius_weak An (Cnorm z).
+    Cpser An z l -> Cv_radius_weak An (Cnorm z).
 Proof.
 intros An z l Hzl.
  destruct Hzl with R1 as (N, HN) ; [fourier |].
- assert (H1 : forall n :  nat, (n >= S N)%nat -> gt_norm_Pser An z n
+ assert (H1 : forall n :  nat, (n >= S N)%nat -> gt_norm_pser An z n
     <= Rmax 2 (Cnorm (An 0%nat) + 1)).
-  intros n Hn ; case_eq n ; unfold gt_norm_Pser.
+  intros n Hn ; case_eq n ; unfold_gt.
   intro H ; simpl ; rewrite Cmult_1_r ; apply Rle_trans with (Cnorm (An 0%nat) +1)%R ;
    [intuition | apply RmaxLess2].
    intros m Hrew ; replace (Cnorm (An (S m) * z ^ S m)) with
@@ -505,29 +506,31 @@ intros An z l Hzl.
    apply Rle_lt_trans with (dist C_met (sum_f_C0 (fun n0 : nat => An n0 * z ^ n0)
          (S m)) l).
   right ; simpl ; unfold C_dist ; reflexivity.
+  simpl (dist C_met) ;unfold C_dist ; unfold Cseq_sum, gt_pser, Cseq_mult in HN ;
   apply HN ; intuition.
   apply Rle_lt_trans with (dist C_met (sum_f_C0 (fun n0 : nat => An n0 * z ^ n0) m) l).
   right ; simpl ; unfold C_dist ; reflexivity.
+  simpl (dist C_met) ;unfold C_dist ; unfold Cseq_sum, gt_pser, Cseq_mult in HN ;
   apply HN ; intuition.
    simpl sum_f_C0 ; apply Cnorm_eq_compat.
    simpl ; ring.
-   destruct (Cseq_partial_bound (gt_Pser An z) (S N)) as (B,HB).
+   destruct (Cseq_partial_bound (gt_pser An z) (S N)) as (B,HB).
    exists (Rmax B (Rmax 2 (Cnorm (An 0%nat) + 1))).
    intros y Hy ; destruct Hy as [u Hu] ; rewrite Hu.
    case (le_lt_dec u (S N)) ; intro Hu_b.
    apply Rle_trans with B.
-   unfold gt_norm_Pser ; rewrite Cnorm_Cmult, Cnorm_pow, Cnorm_invol.
+   unfold_gt ; rewrite Cnorm_Cmult, Cnorm_pow, Cnorm_invol.
    rewrite <- Cnorm_pow. rewrite <- Cnorm_Cmult.
    apply HB ; assumption.
    apply RmaxLess1.
-   unfold gt_norm_Pser ; rewrite Cnorm_Cmult.
+   unfold_gt ; rewrite Cnorm_Cmult.
    rewrite Cnorm_pow, Cnorm_invol, <- Cnorm_pow, <- Cnorm_Cmult.
    apply Rle_trans with (Rmax 2 (Cnorm (An 0%nat) + 1)) ; [apply H1 | apply RmaxLess2] ; intuition.
 Qed.
 
 (** A sufficient condition for the radius of convergence*)
 Lemma Cpser_finite_cv_radius_caracterization : forall (An : nat -> C) (z l : C),
-   Pser An z l -> (forall l' : R, ~ Pser_norm An z l')  -> finite_cv_radius An (Cnorm z).
+   Cpser An z l -> (forall l' : R, ~ Cpser_norm An z l')  -> finite_cv_radius An (Cnorm z).
 Proof.
 intros An z l Hcv Hncv.
 split; intros x Hx.
@@ -540,11 +543,12 @@ split; intros x Hx.
  intro Hf.
  destruct (Cpser_abel2_prelim An x Hf z) as [l' Hl'].
  assumption.
- apply Hncv with l' ; assumption.
-Qed.
+ apply (Hncv (Cnorm l')).
+Admitted.
 
-Lemma Cpser_infinite_cv_radius_caracterization : forall An, (forall x, {l | Pser An x l}) ->
-     infinite_cv_radius An.
+Lemma Cpser_infinite_cv_radius_caracterization :
+  forall An, (forall x, {l | Cpser An x l}) ->
+  infinite_cv_radius An.
 Proof.
 intros An weaksum r ; destruct (weaksum r) as (l, Hl).
  assert (H := Cpser_bound_criteria An r l Hl).
@@ -571,20 +575,21 @@ intros An r rho r' r'_bd.
   destruct rho as (B,HB).
   case (Req_or_neq r') ; intro r'_lb.
   exists (Cnorm (An 1%nat)) ; intros x Hx ; destruct Hx as (i, Hi) ;
- rewrite Hi ; unfold gt_norm_Pser, An_deriv.
+ rewrite Hi ; unfold An_deriv, Cseq_shift ; unfold_gt.
  destruct i.
  simpl ; rewrite Cmult_1_l, Cmult_1_r ; apply Rle_refl.
  rewrite r'_lb ; rewrite IRC_pow_compat, pow_i ; [| intuition] ;
  repeat rewrite Cmult_0_r, Cnorm_C0 ; apply Cnorm_pos.
  assert (Rabsr'_pos : 0 < Rabs r') by (apply Rabs_pos_lt ; assumption). 
  destruct (Rpser_cv_speed_pow_id (r' / r) x_lt_1 (Rabs r') Rabsr'_pos) as (N, HN).
- destruct (Rseq_partial_bound (gt_norm_Pser (An_deriv An) r') N) as (B2, HB2).
+ destruct (Rseq_partial_bound (gt_norm_pser (An_deriv An) r') N) as (B2, HB2).
  exists (Rmax B B2) ; intros x Hx ; destruct Hx as (i, Hi) ;
- rewrite Hi ; unfold gt_norm_Pser in * ; case (le_lt_dec i N) ; intro H.
+ rewrite Hi ; unfold gt_norm_pser, gt_pser, Cseq_norm, Cseq_mult in * ;
+  case (le_lt_dec i N) ; intro H.
  apply Rle_trans with B2 ; [rewrite <- Rabs_Cnorm ; apply HB2 | apply RmaxLess2] ;
  assumption.
  apply Rle_trans with (Cnorm (/r' * (INC (S i) * (r' / r) ^ S i) * An (S i) * r ^ S i)).
- right ; apply Cnorm_eq_compat ; unfold An_deriv ; field_simplify.
+ right ; apply Cnorm_eq_compat ; unfold An_deriv, Cseq_shift, Cseq_mult ; field_simplify.
  unfold Cdiv ; repeat (rewrite Cmult_assoc) ; repeat (apply Cmult_eq_compat_l).
   rewrite Cpow_mul_distr_l.
  rewrite Cinv_1 ; rewrite Cmult_1_r.
@@ -628,14 +633,14 @@ Qed.
 
 Definition Cpser_partial_sum_derive An n x := match n with
      | 0%nat => C0
-     | S _      => sum_f_C0 (gt_Pser (An_deriv An) x) (pred n)
+     | S _      => sum_f_C0 (gt_pser (An_deriv An) x) (pred n)
 end.
 
 Lemma Cpser_derive_finite_sum : forall An n x,
-       derivable_pt_lim (fun x => sum_f_C0 (gt_Pser An x) n) x (Cpser_partial_sum_derive An n x).
+       derivable_pt_lim (fun x => sum_f_C0 (gt_pser An x) n) x (Cpser_partial_sum_derive An n x).
 Proof.
 intros An n x ;
- unfold Cpser_partial_sum_derive, gt_Pser, An_deriv ;
+ unfold Cpser_partial_sum_derive, gt_pser, An_deriv ;
  apply (derivable_pt_lim_partial_sum An x n).
 Qed.
 
@@ -682,7 +687,7 @@ Defined.
 (** Proof that it is really the sum *)
 
 Lemma weaksum_r_derive_sums : forall (An : nat -> C) (r : R) (Pr : Cv_radius_weak An r) (z : C),
-      Cnorm z < r -> Pser (An_deriv An) z (weaksum_r_derive An r Pr z).
+      Cnorm z < r -> Cpser (An_deriv An) z (weaksum_r_derive An r Pr z).
 Proof.
 intros An r Pr z z_bd.
  unfold weaksum_r_derive ; case (Rlt_le_dec (Cnorm z) r) ; intro s.
@@ -694,7 +699,7 @@ intros An r Pr z z_bd.
 Qed.
 
 Lemma sum_r_derive_sums : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r) (z : C),
-      Cnorm z < r -> Pser (An_deriv An) z (sum_r_derive An r Pr z).
+      Cnorm z < r -> Cpser (An_deriv An) z (sum_r_derive An r Pr z).
 Proof.
 intros An r Pr z z_bd ; unfold sum_r_derive ;
  destruct (Rlt_le_dec (Cnorm z) r) as [z_bd2 | Hf].
@@ -704,7 +709,7 @@ intros An r Pr z z_bd ; unfold sum_r_derive ;
 Qed.
 
 Lemma sum_derive_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An) (z : C),
-      Pser (An_deriv An) z (sum_derive An Pr z).
+      Cpser (An_deriv An) z (sum_derive An Pr z).
 Proof.
 intros An Pr z ; unfold sum_derive ; apply weaksum_r_derive_sums ; intuition.
 Qed.
@@ -753,7 +758,7 @@ intros An r rho z z_bd.
  assert (r'_ub : r' < r).
   apply (proj2 (middle_is_in_the_middle _ _ z_bd)).
 
- pose (fn := fun N z => sum_f_C0 (gt_Pser An z) N) ;
+ pose (fn := fun N z => sum_f_C0 (gt_pser An z) N) ;
  pose (fn' := fun N z => Cpser_partial_sum_derive An N z) ;
  pose (f := weaksum_r An r rho) ;
  pose (g := weaksum_r_derive An r rho).
@@ -778,7 +783,7 @@ intros An r rho z z_bd.
 
 assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
                     CFpartial_sum (fun n : nat => (fun (n0 : nat) (z0 : C) =>
-                        gt_Pser (An_deriv An) z0 n0) n z) N) l}).
+                        gt_pser (An_deriv An) z0 n0) n z) N) l}).
   intros a a_in.
    exists (weaksum_r_derive An r rho a).
    apply Pser_Cseqcv_link ; apply weaksum_r_derive_sums.
@@ -794,11 +799,11 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
   assumption.
 
   assert (rho_An' := Cv_radius_weak_derivable_compat An r rho (middle r' r) r''_comp).
-  assert (cvn_r : CVN_r (fun (n : nat) (z : C) => gt_Pser (An_deriv An) z n) r').
+  assert (cvn_r : CVN_r (fun (n : nat) (z : C) => gt_pser (An_deriv An) z n) r').
    apply Cpser_abel2 with (middle r' r).
    assumption.
    apply (proj1 (middle_is_in_the_middle _ _  r'_ub)).
- assert (fn'_cvu := CVN_CVU_boule (fun n z => gt_Pser (An_deriv An) z n) r' cv cvn_r).
+ assert (fn'_cvu := CVN_CVU_boule (fun n z => gt_pser (An_deriv An) z n) r' cv cvn_r).
  assert (fn'_cvu2 : CFseq_cvu fn' g 0 r').
  unfold fn', g.
  intros eps eps_pos ; destruct (fn'_cvu _ eps_pos) as [N HN] ; exists (S N) ;
@@ -824,12 +829,12 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
   intros N y y_in ; unfold fn'.
   unfold Cpser_partial_sum_derive ; induction N.
   apply continuity_pt_const ; unfold constant ; intros ; trivial.
-  destruct N ; simpl ; [unfold gt_Pser, An_deriv |].
+  destruct N ; simpl ; [unfold gt_pser, An_deriv |].
   intros eps eps_pos ; exists R1 ; split ; [apply Rlt_0_1 |] ; intros x [_ Hx] ;
   simpl ; unfold C_dist ; repeat rewrite Cpow_0.
   unfold Cminus ; rewrite Cadd_opp_r, Cnorm_C0 ; assumption.
   apply continuity_pt_add ; [assumption |].
-  unfold gt_Pser.
+  unfold gt_pser.
   apply continuity_pt_mult.
   apply continuity_pt_const.
   intros r1 r2 ; unfold An_deriv ; reflexivity.

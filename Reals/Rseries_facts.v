@@ -236,8 +236,8 @@ Qed.
 
 Lemma Rser_cv_eq_compat : forall Un Vn l, Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
 Proof.
-intros Un Vn l H n.
-apply Rseq_cv_eq_compat with (sum_f_R0 Un); [apply Rsum_eq_compat | ]; assumption.
+intros Un Vn l H n ; unfold Rser_cv ; rewrite <- Rseq_cv_eq_compat ;
+ [| eapply Rsum_eq_compat] ; eassumption.
 Qed.
 
 (** * Compatibility between convergence and common operations *)
@@ -1090,7 +1090,7 @@ assert (EC : forall (a:Rseq) (b x:R), Rseq_cv (a - b)%Rseq (x - b) -> Rseq_cv a 
  eapply EC with (Un O).
  apply Rseq_cv_shift_compat.
  apply Rseq_cv_eq_compat with (sum_f_R0 (Rseq_shift Un)).
- apply Rsum_shift.
+ symmetry ; apply Rsum_shift.
  apply H.
 Qed.
 
@@ -1390,8 +1390,7 @@ intro n; split.
   induction n.
    simpl; unfold Rseq_constant; field.
    
-   rewrite tech5; rewrite <- IHn.
-   repeat rewrite plus_1_S.
+   rewrite tech5, IHn.
    unfold Rseq_constant.
    field; INR_solve.
  

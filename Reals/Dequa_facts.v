@@ -11,6 +11,7 @@ Require Import Ass_handling.
 Local Open Scope R_scope.
 
 Fixpoint max_y_se (s : side_equa) : nat := match s with
+  | scal _ s   => max_y_se s
   | y _ p      => p
   | opp s      => max_y_se s
   | plus s1 s2 => max (max_y_se s1) (max_y_se s2)
@@ -52,6 +53,13 @@ Lemma interp_side_equa_in_R2_R : forall (s : side_equa)
 Proof.
 intro s ; induction s ; intros l n n_lb x ; simpl in *.
 
+ reflexivity.
+
+ destruct_eq (interp_side_equa_in_R2 s l) ;
+ destruct_eq (interp_side_equa_in_R s (map (fun cinf : Cinfty =>
+ existT Cn n (Cinfty_to_Cn cinf n)) l)) ; assert (Hrew := IHs l _ n_lb x) ;
+ symmetry in Heqb0, Heqb ; rewrite Heqb0, Heqb in Hrew ; inversion Hrew.
+ unfold mult_fct ; simpl ; f_equal ; apply Rmult_eq_compat_l ; assumption.
  reflexivity.
 
  destruct_eq (nth_error l p) ; symmetry in Heqb.
@@ -145,7 +153,14 @@ Proof.
 intros s l n x ; induction s.
 
  simpl ; f_equal.
- 
+
+ simpl ; destruct (interp_side_equa_in_N s l) ;
+  destruct (interp_side_equa_in_SN s l) ; simpl in * ;
+  inversion IHs as [Heq ].
+  rewrite Rseq_pps_scal_compat_l ; unfold Rseq_mult, mult_fct ;
+  rewrite Heq ; reflexivity.
+  reflexivity.
+
  simpl ; destruct (nth_error l p) as [un |] ; reflexivity.
 
  simpl ; destruct (interp_side_equa_in_N s l) ;
@@ -196,6 +211,23 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
  inversion HN ; inversion HR3 ; subst ; exists (constant_infinite_cv_radius r) ;
   apply constant_is_cst.
 
+ destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)).
+  destruct_eq (interp_side_equa_in_R3 s l).
+   symmetry in Heqb ; symmetry in Heqb0 ; specify5 IHs l r0 r1 Heqb Heqb0.
+   inversion HR3 as [Hrew] ; destruct Hrew.
+   inversion HN as [Hrew] ; destruct Hrew.
+   destruct IHs as [rho Hrho].
+   assert (pr : infinite_cv_radius (r * r0)).
+    destruct (Req_dec r 0) as [Heq | Hneq].
+     rewrite Heq ; simpl ; rewrite <- (infinite_cv_radius_ext (Rseq_constant 0)) ;
+      [apply zero_infinite_cv_radius | intro n ; unfold Rseq_mult ;
+      rewrite Rmult_0_l ; reflexivity].
+     rewrite <- infinite_cv_radius_scal_compat ; assumption.
+   exists pr ; intro x ; unfold mult_fct ; rewrite <- Hrho.
+   apply sum_scal_compat.
+  inversion HR3.
+ inversion HN. 
+
  assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;
  destruct (nth_error l p).
   specify2 Hrew s (eq_refl (Some s)) ; destruct s as [An rAn] ;
@@ -213,7 +245,7 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
    inversion HN as [Hrew] ; destruct Hrew.
    destruct IHs as [rho Hrho].
    assert (pr : infinite_cv_radius (- r)) by
-    (rewrite infinite_cv_radius_opp_compat ; assumption).
+    (rewrite <- infinite_cv_radius_opp_compat ; assumption).
    exists pr ; intro x ; unfold opp_fct ; rewrite <- Hrho ;
    apply sum_opp_compat.
   inversion HR3.
@@ -257,6 +289,12 @@ Lemma interp_side_equa_in_N_R3_compat : forall s l un,
 Proof.
 intro s ; induction s ; intros l un H.
  exists (fun _ => r) ; reflexivity.
+
+ simpl in * ; destruct_eq (interp_side_equa_in_N s (map
+ (@projT1 _ infinite_cv_radius) l)) ; symmetry in Heqb.
+  specify3 IHs l r0 Heqb ; destruct IHs as [f Hf] ;
+  exists ((fun _ => r) * f)%F ; rewrite Hf ; reflexivity.
+ inversion H.
 
  assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;
  destruct_eq (nth_error l p).

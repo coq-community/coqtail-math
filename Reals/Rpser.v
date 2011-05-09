@@ -1,4 +1,5 @@
 Require Export Rpser_def.
+Require Export Rpser_def_simpl.
 
 Require Export Rpser_base_facts.
 Require Export Rpser_cv_facts.

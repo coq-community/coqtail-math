@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rsequence_def.
-Require Import Rpser_def Rpser_base_facts Rpser_sums Rpser_cv_facts.
+Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_sums Rpser_cv_facts.
 Require Import Rfunction_facts.
 Require Import Ass_handling.
 
@@ -58,30 +58,22 @@ Section Rpser_extensionality.
 Variables An Bn : Rseq.
 Hypothesis AnBn_ext : (An == Bn)%Rseq.
 
-Lemma gt_Pser_ext : forall x, (gt_Pser An x == gt_Pser Bn x)%Rseq.
-Proof.
-intros x n ; unfold gt_Pser ; rewrite AnBn_ext ; reflexivity.
-Qed.
-
-Lemma gt_abs_Pser_ext : forall x, (gt_abs_Pser An x == gt_abs_Pser Bn x)%Rseq.
-Proof.
-intros x n ; unfold gt_abs_Pser ; rewrite AnBn_ext ; reflexivity.
-Qed.
-
 Lemma An_deriv_ext : (An_deriv An == An_deriv Bn)%Rseq.
 Proof.
-intro n ; unfold An_deriv ; rewrite AnBn_ext ; reflexivity.
+intro n ; unfold An_deriv, Rseq_mult, Rseq_shift ; rewrite AnBn_ext ; reflexivity.
 Qed.
 
 Lemma An_nth_deriv_ext : forall k, (An_nth_deriv An k == An_nth_deriv Bn k)%Rseq.
 Proof.
-intros n k ; unfold An_nth_deriv ; rewrite AnBn_ext ; reflexivity.
+intros n k ; unfold An_nth_deriv, Rseq_mult, Rseq_div, Rseq_shifts ;
+rewrite AnBn_ext ; reflexivity.
 Qed.
 
 Lemma Cv_radius_weak_ext : forall r, Cv_radius_weak An r <-> Cv_radius_weak Bn r.
 Proof.
 intro r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
- [rewrite <- gt_abs_Pser_ext | rewrite gt_abs_Pser_ext] ; apply HB ; exists i ; reflexivity.
+ [rewrite <- (gt_abs_pser_ext  _ _ _ AnBn_ext) |
+ rewrite (gt_abs_pser_ext _ _ _ AnBn_ext)] ; apply HB ; exists i ; reflexivity.
 Qed.
 
 Lemma finite_cv_radius_ext : forall r, finite_cv_radius An r <->
@@ -123,7 +115,7 @@ intros r rAn rBn x.
  destruct (Rpser_abel _ _ rAn x r0) as [l1 Hl1] ; copy Hl1 ;
   rewrite Pser_ext in Hl0.
  destruct (Rpser_abel _ _ rBn x r0) as [l2 Hl2].
- simpl ; eapply Pser_unique ; eassumption.
+ simpl ; eapply Rpser_unique ; eassumption.
 Qed.
 
 Lemma sum_r_ext : forall (r : R) (rAn : finite_cv_radius An r)

@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Export Cbase.
+Require Export Cbase Cfunctions.
 
 Delimit Scope Cseq_scope with Cseq.
 
@@ -42,6 +42,8 @@ Definition Cseq_add An Bn n := An n + Bn n.
 Definition Cseq_mult An Bn n := An n * Bn n.
 Definition Cseq_opp An n := Copp (An n).
 Definition Cseq_inv An n := Cinv (An n).
+Definition Cseq_sum := sum_f_C0.
+     
 
 Infix "+" := Cseq_add : Cseq_scope.
 Infix "*" := Cseq_mult : Cseq_scope.
@@ -50,9 +52,14 @@ Notation "/ u" := (Cseq_inv u) : Cseq_scope.
 
 Definition Cseq_minus An Bn n := An n - Bn n.
 Definition Cseq_div An Bn n := An n / Bn n.
+Definition Cseq_norm An n := Cnorm (An n).
 
+Notation "'|' An '|'" := (Cseq_norm An) (at level 39, format "'|' An '|'") : Cseq_scope.
 Infix "-" := Cseq_minus : Cseq_scope.
 Infix "/" := Cseq_div : Cseq_scope.
+
+Definition Cseq_shift An n := An (S n).
+Definition Cseq_shifts An N n := An (N + n)%nat.
 
 (** * Various properties. *)
 

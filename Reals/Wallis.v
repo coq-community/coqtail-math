@@ -18,7 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
-
+(*
 Require Import Max.
 Require Import Reals.
 Require Import Rintegral.
@@ -192,7 +192,7 @@ replace (S (S (2*n))) with (2 * (S n))%nat by auto with *.
 repeat rewrite mult_INR.
 replace (INR 2) with 2 by trivial; field.
 
-repeat split;apply not_0_INR; try (auto with *).
+repeat split;apply not_0_INR; try (auto with * ).
 apply fact_neq_0.
 Qed.
 
@@ -796,3 +796,4 @@ ring.
 Qed.
 
 End Wallis.
+*)

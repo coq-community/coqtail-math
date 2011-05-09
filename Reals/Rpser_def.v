@@ -22,32 +22,37 @@ USA.
 Require Export MyReals.
 Require Import Rsequence_def.
 
-Open Local Scope R_scope.
+Local Open Scope Rseq_scope.
 
 (** * Definitions *)
 
 (** General term of a Power Serie and its absolute value *)
-Definition gt_Pser (An : nat -> R) (x : R) := fun (n:nat) => (An n) * (x ^ n).
 
-Definition gt_abs_Pser (An : nat -> R) (x : R) := fun (n:nat) => Rabs(An n * x ^ n).
+Definition gt_pser An x := An * (pow x).
+Definition gt_abs_pser An x := | gt_pser An x |.
 
-Definition An_deriv (An : Rseq) := fun n => INR (S n) * An (S n).
-Definition An_nth_deriv (An : Rseq) (k : nat) :=
-  fun n => Rseq_fact (n + k) / Rseq_fact n * An (n + k)%nat.
+(** Formal derivative. *)
 
-Definition gt_deriv_Pser (An : nat -> R) (x : R) := gt_Pser (An_deriv An) x.
+Definition An_deriv An := Rseq_shift (INR * An).
+Definition An_nth_deriv An k := Rseq_shifts (Rseq_fact * An) k / Rseq_fact.
+Definition gt_deriv_Pser An x := gt_pser (An_deriv An) x.
+Definition gt_nth_deriv_Pser An k x := gt_pser (An_nth_deriv An k) x.
 
-Definition Pser_abs (An : nat -> R) (x l: R) := 
-    Pser (fun n : nat => Rabs (An n)) (Rabs x) l.
+(** Partial sums and convergence predicates. *)
+
+Definition Rseq_pps An x := Rseq_sum (gt_pser An x).
+Definition Rseq_pps_abs An x := Rseq_sum (gt_abs_pser An x).
+Definition Rpser An x l := Rseq_cv (Rseq_pps An x) l.
+Definition Rpser_abs An x l := Rseq_cv (Rseq_pps_abs An x) l.
 
 (** Lower bound on the cv radius *)
 
-Definition Cv_radius_weak (An : nat -> R) (r:R) := has_ub (gt_abs_Pser An r).
+Definition Cv_radius_weak An r := has_ub (gt_abs_pser An r).
 
 (** Cv radius definition *)
 
-Definition finite_cv_radius (An : nat -> R) (r:R) := 
+Definition finite_cv_radius An r := 
     (forall r', 0 <= r' < r -> Cv_radius_weak An r') /\
     (forall r', r < r' -> ~ (Cv_radius_weak An r')).
 
-Definition infinite_cv_radius (An : Rseq) := forall (r : R), Cv_radius_weak An r.
+Definition infinite_cv_radius An := forall r, Cv_radius_weak An r.

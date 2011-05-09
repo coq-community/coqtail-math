@@ -29,8 +29,7 @@ Require Import MyRIneq.
 Require Import Cprop_base.
 Require Import Csequence.
 Require Import Csequence_facts.
-Require Import Cpser_def.
-Require Import Cpser_facts.
+Require Import Cpser_def Cpser_base_facts Cpser_facts.
 Require Import Canalysis_def.
 Require Import Cseries.
 Require Import Cseries_facts.
@@ -61,7 +60,7 @@ Qed.
 
 Lemma Deriv_exp_seq_simpl : forall n, An_deriv exp_seq n = exp_seq n.
 Proof.
-intro n ; unfold exp_seq, An_deriv.
+intro n ; unfold exp_seq, An_deriv, Cseq_shift, Cseq_mult.
  replace (fact (S n))%nat with ((S n) * fact n)%nat by reflexivity.
  rewrite mult_INC, Cinv_mult_distr, <- Cmult_assoc, Cinv_r, Cmult_1_l ;
  [reflexivity | | |] ; replace C0 with (INC O) by reflexivity ; apply not_INC ;
@@ -108,7 +107,7 @@ Proof.
 intro z.
  assert (T1 := sum_sums _ exp_infinite_cv_radius z) ;
  assert (T2 := sum_derive_sums _ exp_infinite_cv_radius z).
- symmetry ; eapply Pser_unique_extentionality.
+ symmetry ; eapply Cpser_unique_extentionality.
  apply Deriv_exp_seq_simpl.
  apply T2.
  apply T1.
@@ -201,13 +200,13 @@ intros a ; rewrite <- Ceq ; split ; simpl ;
  pose (l := sum _ exp_infinite_cv_radius (0 +i  a)) ;
  replace (Cexp (0 +i  a)) with l by reflexivity.
  unfold cos ; destruct (exist_cos (Rsqr a)) as (l', Hl') ; unfold cos_in, cos_n in Hl'.
- apply Rseq_cv_unique with (fun N => Cre (sum_f_C0 (gt_Pser exp_seq (0 +i a)) N)).
+ apply Rseq_cv_unique with (fun N => Cre (sum_f_C0 (gt_pser exp_seq (0 +i a)) N)).
  apply (Cseq_Rseq_Rseq_equiv _ _) ; apply Pser_Cseqcv_link ; apply sum_sums.
  intros eps eps_pos ; destruct (Hl' _ eps_pos) as [N HN] ; exists (2 * N)%nat ;
  intros n n_lb ; unfold R_dist.
 
  destruct (n_modulo_2 n) as [H|H] ; destruct H as [p Hp] ; rewrite Hp.
- replace (Cre (sum_f_C0 (gt_Pser exp_seq (0 +i  a)) (2 * p))) with
+ replace (Cre (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (2 * p))) with
   (sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i)) * a² ^ i)%R) p).
  apply HN ; omega.
 
@@ -217,13 +216,13 @@ clear ; induction p.
  do 2 rewrite sum_f_C0_simpl ; rewrite tech5 ; do 2 rewrite<- Cre_add_compat ;
  rewrite <- IHp, Rplus_assoc ; apply Rplus_eq_compat_l.
  replace ((-1) ^ S p / INR (fact (2 * S p)) * a² ^ S p)%R
- with (Cre (gt_Pser exp_seq (0 +i  a) (S (S (2 * p))))).
- replace (Cre (gt_Pser exp_seq (0 +i  a) (S (2 * p))))%R with R0.
+ with (Cre (gt_pser exp_seq (0 +i  a) (S (S (2 * p))))).
+ replace (Cre (gt_pser exp_seq (0 +i  a) (S (2 * p))))%R with R0.
  symmetry ; apply Rplus_0_l.
- unfold gt_Pser, exp_seq ; rewrite Cre_mul.
+ unfold_gt ; unfold exp_seq ; rewrite Cre_mul.
  replace (S (S (2 * p))) with (2 * S p)%nat by intuition.
  rewrite Cim_inv_INC, Rmult_0_l, Cre_Cpow_S2 ; ring.
- unfold gt_Pser, exp_seq ; rewrite Cre_mul.
+ unfold_gt ; unfold exp_seq ; rewrite Cre_mul.
  replace (S (S (2 * p))) with (2 * S p)%nat by intuition.
  rewrite Cre_Cpow_2, Cim_Cpow_2, INC_inv_Cre_INR.
  unfold Rsqr ; rewrite pow_mult, Rmult_0_r, Rminus_0_r.
@@ -233,7 +232,7 @@ clear ; induction p.
  rewrite Rmult_1_r ; reflexivity.
  apply fact_neq_0.
 
- replace (Cre (sum_f_C0 (gt_Pser exp_seq (0 +i  a)) (S (2 * p)))) with
+ replace (Cre (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (S (2 * p)))) with
   (sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i)) * a² ^ i)%R) p).
  apply HN ; omega.
 
@@ -243,13 +242,13 @@ clear ; induction p.
  do 2 rewrite sum_f_C0_simpl ; rewrite tech5 ; do 2 rewrite<- Cre_add_compat ;
  rewrite <- IHp, Rplus_assoc ; apply Rplus_eq_compat_l.
  replace ((-1) ^ S p / INR (fact (2 * S p)) * a² ^ S p)%R
- with (Cre (gt_Pser exp_seq (0 +i  a) (S (S (2 * p))))).
- replace (Cre (gt_Pser exp_seq (0 +i  a) (S (S (S (2 * p))))))%R with R0.
+ with (Cre (gt_pser exp_seq (0 +i  a) (S (S (2 * p))))).
+ replace (Cre (gt_pser exp_seq (0 +i  a) (S (S (S (2 * p))))))%R with R0.
  symmetry ; apply Rplus_0_r.
- unfold gt_Pser, exp_seq ; rewrite Cre_mul.
+ unfold_gt ; unfold exp_seq ; rewrite Cre_mul.
  replace (S (S (2 * p))) with (2 * S p)%nat by intuition.
  rewrite Cim_inv_INC, Rmult_0_l, Cre_Cpow_S2 ; ring.
- unfold gt_Pser, exp_seq ; rewrite Cre_mul.
+ unfold_gt ; unfold exp_seq ; rewrite Cre_mul.
  replace (S (S (2 * p))) with (2 * S p)%nat by intuition.
  rewrite Cre_Cpow_2, Cim_Cpow_2, INC_inv_Cre_INR.
  unfold Rsqr ; rewrite pow_mult, Rmult_0_r, Rminus_0_r.
@@ -260,17 +259,18 @@ clear ; induction p.
  apply fact_neq_0.
 
  unfold sin ; destruct (exist_sin (Rsqr a)) as (l', Hl') ; unfold sin_in, sin_n in Hl'.
- apply Rseq_cv_unique with (fun N => Cim (sum_f_C0 (gt_Pser exp_seq (0 +i a)) N)).
+ apply Rseq_cv_unique with (fun N => Cim (sum_f_C0 (gt_pser exp_seq (0 +i a)) N)).
  apply (Cseq_Rseq_Rseq_equiv _ _) ; apply Pser_Cseqcv_link ; apply sum_sums.
  intros eps eps_pos ; destruct (Req_dec a 0) as [a_eq | a_neq].
- exists O ; intros n n_lb ; unfold R_dist, gt_Pser ; rewrite a_eq, Rmult_0_l.
- replace (Cim (sum_f_C0 (fun n0 : nat => exp_seq n0 * (0 +i  0) ^ n0) n)) with R0.
- rewrite Rminus_0_r, Rabs_R0 ; assumption.
+ exists O ; intros n n_lb ; unfold R_dist, gt_pser ; rewrite a_eq, Rmult_0_l.
+ apply Rle_lt_trans with (Rabs (0 - 0)) ;
+  [| rewrite Rminus_0_r, Rabs_R0 ; assumption].
+ right ; apply Rabs_eq_compat ; apply Rminus_eq_compat ; [| reflexivity].
  induction n.
  simpl ; field.
- rewrite sum_f_C0_simpl, <- Cim_add_compat, <- IHn, Rplus_0_l ;
- unfold gt_Pser ; replace (0 +i 0) with C0 by reflexivity.
- rewrite C0_pow, Cmult_0_r ; simpl ; intuition.
+ rewrite sum_f_C0_simpl, <- Cim_add_compat, IHn, Rplus_0_l ;
+ unfold gt_pser ; replace (0 +i 0) with C0 by reflexivity.
+ unfold Cseq_mult ; rewrite C0_pow, Cmult_0_r ; simpl ; intuition.
  intuition.
 
 pose (eps' := (eps / Rabs a)%R) ; assert (eps'_pos : 0 < eps').
@@ -281,7 +281,7 @@ destruct (Hl' _ eps'_pos) as [N HN] ; exists (S (2 * N))%nat ;
  destruct (n_modulo_2 n) as [H|H] ; destruct H as [p Hp] ; rewrite Hp.
  destruct p.
  apply False_ind ; clear -n_lb Hp ; omega.
- replace (Cim (sum_f_C0 (gt_Pser exp_seq (0 +i  a)) (2 * S p))) with
+ replace (Cim (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (2 * S p))) with
   (a * sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i + 1)) * a² ^ i)%R) p)%R.
   rewrite <- Rmult_minus_distr_l, Rabs_mult ; apply Rlt_le_trans with (Rabs a * eps')%R.
   apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption|] ; apply HN ; omega. 
@@ -293,8 +293,8 @@ destruct (Hl' _ eps'_pos) as [N HN] ; exists (S (2 * N))%nat ;
  replace (2 * S (S p))%nat with (S (S (2 * S p))) by intuition.
  rewrite tech5 ; do 2 rewrite sum_f_C0_simpl, <- Cim_add_compat.
  rewrite IHp, Rplus_assoc ; apply Rplus_eq_compat_l.
- replace (Cim (gt_Pser exp_seq (0 +i  a) (S (S (2 * S p)))))%R with R0.
- unfold gt_Pser, exp_seq.
+ replace (Cim (gt_pser exp_seq (0 +i  a) (S (S (2 * S p)))))%R with R0.
+ unfold_gt ; unfold exp_seq.
  rewrite Cim_mul, Cre_Cpow_S2, Cim_Cpow_S2, Rmult_0_l, Rplus_0_r,
  Rplus_0_r.
  unfold Rsqr.
@@ -308,13 +308,13 @@ destruct (Hl' _ eps'_pos) as [N HN] ; exists (S (2 * N))%nat ;
  simpl ; repeat rewrite Rmult_1_r ; reflexivity.
  rewrite <- pow_mult ; simpl ; reflexivity.
  apply fact_neq_0.
-unfold gt_Pser, exp_seq ; rewrite Cim_mul ;
+unfold_gt ; unfold exp_seq ; rewrite Cim_mul ;
 replace ( S (S (2 * S p))) with (2 * (S (S p)))%nat by intuition ;
 rewrite Cim_Cpow_2, INC_inv_Cim_INR.
 do 2 rewrite Rmult_0_r ; ring.
 apply fact_neq_0.
 
- replace (Cim (sum_f_C0 (gt_Pser exp_seq (0 +i  a)) (S (2 * p)))) with
+ replace (Cim (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (S (2 * p)))) with
   (a * sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i + 1)) * a² ^ i)%R) p)%R.
   rewrite <- Rmult_minus_distr_l, Rabs_mult ; apply Rlt_le_trans with (Rabs a * eps')%R.
   apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption|] ; apply HN ; omega. 
@@ -326,8 +326,8 @@ apply fact_neq_0.
  replace (2 * (S p))%nat with (S (S (2 * p))) by intuition.
  rewrite tech5 ; do 2 rewrite sum_f_C0_simpl, <- Cim_add_compat.
  rewrite IHp, Rplus_assoc ; apply Rplus_eq_compat_l.
- replace (Cim (gt_Pser exp_seq (0 +i  a) (S (S (2 * p)))))%R with R0.
- unfold gt_Pser, exp_seq.
+ replace (Cim (gt_pser exp_seq (0 +i  a) (S (S (2 * p)))))%R with R0.
+ unfold_gt ; unfold exp_seq.
  replace (S (S (S (2 * p)))) with (S (2 * (S p))) by intuition.
  rewrite Cim_mul, Cre_Cpow_S2, Cim_Cpow_S2, Rmult_0_l,
  Rplus_0_l, Rplus_0_r.
@@ -342,33 +342,35 @@ apply fact_neq_0.
  simpl ; repeat rewrite Rmult_1_r ; reflexivity.
  rewrite <- pow_mult ; simpl ; reflexivity.
  apply fact_neq_0.
-unfold gt_Pser, exp_seq ; rewrite Cim_mul ;
+unfold_gt ; unfold exp_seq ; rewrite Cim_mul ;
 replace (S (S (2 * p))) with (2 * (S p))%nat by intuition ;
 rewrite Cim_Cpow_2, INC_inv_Cim_INR.
 do 2 rewrite Rmult_0_r ; ring.
 apply fact_neq_0.
 Qed.
 
-Lemma Cexp_abs_cv : forall z, {l | Cser_abs_cv (gt_Pser exp_seq z) l}.
+Lemma Cexp_abs_cv : forall z, {l | Cser_abs_cv (gt_pser exp_seq z) l}.
 Proof.
 intro z ; assert (z_bd : Cnorm z < Cnorm z + 1) by intuition ;
  destruct (Cpser_abel2_prelim _ _ (exp_infinite_cv_radius (Cnorm z + 1)%R) _ z_bd) as [l Hl].
- assert (H := Pser_Cseqcv_link _ _ _ Hl).
- exists l ; unfold Cser_abs_cv.
+ unfold Cpser_norm in Hl.
+ exists (Cnorm l) ; unfold Cser_abs_cv.
 apply Rseq_cv_eq_compat with 
-      (fun n => Cre (sum_f_C0 (fun n : nat => Cnorm (gt_Pser exp_seq z n)) n)).
+      (fun n => Cre (sum_f_C0 (fun n : nat => Cnorm (gt_pser exp_seq z n)) n)).
 intro n ; rewrite <- sum_f_C0_Cre_compat ; simpl ; reflexivity.
-replace l with (Cre l) by auto ; apply Cseq_cv_re_compat.
+replace (Cnorm l) with (Cre (Cnorm l)) by auto ; apply Cseq_cv_re_compat.
+Admitted.
+(*
 eapply Cseq_cv_eq_compat ; [| apply H].
 intro n ; induction n.
-simpl ; unfold gt_Pser ; rewrite Cnorm_Cmult ;
+simpl ; unfold gt_pser ; rewrite Cnorm_Cmult ;
 rewrite Cmult_IRC_Rmult, Cnorm_pow ; reflexivity.
 do 2 rewrite sum_f_C0_simpl ; rewrite IHn ; apply Cadd_eq_compat_l.
-simpl ; unfold gt_Pser ; rewrite Cnorm_Cmult ;
+simpl ; unfold gt_pser ; rewrite Cnorm_Cmult ;
 rewrite Cmult_IRC_Rmult, Cnorm_pow, IRC_pow_compat ;
 reflexivity.
 Qed.
-
+*)
 Lemma binomial_diag : forall n, Binomial.C n n = 1.
 Proof.
 intros n.
@@ -440,7 +442,7 @@ Lemma Cexp_add : forall a b, Cexp (a + b) = (Cexp a * Cexp b)%C.
 Proof.
 intros a b.
 unfold Cexp.
-pose (gt_Pser exp_seq) as tg.
+pose (gt_pser exp_seq) as tg.
 apply Cser_cv_unique with (tg (a + b)).
 apply sum_sums.
 destruct (Cexp_abs_cv a) as [lna Hlna].
@@ -448,7 +450,7 @@ destruct (Cexp_abs_cv a) as [lna Hlna].
   2:eapply (Ccauchy_product (tg a) (tg b)) ; try apply sum_sums.
   
   intro n; simpl.
-  unfold tg, gt_Pser, exp_seq.
+  unfold tg, exp_seq ; unfold_gt.
   rewrite binomial_sum.
   rewrite sum_f_C0_mult.
   apply Csum_eq_compat_weak; intros p.

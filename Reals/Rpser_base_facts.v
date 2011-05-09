@@ -19,87 +19,62 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 Require Import Reals.
-Require Import Rpser_def.
+Require Import Rpser_def Rpser_def_simpl.
 
 Require Import Ranalysis_def.
-Require Import Rsequence_def Rsequence_base_facts.
+Require Import Rsequence_def Rsequence_base_facts Rsequence_rewrite_facts.
 Require Import Rsequence_cv_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
-Require Import Fourier MyRIneq.
+Require Import Fourier MyRIneq MyNat.
 
 Open Local Scope R_scope.
 
-(** * Some lemmas manipulating the definitions. *)
+(** ** Some lemmas manipulating the definitions. *)
 
-(** Relation between An_nth_deriv & An_deriv. *)
-
-Lemma An_nth_deriv_0 : forall An, An_nth_deriv An 0 == An.
-Proof.
- intros An n ; unfold An_nth_deriv, Rdiv ; rewrite plus_0_r,
-  Rinv_r_simpl_r ; auto ; apply not_0_INR ; apply fact_neq_0.
-Qed.
-
-Lemma An_nth_deriv_S : forall An k,
- An_nth_deriv An (S k) == An_deriv (An_nth_deriv An k).
-Proof.
-assert (Hrew : forall n, / Rseq_fact n = INR (S n) * / Rseq_fact (S n)).
- intro n ; unfold Rseq_fact ; rewrite fact_simpl, mult_INR, Rinv_mult_distr,
- <- Rmult_assoc.
- symmetry ; apply Rinv_r_simpl_r ; apply not_0_INR ; omega.
- apply not_0_INR ; omega.
- apply INR_fact_neq_0.
-intros An k n ; unfold An_nth_deriv, An_deriv, Rdiv ;
- rewrite Hrew, <- plus_n_Sm.
- do 2 (repeat rewrite <- Rmult_assoc ; apply Rmult_eq_compat_r) ;
- apply Rmult_comm.
-Qed.
-
-Lemma An_nth_deriv_S' : forall An k,
- An_nth_deriv An (S k) == An_nth_deriv (An_deriv An) k.
-Proof.
-intros An k n ; unfold An_nth_deriv, An_deriv.
- repeat rewrite <- Rmult_assoc ; rewrite <- plus_n_Sm ;
- apply Rmult_eq_compat_r.
- rewrite Rmult_comm ; unfold Rdiv ;
- rewrite <- Rmult_assoc ; apply Rmult_eq_compat_r.
- unfold Rseq_fact ; rewrite fact_simpl, mult_INR ;
- reflexivity.
-Qed.
-
-Lemma An_nth_deriv_1 : forall An, An_nth_deriv An 1 == An_deriv An.
-Proof.
-intros An n ; rewrite An_nth_deriv_S ; unfold An_deriv ; 
- rewrite An_nth_deriv_0 ; reflexivity.
-Qed.
-
-(** TODO: add all the relations. *)
+(** Compatibility of An_deriv with the common operators. *)
 
 Lemma An_deriv_opp_compat : forall An,
   An_deriv (- An) == - An_deriv An.
 Proof.
-intros An n ; unfold Rseq_opp, An_deriv ;
- rewrite Ropp_mult_distr_r_reverse ; reflexivity.
+intros An n ; unfold Rseq_opp, An_deriv, Rseq_mult,
+Rseq_shift ; apply Ropp_mult_distr_r_reverse.
 Qed.
 
-(** Compatibility of the Cv_radius_weak concept with various operations. *)
+Lemma An_deriv_plus_compat : forall An Bn,
+  An_deriv (An + Bn) == (An_deriv An) + (An_deriv Bn).
+Proof.
+intros An Bn n ; unfold Rseq_opp, An_deriv, Rseq_mult,
+ Rseq_shift, Rseq_plus ; apply Rmult_plus_distr_l.
+Qed.
+
+Lemma An_deriv_minus_compat : forall An Bn,
+  An_deriv (An - Bn) == An_deriv An - An_deriv Bn.
+Proof.
+intros An Bn n ; unfold An_deriv, Rseq_shift,
+Rseq_mult, Rseq_minus ; apply Rmult_minus_distr_l.
+Qed.
+
+(** * Cv_radius_weak *)
+(** There exists always a Cv_radius_weak. *)
 
 Lemma Cv_radius_weak_0 : forall An, Cv_radius_weak An 0.
 Proof.
-intro An.
-exists (Rabs(An O)).
-intros x Hx.
-destruct Hx as [n Hn].
-rewrite Hn.
-unfold gt_abs_Pser.
+intro An ; exists (Rabs(An O)) ; intros x [n Hn] ; subst ;
+unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
 destruct n.
- rewrite pow_O.
-  ring_simplify(An 0%nat * 1); apply Rle_refl.
-  
- rewrite pow_i.
- ring_simplify(An(S n)%nat * 0).
- rewrite Rabs_R0; apply Rabs_pos.
-omega.
+ simpl ; rewrite Rmult_1_r ; reflexivity.
+ rewrite pow_i ; [| omega] ; rewrite Rmult_0_r, Rabs_R0 ;
+ apply Rabs_pos.
+Qed.
+
+(** Compatibility of the Cv_radius_weak concept with common operations. *)
+
+Lemma Cv_radius_weak_Rabs : forall (An : Rseq) (r : R),
+  Cv_radius_weak An (Rabs r) <-> Cv_radius_weak An r.
+Proof.
+intros An r ; split ; intros [B HB] ; exists B ; intros y [i Hi] ; subst ;
+ apply HB ; exists i ; rewrite gt_abs_pser_Rabs_compat ; reflexivity.
 Qed.
 
 Lemma Rle_cv_radius_compat : forall (An Bn : nat -> R) (r : R),
@@ -107,140 +82,75 @@ Lemma Rle_cv_radius_compat : forall (An Bn : nat -> R) (r : R),
       Cv_radius_weak An r ->
       Cv_radius_weak Bn r.
 Proof.
-intros An Bn r Bn_le_An [M HM] ; exists M ; intros x [n Hn] ;
- rewrite Hn ; apply Rle_trans with (gt_abs_Pser An r n) ;
+intros An Bn r Bn_le_An [M HM] ; exists M ; intros x [n Hn] ; subst ;
+ apply Rle_trans with (gt_abs_pser An r n) ;
  [| apply HM ; exists n ; reflexivity].
- unfold gt_abs_Pser ; do 2 rewrite Rabs_mult ;
+ unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult ; do 2 rewrite Rabs_mult ;
  apply Rmult_le_compat_r ; [apply Rabs_pos | apply Bn_le_An].
-Qed.
-
-Lemma Cv_radius_weak_Rabs_compat_rev : forall (An : nat -> R) (r : R), 
-       Cv_radius_weak (fun n => Rabs (An n)) r -> Cv_radius_weak An r.
-Proof.
-intros An r [M HM] ; exists M.
- intros x [n Hn] ; rewrite Hn.
- unfold gt_abs_Pser ; rewrite Rabs_mult, <- Rabs_Rabsolu, <- Rabs_mult ;
- apply HM ; exists n ; reflexivity.
-Qed.
-
-Lemma Cv_radius_weak_Rabs_compat : forall (An : nat -> R) (r : R), 
-       Cv_radius_weak An r -> Cv_radius_weak (fun n => Rabs (An n)) r.
-Proof.
-intros An r Rho.
-elim Rho ; intros m Hm ; exists m ; unfold gt_abs_Pser ; intros a Ha ;
- unfold EUn in Ha ; elim Ha ; intros i Hi ; rewrite Hi ; rewrite Rabs_mult ;
- rewrite Rabs_Rabsolu ; rewrite <- Rabs_mult ; apply Hm ; exists i ; unfold gt_abs_Pser ;
- reflexivity.
 Qed.
 
 Lemma Cv_radius_weak_le_compat : forall (An : nat -> R) (r r' : R),
        Rabs r' <= Rabs r -> Cv_radius_weak An r -> Cv_radius_weak An r'.
 Proof.
-intros An r r' r'_bd Rho.
- case (Req_or_neq r') ; intro r_eq.
-  rewrite r_eq ; exists (Rabs (An 0%nat)) ; intros x Hx ; destruct Hx as (i, Hi) ;
-  rewrite Hi ; unfold gt_abs_Pser ; clear ; induction i ; [apply Req_le ;
-  apply Rabs_eq_compat ; field | rewrite pow_i ; intuition ; rewrite Rmult_0_r ;
-  rewrite Rabs_R0 ; apply Rabs_pos].
-  assert (r_pos : 0 < Rabs r).
-   apply Rlt_le_trans with (Rabs r') ; [apply Rabs_pos_lt |] ; assumption.
-  assert (r_neq : r <> 0).
-   case (Req_or_neq r) ; intro s ; [| assumption] ;
-  apply False_ind ; rewrite s in r_pos ; rewrite Rabs_R0 in r_pos ; fourier.
-  destruct Rho as (C, HC) ; exists C ; intros x Hx ; destruct Hx as (i,Hi) ; rewrite Hi ;
-  unfold gt_abs_Pser.
-  replace (r' ^ i) with ((r' ^ i * /r ^ i) * (r ^ i)).
-  repeat (rewrite Rabs_mult) ; rewrite Rmult_comm ; rewrite <- Rabs_mult at 1 ;
-  rewrite Rmult_assoc ; rewrite <- Rabs_mult.
-  apply Rle_trans with (1 * Rabs (r ^ i * An i)).
-  apply Rmult_le_compat_r ; [apply Rabs_pos | rewrite Rinv_pow] ;
-  [|assumption].
-  rewrite <- Rpow_mult_distr ; rewrite <- RPow_abs ; replace 1 with (1 ^ i) ;
-  [|apply pow1] ; apply pow_le_compat ; [apply Rabs_pos | rewrite Rabs_mult].
-  replace 1 with ((Rabs r) * /(Rabs r)) ; [rewrite Rabs_Rinv ; [apply Rmult_le_compat_r ;
-  [apply Rlt_le ; apply Rinv_0_lt_compat |] |] | apply Rinv_r ; apply Rgt_not_eq] ;
-  assumption.
-  rewrite Rmult_1_l ; rewrite Rmult_comm ; apply HC ; exists i ; reflexivity.
-  field ; apply pow_nonzero ; assumption.
-Qed.
-
-Lemma Cv_radius_weak_shifts_compat : forall (An : nat -> R) (r : R),
-  Cv_radius_weak An r ->
-  forall N, Cv_radius_weak (Rseq_shifts An N) r.
-Proof.
-intros An r Rho N ; unfold Rseq_shifts.
- destruct (Req_dec r 0) as [r_eq | r_neq].
-  rewrite r_eq ; exists (Rabs (An N)).
-  intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn ; unfold gt_abs_Pser ; destruct n.
-  simpl ; rewrite Rmult_1_r, plus_0_r ; right ; reflexivity.
-  rewrite Rabs_mult, pow_i,
-  Rabs_R0, Rmult_0_r ; [apply Rabs_pos | intuition].
- destruct Rho as [M HM].
- exists (M * (/ Rabs r) ^ N)%R.
- intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
- unfold gt_abs_Pser ; simpl.
- rewrite Rabs_mult ; apply Rle_trans with (Rabs (An (N + n)%nat) * Rabs (r ^ N) *
- (Rabs r ^ n) * ((/Rabs r) ^ N))%R.
- right ; repeat rewrite Rmult_assoc ; repeat apply Rmult_eq_compat_l.
- rewrite RPow_abs, <- Rinv_pow ; [| apply Rgt_not_eq ;
- apply Rabs_pos_lt ; assumption] ; rewrite RPow_abs ;
- rewrite (Rmult_comm (Rabs (r ^ n))), <- Rmult_assoc, Rinv_r, Rmult_1_l ;
- [reflexivity | apply Rabs_no_R0 ; apply pow_nonzero ; assumption].
- apply Rmult_le_compat_r.
- apply pow_le ; left ; apply Rinv_0_lt_compat ; apply Rabs_pos_lt ; assumption.
- rewrite Rmult_assoc, RPow_abs ; apply HM.
- exists (N + n)%nat ; unfold gt_abs_Pser.
- repeat rewrite Rabs_mult ; apply Rmult_eq_compat_l ;
- rewrite <- Rabs_mult ; apply Rabs_eq_compat.
- symmetry ; apply pow_add.
-Qed.
-
-Lemma Cv_radius_weak_padding_neg_compat : forall (An : nat -> R) (r : R) (N : nat),
-     Cv_radius_weak (Rseq_shifts An N) r -> Cv_radius_weak An r.
-Proof.
-unfold Rseq_shifts ; intros An r N Rho.
- destruct Rho as [M HM].
- destruct (Rseq_partial_bound (fun n => (An n) * r ^ n) N) as [M' HM'].
- destruct (Req_dec r 0) as [r_eq | r_neq].
- exists (Rabs (An 0%nat)) ; intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
-  unfold gt_abs_Pser ; destruct n.
-   simpl ; rewrite Rmult_1_r ; right ; reflexivity.
-   rewrite Rabs_mult, r_eq, pow_i, Rabs_R0,  Rmult_0_r ; [apply Rabs_pos | intuition].
- exists (Rmax (M * Rabs (r ^ N)) M') ; intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
- destruct (le_lt_dec n N) as [n_lb | n_ub].
- apply Rle_trans with M' ; [apply HM' | apply RmaxLess2] ; assumption.
- apply Rle_trans with (M * Rabs (r ^ N))%R ; [| apply RmaxLess1] ; unfold gt_abs_Pser.
- apply Rle_trans with (Rabs (An n * r ^ n) * (/ Rabs (r ^ N)) * Rabs (r ^ N))%R.
- right ; field ; apply Rabs_no_R0.
- apply pow_nonzero ; assumption.
-  apply Rmult_le_compat_r ; [apply Rabs_pos |].
-  apply HM ; exists (n - N)%nat.
-  unfold gt_abs_Pser.
-  rewrite <- RPow_abs, Rinv_pow, <- Rabs_Rinv, RPow_abs, <- Rabs_mult,
-  <- Rinv_pow.
-  assert (Hrew : (n = N + (n - N))%nat) by intuition.
-  repeat rewrite Rabs_mult ; rewrite Hrew at 1 ; rewrite Rmult_assoc ;
-  apply Rmult_eq_compat_l ; rewrite <- Rabs_mult ; apply Rabs_eq_compat.
-  unfold Rdiv ; rewrite (pow_RN_plus _ (n - N) N).
-  replace (n - N + N)%nat with n by intuition.
-  reflexivity.
-  assumption.
-  assumption.
-  assumption.
-  apply Rabs_no_R0 ; assumption.
-Qed.
-
-Lemma Cv_radius_weak_Rabs : forall (An : Rseq) (r : R),
-  Cv_radius_weak An (Rabs r) <-> Cv_radius_weak An r.
-Proof.
-intros An r ; split ; intros [B HB] ;
- exists B ; intros y [i Hi] ; subst ; unfold gt_abs_Pser.
-
-  rewrite Rabs_mult, <- RPow_abs, <- (Rabs_Rabsolu r),
-  RPow_abs, <- Rabs_mult ; apply HB ; exists i ; reflexivity.
-  
-  rewrite Rabs_mult, RPow_abs, Rabs_Rabsolu, <- Rabs_mult ;
+intros An r r' r'_bd [B HB].
+  exists B ; intros x [i Hi] ; subst ; apply Rle_trans with (gt_abs_pser An r i).
+  apply gt_abs_pser_le_compat ; assumption.
   apply HB ; exists i ; reflexivity.
+Qed.
+
+Lemma Cv_radius_weak_shifts_compat : forall An r k,
+  Cv_radius_weak An r <-> Cv_radius_weak (Rseq_shifts An k) r.
+Proof.
+intros An r k ; split ; intros [B HB].
+destruct (Req_dec r 0) as [r_eq | r_neq].
+ rewrite r_eq ; exists (Rabs (An k)) ; intros x [i Hi] ; subst ;
+ rewrite <- (Rseq_shifts_O An) ; apply gt_abs_pser_0_ub.
+ assert (Rabs (r ^ k) <> 0) by (apply Rabs_no_R0 ; apply pow_nonzero ; assumption).
+ exists (B * (/ Rabs (r ^ k))) ; intros x [i Hi] ; subst.
+ apply Rle_trans with (Rseq_shifts (gt_abs_pser An r) k i * / Rabs (r ^ k)).
+ unfold gt_abs_pser, gt_pser, Rseq_shifts, Rseq_abs, Rseq_mult ; simpl ;
+ rewrite plus_comm, pow_add, <- Rmult_assoc, (Rabs_mult (An (i + k)%nat * r ^ i)) ;
+ right ; field ; assumption.
+ apply Rmult_le_compat_r ; [left ; apply Rinv_0_lt_compat ;
+  assert (T := Rabs_pos (r ^k)) ; apply Rle_neq_lt ; auto|].
+ apply HB ; exists (k + i)%nat ; unfold Rseq_shifts ; reflexivity.
+destruct (Rseq_partial_bound (gt_pser An r) k) as [C HC] ;
+ exists (Rmax (B * Rabs (r ^ k)) C) ; intros u [i Hi] ; subst.
+ destruct (le_lt_dec i k) as [k_lb | k_ub].
+ apply Rle_trans with C ; [apply HC | apply RmaxLess2] ; assumption.
+ apply Rle_trans with (B * Rabs (r ^ k))%R ; [| apply RmaxLess1].
+ destruct (lt_exist k i k_ub) as [p Hp] ; subst ; unfold gt_abs_pser, gt_pser,
+ Rseq_abs, Rseq_mult ; rewrite plus_comm, pow_add, plus_comm, <- Rmult_assoc,
+ Rabs_mult ; apply Rmult_le_compat_r ; [apply Rabs_pos |] ; apply HB ; exists p ;
+ unfold Rseq_shifts, gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult ; reflexivity.
+Qed.
+
+(** Compatibility of Cv_radius_weak with common operators. *)
+
+Lemma Cv_radius_weak_scal : forall (An : Rseq) (lambda r : R), lambda <> 0 ->
+  (Cv_radius_weak An r <-> Cv_radius_weak (lambda * An)%Rseq r).
+Proof.
+intros An lam r lam_neq ; split ; intros [B HB] ;
+ [exists (Rabs lam * B) | exists (B * / (Rabs lam))] ;
+ intros x [n Hn] ; subst ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
+
+ do 2 rewrite Rabs_mult ; rewrite Rmult_assoc ;
+  apply Rmult_le_compat_l ; [apply Rabs_pos |] ;
+  rewrite <- Rabs_mult ; apply HB ; exists n ; reflexivity.
+
+ apply Rle_trans with (Rabs lam * Rabs (An n * r ^ n) * / Rabs lam) ;
+  [right ; field ; apply Rabs_no_R0 ; assumption |].
+  rewrite <- Rabs_mult ; apply Rmult_le_compat_r ; [left ;
+  apply Rinv_0_lt_compat ; apply Rabs_pos_lt ; assumption |].
+  rewrite <- Rmult_assoc ; apply HB ; exists n ; reflexivity.
+Qed.
+
+Lemma Cv_radius_weak_abs : forall (An : Rseq) (r : R),
+  Cv_radius_weak An r <-> Cv_radius_weak (| An |) r.
+Proof.
+intros An r ; split ; intros [B HB] ; exists B ; intros x [n Hn] ;
+subst ; [rewrite gt_abs_pser_Rseq_abs_compat |
+rewrite <- gt_abs_pser_Rseq_abs_compat] ; apply HB ; exists n ; reflexivity.
 Qed.
 
 Lemma Cv_radius_weak_plus : forall (An Bn : nat -> R) (r1 r2 : R),
@@ -259,7 +169,7 @@ assert (Rho'B := Cv_radius_weak_le_compat Bn _ _ r''_bd2 RhoB).
  destruct Rho'A as (C, HC) ;
  destruct Rho'B as (C', HC') ;
  exists (C + C').
- intros x Hx ; destruct Hx as (i, Hi) ; rewrite Hi ; unfold gt_abs_Pser, Rseq_plus.
+ intros x [i Hi] ; subst ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, Rseq_plus.
  rewrite Rmult_plus_distr_r ; apply Rle_trans with (Rabs (An i *  Rmin (Rabs r1)
          (Rabs r2) ^ i) + Rabs (Bn i * Rmin (Rabs r1) (Rabs r2) ^ i)) ; [apply Rabs_triang |].
  apply Rle_trans with (Rabs (An i * Rmin (Rabs r1) (Rabs r2) ^ i) + C') ;
@@ -272,11 +182,9 @@ Lemma Cv_radius_weak_opp : forall (An : Rseq) (r : R),
        Cv_radius_weak (- An)%Rseq r.
 Proof.
 intros An r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
- unfold gt_abs_Pser.
-
+ unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
  unfold Rseq_opp ; rewrite Ropp_mult_distr_l_reverse, Rabs_Ropp ;
  apply HB ; exists i ; reflexivity.
-
  rewrite <- Rabs_Ropp, <- Ropp_mult_distr_l_reverse ; apply HB ;
  exists i ; reflexivity.
 Qed.
@@ -305,7 +213,7 @@ intros An r [rho rho_ub] ; split.
 
  intros r' Hr' ; destruct (Rle_lt_dec r r') as [rler' | r'ltr].
   assumption.
-  assert (H : has_ub (gt_abs_Pser An (middle r' r))).
+  assert (H : has_ub (gt_abs_pser An (middle r' r))).
    assert (r'_pos : 0 <= r').
     apply Hr' ; apply Cv_radius_weak_0.
    apply rho ; split ;
@@ -343,41 +251,68 @@ intros EM An r [rho_ub rho_l] ; split.
   [| apply rho_ub] ; assumption.
 Qed.
 
-Section fcvr_properties.
-
-Variables (An : Rseq) (r : R).
-Hypotheses rAn : finite_cv_radius An r.
-
 (** Compatibility of the finite_cv_radius concept with various operations. *)
 
-Lemma finite_cv_radius_pos : 0 <= r.
+Lemma finite_cv_radius_scal_compat : forall (An : Rseq) (lam r : R), lam <> 0 ->
+  (finite_cv_radius An r <-> finite_cv_radius (lam * An)%Rseq r).
 Proof.
-destruct rAn as [_ Hf].
- destruct(Rle_lt_dec 0 r).
-  trivial.
-destruct (Hf 0).
-trivial.
-apply Cv_radius_weak_0.
+intros An lam r lam_neq ; split ; intros [H_inf H_sup].
+ split ; intros r' ; rewrite <- Cv_radius_weak_scal ;
+  [apply H_inf | | apply H_sup |] ; assumption.
+ split ; intros r' ; rewrite (Cv_radius_weak_scal _ lam) ;
+  [apply H_inf | | apply H_sup |] ; assumption.
 Qed.
 
-Lemma finite_cv_radius_weakening : forall x, Rabs x < r -> Cv_radius_weak An x.
+Lemma finite_cv_radius_abs_comapt : forall (An : Rseq) (r : R),
+  finite_cv_radius An r <-> finite_cv_radius (| An |) r.
 Proof.
-destruct rAn as [H_sup _] ; intros x Hx.
- apply Cv_radius_weak_le_compat with (Rabs x).
-  rewrite Rabs_Rabsolu ; right ; reflexivity.
-  apply H_sup ; split ; [apply Rabs_pos | assumption].
+intros An r ; split ; intros [H_inf H_sup].
+ split ; intros r' ; rewrite <- Cv_radius_weak_abs ;
+  [apply H_inf | apply H_sup].
+ split ; intros r' ; rewrite Cv_radius_weak_abs ;
+  [apply H_inf | apply H_sup] ; assumption.
 Qed.
 
-End fcvr_properties.
+Lemma finite_cv_radius_pos : forall (An : Rseq) (r : R),
+  finite_cv_radius An r -> 0 <= r.
+Proof.
+intros An r [_ Hf] ; destruct(Rle_lt_dec 0 r) as [H1 | H1] ;
+ [| exfalso ; destruct (Hf 0) ; try apply Cv_radius_weak_0] ; assumption.
+Qed.
+
+Lemma finite_cv_radius_weakening : forall (An : Rseq) (r : R),
+  finite_cv_radius An r ->
+  forall x, Rabs x < r -> Cv_radius_weak An x.
+Proof.
+intros An r [H_sup _] x Hx ;
+ apply Cv_radius_weak_Rabs ; apply H_sup ; split ;
+ [apply Rabs_pos | assumption].
+Qed.
+
+(** Compatibility of the infinite_cv_radius concept with various operations. *)
+
+Lemma infinite_cv_radius_scal_compat : forall (An : Rseq) (lam : R), lam <> 0 ->
+  (infinite_cv_radius An <-> infinite_cv_radius (lam * An)%Rseq).
+Proof.
+intros An lam lam_neq ; split ; intros rho r ;
+ [rewrite <- Cv_radius_weak_scal | rewrite (Cv_radius_weak_scal _ lam)] ;
+ auto.
+Qed.
+
+Lemma infinite_cv_radius_abs_comapt : forall (An : Rseq),
+  infinite_cv_radius An <-> infinite_cv_radius (| An |).
+Proof.
+intros An ; split ; intros rho r ;
+ [rewrite <- Cv_radius_weak_abs | rewrite Cv_radius_weak_abs] ;
+ apply rho.
+Qed.
 
 Lemma infinite_cv_radius_opp_compat : forall (An : Rseq),
-  infinite_cv_radius (- An) <-> infinite_cv_radius An.
+  infinite_cv_radius An <-> infinite_cv_radius (- An).
 Proof.
-intros An ; split ; intros H r ; rewrite Cv_radius_weak_opp.
- apply H.
- destruct (H r) as [B HB] ; exists B ; intros Heq [i Hi] ; subst ;
- unfold gt_abs_Pser ; rewrite Rseq_opp_invol ; apply HB ; exists i ;
- reflexivity.
+intros An ; split ; intros rho r ;
+ [rewrite <- Cv_radius_weak_opp | rewrite Cv_radius_weak_opp] ;
+ apply rho.
 Qed.
 
 Section icvr_properties.
@@ -399,68 +334,41 @@ Qed.
 
 End icvr_properties.
 
-(* TOOD: change name & Rpps_seqify *)
-
-Lemma Pser_add : forall (An Bn : nat -> R) (x : R) (N : nat),
-       sum_f_R0 (gt_Pser (fun n => An n + Bn n) x) N = sum_f_R0 (gt_Pser An x) N + sum_f_R0 (gt_Pser Bn x) N.
-Proof.
-intros An Bn x N ; induction N. 
- compute ; field.
- assert (Hrew : forall a b c d e, c = d + e -> a + b + c = a + d + (b + e)).
-  intros ; repeat (rewrite Rplus_assoc) ; apply Rplus_eq_compat_l ;
-  replace (d + (b + e)) with (b + (d + e)) by field ; apply Rplus_eq_compat_l ;
-  assumption.
- simpl ; rewrite IHN ; apply Hrew.
- unfold gt_Pser ; field.
-Qed.
-
-Lemma Pser_minus : forall (An Bn : nat -> R) (x : R) (N : nat),
-       sum_f_R0 (gt_Pser (fun n => An n - Bn n) x) N = sum_f_R0 (gt_Pser An x) N - sum_f_R0 (gt_Pser Bn x) N.
-Proof.
-intros An Bn x N ; induction N. 
- compute ; field.
- assert (Hrew : forall a b c d e, c = d - e -> a - b + c = a + d - (b + e)).
-  intros ; unfold Rminus ; repeat (rewrite Rplus_assoc) ; apply Rplus_eq_compat_l ;
-  replace (d + - (b + e)) with (- b + (d - e)) by field ; apply Rplus_eq_compat_l ;
-  assumption.
- simpl ; rewrite IHN ; apply Hrew.
- unfold gt_Pser ; field.
-Qed.
-
-Lemma Pser_opp : forall (An : nat -> R) (x : R) (N : nat),
-        sum_f_R0 (gt_Pser (- An)%Rseq x) N = - sum_f_R0 (gt_Pser An x) N.
-Proof.
-intros An x N ; induction N.
- unfold gt_Pser ; simpl ; unfold Rseq_opp ; ring.
- repeat rewrite tech5 ; rewrite IHN, Ropp_plus_distr ;
- unfold gt_Pser, Rseq_opp ; ring.
-Qed.
-
 (** Pser and Un_cv are linked. See "tech12" for the reciprocal lemma *)
 
-Lemma Pser_Rseqcv_link : forall (An : nat -> R) (x l : R),
-       Pser An x l ->
-       Rseq_cv (fun N : nat => sum_f_R0 (gt_Pser An x) N) l.
+Lemma Pser_Rpser_link : forall An x l, Pser An x l <-> Rpser An x l.
 Proof.
-intros An x l Hyp.
- unfold gt_Pser.
- apply Hyp.
+intros An x l ; split ; intro Hyp ; apply Hyp.
 Qed.
 
-(* TODO: modifier Pser pour utiliser Rseq_pps *)
+Lemma Rpser_scal_compat : forall (r : R) An x l,
+  Rpser An x l -> Rpser (r * An)%Rseq x (r * l).
+Proof.
+intros r An x l Hl eps eps_pos ; destruct (Req_dec r 0) as [Heq | Hneq].
+exists O ; intros ; unfold R_dist ; rewrite Rseq_pps_scal_compat_l ;
+ unfold Rseq_mult, Rseq_constant ; rewrite <- Rmult_minus_distr_l, Rabs_mult,
+ Heq, Rabs_R0, Rmult_0_l ; assumption.
+ pose (eps' := eps / Rabs r).
+assert (eps'_pos : 0 < eps') by (unfold eps', Rdiv ;
+  apply Rlt_mult_inv_pos ; [| apply Rabs_pos_lt] ; assumption).
+ destruct (Hl eps' eps'_pos) as [N HN] ; exists N ; intros ; unfold R_dist ;
+  rewrite Rseq_pps_scal_compat_l ; unfold Rseq_mult, Rseq_constant ;
+  rewrite <- Rmult_minus_distr_l, Rabs_mult ; apply Rlt_le_trans with (Rabs r * eps').
+  apply Rmult_lt_compat_l ; [apply Rabs_pos_lt | apply HN] ; assumption.
+  right ; unfold eps' ; field ; apply Rabs_no_R0 ; assumption.
+Qed.
 
-Lemma Pser_opp_compat : forall (An : Rseq) (x l : R),
-	Pser An x l -> Pser (- An)%Rseq x (-l).
+Lemma Rpser_opp_compat : forall An x l,
+  Rpser An x l -> Rpser (- An)%Rseq x (-l).
 Proof.
 intros An x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ;
- exists N ; intros n n_lb ; unfold R_dist, Rminus in *.
- fold (gt_Pser (-An)%Rseq x).
- rewrite Pser_opp, <- Ropp_plus_distr, Rabs_Ropp ; apply HN ;
- assumption.
+ exists N ; intros n n_lb ; unfold R_dist, Rminus in * ;
+ rewrite Rseq_pps_opp_compat ; unfold Rseq_opp ; rewrite <- Ropp_plus_distr,
+  Rabs_Ropp ; apply HN ; assumption.
 Qed.
 
-Lemma Pser_add_compat : forall (An Bn : Rseq) (x la lb : R),
-  Pser An x la -> Pser Bn x lb -> Pser (An + Bn)%Rseq x (la + lb).
+Lemma Rpser_add_compat : forall An Bn x la lb,
+  Rpser An x la -> Rpser Bn x lb -> Rpser (An + Bn)%Rseq x (la + lb).
 Proof.
 intros An Bn x la lb Hla Hlb eps eps_pos.
  pose (eps' := middle 0 eps) ; assert (eps'_pos : 0 < eps')
@@ -468,11 +376,8 @@ intros An Bn x la lb Hla Hlb eps eps_pos.
  destruct (Hla _ eps'_pos) as [Na HNa] ;
  destruct (Hlb _ eps'_pos) as [Nb HNb] ;
  exists (max Na Nb) ; intros n n_lb.
- assert (Hrew := Rseq_pps_plus_compat An Bn x n) ;
-  unfold Rseq_pps, Rseq_sum, Rseq_mult in Hrew.
- rewrite Hrew.
- eapply Rle_lt_trans.
-  eapply R_dist_plus.
+ rewrite Rseq_pps_plus_compat ; eapply Rle_lt_trans.
+ eapply R_dist_plus.
  apply Rlt_le_trans with (eps' + eps').
   eapply Rlt_trans.
    eapply Rplus_lt_compat_l ; eapply HNb ;
@@ -482,32 +387,23 @@ intros An Bn x la lb Hla Hlb eps eps_pos.
   right ; unfold eps', middle ; field.
 Qed.
 
-Lemma Pser_minus_compat : forall (An Bn : Rseq) (x la lb : R),
-  Pser An x la -> Pser Bn x lb -> Pser (An - Bn)%Rseq x (la - lb).
+Lemma Rpser_minus_compat : forall An Bn x la lb,
+  Rpser An x la -> Rpser Bn x lb -> Rpser (An - Bn)%Rseq x (la - lb).
 Proof.
-intros ; unfold Rseq_minus, Rminus.
- apply Pser_add_compat ; [| apply Pser_opp_compat] ; assumption.
+intros ; unfold Rseq_minus, Rminus ; apply Rpser_add_compat ;
+ [| apply Rpser_opp_compat] ; assumption.
 Qed.
 
-Lemma Pser_unique : forall (An : nat -> R) (x l1 l2 : R),
-          Pser An x l1 -> Pser An x l2 -> l1 = l2.
+Lemma Rpser_unique : forall An (x l1 l2 : R),
+  Rpser An x l1 -> Rpser An x l2 -> l1 = l2.
 Proof.
-intros An x l1 l2 Hl1 Hl2.
- assert (T1 := Pser_Rseqcv_link _ _ _ Hl1) ;
- assert (T2 := Pser_Rseqcv_link _ _ _ Hl2) ;
- eapply Rseq_cv_unique ; eassumption.
+intros ; eapply Rseq_cv_unique ; eassumption.
 Qed.
 
-Lemma Pser_unique_extentionality : forall (An Bn : nat -> R) (x l1 l2 : R),
-	(forall n, An n = Bn n) ->
-        Pser An x l1 -> Pser Bn x l2 -> l1 = l2.
+Lemma Rpser_unique_extentionality : forall An Bn (x l1 l2 : R),
+  An == Bn -> Rpser An x l1 -> Rpser Bn x l2 -> l1 = l2.
 Proof.
-intros An Bn x l1 l2 An_eq_Bn Hl1 Hl2.
- assert (T1 := Pser_Rseqcv_link _ _ _ Hl1) ;
- assert (T2 := Pser_Rseqcv_link _ _ _ Hl2).
- assert (T3 : forall (n : nat), sum_f_R0 (fun n => (gt_Pser An x) n) n
-                  = sum_f_R0 (fun n => (gt_Pser Bn x) n) n).
-  intro n ; apply sum_eq ; intros ; unfold gt_Pser ; rewrite An_eq_Bn ; reflexivity.
- assert (T4 := Rseq_cv_eq_compat _ _ _ T3 T1).
- eapply Rseq_cv_unique ; eassumption.
+intros An Bn x l1 l2 Heq Hl1 Hl2 ; eapply Rseq_cv_unique ;
+ [rewrite Rseq_cv_eq_compat |] ; [| eapply Rseq_pps_ext ; symmetry |] ;
+ eassumption.
 Qed.

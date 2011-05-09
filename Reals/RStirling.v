@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+(*
 (** Proof of Stirling equivalence of factorial. *)
 
 Require Import Reals.
@@ -411,3 +412,4 @@ unfold Rdiv, Rsqr; field; auto with *.
 Qed.
 
 End Stirling.
+*)

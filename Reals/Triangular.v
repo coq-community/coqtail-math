@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+(*
 Require Import Reals.
 Require Import Rseries_RiemannInt.
 Require Import Rseries_facts.
@@ -167,3 +168,4 @@ Proof.
    auto with *.
    apply ser_cv_inv_snssn.
 Qed.
+*)

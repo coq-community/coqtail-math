@@ -21,7 +21,8 @@ USA.
 
 Require Import Reals.
 Require Import Rsequence_def.
-Require Import Rpser_def Rpser_base_facts Rsequence_facts.
+Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rsequence_facts.
+Require Import Rsequence_sums_facts Rsequence_rewrite_facts.
 Require Import Rpow_facts.
 Require Import Fourier.
 
@@ -30,100 +31,95 @@ Require Import MyRIneq MyNeq.
 Require Import Ranalysis_def.
 Require Import RFsequence RFsequence_facts.
 
+Require Import Ass_handling.
+
 Open Scope Rseq_scope.
 Open Scope R_scope.
 
 (** * Abel's lemma : convergence of the power serie inside the cv-disc *)
 
-Lemma Cauchy_crit_partial_sum : forall (An : nat -> R) (r : R), 
-     Cv_radius_weak An r -> forall x, Rabs x < r ->
-     Cauchy_crit (sum_f_R0 (gt_Pser An x)).
+Lemma Cauchy_crit_Rseq_pps : forall An r, Cv_radius_weak An r ->
+  forall x, Rabs x < r -> Cauchy_crit (Rseq_pps An x).
 Proof.
-intros An r Rho x x_ub eps eps_pos.
- case (Req_or_neq r) ; intro r_0.
- exists 0%nat ; apply False_ind ; rewrite r_0 in x_ub ; assert (0 <= Rabs x). apply Rabs_pos. fourier.
+intros An r rho x x_ub eps eps_pos.
+assert (r_pos : 0 < r).
+ apply Rle_lt_trans with (Rabs x) ; [apply Rabs_pos | assumption].
+assert (r_neq : 0 <> r) by (apply Rlt_not_eq ; assumption).
 assert (Hrew_abs : Rabs (x / r) = Rabs x / r).
  unfold Rdiv ; rewrite Rabs_mult ; apply Rmult_eq_compat_l ; apply Rabs_right ;
  apply Rgt_ge ; apply Rlt_gt ; apply Rinv_0_lt_compat ; apply Rle_lt_trans with (Rabs x) ;
  [apply Rabs_pos | assumption].
 assert (Rabsx_r_lt_1 : Rabs x / r < 1).
- assert (Temp : forall a b, b > 0 -> a < b -> a / b < 1).
-  clear ; intros a b b_neq a_lt_b ; replace 1 with (b * / b).
-  unfold Rdiv ; apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
-  apply Rinv_r ; apply Rgt_not_eq ; assumption.
- case (Req_or_neq x) ; intro H.
- rewrite H ; rewrite Rabs_R0 ; unfold Rdiv ; rewrite Rmult_0_l ; intuition.
- apply Temp ; [apply Rle_lt_trans with (Rabs x) ; [apply Rabs_pos |] |] ; assumption.
- assert (Hrew : forall m n, m <> n -> R_dist (sum_f_R0 (gt_Pser An x) n) (sum_f_R0 (gt_Pser An x) m)
-               = Rabs (sum_f_R0 (fun i => (gt_Pser An x) (S (min m n) + i)%nat) ((max m n) - S (min m n)))).
-  intros m n m_neq_n ; unfold R_dist.
-   case (le_lt_dec m n) ; intro s.
-   assert (H := le_lt_or_eq _ _ s) ; case H ; clear H s ; intro s.
-   apply Rabs_eq_compat ; replace (min m n) with m.
-   replace (max m n) with n. 
-   rewrite tech2 with (m:=m).
-   assert (Temp : forall a b, a + b - a = b).
-    intros a b ; field.
-   apply Temp.
-   assumption.
-   symmetry ; apply max_r ; intuition.
+ rewrite <- (Rinv_r r) ; [| symmetry ; assumption] ; unfold Rdiv ;
+ apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+destruct (Req_or_neq x) as [x_eq | x_neq].
+ exists O ; intros ; subst ; do 2 rewrite Rseq_pps_0_simpl ; rewrite R_dist_eq ;
+  assumption.
+ assert (Temp : forall m n, (m < n)%nat -> R_dist (Rseq_pps An x n) (Rseq_pps An x m)
+  = Rabs (Rseq_sum (Rseq_shifts (gt_pser An x) (S (min m n))) ((max m n) - S (min m n)))).
+  intros m n m_neq_n ; unfold R_dist ; apply Rabs_eq_compat ;
+   replace (max m n) with n. replace (min m n) with m.
+   rewrite Rseq_sum_shifts_compat ; unfold Rseq_shifts ;
+   replace (S m + (n - S m))%nat with n by omega ; reflexivity.
    symmetry ; apply min_l ; intuition.
-   apply False_ind ; exact (m_neq_n s).
-   rewrite <- Rabs_Ropp ; apply Rabs_eq_compat ; replace (min m n) with n.
-   replace (max m n) with m.
-   assert (Hrew := tech2 (gt_Pser An x) n m s) ; rewrite Hrew.
-   unfold Rminus ; rewrite Ropp_plus_distr.
-   rewrite Ropp_involutive ; rewrite <- Rplus_assoc ; rewrite Rplus_opp_l.
-   intuition.
-   symmetry ; apply max_l ; intuition.
-   symmetry ; apply min_r ; intuition.
- assert (Hineq : exists M, forall m n, m <> n -> R_dist (sum_f_R0 (gt_Pser An x) n) (sum_f_R0 (gt_Pser An x) m)
-        <= M * sum_f_R0 (fun i : nat => pow (Rabs x / r) (S (min m n) + i)) ((max m n) - S (min m n))).
-  elim Rho ; intros M HM ; exists M ; intros m n m_neq_n.
-  rewrite Hrew ; [| assumption].
-  assert (H : forall n, Rabs (An n * r^n) <= M).
-   intro u ; apply HM ; exists u ; unfold gt_abs_Pser ; reflexivity.
-  assert (Temp : forall k n, Rabs (sum_f_R0 (fun i : nat => gt_Pser An x (k + i)) n) <=
-       M * sum_f_R0 (fun i : nat => pow (Rabs x / r) (k + i)) n).
-   clear -H Hrew_abs r_0 ; intros k n ; induction n.
-   simpl ; replace (k+0)%nat with k%nat by intuition ; unfold gt_Pser.
-   replace (An k * x ^ k) with ((An k * r ^ k) * (x / r) ^ k).
-   rewrite Rabs_mult ; rewrite <- Hrew_abs ; rewrite RPow_abs ; apply Rmult_le_compat_r ;
-   [apply Rabs_pos | apply H].
-   repeat (rewrite Rmult_assoc) ; apply Rmult_eq_compat_l.
-   unfold Rdiv ; rewrite Rpow_mult_distr ; rewrite Rmult_comm ; rewrite Rmult_assoc ;
-   rewrite <- Rmult_1_r ; apply Rmult_eq_compat_l.
-   rewrite <- Rpow_mult_distr ; rewrite Rinv_l ; [apply pow1 | assumption].
-   simpl ; apply Rle_trans with (M * sum_f_R0 (fun i : nat => pow (Rabs x / r) (k + i)) n
-          + Rabs (gt_Pser An x (k + S n))).
-   apply Rle_trans with (Rabs (sum_f_R0 (fun i : nat => gt_Pser An x (k + i)) n)
-          + Rabs (gt_Pser An x (k + S n))) ; [apply Rabs_triang | apply Rplus_le_compat_r ;
-   assumption].
-   rewrite Rmult_plus_distr_l ; apply Rplus_le_compat_l. 
-   unfold gt_Pser ; replace (An (k + S n)%nat * x ^ (k + S n)) with
-          ((An (k + S n)%nat * r ^ (k + S n)) * (x / r) ^ (k + S n)).
-   rewrite Rabs_mult ; rewrite <- RPow_abs ; rewrite <- Hrew_abs ;
-   apply Rmult_le_compat_r ; [rewrite RPow_abs ; apply Rabs_pos | apply H].
-   repeat (rewrite Rmult_assoc) ; apply Rmult_eq_compat_l.
-   unfold Rdiv ; rewrite Rpow_mult_distr ; rewrite Rmult_comm ; rewrite Rmult_assoc ;
-   rewrite <- Rmult_1_r ; apply Rmult_eq_compat_l.
-   rewrite <- Rpow_mult_distr ; rewrite Rinv_l ; [apply pow1 | assumption].
-   apply Temp.
+   symmetry ; apply max_r ; intuition.
+ assert (Hrew : forall m n, m <> n -> R_dist (Rseq_pps An x n) (Rseq_pps An x m)
+  = Rabs (Rseq_sum (Rseq_shifts (gt_pser An x) (S (min m n))) ((max m n) - S (min m n)))).
+  intros m n m_neq_n ; unfold R_dist ; destruct (le_lt_dec m n) as [mlen | nltm].
+   assert (mltn : (m < n)%nat) by (clear -m_neq_n mlen ; omega) ;
+    apply Temp ; assumption.
+   rewrite Rabs_minus_sym, min_comm, max_comm ; apply Temp ; assumption.
+ clear Temp.
+ assert (Hineq : exists M, forall m n, m <> n ->
+  R_dist (Rseq_pps An x n) (Rseq_pps An x m) <= M *
+  Rseq_sum (Rseq_shifts (pow (Rabs x / r)) (S (min m n))) ((max m n) - S (min m n))).
+  destruct rho as [B HB] ; exists B ; intros m n m_neq_n ;
+   rewrite Hrew ; [| assumption].
+   assert (Temp : forall k n, Rabs (Rseq_sum (Rseq_shifts (gt_pser An x) k) n) <=
+    B * Rseq_sum (Rseq_shifts (pow (Rabs x / r)) k) n).
+    clear - r_neq r_pos Hrew_abs HB; intros k n ; induction n.
+    simpl ; do 2 rewrite Rseq_shifts_O ; rewrite <- (Rmult_1_r (gt_pser An x k)),
+    <- (Rinv_r (r ^ k)), <- Rmult_assoc, Rabs_mult, Rinv_pow ;
+    [| symmetry ; assumption | apply pow_nonzero ; symmetry ; assumption].
+    apply Rle_trans with (Rabs (gt_pser An r k) * Rabs (x ^ k) * Rabs ((/ r) ^ k)).
+    right ; repeat rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
+    unfold gt_pser, Rseq_mult ; ring.
+    apply Rle_trans with ((gt_abs_pser An r k) * (Rabs x / r) ^ k).
+    right ; rewrite Rmult_assoc ; apply Rmult_eq_compat_l ;
+    rewrite <- Hrew_abs, <- Rabs_mult, <- Rpow_mult_distr, RPow_abs ;
+    reflexivity.
+    apply Rmult_le_compat_r ; [| apply HB ; exists k ; reflexivity].
+    apply pow_le ; unfold Rdiv ; apply Rle_mult_inv_pos ; [apply Rabs_pos | assumption].
+    apply Rle_trans with (Rabs (Rseq_sum (Rseq_shifts (gt_pser An x) k) n)
+      + Rabs (Rseq_shifts (gt_pser An x) k (S n))).
+    simpl ; apply Rabs_triang.
+    apply Rle_trans with (B * Rseq_sum (Rseq_shifts (pow (Rabs x / r)) k) n
+     + B * (Rseq_shifts (pow (Rabs x / r)) k) (S n)).
+    apply Rplus_le_compat ; [apply IHn |].
+    apply Rle_trans with (gt_abs_pser An r (k + S n) * ((Rabs x / r) ^ (k + S n))).
+    right ; unfold Rseq_shifts, gt_abs_pser, gt_pser, Rseq_mult, Rseq_abs.
+    repeat rewrite Rabs_mult ; repeat rewrite Rmult_assoc ; apply Rmult_eq_compat_l ;
+    rewrite <- Hrew_abs, RPow_abs, <- Rabs_mult ; apply Rabs_eq_compat ; unfold Rdiv ;
+    rewrite Rpow_mult_distr, <- Rinv_pow ; [field |] ; [apply pow_nonzero |] ;
+    symmetry ; assumption.
+    apply Rmult_le_compat_r ; [| apply HB ; exists (k + S n)%nat ; reflexivity].
+    unfold Rseq_shifts, Rdiv ; apply pow_le ; apply Rle_mult_inv_pos ;
+    [apply Rabs_pos | assumption].
+    right ; simpl ; symmetry ; apply Rmult_plus_distr_l.
+  apply Temp.
   assert (Main :  exists M : R, forall m n : nat, m <> n ->
-        R_dist (sum_f_R0 (gt_Pser An x) n) (sum_f_R0 (gt_Pser An x) m) <=
+        R_dist (Rseq_pps An x n) (Rseq_pps An x m) <=
         M * ((Rabs x / r) ^ (S (min m n)) * (1 - (Rabs x / r)
         ^ (S (max m n - S (min m n)))) / (1 - (Rabs x / r)))).
-   elim Hineq ; intros M HM ; exists M ; intros m n m_neq_n.
-   assert (HM' := HM m n m_neq_n).
-   rewrite sum_pow in HM'. apply HM'.
-    apply Rlt_not_eq ; assumption.
+   destruct Hineq as [B HB] ; exists B ; intros m n m_neq_n.
+   specify3 HB m n m_neq_n ; unfold Rseq_shifts in HB ; rewrite sum_pow in HB ;
+   [apply HB | apply Rlt_not_eq ; assumption].
  clear Hineq Hrew.
-  assert (Final : exists M : R, 0 < M /\ forall m n : nat,
-       m <> n ->
-       R_dist (sum_f_R0 (gt_Pser An x) n) (sum_f_R0 (gt_Pser An x) m) <=
+  assert (Final : exists M : R, 0 < M /\ forall m n : nat, m <> n ->
+       R_dist (Rseq_pps An x n) (Rseq_pps An x m) <=
        (Rabs x / r) ^ S (min m n) * (M * 2 / (1 - Rabs x / r))).
-    elim Main ; intros M HM ; exists (Rmax M 1) ; split ; [apply Rlt_le_trans with 1 ;
-    [intuition | apply RmaxLess2 ] | intros m n m_neq_n].
+   destruct Main as [B HB] ; exists (Rmax B 1) ; split ;
+   [apply Rlt_le_trans with 1 ; [fourier | apply RmaxLess2] | intros m n m_neq_n].
     assert (Temp : (1 - (Rabs x / r) ^ S (max m n - S (min m n))) <= 2).
     apply Rle_trans with (Rabs (1 - (Rabs x / r) ^ S (max m n - S (min m n)))) ;
     [apply RRle_abs |].
@@ -133,12 +129,12 @@ assert (Rabsx_r_lt_1 : Rabs x / r < 1).
     replace 1 with (1 ^  S (max m n - S (min m n))) ; [apply pow_le_compat | apply pow1].
     apply Rabs_pos.
     apply Rlt_le ; rewrite Hrew_abs ; assumption.
-   apply Rle_trans with (M * ((Rabs x / r) ^ S (min m n) *
-      (1 - (Rabs x / r) ^ S (max m n - S (min m n))) / (1 - Rabs x / r))) ; [apply HM ; assumption |].
-  clear Main HM ; rewrite Rmult_comm ; unfold Rdiv ; repeat (rewrite Rmult_assoc) ;
+   apply Rle_trans with (B * ((Rabs x / r) ^ S (min m n) *
+      (1 - (Rabs x / r) ^ S (max m n - S (min m n))) / (1 - Rabs x / r))) ; [apply HB ; assumption |].
+  clear HB ; rewrite Rmult_comm ; unfold Rdiv ; repeat (rewrite Rmult_assoc) ;
   apply Rmult_le_compat_l ; [ unfold Rdiv in Hrew_abs ; rewrite <- Hrew_abs ;
   rewrite RPow_abs ; apply Rabs_pos |].
-  apply Rle_trans with ((1 - (Rabs x * / r) ^ S (max m n - S (min m n))) * (/ (1 - Rabs x * / r) * (Rmax M 1))).
+  apply Rle_trans with ((1 - (Rabs x * / r) ^ S (max m n - S (min m n))) * (/ (1 - Rabs x * / r) * (Rmax B 1))).
   apply Rmult_le_compat_l.
   unfold Rdiv in Hrew_abs ; rewrite <- Hrew_abs, RPow_abs.
   apply Rlt_le ; apply Rgt_minus.
@@ -208,7 +204,7 @@ Lemma Rpser_abel : forall (An : nat -> R) (r : R),
      Cv_radius_weak An r -> forall x, Rabs x < r -> {l | Pser An x l}.
 Proof.
 intros An r Rho x x_ub.
-  apply R_complete ; apply Cauchy_crit_partial_sum with r ; assumption.
+  apply R_complete ; apply Cauchy_crit_Rseq_pps with r ; assumption.
 Qed.
 
 Lemma Rpser_alembert_prelim : forall (An : nat -> R) (M : R),
@@ -226,7 +222,7 @@ intros An M M_pos An_neq An_frac_ub r r_bd.
  apply Rgt_not_eq ; assumption.
  exists (Rabs (An 0%nat)) ; intros x Hyp ;
   elim Hyp ; intros n Hn ; rewrite Hn ;
-  unfold gt_abs_Pser ; rewrite Rabs_mult.
+  unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult ; rewrite Rabs_mult.
   clear Hn ; induction n.
   simpl ; rewrite Rabs_R1 ; rewrite Rmult_1_r ; right ; reflexivity.
   apply Rle_trans with (Rabs (An (S n) / (An n)) * Rabs (An n) * Rabs (r ^ S n)).
@@ -244,16 +240,13 @@ intros An M M_pos An_neq An_frac_ub r r_bd.
   apply Rle_trans with (Rabs (An n) * Rabs (r ^ n))%R ; [right ; field ;
   apply Rgt_not_eq |] ; assumption.
  exists (Rabs (An 0%nat)).
-  intros x Hx ; destruct Hx as (n,Hn) ; rewrite Hn ; unfold gt_abs_Pser ; destruct n.
-  right ; apply Rabs_eq_compat ; ring.
+  intros x Hx ; destruct Hx as (n,Hn) ; rewrite Hn ; destruct n.
+  apply gt_abs_pser_0_ub.
   destruct (Req_dec r 0) as [Hr | Hf].
-  rewrite Hr ; unfold gt_abs_Pser ; rewrite Rabs_mult, <- RPow_abs,
-  Rabs_R0, pow_i, Rmult_0_r ; [apply Rabs_pos | intuition].
+  rewrite Hr ; apply gt_abs_pser_0_ub.
   apply False_ind ; assert (T := Rabs_no_R0 _ Hf) ;
   apply T ; symmetry ; assumption.
 Qed.
-
-(*TODO : prove & move*)
 
 Lemma Rseq_cv_bounded : forall Un l, l <> 0 ->
   Rseq_cv Un l -> forall k, 1 < k ->
@@ -272,7 +265,6 @@ unfold eps, Rdiv ; right ; field ; apply Rgt_not_eq ;
  apply Rlt_trans with 1 ; fourier.
 apply R_dist_gt_r ; apply HN ; intuition.
 Qed.
-
 
 
 (* TODO: move *)
@@ -299,7 +291,7 @@ destruct An_frac_event as [N HN].
   intro n ; unfold Rseq_shifts ; replace (N + S n)%nat
    with (S (N + n)) by intuition ; apply HN.
   assumption.
-  apply Cv_radius_weak_padding_neg_compat with N ;
+  rewrite Cv_radius_weak_shifts_compat.
  destruct Rho as [T HT] ; exists T ; intros u Hu ; destruct Hu as [n Hn] ;
  rewrite Hn ; apply HT ; exists n ; reflexivity.
 Qed.
@@ -311,7 +303,7 @@ Lemma Rpser_alembert_weak : forall (An : Rseq) (lambda : R),
 Proof.
 intros An lam lam_neq An_neq An_frac_cv r r_bd.
  assert (lam_pos : 0 < lam).
-  apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+  apply Rle_neq_lt ; [| symmetry ; exact lam_neq].
   eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
   (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
   does. Using [compute] to avoid the problem. *)
@@ -354,7 +346,7 @@ Proof.
 intros An lam lam_neq An_neq An_frac_ub r r_ld Hf ;
 pose (l' := middle 1 (Rabs r * lam)).
 assert (lam_pos : 0 < lam).
- apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+ apply Rle_neq_lt ; [| symmetry ; exact lam_neq].
  eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
   (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
   does. Using [compute] to avoid the problem. *)
@@ -387,11 +379,12 @@ assert (r_gt_1: 1 < (lam / l') * Rabs r).
  apply Rlt_le_trans with (Rabs r * lam * / l') ; [| right ; unfold Rdiv ; ring].
  apply Rlt_1_mult_inv ; [apply Rlt_trans with 1 ; [fourier |]|] ;
  apply middle_is_in_the_middle ; assumption.
-assert (Hinfty : Rseq_cv_pos_infty (gt_abs_Pser An r)).
+assert (Hinfty : Rseq_cv_pos_infty (gt_abs_pser An r)).
  apply Rseq_cv_pos_infty_shifts_compat with N.
  apply Rseq_cv_pos_infty_le_compat with (Rseq_mult (Rseq_constant (Rabs (An N) * Rabs r ^ N))
   (Rseq_pow (lam / l' * Rabs r))).
- intro n ; unfold Rseq_pow, Rseq_shifts, Rseq_mult, Rseq_constant, gt_abs_Pser.
+ intro n ; unfold Rseq_pow, Rseq_shifts, Rseq_mult, Rseq_constant,
+ gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
  apply Rle_trans with ((Rabs (An N) * (lam / l') ^ n) * Rabs r ^ (n + N)).
  right; repeat rewrite Rmult_assoc ; apply Rmult_eq_compat_l.
  rewrite Rpow_mult_distr, pow_add ; ring.
@@ -405,7 +398,7 @@ assert (Hinfty : Rseq_cv_pos_infty (gt_abs_Pser An r)).
  apply Rseq_pow_gt_1_cv ; assumption.
 destruct Hf as [B HB].
 destruct (Hinfty B) as [M HM].
-apply (Rlt_irrefl (gt_abs_Pser An r M)).
+apply (Rlt_irrefl (gt_abs_pser An r M)).
 apply Rle_lt_trans with B ; [apply HB ; exists M | apply HM] ; auto.
 Qed.
 
@@ -415,8 +408,8 @@ Theorem Rpser_alembert_weak_eventually : forall (An : Rseq) (lambda : R),
   Rabs r < / lambda -> Cv_radius_weak An r.
 Proof.
 intros An lam lam_neq [N An_neq] An_frac_cv r r_bd.
- apply Cv_radius_weak_padding_neg_compat with N ;
- apply Rpser_alembert_weak with lam ; try assumption.
+ rewrite Cv_radius_weak_shifts_compat ;
+ apply Rpser_alembert_weak with lam ; try (assumption || apply An_neq).
  apply Rseq_cv_eq_compat with (Rseq_shifts (fun n => Rabs (An (S n) / An n)) N).
  intro n ; unfold Rseq_shifts ; rewrite plus_n_Sm ; reflexivity.
  apply Rseq_cv_shifts_compat_reciprocal ; assumption.
@@ -428,7 +421,7 @@ Theorem Rpser_alembert_weak_reciprocal_eventually : forall (An : Rseq) (lambda :
   / lambda < Rabs r -> ~ Cv_radius_weak An r.
 Proof.
 intros An lam lam_neq [N An_neq] An_frac_cv r r_bd Hf.
- assert (H := Cv_radius_weak_shifts_compat _ _ Hf N).
+ assert (H := proj1 (Cv_radius_weak_shifts_compat _ _ N) Hf).
  revert H.
  apply Rpser_alembert_weak_reciprocal with lam ; try assumption.
  apply Rseq_cv_eq_compat with (Rseq_shifts (fun n => Rabs (An (S n) / An n)) N).
@@ -443,7 +436,7 @@ Lemma Rpser_alembert_finite : forall (An : Rseq) (lambda : R),
 Proof.
 intros An lam lam_neq An_neq An_l.
 assert (lam_pos : 0 < / lam).
- apply Rinv_0_lt_compat ; apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+ apply Rinv_0_lt_compat ; apply Rle_neq_lt ; [| symmetry ; exact lam_neq].
  eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
   (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
   does. Using [compute] to avoid the problem. *)
@@ -462,7 +455,7 @@ Lemma Rpser_alembert_finite_eventually : forall (An : Rseq) (lambda : R),
 Proof.
 intros An lam lam_neq An_neq An_l.
 assert (lam_pos : 0 < / lam).
- apply Rinv_0_lt_compat ; apply Rle_neq_lt ; split ; [| symmetry ; exact lam_neq].
+ apply Rinv_0_lt_compat ; apply Rle_neq_lt ; [| symmetry ; exact lam_neq].
  eapply Rseq_positive_limit ; [| eassumption] ; intro n ; compute ;
   (* TODO: BUG? [; simpl] does not reduce [(fun n0 => ...) n] but [. simpl.]
   does. Using [compute] to avoid the problem. *)
@@ -492,7 +485,7 @@ assert (eps_pos : 0 < /(Rabs r + 1)).
  apply Rinv_0_lt_compat ; apply Rplus_le_lt_0_compat ; [apply Rabs_pos |
  apply Rlt_0_1].
 destruct (An_frac_0 (/ (Rabs r + 1))%R eps_pos) as [N2 HN2].
-apply Cv_radius_weak_padding_neg_compat with (max N1 N2).
+rewrite (Cv_radius_weak_shifts_compat _ _ (max N1 N2)).
 apply Rpser_alembert_prelim with (/ (Rabs r + 1)).
 assumption.
 intro n ; unfold Rseq_shifts.
@@ -514,8 +507,8 @@ Lemma Rpser_bound_criteria : forall (An : nat -> R) (x l : R),
 Proof.
 intros An x l Hxl.
  destruct Hxl with 1 as (N, HN) ; [fourier |].
- assert (H1 : forall n :  nat, (n >= S N)%nat -> gt_abs_Pser An (Rabs x) n <= Rmax 2 (Rabs (An 0%nat) + 1)).
-  intros n Hn ; case_eq n ; unfold gt_abs_Pser.
+ assert (H1 : forall n :  nat, (n >= S N)%nat -> gt_abs_pser An (Rabs x) n <= Rmax 2 (Rabs (An 0%nat) + 1)).
+  intros n Hn ; case_eq n ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
   intro H ; simpl ; rewrite Rmult_1_r ; apply Rle_trans with (Rabs (An 0%nat) +1) ;
    [intuition | apply RmaxLess2].
    intros m Hrew ; replace (Rabs (An (S m) * Rabs x ^ S m))
@@ -533,13 +526,11 @@ intros An x l Hxl.
           (- sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m) by field.
    rewrite <- Rplus_comm ; rewrite Rplus_assoc ; rewrite Rplus_opp_l.
    intuition.
-   destruct (Rseq_partial_bound (gt_Pser An x) (S N)) as (B,HB).
+   destruct (Rseq_partial_bound (gt_pser An x) (S N)) as (B,HB).
    exists (Rmax B (Rmax 2 (Rabs (An 0%nat) + 1))).
    intros y Hy ; destruct Hy as (i,Hi) ; rewrite Hi.
    case (le_lt_dec i (S N)) ; intro Hi_b.
    apply Rle_trans with B ; [apply HB | apply RmaxLess1] ; intuition.
-   replace (gt_abs_Pser An x i) with (gt_abs_Pser An (Rabs x) i).
-   apply Rle_trans with (Rmax 2 (Rabs (An 0%nat) + 1)) ; [apply H1 | apply RmaxLess2] ; intuition.
-   unfold gt_abs_Pser ; rewrite RPow_abs ; rewrite Rabs_mult ; rewrite Rabs_Rabsolu ;
-   rewrite <- Rabs_mult ; reflexivity.
+   rewrite <- gt_abs_pser_Rabs_compat ; apply Rle_trans with (Rmax 2 (Rabs (An 0%nat) + 1)) ;
+   [apply H1 | apply RmaxLess2] ; intuition.
 Qed.

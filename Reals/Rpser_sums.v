@@ -31,7 +31,7 @@ Defined.
 (** Proof that it is really the sum *)
 
 Lemma weaksum_r_sums : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r) (x : R),
-      Rabs x < r -> Pser An x (weaksum_r An r Pr x).
+      Rabs x < r -> Rpser An x (weaksum_r An r Pr x).
 Proof.
 intros An r Pr x x_bd.
  unfold weaksum_r ; case (Rlt_le_dec (Rabs x) r) ; intro s.
@@ -47,7 +47,7 @@ Proof.
 intros An r Pr1 Pr2 x x_bd ;
  assert (T1 := weaksum_r_sums _ _ Pr1 _ x_bd) ;
  assert (T2 := weaksum_r_sums _ _ Pr2 _ x_bd) ;
- eapply Pser_unique ; eassumption.
+ eapply Rpser_unique ; eassumption.
 Qed.
 
 Lemma weaksum_r_unique_strong : forall (An : nat -> R) (r1 r2 : R) (Pr1 : Cv_radius_weak An r1)
@@ -57,7 +57,7 @@ Proof.
 intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2.
   assert (T1 := weaksum_r_sums _ _ Pr1 _ x_bd1) ;
   assert (T2 := weaksum_r_sums _ _ Pr2 _ x_bd2) ;
- eapply Pser_unique ; eassumption.
+ eapply Rpser_unique ; eassumption.
 Qed.
 
 (** * Definition of sum_r *)
@@ -79,7 +79,7 @@ Defined.
 (** Proof that it is really the sum *)
 
 Lemma sum_r_sums : forall  (An : nat -> R) (r : R) (Pr : finite_cv_radius An r),
-      forall x, Rabs x < r -> Pser An x (sum_r An r Pr x).
+      forall x, Rabs x < r -> Rpser An x (sum_r An r Pr x).
 Proof.
 intros An r Pr x x_ub.
  unfold sum_r ; destruct (Rlt_le_dec (Rabs x) r) as [x_bd | x_nbd].
@@ -96,7 +96,7 @@ Proof.
 intros An r Pr1 Pr2 x x_bd ;
  assert (T1 := sum_r_sums _ _ Pr1 _ x_bd) ;
  assert (T2 := sum_r_sums _ _ Pr2 _ x_bd) ;
- eapply Pser_unique ; eassumption.
+ eapply Rpser_unique ; eassumption.
 Qed.
 
 Lemma sum_r_unique_strong : forall (An : nat -> R) (r1 r2 : R) (Pr1 : finite_cv_radius An r1)
@@ -106,7 +106,7 @@ Proof.
 intros An r1 r2 Pr1 Pr2 x x_bd1 x_bd2 ;
  assert (T1 := sum_r_sums _ _ Pr1 _ x_bd1) ;
  assert (T2 := sum_r_sums _ _ Pr2 _ x_bd2) ;
- eapply Pser_unique ; eassumption.
+ eapply Rpser_unique ; eassumption.
 Qed.
 
 (** * Definition of sum *)
@@ -120,7 +120,7 @@ Defined.
 (** Proof that it is really the sum *)
 
 Lemma sum_sums : forall  (An : nat -> R) (Pr : infinite_cv_radius An),
-      forall x, Pser An x (sum An Pr x).
+      forall x, Rpser An x (sum An Pr x).
 Proof.
 intros An Pr x.
  apply weaksum_r_sums ; intuition.
@@ -134,6 +134,5 @@ Proof.
 intros An Pr1 Pr2 x ;
  assert (T1 := sum_sums  _ Pr1 x) ;
  assert (T2 := sum_sums  _ Pr2 x) ;
- eapply Pser_unique ; eassumption.
+ eapply Rpser_unique ; eassumption.
 Qed.
-

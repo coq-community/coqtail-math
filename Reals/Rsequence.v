@@ -6,5 +6,6 @@ Require Export Rsequence_facts.
 Require Export Rsequence_usual_facts.
 Require Export Rsequence_sums_facts.
 Require Export Rsequence_ring.
+Require Export Rsequence_rewrite_facts.
 Require Export Rsequence_tactics.
 Require Export Rsequence_subsequence.

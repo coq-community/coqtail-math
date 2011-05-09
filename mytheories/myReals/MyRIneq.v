@@ -168,6 +168,12 @@ intros r1 r2 r r_neq.
  apply Rmult_eq_compat_l ; assumption.
 Qed.
 
+Lemma Rminus_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 ->
+  r1 - r2 = r3 - r4.
+Proof.
+intros r1 r2 r3 r4 [] [] ; reflexivity.
+Qed.
+
 Lemma Rmax_lt_lt_lt : forall x y z, Rmax x y < z <-> x < z /\ y < z.
  intros x y z. split.
   unfold Rmax. case (Rle_dec x y) ; intros Hyp Hyp2.
@@ -231,11 +237,9 @@ Lemma Rmin_ge_ge_ge : forall x y z, Rmin x y >= z <-> x >= z /\ y >= z.
   intro ; exact (proj2 Hyp).
 Qed.
 
-Lemma Rle_neq_lt : forall x y, x <= y /\ x <> y -> x < y.
+Lemma Rle_neq_lt : forall x y, x <= y -> x <> y -> x < y.
 Proof.
-intros m n Hyp. unfold Rle in Hyp.
- destruct Hyp as (Hyp1,Hyp2).
- case Hyp1.
+intros m n Hyp1 Hyp2 ; case Hyp1.
  intuition.
  intro Hfalse ; apply False_ind ; apply Hyp2 ; exact Hfalse.
 Qed.
@@ -247,6 +251,12 @@ intros x y y_pos y_lb ; apply Rle_lt_trans with (y * / y).
  apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
 Qed.
 
+Lemma Rabs_pos_lt_contravar : forall x, 0 < Rabs x -> x <> 0.
+Proof.
+intros x Hpos ; destruct (Req_or_neq x) as [Heq | Hneq].
+ rewrite Heq, Rabs_R0 in Hpos ; destruct (Rlt_irrefl _ Hpos).
+ assumption.
+Qed.
 
 Require Setoid.
 

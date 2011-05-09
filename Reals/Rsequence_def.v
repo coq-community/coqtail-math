@@ -46,7 +46,6 @@ Definition Rseq_mult Un Vn n := Un n * Vn n.
 Definition Rseq_opp Un n := Ropp (Un n).
 Definition Rseq_inv Un n := Rinv (Un n).
 Definition Rseq_sum := sum_f_R0.
-Definition Rseq_pps Un (x : R) := Rseq_sum (Rseq_mult Un (pow x)).
 Definition Rseq_prod Un Vn n := Rseq_sum (Rseq_mult Un (fun p => Vn (n - p)%nat)) n.
 
 Infix "+" := Rseq_plus : Rseq_scope.

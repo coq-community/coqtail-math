@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+(*
 Require Import Reals.
 Require Import Fourier.
 Require Import Rsequence_facts.
@@ -1862,3 +1863,4 @@ eapply Rser_cv_eq_compat.
  field.
  INR_solve.
 Qed.
+*)

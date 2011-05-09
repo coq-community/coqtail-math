@@ -4,7 +4,8 @@ Require Import Fourier MyRIneq.
 Require Import Ranalysis_def Rfunction_def Rextensionality Nth_derivative_def.
 
 Require Import Rsequence_facts RFsequence RFsequence_facts.
-Require Import Rpser_def Rpser_base_facts Rpser_radius_facts Rpser_sums Rpser_derivative.
+Require Import Rpser_def Rpser_def_simpl Rpser_base_facts.
+Require Import Rpser_radius_facts Rpser_sums Rpser_derivative.
 
 Require Import C_n_def C_n_facts C_n_usual Nth_derivative_def Nth_derivative_facts.
 

@@ -71,13 +71,13 @@ Qed.
 
 (**********)
 Lemma Rseq_cv_eq_compat :
-  forall Un Vn l, Un == Vn -> Rseq_cv Un l -> Rseq_cv Vn l.
+  forall Un Vn l, Un == Vn ->
+  (Rseq_cv Un l <-> Rseq_cv Vn l).
 Proof.
-intros Un Vn l Heq Hcv.
-intros eps Heps.
-destruct (Hcv eps Heps) as [N HN].
-exists N; intros n Hn.
-rewrite <- (Heq n).
+intros Un Vn l Heq ; split ; intros Hcv eps Heps ;
+destruct (Hcv eps Heps) as [N HN] ;
+exists N; intros n Hn ;
+[rewrite <- Heq | rewrite Heq] ;
 apply HN; assumption.
 Qed.
 

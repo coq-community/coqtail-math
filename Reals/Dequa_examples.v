@@ -22,7 +22,7 @@ Lemma identity_is_id :
  [| y 0 1 :=: cst 1 |]R3 ((existT _ _ identity_infinite_cv_radius) :: nil).
 Proof.
 apply interp_equa_in_N_R3 ; simpl ; rewrite An_nth_deriv_1.
-intro n ; unfold An_deriv, constant_seq, identity_seq.
+intro n ; unfold An_deriv, Rseq_shift, Rseq_mult, constant_seq, identity_seq.
  destruct (eq_nat_dec n 0) ; destruct (eq_nat_dec (S n) 1).
    subst ; rewrite Rmult_1_r ; reflexivity.
    subst ; destruct (f (eq_refl 1%nat)).

@@ -3,94 +3,81 @@ Require Import Fourier.
 Require Import Rpow_facts.
 
 Require Import Ranalysis_def Rextensionality.
-Require Import Rsequence_facts RFsequence RFsequence_facts.
-Require Import Rpser_def Rpser_base_facts.
+Require Import Rsequence_facts Rsequence_sums_facts Rsequence_rewrite_facts.
+Require Import RFsequence RFsequence_facts.
+Require Import Rpser_def Rpser_def_simpl Rpser_base_facts.
 Require Import Rpser_cv_facts Rpser_sums.
+Require Import MyINR.
 
 Open Local Scope R_scope.
 
 (** Abel's lemma : Normal convergence of the power serie *)
 
-Lemma Rpser_abel2_prelim : forall (An : nat -> R) (r : R), 
-     Cv_radius_weak An r -> forall x, Rabs x < r -> { l | Pser (fun n => Rabs (An n)) x l}.
+Lemma Rpser_abel2_prelim : forall (An : Rseq) (r : R), 
+  Cv_radius_weak An r -> forall x, Rabs x < r ->
+  { l | Rpser (| An |) x l}.
 Proof.
 intros An r Rho x x_bd ;
- assert (Rho' := Cv_radius_weak_Rabs_compat An r Rho) ;
- pose (l := weaksum_r (fun n => Rabs (An n)) r Rho' x) ;
+ assert (Rho' := proj1 (Cv_radius_weak_abs An r) Rho) ;
+ pose (l := weaksum_r (| An |) r Rho' x) ;
  exists l ; apply weaksum_r_sums ; assumption.
 Qed.
 
-Lemma Rpser_abel2 : forall (An : nat -> R) (r : R), 
-     Cv_radius_weak An r -> forall r0 : posreal, r0 < r ->
-     CVN_r (fun n x => gt_Pser An x n) r0.
+Lemma Rpser_abel2 : forall An r, Cv_radius_weak An r ->
+  forall r' : posreal, r' < r -> CVN_r (fun n x => gt_pser An x n) r'.
 Proof.
-intros An r Pr r0 r0_ub.
- destruct r0 as (a,a_pos).
- assert (a_bd : Rabs a < r).
-  rewrite Rabs_right ; [| apply Rgt_ge ; apply Rlt_gt] ; assumption.
- assert (r_pos : 0 < r). 
-  apply Rlt_trans with a ; assumption.
- assert (r'_bd : Rabs ((a + r) / 2) < r).
-  rewrite Rabs_right.
-  assert (Hrew : r = ((r+r)/2)) by field ; rewrite Hrew at 2; unfold Rdiv ;
-  apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat ; intuition |] ;
-  apply Rplus_lt_compat_r ; rewrite Rabs_right in a_bd ; intuition.
-  apply Rle_ge ; unfold Rdiv ; replace 0 with (0 * /2) by field ; apply Rmult_le_compat_r ;
-  fourier.
- assert (r'_bd2 : Rabs (Rabs ((a + r) / 2)) < r).
-  rewrite Rabs_right ; [assumption | apply Rle_ge ; apply Rabs_pos].
- assert (Pr' := Cv_radius_weak_Rabs_compat _ _ Pr).
- exists (gt_abs_Pser An ((a+r)/2)) ; exists (weaksum_r (fun n => Rabs (An n)) r Pr' (Rabs ((a+r)/2))) ; split.
- assert (H := weaksum_r_sums (fun n => Rabs (An n)) r Pr' (Rabs ((a + r) / 2)) r'_bd2).
- assert (Main := Pser_Rseqcv_link _ _ _ H). 
- intros eps eps_pos ; destruct (Main eps eps_pos) as (N, HN) ; exists N.
-  assert (Hrew : forall k, Rabs (gt_abs_Pser An ((a + r) / 2) k) = gt_Pser (fun n0 : nat => Rabs (An n0)) (Rabs ((a + r) / 2)) k).
-   intro k ; unfold gt_abs_Pser, gt_Pser ; rewrite Rabs_Rabsolu ; rewrite Rabs_mult ; rewrite RPow_abs ; reflexivity.
-  assert (Temp : forall n, sum_f_R0 (fun k : nat => Rabs (gt_abs_Pser An ((a + r) / 2) k)) n
-            = sum_f_R0 (gt_Pser (fun n0 : nat => Rabs (An n0)) (Rabs ((a + r) / 2))) n).
-   intros n ; clear -Hrew ; induction n ; simpl ; rewrite Hrew ; [| rewrite IHn] ; reflexivity.
-  intros n n_lb ; rewrite Temp ; apply HN ; assumption.
- intros n y Hyp ; unfold gt_Pser, gt_abs_Pser ; repeat (rewrite Rabs_mult) ;
- apply Rmult_le_compat_l ; [apply Rabs_pos |] ; repeat (rewrite <- RPow_abs) ;
- apply pow_le_compat ; [apply Rabs_pos |] ; unfold Boule in Hyp ; apply Rle_trans with a ;
- apply Rlt_le ; replace (y-0) with y in Hyp by intuition ; intuition ; rewrite Rabs_right.
- assert (Hrew : a = ((a+a)/2)) by field ; rewrite Hrew at 1; unfold Rdiv ;
-  apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat ; intuition |] ;
-  apply Rplus_lt_compat_l ; intuition.
-  apply Rle_ge ; unfold Rdiv ; replace 0 with (0 * /2) by field ; apply Rmult_le_compat_r ;
-  fourier.
+intros An r Pr [a a_pos] r'_ub.
+ assert (a_bd : Rabs a < r) by (rewrite Rabs_pos_eq ; [| left] ; assumption).
+ assert (r_pos : 0 < r) by (apply Rlt_trans with a ; assumption).
+ assert (r'_bd : Rabs (middle a r) < r).
+  rewrite Rabs_pos_eq ; [apply middle_is_in_the_middle |
+   left ; apply middle_lt_lt_pos_lt] ; assumption.
+ rewrite Cv_radius_weak_abs in Pr.
+ exists (gt_abs_pser An (middle a r)) ;
+ exists (weaksum_r (| An |) r Pr (Rabs (middle a r))) ; split.
+ rewrite <- Rseq_cv_Un_cv_equiv ;
+ apply Rseq_cv_eq_compat with (Rseq_sum (gt_abs_pser An (middle a r))).
+ intro n ; fold (Rseq_abs (gt_abs_pser An (middle a r))) ;
+ apply Rseq_sum_ext with (Vn := gt_abs_pser An (middle a r)) ;
+ apply Rseq_abs_proj.
+ assert (tmp := Rseq_sum_ext _ _ (gt_abs_pser_unfold An (middle a r))) ;
+ symmetry in tmp ; apply (Rseq_cv_eq_compat  _ _ _ tmp) ; clear tmp.
+ apply weaksum_r_sums ; rewrite Rabs_Rabsolu ; assumption.
+ intros n y B ; apply gt_abs_pser_le_compat ; unfold Boule in B ;
+ apply Rle_trans with a ; [left |].
+ unfold Rminus in B ; rewrite Ropp_0, Rplus_0_r in B ; apply B.
+ rewrite Rabs_pos_eq ; [left ; apply middle_is_in_the_middle |
+ left ; apply middle_lt_lt_pos_lt] ; assumption.
 Qed.
 
 (** A sufficient condition for the radius of convergence*)
-Lemma Rpser_finite_cv_radius_caracterization : forall (An : nat -> R) (x0 l : R),
-   Pser An x0 l -> (forall l : R, ~ Pser_abs An x0 l)  -> finite_cv_radius An (Rabs x0).
+Lemma Rpser_finite_cv_radius_caracterization : forall An x l,
+  Rpser An x l -> (forall l : R, ~ Rpser_abs An x l) ->
+  finite_cv_radius An (Rabs x).
 Proof.
-intros An x0 l Hcv Hncv.
-split; intros x Hx.
-
- apply Cv_radius_weak_le_compat with x0.
-  rewrite Rabs_pos_eq with x; intuition.
+intros An x l Hcv Hncv ; split; intros r Hr.
+ apply Cv_radius_weak_le_compat with x.
+  rewrite Rabs_pos_eq ; [left |] ; apply Hr.
   apply (Rpser_bound_criteria _ _ l Hcv).
-  
  intro Hf.
- destruct (Rpser_abel2_prelim An x Hf (Rabs x0)) as [l' Hl'].
- rewrite Rabs_Rabsolu; trivial.
+ destruct (Rpser_abel2_prelim An r Hf (Rabs x)) as [l' Hl'].
+ rewrite Rabs_Rabsolu ; assumption.
  apply Hncv with l'.
-trivial.
+ rewrite Rpser_abs_unfold ; apply Hl'.
 Qed.
 
-Lemma Rpser_infinite_cv_radius_caracterization : forall An, (forall x, {l | Pser An x l}) ->
-     infinite_cv_radius An.
+Lemma Rpser_infinite_cv_radius_caracterization :
+  forall An, (forall x, {l | Rpser An x l}) -> infinite_cv_radius An.
 Proof.
-intros An weaksum r ; destruct (weaksum r) as (l, Hl) ; apply Rpser_bound_criteria with l ;
- assumption.
+intros An weaksum r ; destruct (weaksum r) as (l, Hl) ;
+ apply Rpser_bound_criteria with l ; assumption.
 Qed.
 
 (** * Caracterization of the cv radius of the formal derivative *)
 
 Lemma Cv_radius_weak_derivable_compat : forall An r,
-         Cv_radius_weak An r -> forall r', Rabs r' < Rabs r ->
-         Cv_radius_weak (An_deriv An) r'.
+  Cv_radius_weak An r -> forall r', Rabs r' < Rabs r ->
+  Cv_radius_weak (An_deriv An) r'.
 Proof.
 intros An r rho r' r'_bd.
  assert (Rabsr_pos : 0 < Rabs r).
@@ -104,20 +91,21 @@ intros An r rho r' r'_bd.
   destruct rho as (B,HB).
   case (Req_or_neq r') ; intro r'_lb.
   exists (Rabs (An 1%nat)) ; intros x Hx ; destruct Hx as (i, Hi) ;
- rewrite Hi ; unfold gt_abs_Pser, An_deriv.
+ rewrite Hi ; unfold gt_abs_pser, gt_pser, An_deriv, Rseq_shift, Rseq_mult, Rseq_abs.
  destruct i.
  simpl ; rewrite Rmult_1_l ; rewrite Rmult_1_r ; apply Rle_refl.
  rewrite r'_lb ; rewrite pow_i ; [| intuition] ; repeat (rewrite Rmult_0_r) ;
  rewrite Rabs_R0 ; apply Rabs_pos.
  assert (Rabsr'_pos : 0 < Rabs r') by (apply Rabs_pos_lt ; assumption). 
  destruct (Rpser_cv_speed_pow_id (r' / r) x_lt_1 (Rabs r') Rabsr'_pos) as (N, HN).
- destruct (Rseq_partial_bound (gt_abs_Pser (An_deriv An) r') N) as (B2, HB2).
+ destruct (Rseq_partial_bound (gt_abs_pser (An_deriv An) r') N) as (B2, HB2).
  exists (Rmax B B2) ; intros x Hx ; destruct Hx as (i, Hi) ;
- rewrite Hi ; unfold gt_abs_Pser in * ; case (le_lt_dec i N) ; intro H.
+ rewrite Hi ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult in * ;
+ case (le_lt_dec i N) ; intro H.
  rewrite <- Rabs_Rabsolu ; apply Rle_trans with B2 ; [apply HB2 | apply RmaxLess2] ;
  assumption.
  apply Rle_trans with (Rabs (/r' * (INR (S i) * (r' / r) ^ S i) * An (S i) * r ^ S i)).
- right ; apply Rabs_eq_compat ; unfold An_deriv ; field_simplify.
+ right ; apply Rabs_eq_compat ; unfold An_deriv, Rseq_shift, Rseq_mult ; field_simplify.
  unfold Rdiv ; repeat (rewrite Rmult_assoc) ; repeat (apply Rmult_eq_compat_l).
  rewrite Rpow_mult_distr.
  rewrite Rinv_1 ; rewrite Rmult_1_r.
@@ -163,32 +151,20 @@ Proof.
 intros An r [B HB] ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
  intros x [i Hi] ; subst.
  destruct i.
-  unfold gt_abs_Pser ; simpl ; rewrite Rmult_1_r ; apply Rmax_r.
-
- apply Rle_trans with (Rabs (An (S i) * r ^ i) * Rabs r).
-  right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
-   simpl ; ring.
- apply Rle_trans with (gt_abs_Pser (An_deriv An) r i * / INR (S i) * Rabs r).
-  unfold gt_abs_Pser, An_deriv ; rewrite <- (Rabs_pos_eq (/ INR (S i))),
-  <- (Rabs_mult _ (/ INR (S i))).
-  apply Rmult_le_compat_r ; [apply Rabs_pos |] ; right ; apply Rabs_eq_compat ;
-  field ; apply not_0_INR ; omega.
-  rewrite S_INR ; left ; apply RinvN_pos.
- apply Rle_trans with (gt_abs_Pser (An_deriv An) r i * / 1 * Rabs r).
-  apply Rmult_le_compat_r ; [apply Rabs_pos |] ;
-  apply Rmult_le_compat_l ; [apply Rabs_pos |] ;
-  apply Rle_Rinv ; [fourier
-  | replace 0 with (INR O) by reflexivity ; apply lt_INR
-  | replace 1 with (INR 1) by reflexivity ; apply le_INR] ; omega.
- rewrite Rinv_1, Rmult_1_r ; apply Rle_trans with (B * Rabs r).
-  apply Rmult_le_compat_r ; [apply Rabs_pos |] ;
-  apply HB ; exists i ; reflexivity.
- apply Rmax_l.
+  apply Rle_trans with (Rabs (An O)) ; [apply gt_abs_pser_0_ub | apply Rmax_r].
+  rewrite gt_abs_pser_S ; apply Rle_trans with (B * Rabs r) ; [| apply Rmax_l].
+  apply Rmult_le_compat_r ; [apply Rabs_pos |].
+  apply Rle_trans with (gt_abs_pser (An_deriv An) r i) ; [| apply HB ; exists i ;
+  reflexivity].
+  rewrite <- (Rmult_1_l (gt_abs_pser (Rseq_shift An) r i)).
+  unfold gt_abs_pser, gt_pser, An_deriv, Rseq_shift, Rseq_abs, Rseq_mult.
+  rewrite Rmult_assoc, (Rabs_mult (INR (S i))) ; apply Rmult_le_compat_r ;
+  [apply Rabs_pos |] ; rewrite <- INR_1, Rabs_INR ; apply le_INR ; omega.
 Qed.
 
 Lemma finite_cv_radius_derivable_compat : forall An r,
-         finite_cv_radius An r <->
-         finite_cv_radius (An_deriv An) r.
+  finite_cv_radius An r <->
+  finite_cv_radius (An_deriv An) r.
 Proof.
 intros An r ; split.
 

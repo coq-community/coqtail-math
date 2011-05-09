@@ -13,7 +13,8 @@ Local Open Scope R_scope.
  interpretation as propositions. *)
 
 Inductive side_equa : Set :=
-    | cst  : R -> side_equa
+    | cst  : forall (r : R), side_equa
+    | scal : forall (r : R) (s : side_equa), side_equa
     | y    : forall (p : nat) (k : nat), side_equa
     | opp  : forall (s1 : side_equa), side_equa
     | plus : forall (s1 s2 : side_equa), side_equa.
@@ -26,6 +27,9 @@ Fixpoint interp_side_equa_in_R (s : side_equa)
  (rho : list (sigT Cn)) : option (R -> R).
 destruct_eq s.
  exact (Some (fun _ => r)).
+ destruct (interp_side_equa_in_R b rho) as [f |].
+  exact (Some ((fun _ => r) * f)%F).
+  exact None.
  destruct (nth_error rho p) as [[l [f Clf]] |].
   destruct (le_lt_dec k l) as [klel | _].
    exact (Some (nth_derive' k f Clf klel)).
@@ -44,6 +48,9 @@ Fixpoint interp_side_equa_in_R2 (s : side_equa)
  (rho : list Cinfty) : option (R -> R).
 destruct_eq s.
  exact (Some (fun _ => r)).
+ destruct (interp_side_equa_in_R2 b rho) as [f |].
+  exact (Some ((fun _ => r) * f)%F).
+  exact None.
  destruct (nth_error rho p) as [[f Cf] |].
   exact (Some (nth_derive' k f (Cf _) (le_refl _))).
   exact None.
@@ -60,6 +67,9 @@ Fixpoint interp_side_equa_in_N (s : side_equa)
  (rho : list Rseq) : option (nat -> R).
 destruct_eq s.
  exact (Some (constant_seq r)).
+ destruct (interp_side_equa_in_N b rho) as [un |].
+  exact (Some (r * un)%Rseq).
+  exact None.
  destruct (nth_error rho p) as [un |].
    exact (Some (An_nth_deriv un k)).
    exact None.
@@ -75,7 +85,10 @@ Defined.
 Fixpoint interp_side_equa_in_SN (s : side_equa)
  (rho : list Rseq) : option (nat -> R -> R).
 destruct_eq s.
- exact (Some (fun n x => Rseq_pps (fun n => if eq_nat_dec n 0 then r else 0) x n)).
+ exact (Some (fun n x => Rseq_pps (constant_seq r) x n)).
+ destruct (interp_side_equa_in_SN b rho) as [un |].
+  exact (Some (fun n => ((fun _ => r) * un n)%F)).
+  exact None.
  destruct (nth_error rho p) as [un |].
    exact (Some (fun n x => Rseq_pps (An_nth_deriv un k) x n)).
    exact None.
@@ -93,6 +106,9 @@ Fixpoint interp_side_equa_in_R3 (s : side_equa)
  (rho : list (sigT infinite_cv_radius)) : option (R -> R).
 destruct_eq s.
  exact (Some (fun _=> r)).
+ destruct (interp_side_equa_in_R3 b rho) as [f |].
+  exact (Some ((fun _ => r) * f)%F).
+  exact None.
  destruct (nth_error rho p) as [[An rAn] |].
   exact (Some (nth_derive (sum An rAn) (C_infty_Rpser An rAn k))).
   exact None.

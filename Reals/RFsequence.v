@@ -53,8 +53,9 @@ Infix "/" := RFseq_div : RFseq_scope.
 (** * Convergence of functions sequences. *)
 
 Definition RFseq_cv fn f := forall x, Rseq_cv (fun n => fn n x) (f x).
-Definition RFseq_cv_interv fn f (lb ub : R) := forall x, lb < x -> x < ub -> Rseq_cv (fun n => fn n x) (f x).
+Definition RFseq_cv_interv fn f (lb ub : R) :=
+  forall x, lb < x -> x < ub -> Rseq_cv (fun n => fn n x) (f x).
 
 Definition RFseq_cvu fn f (x : R) (r : posreal) := forall eps : R, 0 < eps ->
-        exists N : nat, forall n (y : R), (N <= n)%nat -> Boule x r y ->
-        R_dist (fn n y) (f y) < eps.
+  exists N : nat, forall n (y : R), (N <= n)%nat -> Boule x r y ->
+  R_dist (fn n y) (f y) < eps.
