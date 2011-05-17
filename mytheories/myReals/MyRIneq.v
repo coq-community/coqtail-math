@@ -174,6 +174,12 @@ Proof.
 intros r1 r2 r3 r4 [] [] ; reflexivity.
 Qed.
 
+Lemma Rmult_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 ->
+  r1 * r2 = r3 * r4.
+Proof.
+intros r1 r2 r3 r4 [] [] ; reflexivity.
+Qed.
+
 Lemma Rmax_lt_lt_lt : forall x y z, Rmax x y < z <-> x < z /\ y < z.
  intros x y z. split.
   unfold Rmax. case (Rle_dec x y) ; intros Hyp Hyp2.
@@ -256,6 +262,26 @@ Proof.
 intros x Hpos ; destruct (Req_or_neq x) as [Heq | Hneq].
  rewrite Heq, Rabs_R0 in Hpos ; destruct (Rlt_irrefl _ Hpos).
  assumption.
+Qed.
+
+Lemma Rmult_Rinv_le_compat : forall x y z, 0 < y ->
+  x <= y * z -> x * / y <= z.
+Proof.
+intros x y z y_pos Hle.
+ apply Rle_trans with (y * z * / y).
+ apply Rmult_le_compat_r.
+  left ; apply Rinv_0_lt_compat ; assumption.
+  assumption.
+ right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_le_compat_contravar : forall x y z, 0 < y ->
+ x * / y <= z -> x <= y * z.
+Proof.
+intros x y z y_pos Hle.
+ apply Rle_trans with (y * (x * / y)).
+  right ; field ; apply Rgt_not_eq ; assumption.
+  apply Rmult_le_compat_l ; [left |] ; assumption.
 Qed.
 
 Require Setoid.

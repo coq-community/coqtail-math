@@ -25,6 +25,8 @@ Require Import Rpser_def Rpser_def_simpl.
 Open Scope R_scope.
 Open Scope Rseq_scope.
 
+(** * Rseq_sum : compatibility with common operations. *)
+
 Section Rseq_sum_facts.
 
 Lemma Rseq_sum_simpl : forall Un n,
@@ -40,6 +42,18 @@ Proof.
 intros Un Vn Hext n ; induction n.
  apply Hext.
  simpl ; rewrite IHn, Hext ; reflexivity.
+Qed.
+
+Lemma Rseq_sum_ext_strong : forall Un Vn n,
+  (forall p, (p <= n)%nat -> Un p = Vn p) ->
+  Rseq_sum Un n = Rseq_sum Vn n.
+Proof.
+intros Un Vn n ; induction n ; intro Heq.
+ simpl ; apply Heq ; trivial.
+ do 2 rewrite Rseq_sum_simpl ; rewrite IHn, Heq.
+  reflexivity.
+  trivial.
+  intros ; apply Heq ; auto.
 Qed.
 
 Lemma Rseq_sum_scal_compat_l : forall (l : R) Un,
@@ -109,6 +123,30 @@ intros Un k n ; induction n.
 Qed.
 
 End Rseq_sum_facts.
+
+(** * Rseq_sum : compatibility with the order. *)
+
+Lemma Rseq_sum_pos : forall An n,
+  (forall p, (p <= n)%nat -> 0 <= An p) ->
+  0 <= Rseq_sum An n.
+Proof.
+intros An n ; induction n ; intro Hpos.
+ simpl ; apply Hpos ; trivial.
+ rewrite Rseq_sum_simpl ; apply Rplus_le_le_0_compat ;
+ [apply IHn ; intros p p_bd |] ; apply Hpos ; omega.
+Qed.
+
+Lemma Rseq_sum_le_compat : forall An n,
+  Rabs (Rseq_sum An n) <= Rseq_sum (| An |) n.
+Proof.
+intros An n ; induction n.
+ unfold Rseq_abs ; simpl ; reflexivity.
+ do 2 rewrite Rseq_sum_simpl ; eapply Rle_trans ;
+ [eapply Rabs_triang |] ; apply Rplus_le_compat ;
+ [assumption | reflexivity].
+Qed.
+
+(** * Rseq_pps : compatibility with common operations. *)
 
 Section Rseq_pps_facts.
 

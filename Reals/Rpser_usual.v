@@ -179,7 +179,7 @@ Qed.
 
 Lemma cos_infinite_cv_radius : infinite_cv_radius cos_seq.
 Proof.
-intros r ; apply Rle_cv_radius_compat with (| exp_seq |).
+intros r ; apply Rle_Cv_radius_weak_compat with (| exp_seq |).
  intro n ; unfold cos_seq, exp_seq ; destruct (n_modulo_2 n) as [[p Hp] | [p Hp]].
  unfold Rdiv, Rseq_abs ; rewrite Rabs_Rabsolu, Rabs_mult, pow_1_abs, Rmult_1_l ;
  right ; reflexivity.
@@ -189,7 +189,7 @@ Qed.
 
 Lemma sin_infinite_cv_radius : infinite_cv_radius sin_seq.
 Proof.
-intros r ; apply Rle_cv_radius_compat with (| exp_seq |)%R.
+intros r ; apply Rle_Cv_radius_weak_compat with (| exp_seq |)%R.
  intro n ; unfold sin_seq, exp_seq ; case (n_modulo_2 n) ; intros [p Hp].
  rewrite Rabs_R0 ; apply Rabs_pos.
  unfold Rdiv, Rseq_abs ; rewrite Rabs_Rabsolu, Rabs_mult, pow_1_abs, Rmult_1_l ;

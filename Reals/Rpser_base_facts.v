@@ -23,7 +23,7 @@ Require Import Rpser_def Rpser_def_simpl.
 
 Require Import Ranalysis_def.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_rewrite_facts.
-Require Import Rsequence_cv_facts Rsequence_sums_facts.
+Require Import Rsequence_cv_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
 Require Import Fourier MyRIneq MyNat.
@@ -31,6 +31,119 @@ Require Import Fourier MyRIneq MyNat.
 Open Local Scope R_scope.
 
 (** ** Some lemmas manipulating the definitions. *)
+
+(** Compatibility of gt_pser with common operations. *)
+
+Lemma gt_pser_scal_compat_l : forall Un (l : R) x,
+  forall n, gt_pser (l * Un) x n = l * gt_pser Un x n.
+Proof.
+intros Un l x n ; unfold gt_pser, Rseq_mult, Rseq_constant ; ring.
+Qed.
+
+Lemma gt_pser_scal_compat_r : forall Un (l : R) x,
+  forall n, gt_pser (Un * l) x n = gt_pser Un x n * l.
+Proof.
+intros Un l x n ; unfold gt_pser, Rseq_mult, Rseq_constant ; ring.
+Qed.
+
+Lemma gt_pser_opp_compat : forall Un x,
+  gt_pser (- Un) x == - gt_pser Un x.
+Proof.
+intros Un x n ; unfold gt_pser, Rseq_opp, Rseq_mult ; ring.
+Qed.
+
+Lemma gt_pser_plus_compat : forall Un Vn x,
+  gt_pser (Un + Vn) x == gt_pser Un x + gt_pser Vn x.
+Proof.
+intros Un Vn x n ; unfold gt_pser, Rseq_plus, Rseq_mult ; ring.
+Qed.
+
+Lemma gt_pser_minus_compat : forall Un Vn x,
+  gt_pser (Un - Vn) x == gt_pser Un x - gt_pser Vn x.
+Proof.
+intros Un Vn x n ; unfold gt_pser, Rseq_minus, Rminus,
+ Rseq_plus, Rseq_mult ; ring.
+Qed.
+
+Lemma gt_pser_mult_compat_l : forall Un Vn x,
+  gt_pser (Un * Vn) x == Un * gt_pser Vn x.
+Proof.
+intros Un Vn x n ; unfold gt_pser, Rseq_mult ; ring.
+Qed.
+
+Lemma gt_pser_mult_compat_r : forall Un Vn x,
+  gt_pser (Un * Vn) x == gt_pser Un x * Vn.
+Proof.
+intros Un Vn x n ; unfold gt_pser, Rseq_mult ; ring.
+Qed.
+
+Lemma gt_pser_prod_compat : forall Un Vn x,
+  gt_pser (Un # Vn) x == (gt_pser Un x) # (gt_pser Vn x).
+Proof.
+intros Un Vn x n ; unfold gt_pser, Rseq_prod, Rseq_mult.
+ assert (Hrew := Rseq_sum_scal_compat_r (pow x n)
+ (fun n0 : nat => Un n0 * Vn (n - n0)%nat)%R n) ;
+ unfold Rseq_mult, Rseq_constant in Hrew ;
+ rewrite <- Hrew ; apply Rseq_sum_ext_strong.
+ intros p p_bd ; replace (x ^ n) with (x ^ (p + (n - p)))%nat.
+ rewrite pow_add ; ring.
+ replace (p + (n - p))%nat with n by omega ; reflexivity.
+Qed.
+
+(** Compatibility of gt_abs_pser with common operations. *)
+
+Lemma gt_abs_pser_pos : forall An x n,
+  0 <= gt_abs_pser An x n.
+Proof.
+intros ; unfold gt_abs_pser, Rseq_abs ; apply Rabs_pos.
+Qed.
+
+Lemma gt_abs_pser_scal_compat_l : forall Un (l : R) x,
+  forall n, gt_abs_pser (l * Un) x n = Rabs l * gt_abs_pser Un x n.
+Proof.
+intros Un l x n ; unfold gt_abs_pser, Rseq_abs ;
+ rewrite gt_pser_scal_compat_l ; apply Rabs_mult.
+Qed.
+
+Lemma gt_abs_pser_scal_compat_r : forall Un (l : R) x,
+  forall n, gt_abs_pser (Un * l) x n = gt_abs_pser Un x n * Rabs l.
+Proof.
+intros Un l x n ; unfold gt_abs_pser, Rseq_abs ;
+ rewrite gt_pser_scal_compat_r ; apply Rabs_mult.
+Qed.
+
+Lemma gt_abs_pser_opp_compat : forall Un x,
+  gt_abs_pser (- Un) x == gt_abs_pser Un x.
+Proof.
+intros Un x n ; unfold gt_abs_pser, Rseq_abs ;
+rewrite gt_pser_opp_compat ; unfold Rseq_opp ;
+apply Rabs_Ropp.
+Qed.
+
+Lemma gt_abs_pser_mult_compat_l : forall Un Vn x,
+  gt_abs_pser (Un * Vn) x == | Un | * gt_abs_pser Vn x.
+Proof.
+intros Un Vn x n ; unfold gt_abs_pser, Rseq_abs ;
+rewrite gt_pser_mult_compat_l ; unfold Rseq_mult ;
+apply Rabs_mult.
+Qed.
+
+Lemma gt_abs_pser_mult_compat_r : forall Un Vn x,
+  gt_abs_pser (Un * Vn) x == gt_abs_pser Un x * | Vn |.
+Proof.
+intros Un Vn x n ; unfold gt_abs_pser, Rseq_abs ;
+rewrite gt_pser_mult_compat_r ; unfold Rseq_mult ;
+apply Rabs_mult.
+Qed.
+
+Lemma gt_abs_pser_prod_le_compat : forall Un Vn x n,
+  gt_abs_pser (Un # Vn) x n <= ((gt_abs_pser Un x) # (gt_abs_pser Vn x)) n.
+Proof.
+intros Un Vn x n ; unfold gt_abs_pser, Rseq_abs ; rewrite gt_pser_prod_compat.
+unfold Rseq_prod ; eapply Rle_trans ; [eapply Rseq_sum_le_compat |].
+right ; apply Rseq_sum_ext ; intro p ; unfold gt_pser, Rseq_abs, Rseq_mult ;
+apply Rabs_mult.
+Qed.
 
 (** Compatibility of An_deriv with the common operators. *)
 
@@ -77,7 +190,7 @@ intros An r ; split ; intros [B HB] ; exists B ; intros y [i Hi] ; subst ;
  apply HB ; exists i ; rewrite gt_abs_pser_Rabs_compat ; reflexivity.
 Qed.
 
-Lemma Rle_cv_radius_compat : forall (An Bn : nat -> R) (r : R),
+Lemma Rle_Cv_radius_weak_compat : forall (An Bn : nat -> R) (r : R),
       (forall n, Rabs (Bn n) <= Rabs (An n)) ->
       Cv_radius_weak An r ->
       Cv_radius_weak Bn r.
@@ -153,9 +266,9 @@ subst ; [rewrite gt_abs_pser_Rseq_abs_compat |
 rewrite <- gt_abs_pser_Rseq_abs_compat] ; apply HB ; exists n ; reflexivity.
 Qed.
 
-Lemma Cv_radius_weak_plus : forall (An Bn : nat -> R) (r1 r2 : R),
-       Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
-       Cv_radius_weak (An + Bn)%Rseq (Rmin (Rabs r1) (Rabs r2)).
+Lemma Cv_radius_weak_plus : forall An Bn r1 r2,
+  Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
+  Cv_radius_weak (An + Bn)%Rseq (Rmin (Rabs r1) (Rabs r2)).
 Proof.
 intros An Bn r1 r2 RhoA RhoB.
 assert (r''_bd1 : Rabs (Rmin (Rabs r1) (Rabs r2)) <= Rabs r1).
@@ -178,8 +291,8 @@ assert (Rho'B := Cv_radius_weak_le_compat Bn _ _ r''_bd2 RhoB).
 Qed.
 
 Lemma Cv_radius_weak_opp : forall (An : Rseq) (r : R),
-       Cv_radius_weak An r <->
-       Cv_radius_weak (- An)%Rseq r.
+  Cv_radius_weak An r <->
+  Cv_radius_weak (- An)%Rseq r.
 Proof.
 intros An r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
  unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
@@ -190,12 +303,49 @@ intros An r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
 Qed.
 
 Lemma Cv_radius_weak_minus : forall (An Bn : nat -> R) (r1 r2 : R),
-       Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
-       Cv_radius_weak (An - Bn)%Rseq (Rmin (Rabs r1) (Rabs r2)).
+  Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
+  Cv_radius_weak (An - Bn)%Rseq (Rmin (Rabs r1) (Rabs r2)).
 Proof.
 intros An Bn r1 r2 RhoA RhoB.
  assert (Rho'B := proj1 (Cv_radius_weak_opp Bn _) RhoB).
  unfold Rminus ; apply Cv_radius_weak_plus ; assumption.
+Qed.
+
+(** This lemma will, together with the one about An_deriv, give us Cv_radius_weak_prod. *)
+
+Lemma Cv_radius_weak_prod_prelim : forall An Bn r1 r2,
+  Cv_radius_weak An r1 -> Cv_radius_weak Bn r2 ->
+  Cv_radius_weak ((An # Bn) / Rseq_shift INR)%Rseq (Rmin (Rabs r1) (Rabs r2)).
+Proof.
+intros An Bn r1 r2 rAn rBn.
+assert (rAn' : Cv_radius_weak An (Rmin (Rabs r1) (Rabs r2))).
+ apply Cv_radius_weak_le_compat with r1.
+ rewrite Rabs_pos_eq ; [apply Rmin_l | apply Rmin_pos ; apply Rabs_pos].
+ assumption.
+assert (rBn' : Cv_radius_weak Bn (Rmin (Rabs r1) (Rabs r2))).
+ apply Cv_radius_weak_le_compat with r2.
+ rewrite Rabs_pos_eq ; [apply Rmin_r | apply Rmin_pos ; apply Rabs_pos].
+ assumption.
+clear rAn rBn ; destruct rAn' as [B1 HB1] ; destruct rBn' as [B2 HB2] ;
+ exists (B1 * B2).
+assert (H1 : Rseq_bound (gt_abs_pser An (Rmin (Rabs r1) (Rabs r2))) B1).
+ intro n ; apply HB1 ; exists n ; unfold gt_abs_pser, Rseq_abs ;
+ rewrite Rabs_Rabsolu ; reflexivity.
+assert (H2 : Rseq_bound (gt_abs_pser Bn (Rmin (Rabs r1) (Rabs r2))) B2).
+ intro n ; apply HB2 ; exists n ; unfold gt_abs_pser, Rseq_abs ;
+ rewrite Rabs_Rabsolu ; reflexivity.
+clear HB1 HB2.
+intros x [n Hn] ; subst.
+ erewrite gt_abs_pser_ext ; [| eapply Rseq_div_simpl].
+ rewrite gt_abs_pser_mult_compat_r.
+ eapply Rle_trans ; [eapply Rmult_le_compat_r ; [unfold Rseq_abs ;
+ apply Rabs_pos | eapply gt_abs_pser_prod_le_compat] |].
+ eapply Rle_trans ; [| eapply Rseq_bound_prod ; try eassumption].
+right ; unfold Rseq_div, Rdiv, Rseq_mult ; rewrite Rabs_mult.
+ apply Rmult_eq_compat ; [| unfold Rseq_abs ; reflexivity].
+symmetry ; apply Rabs_pos_eq.
+unfold Rseq_prod ; apply Rseq_sum_pos ; intros p p_bd.
+ unfold Rseq_mult ; apply Rmult_le_pos ; apply gt_abs_pser_pos.
 Qed.
 
 (** The finite_cv_radius is exactly the upper bound. We choose our definitions

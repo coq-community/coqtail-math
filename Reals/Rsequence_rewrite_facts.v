@@ -2,6 +2,18 @@ Require Import Rsequence_def.
 
 Local Open Scope Rseq_scope.
 
+Lemma Rseq_minus_simpl : forall Un Vn,
+  Un - Vn == Un + - Vn.
+Proof.
+intros Un Vn n ; unfold Rseq_minus, Rminus ; reflexivity.
+Qed.
+
+Lemma Rseq_div_simpl : forall Un Vn,
+  Un / Vn == Un * / Vn.
+Proof.
+intros Un Vn n ; unfold Rseq_div, Rdiv ; reflexivity.
+Qed.
+
 Lemma Rseq_fact_simpl : forall n,
   Rseq_fact (S n) = (INR (S n) * Rseq_fact n)%R.
 Proof.
