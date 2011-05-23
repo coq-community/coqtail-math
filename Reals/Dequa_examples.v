@@ -13,15 +13,15 @@ Require Import LegacyField_Theory.
 Open Local Scope de_scope.
 
 Lemma constant_is_cst : forall r, 
- [| y 0 0 :=: `c r |]R3 ((existT _ _ (constant_infinite_cv_radius r)) :: nil).
+ [| y 0 0 :=: `c r |]R ((existT _ _ (constant_infinite_cv_radius r)) :: nil).
 Proof.
-intros r ; apply interp_equa_in_N_R3 ; simpl ; apply An_nth_deriv_0.
+intros r ; apply interp_equa_in_N_R ; simpl ; apply An_nth_deriv_0.
 Qed.
 
 Lemma identity_is_id :
- [| y 0 1 :=: cst 1 |]R3 ((existT _ _ identity_infinite_cv_radius) :: nil).
+ [| y 0 1 :=: cst 1 |]R ((existT _ _ identity_infinite_cv_radius) :: nil).
 Proof.
-apply interp_equa_in_N_R3 ; simpl ; rewrite An_nth_deriv_1.
+apply interp_equa_in_N_R ; simpl ; rewrite An_nth_deriv_1.
 intro n ; unfold An_deriv, Rseq_shift, Rseq_mult, constant_seq, identity_seq.
  destruct (eq_nat_dec n 0) ; destruct (eq_nat_dec (S n) 1).
    subst ; rewrite Rmult_1_r ; reflexivity.
@@ -31,9 +31,9 @@ intro n ; unfold An_deriv, Rseq_shift, Rseq_mult, constant_seq, identity_seq.
 Qed.
 
 Lemma diff_equa_cos :
- [| y 0 2 :=: - y 0 0 |]R3 ((existT _ _ cos_infinite_cv_radius) :: nil).
+ [| y 0 2 :=: - y 0 0 |]R ((existT _ _ cos_infinite_cv_radius) :: nil).
 Proof.
-apply interp_equa_in_N_R3 ; simpl.
+apply interp_equa_in_N_R ; simpl.
  do 2 rewrite An_nth_deriv_S' ; do 2 rewrite An_nth_deriv_0.
  intro n ; rewrite (An_deriv_ext _ (- sin_seq)%Rseq) ;
   [ | apply Deriv_cos_seq_simpl] ; rewrite An_deriv_opp_compat ;
@@ -42,17 +42,17 @@ apply interp_equa_in_N_R3 ; simpl.
 Qed.
 
 Lemma diff_equa_sin :
- [| y 0 2 :=: - y 0 0 |]R3 ((existT _ _ sin_infinite_cv_radius) :: nil).
+ [| y 0 2 :=: - y 0 0 |]R ((existT _ _ sin_infinite_cv_radius) :: nil).
 Proof.
-apply interp_equa_in_N_R3 ; simpl.
+apply interp_equa_in_N_R ; simpl.
  do 2 rewrite An_nth_deriv_S' ; do 2 rewrite An_nth_deriv_0.
  intro n ; rewrite (An_deriv_ext _ (cos_seq)%Rseq) ;
   [apply Deriv_cos_seq_simpl | apply Deriv_sin_seq_simpl].
 Qed.
 
 Lemma diff_equa_exp : forall n,
- [| y 0 (S n) :=: y 0 n |]R3 ((existT _ _ exp_infinite_cv_radius) :: nil).
-intro n ; apply interp_equa_in_N_R3 ; simpl ;
+ [| y 0 (S n) :=: y 0 n |]R ((existT _ _ exp_infinite_cv_radius) :: nil).
+intro n ; apply interp_equa_in_N_R ; simpl ;
  rewrite An_nth_deriv_S', (An_nth_deriv_ext _ exp_seq) ;
  [reflexivity | apply Deriv_exp_seq_simpl].
 Qed.
