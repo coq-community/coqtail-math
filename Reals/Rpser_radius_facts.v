@@ -230,6 +230,58 @@ intros Rho r ; apply Cv_radius_weak_derivable_compat with (r := (Rabs r) + 1).
 intros Rho r ; apply Cv_radius_weak_derivable_compat_rev ; apply Rho.
 Qed.
 
+(** Using the results on the derivative, we can now talk about Rseq_prod. *)
+
+Lemma Cv_radius_weak_prod:
+  forall (An Bn : Rseq) (r1 r2 : R),
+  Cv_radius_weak An r1 ->
+  Cv_radius_weak Bn r2 ->
+  forall r, Rabs r < Rmin (Rabs r1) (Rabs r2) ->
+  Cv_radius_weak (An # Bn) r.
+Proof.
+intros An Bn r1 r2 rAn rBn r Hr.
+ apply Cv_radius_weak_ext with (An_deriv (fun n => if eq_nat_dec n 0 then 0
+else (Rseq_div (An # Bn) (Rseq_shift INR)) (pred n))).
+
+unfold An_deriv, Rseq_shift, Rseq_mult, Rseq_div, Rdiv ; intro n ; simpl.
+rewrite <- Rmult_assoc, Rmult_comm, <- Rmult_assoc, Rinv_l, Rmult_1_l.
+ reflexivity.
+ apply Rgt_not_eq ; unfold Rgt ; replace (match n with | 0%nat => 1 | S _ => INR n + 1 end)
+ with (INR (S n)) by auto ; apply lt_0_INR ; omega.
+apply Cv_radius_weak_derivable_compat with (Rmin (Rabs r1) (Rabs r2)).
+
+destruct (Cv_radius_weak_prod_prelim An Bn r1 r2 rAn rBn) as [B HB] ;
+ exists (B * Rabs (Rmin (Rabs r1) (Rabs r2))) ;
+ intros x [i Hi] ; subst ; unfold gt_abs_pser, Rseq_abs, gt_pser,
+ Rseq_mult ; destruct i as [| j].
+  simpl ; rewrite Rmult_1_r, Rabs_R0 ; apply Rle_trans with
+  ((gt_abs_pser ((An # Bn) / Rseq_shift INR)) (Rmin (Rabs r1) (Rabs r2)) O *
+  Rabs (Rmin (Rabs r1) (Rabs r2))).
+  apply Rmult_le_pos ; [unfold gt_abs_pser, Rseq_abs|] ; apply Rabs_pos.
+  apply Rmult_le_compat_r ; [apply Rabs_pos | apply HB ; exists O ; reflexivity].
+ simpl.
+ rewrite (Rmult_comm (Rmin (Rabs r1) (Rabs r2))), <- Rmult_assoc, Rabs_mult,
+  (Rabs_pos_eq (Rmin (Rabs r1) (Rabs r2))).
+  apply Rmult_le_compat_r.
+  apply Rmin_pos ; apply Rabs_pos.
+  apply HB ; exists j ; reflexivity.
+  apply Rmin_pos ; apply Rabs_pos.
+  rewrite (Rabs_pos_eq (Rmin (Rabs r1) (Rabs r2))) ;
+  [assumption | apply Rmin_pos ; apply Rabs_pos].
+Qed.
+
+Lemma infinite_cv_radius_prod: forall (An Bn : Rseq),
+  infinite_cv_radius An -> infinite_cv_radius Bn ->
+  infinite_cv_radius (An # Bn).
+Proof.
+intros An Bn rAn rBn r ; apply Cv_radius_weak_prod with (Rabs r + 1) (Rabs r + 1).
+ apply rAn.
+ apply rBn.
+ apply Rlt_le_trans with (Rabs r + 1) ; [fourier |].
+ right ; rewrite Rmin_diag ; symmetry ; apply Rabs_pos_eq ;
+ rewrite Rplus_comm ; apply Rle_zero_pos_plus1, Rabs_pos.
+Qed.
+
 (** Same thing but for the nth derivative. *)
 
 Lemma Cv_radius_weak_nth_derivable_compat (k : nat) : forall An r,
