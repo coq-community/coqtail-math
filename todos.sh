@@ -16,11 +16,11 @@ find | grep -v "$discard" |
   do
     if [ -f "$f" ]
       then
-	    if [ "`grep "$query" $opt "$f" | wc -l`" -ne "0" ]
-	    then
-		    echo
-		    echo "\033[1m$f :\033[0m"
-		    grep --color "$query" $opt "$f"
-	    fi
-	  fi
+      if [ "`grep "$query" $opt "$f" | wc -l`" -ne "0" ]
+      then
+        echo
+        echo "\033[1m$f :\033[0m"
+        grep --color "$query" $opt "$f"
+      fi
+    fi
   done
