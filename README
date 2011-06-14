@@ -1,7 +1,4 @@
-Revision 266: working Reals/Dequa_*
-
-Currently modifying / editing
-
+TODO (for Rpser_prod): Mertens' Theorem
 
 How to launch Real library mytheories in coqide / Proofgeneral:
 (setq coq-prog-args '("-R" "MY_PATH_TO_COQTAIL/coqtail/src/" "Coqtail"))

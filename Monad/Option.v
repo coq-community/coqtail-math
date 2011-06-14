@@ -49,7 +49,7 @@ Proof.
 destruct Oa ; reflexivity.
 Qed.
 
-Definition Map_is_Bind : Map h Oa = Bind Oa (fun x => Some (h x)).
+Definition Map_is_Bind : Map h Oa = Bind Oa (fun x => Return (h x)).
 Proof.
 reflexivity.
 Qed.

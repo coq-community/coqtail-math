@@ -11,20 +11,6 @@ Require Import Option.
 
 Local Open Scope R_scope.
 
-Fixpoint max_y_se (s : side_equa) : nat := match s with
-  | scal _ s   => max_y_se s
-  | y _ p      => p
-  | opp s      => max_y_se s
-  | plus s1 s2 => max (max_y_se s1) (max_y_se s2)
-  | _ => O
-end.
-
-Definition max_y (e : diff_equa) : nat :=
-let (s1, s2) := e in max (max_y_se s1) (max_y_se s2).
-
-Definition Cinfty_to_Cn (c : Cinfty) (p : nat) : Cn p :=
-let (f, Cf) := c in existT _ f (Cf p).
-
 Lemma map_nth_error_None_iff : forall {A B : Type} (l : list A) (f : A -> B) (n : nat),
   nth_error l n = None <-> nth_error (map f l) n = None.
 Proof.
@@ -103,6 +89,27 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
      specify5 IHs2 l r0 r2 Heqb0 Heqb2.
      destruct IHs1 as [rho1 Hrho1] ;
      destruct IHs2 as [rho2 Hrho2].
+     assert (pr : infinite_cv_radius (r - r0)).
+      apply infinite_cv_radius_minus_compat ; assumption.
+     exists pr.
+     intro x ; unfold minus_fct ; rewrite <- Hrho1, <- Hrho2 ;
+     apply sum_minus_compat.
+    inversion HR3.
+   inversion HR3.
+  inversion HN.
+ inversion HN.
+
+ destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
+  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
+   destruct_eq (interp_side_equa_in_R s1 l).
+    destruct_eq (interp_side_equa_in_R s2 l).
+     inversion HN as [Hrew] ; destruct Hrew ;
+     inversion HR3 as [Hrew] ; destruct Hrew.
+     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
+     specify5 IHs1 l r r1 Heqb Heqb1 ;
+     specify5 IHs2 l r0 r2 Heqb0 Heqb2.
+     destruct IHs1 as [rho1 Hrho1] ;
+     destruct IHs2 as [rho2 Hrho2].
      assert (pr : infinite_cv_radius (r + r0)).
       apply infinite_cv_radius_plus_compat ; assumption.
      exists pr.
@@ -153,6 +160,17 @@ intro s ; induction s ; intros l un H.
    specify3 IHs l r Heqb ; destruct IHs as [f Hf].
    exists (- f)%F ; rewrite Hf ; reflexivity.
  inversion H.
+
+ simpl in *.
+  destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;
+  symmetry in Heqb.
+   destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) ;
+   symmetry in Heqb0.
+    specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
+    specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
+    exists (f - g)%F ; rewrite Hf, Hg ; reflexivity.
+   inversion H.
+  inversion H.
 
  simpl in *.
   destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;

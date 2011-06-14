@@ -18,9 +18,8 @@ Inductive side_equa : Set :=
     | scal : forall (r : R) (s : side_equa), side_equa
     | y    : forall (p : nat) (k : nat), side_equa
     | opp  : forall (s1 : side_equa), side_equa
+    | min  : forall (s1 s2 : side_equa), side_equa
     | plus : forall (s1 s2 : side_equa), side_equa.
-
-Definition minus (s1 s2 : side_equa) := plus s1 (opp s2).
 
 Definition diff_equa : Set := prod (side_equa) (side_equa).
 
@@ -30,6 +29,8 @@ match s with
   | scal r e   => Bind (interp_side_equa_in_N e rho) (fun un => Return (r * un))
   | y i k      => Bind (nth_error rho i) (fun un => Return (An_nth_deriv un k))
   | opp e      => Bind (interp_side_equa_in_N e rho) (fun un => Return (- un))
+  | min e1 e2  => Bind (interp_side_equa_in_N e1 rho) (fun un =>
+                  Bind (interp_side_equa_in_N e2 rho) (fun vn => Return (un - vn)))
   | plus e1 e2 => Bind (interp_side_equa_in_N e1 rho) (fun un =>
                   Bind (interp_side_equa_in_N e2 rho) (fun vn => Return (un + vn)))
 end.
@@ -41,6 +42,8 @@ match s with
   | y i k      => Bind (nth_error rho i) (fun f => Return (nth_derive (sum (projT1 f) (projT2 f))
                  (C_infty_Rpser (projT1 f) (projT2 f) k)))
   | opp e      => Bind (interp_side_equa_in_R e rho) (fun f => Return (- f)%F)
+  | min e1 e2  => Bind (interp_side_equa_in_R e1 rho) (fun f =>
+                  Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f - g)%F))
   | plus e1 e2 => Bind (interp_side_equa_in_R e1 rho) (fun f =>
                   Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f + g)%F))
 end.
@@ -65,15 +68,16 @@ Definition interp_in_R e rho : Prop :=
 
 Delimit Scope de_scope with de.
 
-(* Automatically open scope C_scope for arguments of type C *)
+(* Automatically open scope de_scope for arguments of type diff_equa *)
 Bind Scope de_scope with diff_equa.
+Bind Scope de_scope with side_equa.
 
 Open Scope de_scope.
 
 Notation "`c k" := (cst k) (at level 40) : de_scope.
 Notation "- y" := (opp y) : de_scope.
 Infix "+" := plus : de_scope.
-Infix "-" := minus : de_scope.
+Infix "-" := min : de_scope.
 Infix ":=:" := (@pair side_equa side_equa) (at level 50): de_scope.
 
 Notation "[| e |]N" := (interp_in_N e%de) (at level 69).
