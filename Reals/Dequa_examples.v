@@ -34,7 +34,7 @@ Lemma diff_equa_cos :
  [| y 0 2 :=: - y 0 0 |]R ((existT _ _ cos_infinite_cv_radius) :: nil).
 Proof.
 apply interp_equa_in_N_R ; simpl.
- do 2 rewrite An_nth_deriv_S' ; do 2 rewrite An_nth_deriv_0.
+ do 2 (rewrite An_nth_deriv_S', An_nth_deriv_0).
  intro n ; rewrite (An_deriv_ext _ (- sin_seq)%Rseq) ;
   [ | apply Deriv_cos_seq_simpl] ; rewrite An_deriv_opp_compat ;
   unfold Rseq_opp ; apply Ropp_eq_compat ;
@@ -45,13 +45,14 @@ Lemma diff_equa_sin :
  [| y 0 2 :=: - y 0 0 |]R ((existT _ _ sin_infinite_cv_radius) :: nil).
 Proof.
 apply interp_equa_in_N_R ; simpl.
- do 2 rewrite An_nth_deriv_S' ; do 2 rewrite An_nth_deriv_0.
+ do 2 (rewrite An_nth_deriv_S', An_nth_deriv_0).
  intro n ; rewrite (An_deriv_ext _ (cos_seq)%Rseq) ;
   [apply Deriv_cos_seq_simpl | apply Deriv_sin_seq_simpl].
 Qed.
 
 Lemma diff_equa_exp : forall n,
  [| y 0 (S n) :=: y 0 n |]R ((existT _ _ exp_infinite_cv_radius) :: nil).
+Proof.
 intro n ; apply interp_equa_in_N_R ; simpl ;
  rewrite An_nth_deriv_S', (An_nth_deriv_ext _ exp_seq) ;
  [reflexivity | apply Deriv_exp_seq_simpl].

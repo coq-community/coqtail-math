@@ -76,6 +76,7 @@ Open Scope de_scope.
 
 Notation "`c k" := (cst k) (at level 40) : de_scope.
 Notation "- y" := (opp y) : de_scope.
+Infix "*" := scal : de_scope.
 Infix "+" := plus : de_scope.
 Infix "-" := min : de_scope.
 Infix ":=:" := (@pair side_equa side_equa) (at level 50): de_scope.
