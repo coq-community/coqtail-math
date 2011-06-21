@@ -1,3 +1,4 @@
+
 (** This file provides the user with the tactics needed to quote differential
     equations as [diff_equa] terms and use [Dequa_facts]' main theorem to solve
     them.
@@ -193,6 +194,7 @@ match env with
   | List.cons ?p ?env2 => repeat (normalize_rec p s x) ; normalize env2 s x
 end.
 
+
 Ltac quote_diff_equa := fun x =>
 match goal with
   | |- ?s1 = ?s2 =>
@@ -204,29 +206,21 @@ match goal with
    end
 end.
 
-(** Proof of concept: quoting + normalizing *)
-
-Ltac quote_diff_equa_in := fun H =>
-let x := fresh "x" in intro x ;
-let ENV := fresh "ENV" in
-match quote_diff_equa x with
-  | (?env, ?p) =>
-    match goal with
-      | |- ?s1 = ?s2 => pose (H := p) ; pose (ENV := env) ; normalize env s1 x ; normalize env s2 x
-    end
-end.
-
 (** Solving an equation **)
 
 Ltac solve_diff_equa :=
-  let H := fresh "H" in
-  let H' := fresh "H" in
-  let x := fresh "x" in
-  intro x ;
-  match quote_diff_equa x with
-   | (?env, ?de) => cut ([| de |]N (map (@projT1 _ infinite_cv_radius) env)) ;
-     [intro H' ; assert (H := interp_equa_in_N_R _ _ H' x) ; clear H' |]
-  end.
+let H := fresh "H" in
+let x := fresh "x" in intro x ;
+match quote_diff_equa x with
+  | (?env, ?p) =>
+    match goal with
+      | |- ?s1 = ?s2 => normalize env s1 x ; normalize env s2 x ;
+                        cut ([| p |]N (map (@projT1 _ infinite_cv_radius) env)) ;
+                        [intro H ; apply (interp_equa_in_N_R _ _ H x) ; clear H | simpl ;
+                        repeat rewrite An_nth_deriv_0 ; repeat rewrite An_nth_deriv_1]
+    end
+end.
+
 
 (* TODO *)
 
@@ -239,29 +233,13 @@ match rec_quote_side_equa (@List.nil (sigT infinite_cv_radius)) s x with
   | (?env, ?p) => constr: p
 end.
 
-Goal forall an (ra : infinite_cv_radius an) x, sum an ra x = 0.
-intros an ra.
- quote_diff_equa_in H.
-Admitted.
-
-
-
-
-
-Goal forall an bn cn, infinite_cv_radius an -> infinite_cv_radius bn ->
- infinite_cv_radius cn -> True.
- intros an bn cn ra rb rc.
- pose (x := 3).
- let k := quote_side_equa (sum an ra x)%R x in pose (H1 := k).
- let k := quote_side_equa
-  (- (sum an ra x  + (nth_derive (sum cn rc) (C_infty_Rpser cn rc 3%nat) x))
-  - (sum bn rb x + derive (sum cn rc) (derivable_sum cn rc) x) * 6)%R x in
- pose (H := k).
- exact I.
+Goal forall an (ra rb : infinite_cv_radius an) x, sum an ra x = sum an rb x.
+intros an ra rb ; solve_diff_equa ; simpl ; reflexivity.
 Qed.
 
 Goal forall an bn (ra: infinite_cv_radius an) (rb rc: infinite_cv_radius bn)
  (rab: infinite_cv_radius (an + bn + bn)), forall (u x : R),
   (sum (an + bn + bn)%Rseq rab x = sum an ra x + sum bn rb x + sum bn rc x)%R.
 intros an bn ra rb rc rab x.
-Admitted.
+ solve_diff_equa ; reflexivity.
+Qed.
