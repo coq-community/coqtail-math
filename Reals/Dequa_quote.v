@@ -19,7 +19,7 @@
 Require Import List.
 Require Import Rsequence_def Rpser_def Rpser_def_simpl Rpser_sums Rpser_derivative Rpser_usual.
 Require Import C_n_def C_n_usual.
-Require Import Nth_derivative_def.
+Require Import Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def Dequa_facts.
 
 (** * Quoting differential equations *)
@@ -129,6 +129,70 @@ Ltac rec_quote_side_equa := fun env s x => match isconst s x with
     end
 end.
 
+(** Adhoc lemmas to be moved? **)
+
+Require Import Rfunction_def Rextensionality.
+
+Lemma nth_derive_sum_PI_O : forall an (r1 r2 : infinite_cv_radius an),
+  nth_derive (sum an r1) (C_infty_Rpser an r1 O) == sum an r2.
+Proof.
+intros an r1 r2 ; apply sum_ext ; reflexivity.
+Qed.
+
+Lemma nth_derive_sum_PI_1 : forall an (r1 r2 : infinite_cv_radius an) (pr : derivable (sum an r2)),
+  nth_derive (sum an r1) (C_infty_Rpser an r1 1%nat) == derive (sum an r2) pr.
+Proof.
+intros an r1 r2 pr ; apply derive_ext ; apply sum_ext ; reflexivity.
+Qed.
+
+Lemma nth_derive_sum_PI: forall (n : nat) an (r1 r2 : infinite_cv_radius an) (pr : C n (sum an r2)),
+  nth_derive (sum an r1) (C_infty_Rpser an r1 n) == nth_derive (sum an r2) pr.
+Proof.
+intros n an r1 r2 pr ; apply nth_derive_ext ; apply sum_ext ; reflexivity.
+Qed.
+
+(** Normalising the goal **)
+
+Ltac normalize_rec := fun p s x =>
+match p with | (existT _ ?an ?rho) =>
+match  isconst s x with | false =>
+  match constr: s with
+    | Ropp ?s1 => progress (normalize_rec p s1 x)
+    | Rplus ?s1 ?s2 => progress (normalize_rec p s1 x)
+    | Rplus ?s1 ?s2 => progress (normalize_rec p s2 x)
+    | Rminus ?s1 ?s2 => progress (normalize_rec p s1 x)
+    | Rminus ?s1 ?s2 => progress (normalize_rec p s2 x)
+    | Rmult ?s1 ?s2 =>
+      match isconst s2 x with
+        | true => replace (Rmult s1 s2)%R with (Rmult s2 s1)%R by (apply Rmult_comm)
+        | false => progress (normalize_rec p s1 x)
+        | false => progress (normalize_rec p s2 x)
+      end
+    | sum an ?rho2 x => replace (sum an rho2 x)%R with
+                        (nth_derive (sum an rho) (C_infty_Rpser an rho O) x)%R
+                        by (apply (nth_derive_sum_PI_O an rho rho2 x))
+    | derive (sum an ?rho2) ?pr x => replace (derive (sum an rho2) pr x)%R with
+                        (nth_derive (sum an rho) (C_infty_Rpser an rho 1%nat) x)%R
+                        by (apply (nth_derive_sum_PI_1 an rho rho2 pr x))
+(** This case is special: we want to do something iff the nth_derive has not
+    the right shape. **)
+    | nth_derive (sum an rho) (C_infty_Rpser an rho ?n) x => idtac
+    | nth_derive (sum an ?rho2) ?pr x =>
+      match type of pr with | C ?n (sum an rho2) =>
+        replace (nth_derive (sum an rho2) pr x)%R with
+        (nth_derive (sum an rho) (C_infty_Rpser an rho n) x)%R
+(*        by (apply nth_derive_sum_PI)*)
+      end
+  end
+end
+end.
+
+Ltac normalize := fun env s x =>
+match env with
+  | List.nil => idtac
+  | List.cons ?p ?env2 => repeat (normalize_rec p s x) ; normalize env2 s x
+end.
+
 Ltac quote_diff_equa := fun x =>
 match goal with
   | |- ?s1 = ?s2 =>
@@ -140,8 +204,19 @@ match goal with
    end
 end.
 
+(** Proof of concept: quoting + normalizing *)
+
 Ltac quote_diff_equa_in := fun H =>
-let x := fresh "x" in intro x ; match quote_diff_equa x with | (_, ?p) => pose (H := p) end.
+let x := fresh "x" in intro x ;
+let ENV := fresh "ENV" in
+match quote_diff_equa x with
+  | (?env, ?p) =>
+    match goal with
+      | |- ?s1 = ?s2 => pose (H := p) ; pose (ENV := env) ; normalize env s1 x ; normalize env s2 x
+    end
+end.
+
+(** Solving an equation **)
 
 Ltac solve_diff_equa :=
   let H := fresh "H" in
@@ -153,9 +228,6 @@ Ltac solve_diff_equa :=
      [intro H' ; assert (H := interp_equa_in_N_R _ _ H' x) ; clear H' |]
   end.
 
-
-(** * Normalizing the goal *)
-
 (* TODO *)
 
 (** * Test materials *)
@@ -166,6 +238,15 @@ Ltac quote_side_equa := fun s x =>
 match rec_quote_side_equa (@List.nil (sigT infinite_cv_radius)) s x with
   | (?env, ?p) => constr: p
 end.
+
+Goal forall an (ra : infinite_cv_radius an) x, sum an ra x = 0.
+intros an ra.
+ quote_diff_equa_in H.
+Admitted.
+
+
+
+
 
 Goal forall an bn cn, infinite_cv_radius an -> infinite_cv_radius bn ->
  infinite_cv_radius cn -> True.
@@ -179,9 +260,8 @@ Goal forall an bn cn, infinite_cv_radius an -> infinite_cv_radius bn ->
  exact I.
 Qed.
 
-Goal forall an bn (ra: infinite_cv_radius an) (rb: infinite_cv_radius bn)
- (rab: infinite_cv_radius (an + bn)), forall (u x : R),
-  (sum (an + bn)%Rseq rab x = sum an ra x + sum bn rb x)%R.
-intros an bn ra rb rab x ; solve_diff_equa ; [apply H |].
- intro n ; simpl ; unfold Rseq_plus ; repeat rewrite An_nth_deriv_0 ; reflexivity.
-Qed.
+Goal forall an bn (ra: infinite_cv_radius an) (rb rc: infinite_cv_radius bn)
+ (rab: infinite_cv_radius (an + bn + bn)), forall (u x : R),
+  (sum (an + bn + bn)%Rseq rab x = sum an ra x + sum bn rb x + sum bn rc x)%R.
+intros an bn ra rb rc rab x.
+Admitted.

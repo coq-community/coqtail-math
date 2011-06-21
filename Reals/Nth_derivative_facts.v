@@ -5,6 +5,20 @@ Require Import Nth_derivative_def.
 
 Open Local Scope R_scope.
 
+(** * Simple equivalences *)
+
+Lemma nth_derive_0 : forall (f : R -> R) (pr : C O f),
+  nth_derive f pr == f.
+Proof.
+intros f pr x ; reflexivity.
+Qed.
+
+Lemma nth_derive_1 : forall (f : R -> R) (pr : C 1 f) (pr' : derivable f),
+  nth_derive f pr == derive f pr'.
+Proof.
+intros f pr pr' x ; apply derive_ext ; reflexivity.
+Qed.
+
 (** * Extensionality of nth_derive. *)
 
 Lemma nth_derive_ext : forall (n : nat) (f g : R -> R)
