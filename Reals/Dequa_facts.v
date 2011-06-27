@@ -1,7 +1,7 @@
 Require Import Rsequence_def Rsequence_sums_facts.
 Require Import Rpser.
 Require Import Rfunction_facts Rextensionality.
-Require Import C_n_def C_n_facts C_n_usual.
+Require Import Rfunction_classes.
 Require Import Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def.
 Require Import List.
@@ -148,7 +148,7 @@ intro s ; induction s ; intros l un H.
  destruct_eq (nth_error l p).
   specify2 Hrew s (eq_refl (Some s)).
   destruct s as [An rAn] ; simpl in H, Hrew ; rewrite Hrew in H ;
-   simpl in H ; exists (nth_derive (sum An rAn) (C_infty_Rpser An rAn k)) ;
+   simpl in H ; exists (nth_derive (sum An rAn) (D_infty_Rpser An rAn k)) ;
    simpl ; rewrite <- Heqb ; reflexivity.
   symmetry in Heqb ; simpl in H.
  assert (T := map_nth_error2 (@projT1 _ infinite_cv_radius) _ _ Heqb).

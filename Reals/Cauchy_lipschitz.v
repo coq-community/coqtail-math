@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rintegral Riemann_integrable.
-Require Import C_n_def C_n_facts C_n_usual Nth_derivative_def.
+Require Import Rfunction_classes Nth_derivative_def.
 Require Import Fourier Ring.
 Require Import Ranalysis.
 Require Import Rextensionality.
@@ -30,7 +30,7 @@ apply derivable_continuous. assumption.
 Qed.
 
 Lemma CL_tr : forall a t0 V0, C 0 a ->
-  {y : R -> R & {pr : (C 1 y) | forall (t : R), (nth_derive y pr) t = (a t) * (y t) /\ y t0 = V0}}.
+  {y : R -> R & {pr : (D 1 y) | forall (t : R), (nth_derive y pr) t = (a t) * (y t) /\ y t0 = V0}}.
 Proof.
  intros a t0 V0 H ; assert (Hcont : continuity a) by (inversion H ; assumption).
  assert (forall t0 t, Riemann_integrable a t0 t).
@@ -40,7 +40,7 @@ Proof.
   apply C_scal ; apply C_comp ; [apply C_infty_exp |
   apply derivable_pt_continuity_Riemann_implies_C1] ; reg.
 
- exists (fun t => V0 * exp (@RiemannInt a t0 t (X t0 t))) ; exists pr.
+ exists (fun t => V0 * exp (@RiemannInt a t0 t (X t0 t))) ; exists (C_implies_D _ _ pr).
 
  intro t ; split.
   rewrite <- (derive_pt_RiemannInt a t0 t X (Hcont t)), <-(derive_pt_exp ),
@@ -56,7 +56,7 @@ Proof.
 Qed.
 
 Lemma CL_tr_second_member : forall a b t0 V0, C 0 a -> C 0 b ->
-  {y : R -> R & { pr : (C 1 y) | 
+  {y : R -> R & { pr : (D 1 y) | 
     forall (t : R), (nth_derive y pr) t - (a t) * (y t) = b t /\ y t0 = V0}}.
 Proof.
  intros a b t0 V0 Ha0 Hb0 ;
@@ -83,7 +83,7 @@ Proof.
   apply RiemannInt_continuity ; assumption.
 
  exists (((fct_cte V0) + (fun t => RiemannInt (Hsol t0 t0 t))) *
-  (comp exp (fun t => RiemannInt (Ha t0 t))))%F ; exists pr.
+  (comp exp (fun t => RiemannInt (Ha t0 t))))%F ; exists (C_implies_D _ _ pr).
 
  intros t ; simpl ; split.
  assert (Hpr1 : derivable_pt (fun t => RiemannInt (Hsol t0 t0 t)) t)

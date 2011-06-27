@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rpser_def Rpser_sums Rpser_usual Rpser_derivative.
-Require Import C_n_def C_n_usual C_n_facts.
+Require Import Rfunction_classes.
 Require Import Nth_derivative_def.
 Require Import Rfunction_def Functions.
 Require Import Rsequence_def.
@@ -40,7 +40,7 @@ match s with
   | cst r      => Return (fun _ => r)
   | scal r e   => Bind (interp_side_equa_in_R e rho) (fun f => Return ((fun _ => r) * f)%F)
   | y i k      => Bind (nth_error rho i) (fun f => Return (nth_derive (sum (projT1 f) (projT2 f))
-                 (C_infty_Rpser (projT1 f) (projT2 f) k)))
+                 (D_infty_Rpser (projT1 f) (projT2 f) k)))
   | opp e      => Bind (interp_side_equa_in_R e rho) (fun f => Return (- f)%F)
   | min e1 e2  => Bind (interp_side_equa_in_R e1 rho) (fun f =>
                   Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f - g)%F))

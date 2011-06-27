@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Fourier.
-Require Import C_n_def.
+Require Import Rfunction_classes_def.
 Require Import Cauchy_lipschitz. (* TODO on importe des trucs qui parlent de Cn *)
 Require Import Rextensionality.
 Open Scope R_scope.

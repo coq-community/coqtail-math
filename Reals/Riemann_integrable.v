@@ -2,7 +2,7 @@ Require Import Max.
 Require Import Reals.
 Require Import Fourier.
 Require Import RiemannInt.
-Require Import C_n_def.
+Require Import Rfunction_classes_def.
 Require Import Rextensionality.
 
 Open Scope R_scope.
@@ -525,7 +525,7 @@ Proof.
 intros.
 assert (derivable (fun t => RiemannInt (pr t0 t))).
 intro. apply RiemannInt_derivable_pt. apply H.
-apply (C_Sn _ _ H0). 
+apply (C_S _ _ H0). 
 apply C_0. apply continuity_ext with f.
 intro. unfold derive. rewrite derive_pt_RiemannInt_1.
 reflexivity.
