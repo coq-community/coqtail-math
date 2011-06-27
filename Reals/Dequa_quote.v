@@ -208,9 +208,8 @@ end.
 
 (** Solving an equation **)
 
-Ltac solve_diff_equa :=
+Ltac solve_diff_equa_on := fun x =>
 let H := fresh "H" in
-let x := fresh "x" in intro x ;
 match quote_diff_equa x with
   | (?env, ?p) =>
     match goal with
@@ -220,6 +219,9 @@ match quote_diff_equa x with
                         repeat rewrite An_nth_deriv_0 ; repeat rewrite An_nth_deriv_1]
     end
 end.
+
+Ltac solve_diff_equa :=
+let x := fresh "x" in intro x ; solve_diff_equa_on x.
 
 
 (* TODO *)
