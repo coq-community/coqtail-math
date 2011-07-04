@@ -21,27 +21,19 @@ USA.
 
 Require Import Rsequence_def Rsequence_base_facts.
 Require Import Rpser_def Rpser_def_simpl.
+Require Import MyRIneq.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
 
-(** * Rseq_sum : compatibility with common operations. *)
+(** * Rseq_sum properties *)
 
-Section Rseq_sum_facts.
+(** Basic properties *)
 
 Lemma Rseq_sum_simpl : forall Un n,
   (Rseq_sum Un (S n) = Rseq_sum Un n + Un (S n))%R.
 Proof.
 intros ; reflexivity.
-Qed.
-
-Lemma Rseq_sum_ext : forall Un Vn,
-  Un == Vn ->
-  Rseq_sum Un == Rseq_sum Vn.
-Proof.
-intros Un Vn Hext n ; induction n.
- apply Hext.
- simpl ; rewrite IHn, Hext ; reflexivity.
 Qed.
 
 Lemma Rseq_sum_ext_strong : forall Un Vn n,
@@ -56,6 +48,12 @@ intros Un Vn n ; induction n ; intro Heq.
   intros ; apply Heq ; auto.
 Qed.
 
+Lemma Rseq_sum_ext : forall Un Vn,
+  Un == Vn -> Rseq_sum Un == Rseq_sum Vn.
+Proof.
+intros Un Vn Heq n ; apply Rseq_sum_ext_strong ; trivial.
+Qed.
+
 Lemma Rseq_sum_scal_compat_l : forall (l : R) Un,
   Rseq_sum (l * Un) == l * (Rseq_sum Un).
 Proof.
@@ -65,6 +63,8 @@ intros l Un n ; induction n.
   unfold Rseq_mult, Rseq_constant ;
   simpl ; ring.
 Qed.
+
+(** Compatibility with common operations *)
 
 Lemma Rseq_sum_scal_compat_r : forall (l : R) Un,
   Rseq_sum (Un * l) == Rseq_sum Un * l.
@@ -122,11 +122,55 @@ intros Un k n ; induction n.
   simpl ; rewrite <- (plus_n_Sm k n) ; simpl ; ring.
 Qed.
 
-End Rseq_sum_facts.
+Lemma Rseq_sum_reindex_compat : forall Un n,
+  Rseq_sum Un n = Rseq_sum (fun i => Un (n - i)%nat) n.
+Proof.
+intros Un n ; revert Un ; induction n ; intro Un.
+ reflexivity.
+ do 2 rewrite Rseq_sum_simpl.
+ rewrite (IHn (fun i => Un (S n - i)%nat)), minus_diag.
+ rewrite (Rseq_sum_ext_strong (fun i => Un (S n - (n - i))%nat) (Rseq_shift Un)).
+ rewrite Rseq_sum_shift_compat ; unfold Rseq_shift ; simpl ; ring.
+ intros m m_bd ; unfold Rseq_shift ; replace (S n - (n - m))%nat with (S m) by omega ;
+ reflexivity.
+Qed.
 
-(** * Rseq_sum : compatibility with the order. *)
+Lemma Rseq_prod_comm: forall An Bn, An # Bn == Bn # An.
+Proof.
+intros An Bn n ; unfold Rseq_prod, Rseq_mult ;
+ rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ;
+ intros p p_ub ; replace (n - (n - p))%nat with p by omega ;
+ ring.
+Qed.
 
-Lemma Rseq_sum_pos : forall An n,
+Lemma Rseq_sum_prod_compat: forall An Bn n,
+  Rseq_sum (An # Bn) n =
+  Rseq_sum (fun i => (Rseq_sum Bn i) * An (n - i)%nat)%R n.
+Proof.
+intros An Bn n ; induction n.
+ unfold Rseq_prod, Rseq_mult ; simpl ; apply Rmult_comm.
+ transitivity (Rseq_sum ((fun i => (An i * (Rseq_sum Bn (n - i)%nat))%R) +
+  (fun i => (An i * Bn (S (n - i))%nat))%R)%Rseq n + An (S n) * Bn O)%R.
+ rewrite Rseq_sum_plus_compat, Rseq_sum_simpl, IHn ; unfold Rseq_plus ;
+ rewrite Rplus_assoc ; apply Rplus_eq_compat.
+ rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ;
+  intros p p_ub ; replace (n - (n - p))%nat with p by omega ; apply Rmult_comm.
+ replace O with ((S n) - S n)%nat by omega ; unfold Rseq_prod ;
+  rewrite Rseq_sum_simpl ; apply Rplus_eq_compat_r ; apply Rseq_sum_ext_strong ;
+  intros p p_ub ; unfold Rseq_mult ; replace (S n - p)%nat with (S (n - p)) by omega ;
+  reflexivity.
+ transitivity (Rseq_sum (fun i => (An i * (Rseq_sum Bn (S n - i)))%R) (S n)).
+ rewrite Rseq_sum_simpl, minus_diag ; apply Rplus_eq_compat ; [| trivial].
+ apply Rseq_sum_ext_strong ; intros p p_ub ; unfold Rseq_plus ;
+ replace (S n - p)%nat with (S (n - p)) by omega ; rewrite Rseq_sum_simpl ; ring.
+ rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ; intros p p_ub ;
+ replace (S n - (S n - p))%nat with p by omega ; apply Rmult_comm.
+Qed.
+
+
+(** Compatibility with the orders *)
+
+Lemma Rseq_sum_pos_strong : forall An n,
   (forall p, (p <= n)%nat -> 0 <= An p) ->
   0 <= Rseq_sum An n.
 Proof.
@@ -136,7 +180,47 @@ intros An n ; induction n ; intro Hpos.
  [apply IHn ; intros p p_bd |] ; apply Hpos ; omega.
 Qed.
 
-Lemma Rseq_sum_le_compat : forall An n,
+Lemma Rseq_sum_pos: forall An n,
+ (forall n, 0 <= An n) ->  0 <= Rseq_sum An n.
+Proof.
+intros ; apply Rseq_sum_pos_strong ; trivial.
+Qed.
+
+Lemma Rseq_sum_le_compat_strong: forall An Bn n,
+ (forall p, (p <= n)%nat -> An p <= Bn p) ->
+ Rseq_sum An n <= Rseq_sum Bn n.
+Proof.
+intros An Bn n Hle ; induction n.
+ simpl ; apply Hle ; trivial.
+ simpl ; transitivity (Rseq_sum Bn n + An (S n))%R.
+  apply Rplus_le_compat_r ; apply IHn ; auto.
+  apply Rplus_le_compat_l ; apply Hle ; trivial.
+Qed.
+
+Lemma Rseq_sum_le_compat: forall An Bn n,
+ (forall n, An n <= Bn n) -> Rseq_sum An n <= Rseq_sum Bn n.
+Proof.
+intros ; apply Rseq_sum_le_compat_strong ; trivial.
+Qed.
+
+Lemma Rseq_sum_lt_compat_strong: forall An Bn n,
+ (forall p, (p <= n)%nat -> An p < Bn p) ->
+ Rseq_sum An n < Rseq_sum Bn n.
+Proof.
+intros An Bn n Hlt ; induction n.
+ simpl ; apply Hlt ; trivial.
+ simpl ; transitivity (Rseq_sum Bn n + An (S n))%R.
+  apply Rplus_lt_compat_r ; apply IHn ; auto.
+  apply Rplus_lt_compat_l ; apply Hlt ; trivial.
+Qed.
+
+Lemma Rseq_sum_lt_compat: forall An Bn n,
+ (forall n, An n < Bn n) -> Rseq_sum An n < Rseq_sum Bn n.
+Proof.
+intros ; apply Rseq_sum_lt_compat_strong ; trivial.
+Qed.
+
+Lemma Rseq_sum_triang: forall An n,
   Rabs (Rseq_sum An n) <= Rseq_sum (| An |) n.
 Proof.
 intros An n ; induction n.
@@ -144,6 +228,31 @@ intros An n ; induction n.
  do 2 rewrite Rseq_sum_simpl ; eapply Rle_trans ;
  [eapply Rabs_triang |] ; apply Rplus_le_compat ;
  [assumption | reflexivity].
+Qed.
+
+(** Partition *)
+
+Lemma Rseq_sum_even_odd_split : forall (An : Rseq) n,
+  (Rseq_sum (fun i => An (2 * i)%nat) n +
+  Rseq_sum (fun i => An (S (2 * i))%nat) n
+  = Rseq_sum An (S (2 * n)))%R.
+Proof.
+intros An n ; induction n.
+ reflexivity.
+ replace (2 * (S n))%nat with (S (S (2 * n))) by ring.
+ do 4 rewrite Rseq_sum_simpl.
+ replace (2 * (S n))%nat with (S (S (2 * n))) by ring.
+ rewrite <- IHn ; ring.
+Qed.
+
+Lemma Rseq_sum_even_odd_split' : forall An n,
+  (Rseq_sum (fun i => An (2 * i)%nat) (S n) +
+  Rseq_sum (fun i => An (S (2 * i))) n
+  = Rseq_sum An (2 * (S n)))%R.
+Proof.
+intros An n ; replace (2 * S n)%nat with (S (S (2 * n))) by ring ;
+ do 2 rewrite Rseq_sum_simpl ; rewrite <- Rseq_sum_even_odd_split ;
+ replace (2 * S n)%nat with (S (S (2 * n))) by ring ; ring.
 Qed.
 
 (** * Rseq_pps : compatibility with common operations. *)

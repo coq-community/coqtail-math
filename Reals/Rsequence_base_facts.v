@@ -155,7 +155,7 @@ Qed.
 Lemma n_modulo_2 : forall n:nat, {p | (n = 2 * p)%nat} + {p | n = S (2 * p)}.
 Proof.
 intro n ; induction n.
- left ; exists 0%nat ; intuition.
+ left ; exists O ; intuition.
  case IHn ; intro H ; destruct H as (p,Hp) ;
  [right ; exists p | left ; exists (S p)] ; intuition.
 Qed.

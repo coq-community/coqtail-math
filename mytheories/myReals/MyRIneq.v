@@ -157,7 +157,12 @@ Qed.
 
 Lemma Rplus_eq_compat_r : forall r r1 r2, r1 = r2 -> r1 + r = r2 + r.
 Proof.
-intros r r1 r2 H; rewrite H; reflexivity.
+intros ; subst ; reflexivity.
+Qed.
+
+Lemma Rplus_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 -> r1 + r2 = r3 + r4.
+Proof.
+intros ; subst ; reflexivity.
 Qed.
 
 Lemma Rmult_eq_compat_r : forall r1 r2 r, r1 = r2 -> r1 * r = r2 * r.
@@ -289,3 +294,6 @@ Require Setoid.
 Add Parametric Relation : R Rle
 reflexivity proved by Rle_refl
 transitivity proved by Rle_trans as Rle.
+
+Add Parametric Relation : R Rlt
+transitivity proved by Rlt_trans as Rlt.

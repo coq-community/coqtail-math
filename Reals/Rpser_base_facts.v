@@ -140,7 +140,7 @@ Lemma gt_abs_pser_prod_le_compat : forall Un Vn x n,
   gt_abs_pser (Un # Vn) x n <= ((gt_abs_pser Un x) # (gt_abs_pser Vn x)) n.
 Proof.
 intros Un Vn x n ; unfold gt_abs_pser, Rseq_abs ; rewrite gt_pser_prod_compat.
-unfold Rseq_prod ; eapply Rle_trans ; [eapply Rseq_sum_le_compat |].
+unfold Rseq_prod ; eapply Rle_trans ; [eapply Rseq_sum_triang |].
 right ; apply Rseq_sum_ext ; intro p ; unfold gt_pser, Rseq_abs, Rseq_mult ;
 apply Rabs_mult.
 Qed.
@@ -344,7 +344,7 @@ intros x [n Hn] ; subst.
 right ; unfold Rseq_div, Rdiv, Rseq_mult ; rewrite Rabs_mult.
  apply Rmult_eq_compat ; [| unfold Rseq_abs ; reflexivity].
 symmetry ; apply Rabs_pos_eq.
-unfold Rseq_prod ; apply Rseq_sum_pos ; intros p p_bd.
+unfold Rseq_prod ; apply Rseq_sum_pos_strong ; intros p p_bd.
  unfold Rseq_mult ; apply Rmult_le_pos ; apply gt_abs_pser_pos.
 Qed.
 

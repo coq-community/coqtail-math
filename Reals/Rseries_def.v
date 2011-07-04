@@ -30,25 +30,21 @@ Implicit Type Un : Rseq.
 (** printing ~	~ *)
 (** * Convergence of series *)
 
-Definition Rser_cv Un l := Rseq_cv (sum_f_R0 Un) l.
+Definition Rser_cv Un := Rseq_cv (Rseq_sum Un).
 
-Definition Rser_abs_cv Un l := Rseq_cv (sum_f_R0 (|Un|)) l.
+Definition Rser_abs_cv Un := Rseq_cv (Rseq_sum (|Un|)).
 
-Definition Rser_cv_pos_infty Un := Rseq_cv_pos_infty (sum_f_R0 Un).
+Definition Rser_cv_pos_infty Un := Rseq_cv_pos_infty (Rseq_sum Un).
 
-Definition Rser_cv_neg_infty Un := Rseq_cv_neg_infty (sum_f_R0 Un).
+Definition Rser_cv_neg_infty Un := Rseq_cv_neg_infty (Rseq_sum Un).
 
 (** * Bounds *)
 
-Definition Rser_bound_max Un M := forall n, sum_f_R0 Un n <= M.
-
-(*Definition Rser_bound_min Un m := forall n, m <= sum_f_R0 Un n.*)
-
-Definition Rser_bound Un M := forall n, Rabs (sum_f_R0 Un n) <= M.
-
-Definition Rser_abs_bound Un M := forall n, sum_f_R0 (fun k => Rabs (Un k)) n <= M.
-
+Definition Rser_bound_max Un := Rseq_bound_max (Rseq_sum Un).
+Definition Rser_bound_min Un := Rseq_bound_min (Rseq_sum Un).
+Definition Rser_bound Un := Rseq_bound (Rseq_sum Un).
+Definition Rser_abs_bound Un := Rseq_bound (Rseq_sum (|Un|)).
 
 (** * Remainders of series *)
 
-Definition Rser_rem (Un : nat -> R) (l : R) (Hcv : Rser_cv Un l) (n : nat) :=  (l - (sum_f_R0 Un n))%R.
+Definition Rser_rem (Un : Rseq) (l : R) (Hcv : Rser_cv Un l) (n : nat) :=  (l - (Rseq_sum Un n))%R.

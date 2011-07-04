@@ -22,14 +22,13 @@ USA.
 (** Properties of real series *)
 
 Require Export Reals.
-Require Export Rsequence_def.
-Require Export Rseries_def.
-Require Import Rsequence_facts.
-Require Export Rsequence_subsequence.
+Require Export Rsequence.
+Require Export Rseries_def Rseries_base_facts Rseries_pos_facts Rseries_cv_facts.
 Require Import Fourier.
 Require Import Max.
 Require Import Rtactic.
-Open Scope R_scope.
+(*
+Local Open Scope R_scope.
 (** printing ~	~ *)
 
 (** Finite facts *)
@@ -46,49 +45,6 @@ induction n2.
  rewrite <- plus_n_Sm. do 2 rewrite plus_Sn_m.
  rewrite plus_comm.
  ring.
-Qed.
-
-Lemma scal_sum_l : forall (An : nat -> R) (N : nat) (x : R),
-       x * sum_f_R0 An N = sum_f_R0 (fun i : nat => x * An i ) N.
-Proof.
-intros.
-induction N; simpl; ring_simplify; trivial.
-rewrite IHN; ring.
-Qed.
-
-Lemma scal_sum_r : forall (An : nat -> R) (N : nat) (x : R),
-       sum_f_R0 An N * x = sum_f_R0 (fun i : nat => An i * x) N.
-Proof.
-intros.
-induction N; simpl; ring_simplify; trivial.
-rewrite IHN; ring.
-Qed.
-
-Lemma sum_lt : forall Un Vn n, (forall k, Un k < Vn k) ->  
-  sum_f_R0 Un n < sum_f_R0 Vn n.
-Proof.
-intros Un Vn n Hlt.
-induction n.
- simpl. apply Hlt.
-
- do 2 rewrite tech5.
- apply Rplus_lt_compat.
-  apply IHn.
-
-  apply Hlt.
-Qed.
-
-Lemma sum_pos_minus : forall Un n k, (n >= k)%nat ->
-  (forall i, (i > k)%nat -> Un i >= 0) ->
-    sum_f_R0 Un n - sum_f_R0 Un k >= 0.
-Proof.
-intros Un n k Hnk Hpos.
-induction Hnk.
- right. ring.
-
- rewrite tech5. rewrite Rplus_comm. unfold Rminus in *. rewrite Rplus_assoc.
- replace 0 with (0 + 0) by intuition.
- apply Rle_ge. apply Rplus_le_compat ; intuition.
 Qed.
 
 Lemma sum_reorder_0 : forall Un n N, (n <= N)%nat -> 
@@ -111,338 +67,12 @@ Qed.
 
 Open Scope Rseq_scope.
 
-Lemma sum_opp_compat : forall Un, sum_f_R0 (-Un) == - sum_f_R0 Un.
-Proof.
-intro Un.
-unfold Rseq_eq.
-induction n.
-trivial.
-simpl.
-rewrite IHn.
-unfold Rseq_opp.
-rewrite <- Ropp_plus_distr.
-reflexivity.
-Qed.
-
-Lemma sum_minus_compat : forall Un Vn, sum_f_R0 (Un - Vn) == sum_f_R0 Un - sum_f_R0 Vn.
-Proof.
-intros Un Vn.
-unfold Rseq_eq, Rseq_minus.
-induction n.
-trivial.
-simpl.
-rewrite IHn.
-ring.
-Qed.
-
-(** Uniqueness of the limit. *)
-
-Lemma Rser_cv_unique : forall Un lu1 lu2, Rser_cv Un lu1 -> Rser_cv Un lu2 -> lu1 = lu2.
-Proof.
-intros Un lu1 lu2 H H'.
-apply Rseq_cv_unique with (sum_f_R0 Un); assumption.
-Qed.
-(* begin hide *)
-(* Simplification lemma *)
-Lemma Rplus_le_simpl_l : forall a b, 0<= b -> a <= a+b.
-Proof.
-intros a b Hb.
-replace a with (a+ 0)%R by intuition ; rewrite Rplus_0_r at 2.
-apply Rplus_le_compat_l.
-exact Hb.
-Qed.
-
-Lemma Rplus_le_simpl_r : forall a b, 0<= b -> a <= b+a.
-Proof.
-intros a b Hb.
-replace a with (0+a)%R by intuition ; rewrite Rplus_0_l at 2.
-apply Rplus_le_compat_r.
-exact Hb.
-Qed.
-(* end hide *)
-
-(** * Properties about positive term series *)
-
-Section Rser_pos_prop.
-
-Variables Un Vn : nat -> R.
-Hypothesis Un_pos : forall n : nat, 0 <= Un n.
-
-Lemma Rser_pos_growing : Rseq_growing (sum_f_R0 Un).
-intro n.
-simpl.
-rewrite <- (Rplus_0_r (sum_f_R0 Un n)) at 1.
-apply Rplus_le_compat_l.
-apply Un_pos.
-Qed.
 
 
-(** Positive term series convergence caracterization *)
-
-Lemma Rser_pos_bound_cv : forall M, Rser_bound_max Un M -> { l | Rser_cv Un l }.
-Proof.
-intros M Hb.
-destruct ub_to_lub with (sum_f_R0 Un).
-exists M.
-intros x Hx; destruct Hx as (i, Hi); rewrite Hi.
-apply Hb.
-exists x.
-apply tech10.
-apply Rser_pos_growing.
-exact i.
-Qed.
-
-End Rser_pos_prop.
-
-(** * Properties using classical logic *)
-
-Section Classical_facts.
-
-Variables Un Vn : nat -> R.
-Hypothesis Un_pos : forall n : nat, 0 <= Un n.
-Hypothesis NNPP : forall p : Prop, ~ ~ p -> p.
-Hypothesis classic: forall P : Prop, P \/ ~ P.
-
-(** Positive series are either convergent or go to infinity *)
-
-Lemma Rser_pos_cv_dec : (exists l, Rser_cv Un l) \/ (Rser_cv_pos_infty Un).
-Proof.
-assert((exists M, Rser_bound_max Un M) \/ ~(exists M, Rser_bound_max Un M)) as Hdec.
-apply classic.
-case Hdec.
-intro H; left.
-destruct H as [ M HM].
-assert ({l : R | Rser_cv Un l}).
-apply (Rser_pos_bound_cv Un Un_pos M); apply HM.
-destruct H as [l Hl].
-exists l; apply Hl.
-intro H; right.
-apply Rseq_unbounded_growing.
-apply NNPP.
-apply Rser_pos_growing; apply Un_pos.
-apply H.
-Qed.
-
-End Classical_facts.
-
-
-(** * Extensionnal equality compatibility *)
-
-Lemma Rsum_eq_compat : forall Un Vn, Un == Vn -> sum_f_R0 Un == sum_f_R0 Vn.
-Proof.
-intros Un Vn H n.
-induction n; simpl; rewrite (H _); [|rewrite IHn]; reflexivity.
-Qed.
-
-Lemma Rser_cv_eq_compat : forall Un Vn l, Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
-Proof.
-intros Un Vn l H n ; unfold Rser_cv ; rewrite <- Rseq_cv_eq_compat ;
- [| eapply Rsum_eq_compat] ; eassumption.
-Qed.
-
-(** * Compatibility between convergence and common operations *)
-
-Section Rser_operations.
-
-Lemma Rser_cv_plus_compat :
-  forall Un Vn lu lv,
-    Rser_cv Un lu -> Rser_cv Vn lv -> Rser_cv (Un + Vn) (lu + lv).
-Proof.
-intros.
-unfold Rser_cv.
-apply Rseq_cv_eq_compat with (sum_f_R0 Un + sum_f_R0 Vn).
-unfold Rseq_eq.
-unfold Rseq_plus.
-intro n; rewrite sum_plus; reflexivity.
-apply Rseq_cv_plus_compat.
-apply H.
-apply H0.
-Qed.
-
-Lemma Rser_cv_opp_compat :
-  forall Un lu,
-    Rser_cv Un lu -> Rser_cv (-Un) (-lu).
-Proof.
-intros Un lu Hu.
-apply Rseq_cv_eq_compat with (- sum_f_R0 Un).
-unfold Rseq_eq, Rseq_opp.
-induction n.
-trivial.
-simpl.
-ring_simplify.
-rewrite IHn.
-unfold Rminus.
-auto with *.
-apply Rseq_cv_opp_compat.
-apply Hu.
-Qed.
-
-Lemma Rser_cv_minus_compat :
-  forall Un Vn lu lv,
-    Rser_cv Un lu -> Rser_cv Vn lv -> Rser_cv (Un - Vn) (lu - lv).
-Proof.
-intros.
-apply Rseq_cv_eq_compat with (sum_f_R0 Un - sum_f_R0 Vn).
-unfold Rseq_eq, Rseq_minus.
-intro n.
-rewrite <- tech11 with (Un - Vn) Un Vn n.
-trivial.
-trivial.
-apply Rseq_cv_minus_compat.
-apply H.
-apply H0.
-Qed.
-
-Lemma Rser_cv_scal_mult_compat :
-  forall Un lu (x:R),
-    Rser_cv Un lu -> Rser_cv (x * Un) (x * lu).
-Proof.
-intros.
-apply Rseq_cv_eq_compat with (x * (sum_f_R0 Un)).
- intro n.
- unfold Rseq_mult.
- rewrite scal_sum.
- apply Rsum_eq_compat; intro; unfold Rseq_constant; ring.
- 
- apply Rseq_cv_mult_compat.
-  apply Rseq_constant_cv.
-  assumption.
-Qed.
-
-(** If a series converges absolutely, then it converges *)
-
-Lemma Rser_abs_cv_cv : forall Un, {l | Rser_abs_cv Un l} -> {lu | Rser_cv Un lu}.
-Proof.
-unfold Rser_cv, Rser_abs_cv.
-intros Un Habs.
-apply (cv_cauchy_2 Un).
-apply cauchy_abs.
-apply cv_cauchy_1.
-apply Habs.
-Qed.
-
-End Rser_operations.
-
-Section Rser_partition.
-
-(** If a gt-positive series converges on an extractor, then it converges *)
-
-Lemma Rser_cv_growing_subseq_compat :
-  forall Un (phi : extractor) l, 0 <= Un ->
-    Rseq_cv ((sum_f_R0 Un) ⋅ phi)%Rseq l -> Rser_cv Un l.
-Proof.
-intros Un phi l ephi Unpos Uncv.
-apply Rseq_subseq_growing_cv_compat with ((sum_f_R0 Un) ⋅ phi).
- exists phi; reflexivity.
-  assumption.
- intro; apply Rplus_le_simpl_l; assumption.
-Qed.
-
-(** If a gt-positive series converges on even integers, then it converges *)
-
-Lemma Rser_cv_growing_even_compat : forall Un l, 0 <= Un ->
-  Rseq_cv (fun n => (sum_f_R0 Un (2*n))) l ->
-  Rser_cv Un l.
-Proof.
-intros Un phi l Unpos.
-assert (Hex : is_extractor (mult 2)).
-  intros n; omega.
-apply Rser_cv_growing_subseq_compat with (exist _ (mult 2) Hex).
- assumption.
- assumption.
-Qed.
-
-(** Finite sum of even and odd terms *)
-
-Lemma sum_even_odd_split : forall an n,
-  ((sum_f_R0 (fun i => an (2 * i)%nat) n) + 
-  (sum_f_R0 (fun i => an (S (2 * i))) n) =
-  (sum_f_R0 an (S (2 * n))))%R.
-Proof.
-intros an n.
-induction n.
- reflexivity.
- 
- replace (2 * S n)%nat with (S (S (2 * n))) by ring.
- do 4 rewrite tech5.
- replace (2 * S n)%nat with (S (S (2 * n))) by ring.
- rewrite <- IHn.
- ring.
-Qed.
-
-Lemma sum_even_odd_split_s : forall an n,
-  ((sum_f_R0 (fun i => an (2 * i)%nat) (S n)) + 
-  (sum_f_R0 (fun i => an (S (2 * i))) n) =
-  (sum_f_R0 an (2 * (S n))))%R.
-Proof.
-intros an n.
-induction n.
- simpl; field.
- 
- replace (2 * (S (S n)))%nat with (S (S (S (S (2 * n))))) by ring.
- do 5 rewrite tech5.
- rewrite <- tech5.
- 
- replace (2 * S n)%nat with (S (S (2 * n))) in IHn by ring.
- replace (2 * S n)%nat with (S (S (2 * n))) by ring.
- replace (2 * S (S n))%nat with (S (S (S (S (2 * n))))) by ring.
- rewrite <- IHn.
- ring.
-Qed.
-
-(** Sum of series of even and odd terms *)
-
-Lemma Rser_even_odd_split : forall an le lo, 
-  Rser_cv (fun n => an (2*n)%nat) le ->
-  Rser_cv (fun n => an (S(2*n))%nat) lo ->
-  Rser_cv an (le+lo).
-Proof.
-intros an le lo CVE CVO eps epspos.
-assert (epssplit: (eps/2 > 0)%R) by fourier.
-destruct (CVO (eps/2)%R epssplit) as [No Ho].
-destruct (CVE (eps/2)%R epssplit) as [Ne He].
-exists (mult 2 (S (plus No Ne))).
-intros n nN.
-destruct (even_odd_cor n) as [p [Hne|Hno]].
- rewrite Hne.
- destruct p; [ rewrite Hne in nN; simpl in nN; inversion nN | ].
- rewrite <- sum_even_odd_split_s.
- replace eps with (eps / 2 + eps / 2)%R by field.
- eapply Rle_lt_trans.
-  eapply R_dist_plus.
-  apply Rplus_lt_compat; [apply He|apply Ho]; omega.
-
- rewrite Hno.
- rewrite <- sum_even_odd_split.
- replace eps with (eps / 2 + eps / 2)%R by field.
- eapply Rle_lt_trans.
-  eapply R_dist_plus.
-  apply Rplus_lt_compat; [apply He|apply Ho]; omega.
-Qed.
-
-End Rser_partition.
 
 (** * Convergence and comparisons between sequences*)
 
 Section Rser_pos_comp.
-
-Lemma Rser_pos_maj_cv : forall (Un Vn : nat -> R), 
-    (forall n : nat, 0 <= Un n) -> (forall n : nat, 0 <= Vn n) ->
-        Rseq_le Un Vn ->  {lv | Rser_cv Vn lv } -> {lu | Rser_cv Un lu}.
-Proof.
-intros Un Vn Un_pos Vn_pos Hmaj Hlv.
-destruct Hlv as (lv, Hlv).
-apply Rser_pos_bound_cv with lv.
-exact Un_pos.
-intro n.
-apply Rle_trans with (sum_f_R0 Vn n).
-apply sum_Rle.
-intros p _; apply Hmaj.
-apply growing_ineq.
-apply Rser_pos_growing.
-apply Vn_pos.
-exact Hlv.
-Qed.
 
 (** Big-O and bound *)
 
@@ -768,6 +398,7 @@ destruct (Hlu eps Heps) as [N HN].
 exists (S n+N)%nat.
 unfold R_dist; unfold Rser_rem.
 intros p Hp.
+unfold Rseq_sum.
 replace (sum_f_R0 (fun k : nat => Un (S n + k)%nat) p - (lu - sum_f_R0 Un n))%R with
     (sum_f_R0 Un n + sum_f_R0 (fun k : nat => Un (S n +k)%nat) p - lu)%R by ring.
 replace p with ((p + S n) - S n)%nat by intuition.
@@ -786,7 +417,7 @@ intros Un Vn lu lv Hlu hlv.
 unfold Rser_rem, Rseq_plus, Rseq_eq.
 intro n.
 rewrite sum_plus.
-ring.
+unfold Rseq_sum ; ring.
 Qed.
 
 Lemma Rser_rem_opp_compat : forall Un lu Hlu,
@@ -796,7 +427,7 @@ intros Un lu Hlu.
 unfold Rser_rem, Rseq_eq.
 intro  n.
 rewrite sum_opp_compat.
-unfold Rseq_opp.
+unfold Rseq_opp, Rseq_sum.
 ring.
 Qed.
 
@@ -807,7 +438,7 @@ intros Un Vn lu lv Hlu hlv.
 unfold Rser_rem, Rseq_eq.
 intro n.
 rewrite sum_minus_compat.
-unfold Rseq_minus.
+unfold Rseq_minus, Rseq_sum.
 ring.
 Qed.
 
@@ -823,7 +454,8 @@ induction n.
  simpl. ring.
 
  repeat rewrite tech5. unfold Rminus in *. 
- repeat rewrite Ropp_plus_distr. rewrite <- Rplus_assoc. rewrite IHn. ring.
+ repeat rewrite Ropp_plus_distr. rewrite <- Rplus_assoc. rewrite IHn.
+unfold Rseq_sum ; ring.
 Qed.
 
 End Rser_rem.
@@ -969,138 +601,6 @@ Open Scope R_scope.
 (* end hide *)
 Local Notation sum := sum_f_R0 (only parsing).
 
-Lemma Rsum_shift : forall Un, sum_f_R0 (Rseq_shift Un) == ((Rseq_shift (sum_f_R0 Un)) - (Un O))%Rseq.
-Proof.
-intros Un n.
-assert (REW : forall a b c, c + a = b -> a = b - c) by (intros; subst; field).
-apply REW.
-induction n.
- compute; field.
- 
- unfold Rseq_shift in *.
- do 2 rewrite tech5.
- rewrite <- IHn.
- unfold Rseq_constant.
- field.
-Qed.
-
-(** Series convergence shifting compatibility *)
-
-Lemma Rser_cv_shift : forall Un l, Rser_cv Un l -> Rser_cv (Rseq_shift Un) (l - (Un O)).
-Proof.
-intros Un l H.
-apply Rseq_cv_shift_compat.
-assert (EC : forall a b x, Rseq_cv (a + b - b)%Rseq x -> Rseq_cv a x).
- intros; apply Rseq_cv_eq_compat with (a + b - b)%Rseq.
-  intro; compute; field.
-  assumption.
- 
- apply EC with (Un O)%Rseq.
-  apply Rseq_cv_minus_compat.
-  intros e ep; destruct (H e ep) as [N He]; exists N; intros n nN.
-  unfold Rseq_plus; unfold Rseq_shift.
-  replace (sum_f_R0 (fun n0 : nat => Un (S n0)) (S n)) with (sum_f_R0 (Rseq_shift Un) (S n)) by reflexivity.
-  rewrite Rsum_shift with Un (S n).
-  unfold Rseq_minus.
-  assert (REW:forall a b, a - b + b = a) by (intros; field); rewrite REW; clear REW.
-  apply He; omega.
-  
-  apply Rseq_constant_cv.
-Qed.
-
-Lemma Rser_cv_shift_rev : forall (Un : nat -> R) (l : R),
-  Rser_cv (Rseq_shift Un) l ->
-   Rser_cv Un (l + Un 0%nat).
-Proof.
-intros Un l H.
-apply Rseq_cv_shift_compat.
-assert (EC : forall a b x, Rseq_cv (a - b + b)%Rseq x -> Rseq_cv a x).
- intros; apply Rseq_cv_eq_compat with (a - b + b)%Rseq.
-  intro; compute; field.
-  assumption.
- 
- apply EC with (Un O)%Rseq.
-  intros e1 ep; destruct (H e1 ep) as [N He]; exists N; intros n nN.
-  unfold Rseq_plus; unfold Rseq_shift. unfold Rseq_constant. unfold Rseq_minus.
-  generalize (He n nN) ; intros H1.
-  rewrite Rsum_shift in H1.
-  unfold Rseq_shift, Rseq_minus, Rseq_constant, Rseq_plus, Rseq_shift, Rseq_constant in H1.
-  unfold R_dist in *. ring_simplify (sum_f_R0 Un (S n) - Un 0%nat + Un 0%nat - (l + Un 0%nat)).
-  apply H1.
-Qed.
-
-Lemma Rser_cv_shift_n : forall n (Un : nat -> R) (l : R),
-  Rser_cv (fun k : nat => Un (S n + k)%nat) (l) ->
-    Rser_cv Un (l + sum_f_R0 Un n).
-Proof.
-intros n Un l Hun.
-unfold Rser_cv in *. unfold Rseq_cv in *.
-intros eps Heps. destruct (Hun eps Heps) as (N, Hun1). clear Hun.
-exists (S n + N)%nat. intros n1 Hn1.
-pose (n2 := (n1 - S n)%nat).
-assert (H3 : (n2 >= N)%nat). unfold n2. intuition. 
-generalize (Hun1 n2 H3). intros Hun. clear Hun1.
-unfold R_dist in *. unfold Rminus. rewrite Ropp_plus_distr.
-rewrite Rplus_comm. rewrite Rplus_assoc.
-destruct n1.
- simpl. unfold n2 in *. destruct n. inversion Hn1.
- inversion H3. unfold minus in *. inversion Hn1.
-
- replace (S n1) with (n2 + S n)%nat in * by (unfold n2 ; intuition).
- rewrite <- plus_n_Sm. rewrite sum_minus.
- rewrite Rplus_comm. apply Hun.
-Qed.
-
-Lemma Rser_cv_shift_n_rev : forall n (Un : nat -> R) (l : R),
-  Rser_cv Un (l + sum_f_R0 Un n) ->
-   Rser_cv (fun k : nat => Un (S n + k)%nat) (l).
-Proof.
-intros n Un l Hun.
-unfold Rser_cv, Rseq_cv in *. 
-intros eps Heps. destruct (Hun eps Heps) as (N, Hun1). clear Hun.
-exists (N - n)%nat. intros n1 Hn1.
-pose (n2 := S (n1 + n)%nat).
-assert (H3 : (n2 >= N)%nat). unfold n2. intuition. 
-generalize (Hun1 n2 H3). intros Hun. clear Hun1.
-unfold R_dist in *. unfold Rminus in Hun. rewrite Ropp_plus_distr in Hun.
-rewrite Rplus_comm in Hun. rewrite Rplus_assoc in Hun.
-rewrite <- sum_minus. fold n2.
-rewrite Rplus_comm in Hun. assumption.
-Qed.
-
-
-Lemma Rser_cv_sig_shift_compat : forall Un, {l | Rser_cv Un l} -> {l | Rser_cv (Rseq_shift Un) l}.
-Proof.
-intros Un [l H].
-exists (l - (Un O)).
-apply Rser_cv_shift; assumption.
-Qed.
-
-Lemma Rser_cv_shift_reciprocal : forall Un l, Rser_cv (Rseq_shift Un) (l - (Un O)) -> Rser_cv Un l.
-Proof.
-intros Un l H.
-assert (EC : forall (a:Rseq) (b x:R), Rseq_cv (a - b)%Rseq (x - b) -> Rseq_cv a x).
- intros; apply Rseq_cv_eq_compat with (a - b + b)%Rseq.
-  intro; compute; field.
-  replace x with (x - b + b) by field.
-  apply Rseq_cv_plus_compat.
-   assumption.
-   apply Rseq_constant_cv.
- 
- eapply EC with (Un O).
- apply Rseq_cv_shift_compat.
- apply Rseq_cv_eq_compat with (sum_f_R0 (Rseq_shift Un)).
- symmetry ; apply Rsum_shift.
- apply H.
-Qed.
-
-Lemma Rser_cv_sig_shift_reciprocal_compat : forall Un, {l | Rser_cv (Rseq_shift Un) l} -> {l | Rser_cv Un l}.
-Proof.
-intros Un [l H].
-exists (l + (Un O)).
-apply Rser_cv_shift_reciprocal.
-replace (l + Un 0%nat - Un 0%nat) with l by ring; assumption.
-Qed.
 
 Lemma Rseq_decomp : forall An p n, sum An (S (p + n)) = sum An p + sum (fun i => An (plus i (S p))) n.
 Proof.
@@ -1116,238 +616,8 @@ induction n.
  ring.
 Qed.
 
-Lemma Rseq_reverse : forall An n, sum (fun i => An (n - i)%nat) n = sum An n.
-Proof.
-intros An n; generalize dependent An.
-induction n.
- trivial.
- 
- intros.
- repeat rewrite tech5.
- pose (fun j => An (S j)) as Asn.
- replace (sum (fun i => An (S n - i)%nat) n)
-   with (sum (fun i => (Rseq_shift An) (n - i)%nat) n)
-   by (unfold Rseq_shift; apply sum_eq; intros; replace (S (n - i)) with (S n - i)%nat by omega; trivial).
- rewrite IHn.
- replace (S n - S n)%nat with O by intuition.
- rewrite Rsum_shift.
- unfold Rseq_shift, Rseq_minus, Rseq_constant.
- simpl.
- ring.
-Qed.
+Require Import Rsequence.
 
-(** * Cauchy Product **)
-
-Lemma cauchy_product_subproof_rearrangement1 : forall An Bn n,
-  sum (fun i => (sum Bn i * An (n - i)%nat)%R) n =
-  sum (fun i => sum (fun k => (An (n - i)%nat * Bn (k)%nat)%R) i) n.
-Proof.
-intros.
-apply Rsum_eq_compat; intro.
-rewrite Rmult_comm; rewrite scal_sum_l; trivial.
-Qed.
-
-Lemma cauchy_product_subproof_rearrangement : forall An Bn n,
-  sum (fun i => (sum Bn i * An (n - i)%nat)%R) n =
-  sum (fun i => sum (fun k => (An k * Bn (i - k)%nat)%R) i) n.
-Proof.
-intros f g n.
-rewrite cauchy_product_subproof_rearrangement1.
-rewrite <- Rseq_reverse.
-induction n.
- simpl; ring.
- 
- do 2 rewrite tech5.
- rewrite <- IHn.
- replace (S n - S n)%nat with O by intuition.
- replace ( (sum (fun i => sum (fun k => f (S n - (S n - i))%nat * g k) (S n - i)) n)%R)
-   with    (sum (fun i => sum (fun k => f (S n - (S n - i))%nat * g k) (n - i) +
-     f ((S n - (S n - i)))%nat * g (S n - i)%nat) n)%R.
-  rewrite sum_plus.
-  assert (forall n, sum (fun l => f ((S n - (S n - l)))%nat * g (S n - l)%nat) n +
-    sum (fun k => f (S n - 0)%nat * g k) 0 =
-    sum (fun k => f k * g (S n - k)%nat) (S n)).
-   intros n0.
-   rewrite tech5.
-   replace (S n0 - S n0)%nat with O by intuition.
-   replace (
-     sum (fun l => f (S n0 - (S n0 - l))%nat * g (S n0 - l)%nat) n0)
-     with
-     (sum (fun k => f k * g (S n0 - k)%nat) n0).
-   trivial.
-   apply sum_eq.
-   intros n1 Hn1.
-   replace (S n0 - (S n0 - n1))%nat with n1 by omega; trivial.
-  
-  rewrite <- H.
-  replace (sum (fun l => sum (fun k => f (S n - (S n - l))%nat * g k) (n - l)) n)
-    with (sum (fun i => sum (fun k => f (n - (n - i))%nat * g k) (n - i)) n).
-  ring.
-  apply sum_eq; intros i Hi.
-  apply sum_eq; intros i0 Hi0.
-  replace (S n - (S n - i))%nat with (n - (n-i))%nat by omega; trivial.
- 
- apply sum_eq; intros i Hi.
- replace (S n - i)%nat with (S (n - i)) by intuition.
- trivial.
-Qed.
-
-(** Mertens' theorem *)
-
-Lemma cauchy_product : forall An Bn la lb lna,
- Rser_cv An la -> 
- Rser_cv Bn lb -> 
- Rser_abs_cv An lna ->
- Rser_cv ((fun k:nat => sum_f_R0 (fun p:nat => An p * Bn (k - p)%nat) k)%R)
-   (la * lb)%R.
-Proof.
-intros An Bn la lb lna HA HB HNA e epos.
-
-pose (e * / 4 * / (lna + 1))%R as eN.
-assert (lnapos : lna + 1 > 0).
- apply Rle_lt_0_plus_1.
- apply Rle_trans with (Rabs (An O)).
-  apply Rabs_pos.
-  apply (sum_incr (|An|) O lna HNA).
-  intro; apply Rabs_pos.
-assert (eNpos : eN > 0) by (apply Rlt_mult_inv_pos; auto; fourier).
-destruct (HB eN eNpos) as [N HN].
-
-destruct (maj_by_pos (sum_f_R0 Bn)) as [supBn[]]; [exists lb; apply HB|].
-pose (supBn + Rabs lb)%R as supBnB.
-assert (HsupBnB : forall n, (Rabs ((sum_f_R0 Bn n) - lb) <= supBnB)%R).
- intro n.
- replace ((sum_f_R0 Bn n) - lb)%R with (sum_f_R0 Bn n + - lb)%R by auto.
- eapply Rle_trans.
-  apply Rabs_triang.
-  apply Rplus_le_compat.
-   apply H0.
-   rewrite Rabs_Ropp; apply Rle_refl.
-pose (e * / 8 * / (INR (S N)) * / (supBnB + 1))%R as eM.
-assert (eMpos : eM > 0).
- repeat apply Rlt_mult_inv_pos; try fourier.
-  replace 0 with (INR O) by trivial; apply lt_INR; omega.
-  apply Rle_lt_0_plus_1; apply Rplus_le_le_0_compat; try fourier; apply Rabs_pos.
-destruct (Rser_cv_zero An la HA eM eMpos) as [M' HM'].
-pose (plus M' N) as M.
-
-pose (e * / 2 * / (Rabs lb + 1))%R as eL.
-assert (eLpos : eL > 0).
- repeat apply Rlt_mult_inv_pos; try fourier.
- apply Rle_lt_0_plus_1; try fourier; apply Rabs_pos.
-destruct (HA eL eLpos) as [L HL].
-
-clear H H0 eLpos epos.
-
-pose (max (max (S N) M) L) as K.
-
-pose (sum_f_R0 An) as SAn.
-pose (sum_f_R0 Bn) as SBn.
-pose (sum_f_R0 (fun i => sum_f_R0 (fun k => (An k * Bn (minus i k))%R) i)) as Cn.
-fold Cn.
-
-exists K; intros n Hn.
-replace (Cn n) with (sum (fun i => SBn i * (An (n - i)%nat))%R n) by
-  (unfold SBn, Cn; apply cauchy_product_subproof_rearrangement).
-
-replace (sum (fun i => (SBn i * An (n - i)%nat)%R) n)
-  with (sum (fun i => ((SBn i - lb) * An (n - i)%nat) + An (n - i)%nat * lb)%R n)
-  by (apply Rsum_eq_compat; intro; ring).
-
-rewrite sum_plus.
-rewrite <- scal_sum.
-rewrite Rseq_reverse.
-fold SAn.
-
-unfold R_dist.
-assert (RE : forall x y z t, x + t * y - z * t = x + t * (y - z))
-  by (intros; ring); rewrite RE; clear RE.
-
-eapply Rle_lt_trans; [apply Rabs_triang|].
-replace e with (e/4 + e/4 + e/2) by field.
-apply Rplus_lt_compat.
- eapply Rle_lt_trans; [apply Rsum_abs |].
- pose (fun l => (fun l0 : nat => (SBn l0 - lb) * An (n - l0)%nat) l) as dab.
- fold dab.
- 
- pose (minus n (S N)) as p.
- assert (HnN : (n >= S N)%nat).
-  apply le_trans with K; auto.
-  eapply le_trans; apply le_max_l.
- replace n with (S (N + p)) by (unfold p; omega).
- rewrite Rseq_decomp.
- 
- apply Rplus_lt_compat.
-  unfold dab.
-  replace (e / 4) with (eM * 2 * INR (S N) * (supBnB + 1))
-    by (unfold eM; field; split; replace 0 with (INR O) by auto; try (apply not_INR; omega);
-    apply Rgt_not_eq; apply Rle_lt_0_plus_1; apply Rle_trans with (Rabs (SBn O - lb)); apply Rabs_pos || apply HsupBnB).
-  apply Rle_lt_trans with (sum (fun l => Rabs (An (n - l)%nat) * supBnB) N).
-   apply sum_Rle; intros.
-   rewrite Rmult_comm.
-   rewrite Rabs_mult.
-   apply Rmult_le_compat_l.
-    apply Rabs_pos.
-    apply HsupBnB.
-   
-   rewrite <- scal_sum.
-   rewrite Rmult_comm.
-   apply Rmult_le_0_lt_compat; [
-    apply cond_pos_sum; intro; apply Rabs_pos|
-    apply Rle_trans with (Rabs (SBn O - lb)); apply Rabs_pos || apply HsupBnB | |
-    auto with * ].
-   apply Rle_lt_trans with (eM * INR (S N)); [|
-    replace (eM * INR (S N)) with (eM * 1 * INR (S N)) by ring;
-    apply Rmult_lt_compat_r; replace 0 with (INR O) by auto; try (apply lt_INR; omega);
-    apply Rmult_lt_compat_l; auto; fourier].
-   
-   apply Rle_trans with (sum (fun i => eM) N); [|rewrite sum_cte; auto with *].
-   apply sum_Rle; intros.
-   unfold R_dist in HM'.
-   rewrite <- Rminus_0_r with (An (n - n0)%nat).
-   apply Rlt_le.
-   apply HM'.
-   replace n with (S p + N)%nat by (unfold p; omega).
-   replace (S p + N - n0)%nat with (S p + (N - n0))%nat by omega.
-   apply le_trans with (S p); [|omega].
-   unfold p.
-   apply le_trans with (K - N)%nat; [|omega].
-   replace M' with (M - N)%nat by (unfold M; omega).
-   apply minus_le_compat_r.
-   unfold K; apply le_trans with (max (S N) M); auto with *.
-  
-  replace (e / 4) with (eN * (lna + 1)) by (unfold eN; field; auto with *).
-  unfold dab.
-  apply Rle_lt_trans with (sum (fun i => Rabs (An (n - (i + S N))%nat) * eN) p).
-   apply sum_Rle; intros.
-   rewrite Rmult_comm.
-   rewrite Rabs_mult.
-   apply Rmult_le_compat_l; [apply Rabs_pos|].
-   apply Rlt_le; apply HN; omega.
-   
-   rewrite <- scal_sum.
-   apply (Rmult_lt_compat_l _ _ _ eNpos).
-   eapply Rle_lt_trans; [|apply Rlt_plus_1].
-   replace (sum (fun i => Rabs (An (n - (i + S N))%nat)) p)
-     with (sum (fun i => Rseq_abs An (p - i)%nat) p)
-     by (apply Rsum_eq_compat; intro; replace (n - (n0 + S N))%nat with (n - S N - n0)%nat by omega; trivial).
-   rewrite Rseq_reverse.
-   apply growing_ineq.
-    intro i; simpl sum; apply Rplus_le_simpl_l; apply Rabs_pos.
-    apply HNA.
- 
- rewrite Rabs_mult.
- replace e with (eL * 2 * (Rabs lb + 1)) by (unfold eL; field;
-   apply Rgt_not_eq; apply Rle_lt_0_plus_1; apply Rabs_pos).
- cut (Rabs (SAn n - la) < eL).
-  intro.
-  replace (eL * 2 * (Rabs lb + 1) / 2) with (eL * (Rabs lb + 1)) by field.
-  rewrite Rmult_comm.
-  apply Rmult_le_0_lt_compat; auto || apply Rabs_pos || apply Rlt_plus_1.
- apply HL.
- apply le_trans with K; auto.
- unfold K; auto with *.
-Qed.
 
 Lemma Rser_pos_maj_cv_shift : forall Un Vn : nat -> R,
   (forall n, 0 <= Un (S n) <= Vn n) -> {lv : R | Rser_cv Vn lv} -> {lu : R | Rser_cv Un lu}.
@@ -1659,3 +929,4 @@ rewrite (Rser_Rser_rem_equiv Un (Vn + Wn)%Rseq x (l + l1) H1 n).
 
  assumption.
 Qed.
+*)

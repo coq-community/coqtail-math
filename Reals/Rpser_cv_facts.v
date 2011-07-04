@@ -324,9 +324,8 @@ intros An lam lam_neq An_neq An_frac_cv r r_bd.
  apply An_neq.
  destruct (An_frac_cv (/ (middle (Rabs r) (/ lam)) - lam))%R as [N HN].
  assumption.
- exists N ; intro n.
- apply Rle_trans with (lam + (Rabs (An (S (N + n)) / An (N + n)%nat)
-      - lam))%R.
+ exists N ; intro n ; unfold Rseq_shifts.
+ transitivity (lam + (Rabs (An (S (N + n)) / An (N + n)%nat) - lam))%R.
  right ; ring.
  apply Rplus_le_compat_l ; apply Rle_trans with
    (R_dist (Rabs (An (S (N + n)) / An (N + n)%nat)) lam)%R.
@@ -336,7 +335,6 @@ intros An lam lam_neq An_neq An_frac_cv r r_bd.
  rewrite Rinv_involutive ; [| apply Rgt_not_eq] ; assumption.
  unfold eps ; ring.
 Qed.
-
 
 Lemma Rpser_alembert_weak_reciprocal : forall (An : nat -> R) (lambda : R),
        lambda <> 0 -> (forall n : nat, An n <> 0) ->

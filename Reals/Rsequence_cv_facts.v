@@ -21,7 +21,7 @@ USA.
 
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
-Require Import Fourier.
+Require Import Max Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -252,6 +252,20 @@ unfold R_dist.
 apply Rle_lt_trans with (Rabs (Un n - l)).
 apply Rabs_triang_inv2.
 apply HN; apply Hn.
+Qed.
+
+Lemma Rseq_cv_even_odd_compat : forall (Un : Rseq) (l : R),
+  Rseq_cv (fun i => Un (2 * i)%nat) l ->
+  Rseq_cv (fun i => Un (S (2 * i))%nat) l ->
+  Rseq_cv Un l.
+Proof.
+intros Un l Heven Hodd eps eps_pos ;
+ destruct (Heven _ eps_pos) as [N1 HN1] ;
+ destruct (Hodd _ eps_pos) as [N2 HN2] ;
+ exists (max (2 * N1) (S (2 * N2))) ; intros n n_lb ;
+ destruct (n_modulo_2 n) as [[p Hp] | [p Hp]] ; subst.
+  apply HN1 ; assert (H := max_lub_l _ _ _ n_lb) ; omega.
+  apply HN2 ; assert (H := max_lub_r _ _ _ n_lb) ; omega.
 Qed.
 
 End Rseq_cv.

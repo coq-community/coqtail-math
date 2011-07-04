@@ -62,6 +62,9 @@ Notation "'|' Un '|'" := (Rseq_abs Un) (at level 39, format "'|' Un '|'") : Rseq
 Infix "-" := Rseq_minus : Rseq_scope.
 Infix "/" := Rseq_div : Rseq_scope.
 
+Definition Rseq_shift Un n := Un (S n).
+Definition Rseq_shifts Un N n := Un (N + n)%nat.
+
 (** * Extensionnal equality. *)
 
 Definition Rseq_eq (Un Vn : Rseq) := forall n, Un n = Vn n.
@@ -71,10 +74,10 @@ Infix "==" := Rseq_eq (at level 70, no associativity) : Rseq_scope.
 (** * Various properties. *)
 
 Definition Rseq_eventually (P : Rseq -> Prop) (Un : Rseq) :=
-  exists N, P (fun n => Un (N + n)%nat).
+  exists N, P (Rseq_shifts Un N).
 
 Definition Rseq_eventually2 (P : Rseq -> Rseq -> Prop) (Un Vn : Rseq) :=
-  exists N, P (fun n => Un (N + n)%nat) (fun n => Vn (N + n)%nat).
+  exists N, P (Rseq_shifts Un N) (Rseq_shifts Vn N).
 
 Definition Rseq_neq_0 Un := forall n, Un n <> 0.
 
@@ -93,9 +96,6 @@ Definition Rseq_bound_min Un m := forall n, m <= Un n.
 Definition Rseq_bound Un M := forall n, Rabs (Un n) <= M.
 
 Definition Rseq_le Un Vn := forall n, Un n <= Vn n.
-
-Definition Rseq_shift Un n := Un (S n).
-Definition Rseq_shifts Un N n := Un (N + n)%nat.
 
 (** * Convergence of sequences. *)
 

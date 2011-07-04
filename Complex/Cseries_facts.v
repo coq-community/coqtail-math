@@ -91,10 +91,10 @@ destruct HNAim as [lnaim HNAim].
 
 apply Cser_cv_re_im_compat.
  rewrite Cre_mul.
- apply Rser_cv_eq_compat with (fun k =>
+ apply Rser_cv_ext with (fun k =>
    sum_f_R0 (fun p => ((Cre (An p) * Cre (Bn (k - p)%nat)))%R) k -
    sum_f_R0 (fun p => ((Cim (An p) * Cim (Bn (k - p)%nat)))%R) k )%R.
-  repeat (intro; rewrite <- sum_f_C0_Cre_compat; rewrite <- minus_sum; apply Rsum_eq_compat).
+  repeat (intro; rewrite <- sum_f_C0_Cre_compat; rewrite <- minus_sum; apply Rseq_sum_ext).
   intro; rewrite <- Cre_mul; trivial.
   
   apply Rser_cv_minus_compat.
