@@ -23,11 +23,12 @@ USA.
 
 Require Export Reals.
 Require Export Rsequence.
-Require Export Rseries_def Rseries_base_facts Rseries_pos_facts Rseries_cv_facts.
+Require Export Rseries_def Rseries_base_facts Rseries_pos_facts.
+Require Export Rseries_remainder_facts Rseries_cv_facts Rseries_usual.
 Require Import Fourier.
 Require Import Max.
 Require Import Rtactic.
-(*
+
 Local Open Scope R_scope.
 (** printing ~	~ *)
 
@@ -388,75 +389,11 @@ End Rser_landau_infty.
 (** Properties of remainder *)
 Section Rser_rem.
 
-(** Remainder caracterization *)
 
-Lemma Rser_rem_cv : forall (Un : nat -> R) (lu : R) (Hlu : Rser_cv Un lu )(n : nat), 
-    Rser_cv (fun k => Un (S n+ k)%nat) (Rser_rem Un lu Hlu n).
-Proof.
-intros Un lu Hlu n eps Heps.
-destruct (Hlu eps Heps) as [N HN].
-exists (S n+N)%nat.
-unfold R_dist; unfold Rser_rem.
-intros p Hp.
-unfold Rseq_sum.
-replace (sum_f_R0 (fun k : nat => Un (S n + k)%nat) p - (lu - sum_f_R0 Un n))%R with
-    (sum_f_R0 Un n + sum_f_R0 (fun k : nat => Un (S n +k)%nat) p - lu)%R by ring.
-replace p with ((p + S n) - S n)%nat by intuition.
-rewrite  <- tech2 with Un n (p+ S n)%nat.
-apply HN.
-apply le_trans with p; intuition.
-apply le_trans with p; intuition.
-Qed.
 
-(** Compatibility between remainder and usual operations *)
 
-Lemma Rser_rem_plus_compat : forall Un Vn lu lv Hlu Hlv,
-    Rser_rem Un lu Hlu + Rser_rem Vn lv Hlv == Rser_rem (Un+Vn) (lu+lv) (Rser_cv_plus_compat Un Vn lu lv Hlu Hlv).
-Proof.
-intros Un Vn lu lv Hlu hlv.
-unfold Rser_rem, Rseq_plus, Rseq_eq.
-intro n.
-rewrite sum_plus.
-unfold Rseq_sum ; ring.
-Qed.
 
-Lemma Rser_rem_opp_compat : forall Un lu Hlu,
-    - Rser_rem Un lu Hlu == Rser_rem (-Un) (-lu) (Rser_cv_opp_compat Un lu Hlu).
-Proof.
-intros Un lu Hlu.
-unfold Rser_rem, Rseq_eq.
-intro  n.
-rewrite sum_opp_compat.
-unfold Rseq_opp, Rseq_sum.
-ring.
-Qed.
 
-Lemma Rser_rem_minus_compat : forall Un Vn lu lv Hlu Hlv,
-    Rser_rem Un lu Hlu - Rser_rem Vn lv Hlv == Rser_rem (Un-Vn) (lu-lv) (Rser_cv_minus_compat Un Vn lu lv Hlu Hlv).
-Proof.
-intros Un Vn lu lv Hlu hlv.
-unfold Rser_rem, Rseq_eq.
-intro n.
-rewrite sum_minus_compat.
-unfold Rseq_minus, Rseq_sum.
-ring.
-Qed.
-
-Lemma Rser_rem_scal : forall x (Un : Rseq) lu n (Vn := (fun n => x * Un n )%R)  
-  (Hlu : Rser_cv Un lu) (Hlv : Rser_cv Vn (x * lu)),
-   (x * Rser_rem Un lu Hlu n = Rser_rem Vn (x * lu) Hlv n)%R.
-Proof.
-intros x Un lu n Vn Hlu Hlv.
-unfold Rser_rem.
-rewrite Rmult_minus_distr_l. rewrite scal_sum.
-unfold Vn.
-induction n. 
- simpl. ring.
-
- repeat rewrite tech5. unfold Rminus in *. 
- repeat rewrite Ropp_plus_distr. rewrite <- Rplus_assoc. rewrite IHn.
-unfold Rseq_sum ; ring.
-Qed.
 
 End Rser_rem.
 
@@ -577,138 +514,15 @@ Qed.
 
 End Rser_equiv_cv.
 
-Lemma Rser_cv_zero : forall Un l, Rser_cv Un l -> Rseq_cv Un 0.
-Proof.
-intros Un l Hu.
-apply Rseq_cv_asymptotic_eq_compat with ((sum_f_R0 Un) - (fun n => sum_f_R0 Un (pred n))%R).
-exists 1%nat.
-intros n Hn ; simpl; unfold Rseq_minus.
-rewrite  sum_N_predN.
-ring.
-apply Hn.
-replace R0 with (l -l)%R by ring.
-apply Rseq_cv_minus_compat.
-apply Hu.
-intros eps Heps.
-destruct (Hu eps Heps) as [N HN].
-exists (S N).
-intros n Hn; unfold R_dist.
-apply HN; intuition.
-Qed.
 
 (* begin hide *)
 Open Scope R_scope.
 (* end hide *)
-Local Notation sum := sum_f_R0 (only parsing).
 
 
-Lemma Rseq_decomp : forall An p n, sum An (S (p + n)) = sum An p + sum (fun i => An (plus i (S p))) n.
-Proof.
-intros.
-induction n.
- replace (p + 0)%nat with p by omega.
- trivial.
- 
- simpl sum.
- replace (p + S n)%nat with (S (p + n)) by auto.
- rewrite IHn.
- replace (S (n + S p)) with (S (S (p + n))) by omega.
- ring.
-Qed.
 
 Require Import Rsequence.
 
-
-Lemma Rser_pos_maj_cv_shift : forall Un Vn : nat -> R,
-  (forall n, 0 <= Un (S n) <= Vn n) -> {lv : R | Rser_cv Vn lv} -> {lu : R | Rser_cv Un lu}.
-Proof.
-intros Un Vn uposmaj Vncv.
-apply Rser_cv_sig_shift_reciprocal_compat.
-eapply Rser_pos_maj_cv.
- intro; unfold Rseq_shift; apply (uposmaj n).
- intro; eapply Rle_trans; apply (uposmaj n).
- intro; apply (uposmaj n).
- assumption.
-Qed.
-
-Lemma Rser_cv_square_inv : {l | Rser_cv (fun i => / INR (S i) ^ 2) l}.
-Proof.
-eapply Rser_pos_maj_cv_shift with (fun n => / (INR ((S n) * (S (S n))))).
-intro n; split.
- apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
- 
- apply Rlt_le; apply Rinv_lt_contravar.
-  unfold pow; INR_solve.
-  
-  unfold pow; rewrite Rmult_1_r.
-  INR_solve; simpl; omega.
- 
- cut ({lv : R | Rser_cv (fun n => / INR (S n) - / (INR (S (S n)))) lv}).
-  intros [lv H]; exists lv.
-  eapply Rser_cv_eq_compat.
-   2: apply H.
-   intro n.
-   replace (INR (S n * S (S n))) with ((INR (S n)) * (1 + (INR (S n)))) by INR_solve.
-   replace (INR (S (S n))) with (1 + (INR (S n))) by INR_solve.
-   field; split; INR_solve.
- 
- exists 1.
- unfold Rser_cv.
- apply Rseq_cv_eq_compat with (1 - (fun n => (/ (INR (S (S n))))%R))%Rseq.
-  intro n.
-  unfold Rseq_minus.
-  induction n.
-   simpl; unfold Rseq_constant; field.
-   
-   rewrite tech5, IHn.
-   unfold Rseq_constant.
-   field; INR_solve.
- 
- replace 1 with (1 - 0) by field.
- apply Rseq_cv_minus_compat.
- eapply Rseq_cv_eq_compat.
-  2:apply Rseq_constant_cv.
-  
-  intro n; unfold Rseq_constant; ring.
- 
- apply Rseq_cv_pos_infty_inv_compat.
- apply Rseq_subseq_cv_pos_infty_compat with INR.
-  assert (Hex : is_extractor (fun i => S (S i))).
-    intros n; omega.
-  exists (exist _ (fun i => S (S i)) Hex).
-   trivial.
-  
-  eapply Rseq_cv_pos_infty_eq_compat.
-   2: apply Rseq_poly_cv.
-   2: constructor.
-   
-   intro n; unfold Rseq_poly.
-   field.
-Qed.
-
-Lemma Rser_cv_inv_poly : forall d, (2 <= d)%nat -> {l | Rser_abs_cv (Rseq_inv_poly d) l}.
-Proof.
-intros d Hd.
-unfold Rser_abs_cv.
-cut ({l | Rser_cv (Rseq_inv_poly d) l}).
- intros [l Hl]; exists l.
- eapply Rser_cv_eq_compat; [|apply Hl]; intro i.
- destruct i; unfold Rseq_abs; symmetry; apply Rabs_right.
-  apply Rle_refl.
-  
-  unfold Rseq_inv_poly.
-  apply Rle_ge; apply pow_le.
-  apply Rlt_le; apply Rinv_0_lt_compat; INR_solve.
-apply Rser_pos_maj_cv_shift with (fun i => / INR (S i) ^ 2).
- unfold Rseq_inv_poly; intro n; rewrite <- Rinv_pow; [|INR_solve].
- split.
-  apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
-  apply Rle_Rinv.
-   unfold pow; INR_solve; simpl mult; apply lt_O_Sn.
-   apply pow_lt; INR_solve.
-  apply Rle_pow; auto; INR_solve.
-apply Rser_cv_square_inv.
-Qed.
 
 Lemma Rser_Rser_rem_equiv : forall Un Vn x l (H : Rser_cv Vn l) n,
   (forall k, (k > n)%nat -> Un (k - S n)%nat = Vn k) -> 
@@ -929,4 +743,3 @@ rewrite (Rser_Rser_rem_equiv Un (Vn + Wn)%Rseq x (l + l1) H1 n).
 
  assumption.
 Qed.
-*)
