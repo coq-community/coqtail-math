@@ -1,7 +1,7 @@
 Require Import Rsequence.
-Require Import Rseries_def Rseries_base_facts Rseries_cv_facts.
+Require Import Rseries_def Rseries_base_facts Rseries_cv_facts Rseries_pos_facts.
 
-Require Import MyRIneq.
+Require Import Fourier MyRIneq.
 
 Local Open Scope R_scope.
 Local Open Scope Rseq_scope.
@@ -61,4 +61,40 @@ Lemma Rser_rem_minus_compat: forall An Bn la lb Hla Hlb Hlab,
 Proof.
 intros An Bn la lb Hla Hlb Hlab n ; unfold Rser_rem ;
  rewrite Rseq_sum_minus_compat ; unfold Rseq_plus, Rseq_minus ; ring.
+Qed.
+
+(** Convergence results *)
+
+Lemma Rser_Rser_rem_equiv: forall An Bn x l (H : Rser_cv Bn l) n,
+  (forall k, An k = Rseq_shifts Bn (S n) k) -> 
+  Rser_cv An x -> x = Rser_rem Bn l H n.
+Proof.
+intros An Bn x l Hl n Heq Hx ; eapply Rser_cv_unique.
+ apply Hx.
+ eapply Rser_cv_ext with (Rseq_shifts Bn (S n)).
+  intro ; apply Heq.
+  apply Rser_cv_shifts ; assumption.
+Qed.
+
+Lemma Rser_rem_pos: forall An k l (Hl : Rser_cv An l) , 
+  (forall n, (n > k)%nat -> An n >= 0) ->
+  {n | (n > k)%nat /\ An n > 0} ->
+  Rser_rem An l Hl k > 0.
+Proof.
+intros An k l Hl An_pos [n [nk Hn]] ; apply Rlt_Rminus, Rlt_le_trans with (Rseq_sum An n).
+ destruct n ; [inversion nk |].
+  rewrite Rseq_sum_simpl ;apply Rle_lt_trans with (Rseq_sum An n) ; [| fourier].
+  clear Hn ; induction n.
+   assert (k = O) by omega ; subst ; reflexivity.
+   destruct (eq_nat_dec k (S n)).
+    subst ; reflexivity.
+    assert (S n > k)%nat by omega ; assert (0 <= An (S n)) by (apply Rge_le, An_pos ; auto) ;
+    rewrite Rseq_sum_simpl ; transitivity (Rseq_sum An n) ; [intuition | fourier].
+   eapply Rseq_limit_comparison with (Rseq_sum An n) (Rseq_shifts (Rseq_sum An) n).
+   intro p ; induction p ; unfold Rseq_constant, Rseq_shifts in *.
+    rewrite plus_0_r ; reflexivity.
+    rewrite <- plus_n_Sm, Rseq_sum_simpl ; assert (0 <= An (S (n +p)))
+     by (apply Rge_le, An_pos ; omega) ; fourier.
+   apply Rseq_constant_cv.
+   apply Rseq_cv_shifts_compat_reciprocal ; assumption.
 Qed.

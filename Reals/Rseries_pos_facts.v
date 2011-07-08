@@ -12,6 +12,7 @@ Variables Un Vn : Rseq.
 Hypothesis Un_pos : forall n : nat, 0 <= Un n.
 
 Lemma Rser_pos_growing : Rseq_growing (Rseq_sum Un).
+Proof.
 intro n ; transitivity (Rseq_sum Un n + 0)%R.
  rewrite Rplus_0_r ; reflexivity.
  apply Rplus_le_compat_l ; trivial.

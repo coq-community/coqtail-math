@@ -524,91 +524,6 @@ Open Scope R_scope.
 Require Import Rsequence.
 
 
-Lemma Rser_Rser_rem_equiv : forall Un Vn x l (H : Rser_cv Vn l) n,
-  (forall k, (k > n)%nat -> Un (k - S n)%nat = Vn k) -> 
-   Rser_cv Un x -> x = Rser_rem Vn l H n.
-Proof.
-intros Un Vn x l Hv n Heq Hu.
-assert ( Hucv : Rseq_cv Un 0). apply Rser_cv_zero with x. assumption.
-unfold Rser_rem.
-assert (forall k, (k > n)%nat -> sum_f_R0 Un (k - S n)%nat 
-+ sum_f_R0 Vn n = sum_f_R0 Vn k).
- intros k Hk.
- induction Hk. 
-  rewrite <- minus_diag_reverse. simpl.
-  rewrite (minus_diag_reverse (S n)). rewrite Heq. ring. intuition.
-  
-  rewrite tech5. rewrite <- IHHk. rewrite <- minus_Sn_m.
-  rewrite tech5. repeat rewrite Rplus_assoc. apply Rplus_eq_compat_l.
-  rewrite minus_Sn_m. rewrite Heq. ring. intuition. apply Hk. apply Hk.
-assert (Rser_cv (Vn - Un)%Rseq (l - x)).
- apply Rser_cv_minus_compat ; assumption.
-assert (Rser_cv (Vn - Un)%Rseq (sum_f_R0 Vn n)).
- intros eps Heps. 
- assert (Heps1 : eps / INR (S n) > 0). 
-  assert (/INR (S n) > 0) by intuition.
-  unfold Rdiv. apply Rmult_gt_0_compat ; assumption.
- destruct (Hucv (eps/INR (S n)) Heps1) as (N, HucvN).
- exists (2 * S n + N)%nat. intros n1 Hn1.
- unfold R_dist, Rseq_minus.
- rewrite minus_sum. rewrite <- H.
-  ring_simplify ( sum_f_R0 Un (n1 - S n) + sum_f_R0 Vn n - sum_f_R0 Un n1 - sum_f_R0 Vn n).
-  apply Rlt_le_trans with (INR (S n) * (eps / INR (S n))).
-   eapply Rlt_le_trans with (sum_f_R0 (fun n0 => eps / INR (S n)) (n)).
-    assert (n1 >= 2 * S n)%nat. intuition.
-    pose (n2 := (n1 - S n)%nat). fold n2. replace n1 with (n2 + S n)%nat by (unfold n2 ; intuition).
-    rewrite <- Rabs_Ropp. rewrite Ropp_minus_distr. unfold Rminus. 
-    rewrite Rplus_comm. rewrite <- plus_n_Sm. rewrite plus_comm. 
-    rewrite sum_minus. eapply Rle_lt_trans with (sum_f_R0 (fun k : nat => Rabs (Un (S n2 + k)%nat)) n ).
-     apply Rsum_abs.
-
-     apply sum_lt. unfold R_dist in HucvN.
-     intros k. rewrite <- (Rminus_0_r (Un (S n2 + k)%nat)). apply HucvN.
-     unfold n2. assert (n1 - S n >= S n + N)%nat. intuition. intuition.
-    
-    rewrite sum_cte. right. unfold Rdiv. ring.
-   right. field. apply not_0_INR ; intuition.
-  intuition.
-assert (H2 : l - x = sum_f_R0 Vn n) by (apply (Rseq_cv_unique (sum_f_R0 (Vn - Un)%Rseq)) ; intuition).
-rewrite <- H2. ring.
-Qed.
-
-Lemma Rser_rem_pos : forall Un k lu (Hlu : Rser_cv Un lu) , 
-  (forall n, (n > k)%nat -> Un n >= 0) ->
-   {n | (n > k)%nat /\ Un n > 0} ->
-    Rser_rem Un lu Hlu k > 0.
-Proof.
-intros Un k lu Hlu Hpos Hstrict.
-unfold Rser_cv, Rseq_cv in Hlu.
-unfold Rser_rem.
-destruct Hstrict as [n1 [Hn1k Heps]].
-destruct (Hlu (Un n1) Heps) as (N, Hlu1).
-assert (H2 : {n | n >= N /\ n >= S n1}%nat) by (exists (max N (S n1)) ; intuition).
-destruct H2 as [n [HnN Hnk]].
-generalize (Hlu1 n HnN). intros H5.
-replace (lu - sum_f_R0 Un k) with ((lu - sum_f_R0 Un n) + (sum_f_R0 Un n - sum_f_R0 Un k)) by ring.
-replace 0 with (-Un (n1) + Un (n1)) by intuition.
-apply Rplus_lt_le_compat.
- unfold R_dist, Rabs in *. destruct (Rcase_abs (sum_f_R0 Un n - lu)) ; fourier.
- 
- intuition. clear HnN H5. 
- induction Hnk.
-  rewrite tech5. rewrite sum_N_predN ; [|inversion Hn1k ; intuition].
-  unfold Rminus. rewrite Rplus_comm. repeat rewrite <- Rplus_assoc.
-  replace (Un n1) with (0 + Un n1) by intuition. rewrite Rplus_assoc.
-  apply Rplus_le_compat.
-   rewrite Rplus_comm. apply Rge_le. apply sum_pos_minus ; intuition.
-   
-   ring_simplify. replace (Un n1) with (Un n1 + 0) by intuition.
-   apply Rplus_le_compat ; intuition.
- 
- apply Rle_trans with (sum_f_R0 Un m - sum_f_R0 Un k).
-  apply IHHnk.
-
-  rewrite tech5. ring_simplify.
-  assert (Un (S m) >= 0) by intuition. fourier.
-Qed.
-
 Lemma Rser_rem_lt_le : forall Un lu lv (n : nat) Vn 
   (Hlu : Rser_cv Un lu) (Hlv : Rser_cv Vn lv),
    (forall k, (k > n)%nat -> Un k <= Vn k) ->
@@ -654,20 +569,6 @@ split.
 
  split ; [assumption|unfold Wn, Rseq_minus, Un1].
  apply Rgt_minus. assumption.
-Qed.
-
-Lemma Rsum_eq_compat1 :  forall Un Vn n, 
-  (forall k, (k <= n)%nat -> Un k = Vn k) ->
-    sum_f_R0 Un n = sum_f_R0 Vn n.
-Proof.
-intros Un Vn n Hk.
-induction n.
- simpl. apply Hk ; intuition.
-
- do 2 rewrite tech5.
- rewrite IHn. rewrite Hk. ring.
-  intuition.
-  intuition.
 Qed.
 
 Lemma Rser_cv_reorder : forall n Un l, 
