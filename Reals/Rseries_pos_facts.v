@@ -6,28 +6,31 @@ Local Open Scope Rseq_scope.
 
 (** * Properties about positive term series *)
 
-Section Rser_pos_prop.
-
-Variables Un Vn : Rseq.
-Hypothesis Un_pos : forall n : nat, 0 <= Un n.
-
-Lemma Rser_pos_growing : Rseq_growing (Rseq_sum Un).
+Lemma Rser_pos_growing: forall Un,
+ (forall n, 0 <= Un n) -> Rseq_growing (Rseq_sum Un).
 Proof.
-intro n ; transitivity (Rseq_sum Un n + 0)%R.
+intros Un Un_pos n ; transitivity (Rseq_sum Un n + 0)%R.
  rewrite Rplus_0_r ; reflexivity.
  apply Rplus_le_compat_l ; trivial.
 Qed.
 
-(** Positive term series convergence caracterization *)
-
-Lemma Rser_pos_bound_cv : forall M, Rser_bound_max Un M -> { l | Rser_cv Un l }.
+Lemma Rser_pos_strictly_growing: forall Un,
+ (forall n, 0 < Un n) -> Rseq_strictly_growing (Rseq_sum Un).
 Proof.
-intros M Hb ; destruct ub_to_lub with (Rseq_sum Un) as [l Hl].
-eapply Rseq_bound_max_has_ub ; eassumption.
-exists l ; apply tech10 ; [apply Rser_pos_growing | assumption].
+intros Un Un_pos n ; apply Rle_lt_trans with (Rseq_sum Un n + 0)%R.
+ rewrite Rplus_0_r ; reflexivity.
+ apply Rplus_lt_compat_l ; trivial.
 Qed.
 
-End Rser_pos_prop.
+(** Positive term series convergence caracterization *)
+
+Lemma Rser_pos_bound_cv : forall Un M,
+ (forall n, 0 <= Un n) -> Rser_bound_max Un M -> { l | Rser_cv Un l }.
+Proof.
+intros Un M Un_pos Hb ; destruct ub_to_lub with (Rseq_sum Un) as [l Hl].
+eapply Rseq_bound_max_has_ub ; eassumption.
+exists l ; apply tech10 ; [apply Rser_pos_growing |] ; assumption.
+Qed.
 
 (** Properties using classical logic *)
 
@@ -47,7 +50,7 @@ destruct (classic (exists l, Rser_cv Un l)) as [yes | no].
  right ; apply Rseq_unbounded_growing.
   apply NNPP.
   apply Rser_pos_growing ; assumption.
-  intros [M HM] ; apply no ; destruct (Rser_pos_bound_cv _ Un_pos _ HM) as [l Hl] ;
+  intros [M HM] ; apply no ; destruct (Rser_pos_bound_cv _ _ Un_pos HM) as [l Hl] ;
   exists l ; assumption.
 Qed.
 
