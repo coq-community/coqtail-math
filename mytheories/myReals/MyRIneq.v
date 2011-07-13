@@ -289,6 +289,12 @@ intros x y z y_pos Hle.
   apply Rmult_le_compat_l ; [left |] ; assumption.
 Qed.
 
+Lemma Rmult_minus_distr_r: forall x y z,
+  (x - y) * z = x * z - y * z.
+Proof.
+intros ; ring.
+Qed.
+
 Require Setoid.
 
 Add Parametric Relation : R Rle

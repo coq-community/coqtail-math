@@ -18,3 +18,10 @@ intro m ; induction m ; intros n mltn.
  destruct (IHm n (lt_S_n m n mltn)) as [p Hp] ;
  exists p ; intuition.
 Qed.
+
+Require Setoid.
+
+Add Parametric Relation : nat le
+reflexivity proved by le_refl
+transitivity proved by le_trans as le.
+

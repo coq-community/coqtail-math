@@ -66,6 +66,14 @@ Qed.
 
 (** Compatibility with common operations *)
 
+Lemma Rseq_sum_constant_compat: forall (l : R) n,
+  (Rseq_sum l n = INR (S n) * l)%R.
+Proof.
+intros l n ; induction n.
+ simpl ; symmetry ; apply Rmult_1_l.
+ rewrite Rseq_sum_simpl, S_INR, IHn ; unfold Rseq_constant ; ring.
+Qed.
+
 Lemma Rseq_sum_scal_compat_r : forall (l : R) Un,
   Rseq_sum (Un * l) == Rseq_sum Un * l.
 Proof.

@@ -1,6 +1,6 @@
 Require Import Rsequence.
 Require Import Rseries_def Rseries_base_facts Rseries_pos_facts.
-Require Import MyRIneq.
+Require Import MyNat MyRIneq.
 
 Require Import Max.
 Require Import Fourier.
@@ -71,7 +71,12 @@ intros An Bn n ; induction n.
     apply Rmult_comm.
 Qed.
 
-(*
+Lemma Rplus_minus_assoc: forall x y z,
+  x + y - z = x + (y - z).
+Proof.
+intros ; ring.
+Qed.
+
 Lemma Rser_cv_prod_compat : forall An Bn la lb lna,
  Rser_cv An la -> Rser_cv Bn lb -> 
  Rser_abs_cv An lna -> Rser_cv (An # Bn) (la * lb).
@@ -89,22 +94,25 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  destruct (Hlb _ eps2_pos) as [N1 HN1].
  destruct (Rseq_cv_bound (Rseq_sum Bn) _ Hlb) as [MBn [MBn_pos HMBn]].
  pose (MB := MBn + Rabs lb).
+ assert (MB_pos: 0 < MB).
+  apply Rplus_lt_le_0_compat ; [trivial | apply Rabs_pos].
  assert (HMB: forall n, Rabs (Rseq_sum Bn n - lb) <= MB).
   intro n ; transitivity (Rabs (Rseq_sum Bn n) + Rabs lb).
    rewrite <- (Rabs_Ropp lb) ; apply Rabs_triang.
    apply Rplus_le_compat ; [trivial | reflexivity].
  pose (eps3 := eps / 8 / INR (S N1) / (MB + 1)).
  assert (eps3_pos: 0 < eps3).
-  repeat apply Rlt_mult_inv_pos ; intuition.
-   fourier.
-   apply Rle_lt_0_plus_1, Rplus_le_le_0_compat ; [left ; trivial | apply Rabs_pos].
- destruct (Rser_cv_zero An _ Hla _ eps3_pos) as [N2 HN2].
- pose (eps4 := eps / 2 / (Rabs lb + 1)).
+  repeat apply Rlt_mult_inv_pos ; intuition ; fourier.
+ destruct (Rser_cv_zero An _ Hla _ eps3_pos) as [N2 HN2t].
+ assert (HN2: forall n : nat, (n >= N2)%nat -> Rabs (An n) < eps3).
+  intros p p_lb ; rewrite <- (Rminus_0_r (An p)) ; apply HN2t ; assumption.
+ clear HN2t.
+ pose (eps4 := eps / 2 / (Rabs lb + 1)). 
  assert (eps4_pos: 0 < eps4).
   repeat apply Rlt_mult_inv_pos ; intuition.
   apply Rle_lt_0_plus_1, Rabs_pos.
  destruct (Hla _ eps4_pos) as [N3 HN3].
- exists (max (max (S N1) (N1 + N2)) N3) ; intros n n_lb.
+ pose (N := max (max (S N1) (N1 + N2)) N3) ; exists N ; intros n n_lb.
  rewrite Rseq_prod_rewrite.
  replace ((Rseq_sum Bn # An) n) with
   (Rseq_sum ((Rseq_sum Bn - lb) * (fun i => An (n - i)%nat)
@@ -112,106 +120,75 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  rewrite Rseq_sum_plus_compat ; unfold Rseq_plus.
  rewrite Rseq_sum_scal_compat_r ; unfold Rseq_mult.
  rewrite <- Rseq_sum_reindex_compat ; unfold Rseq_constant.
-
-
-
-
-
-
-
-
-rewrite sum_plus.
-rewrite <- scal_sum.
-rewrite Rseq_reverse.
-fold SAn.
-
-unfold R_dist.
-assert (RE : forall x y z t, x + t * y - z * t = x + t * (y - z))
-  by (intros; ring); rewrite RE; clear RE.
-
-eapply Rle_lt_trans; [apply Rabs_triang|].
-replace e with (e/4 + e/4 + e/2) by field.
-apply Rplus_lt_compat.
- eapply Rle_lt_trans; [apply Rsum_abs |].
- pose (fun l => (fun l0 : nat => (SBn l0 - lb) * An (n - l0)%nat) l) as dab.
- fold dab.
- 
- pose (minus n (S N)) as p.
- assert (HnN : (n >= S N)%nat).
-  apply le_trans with K; auto.
-  eapply le_trans; apply le_max_l.
- replace n with (S (N + p)) by (unfold p; omega).
- rewrite Rseq_decomp.
- 
+ unfold R_dist ; rewrite Rplus_minus_assoc, <- Rmult_minus_distr_r.
+ eapply Rle_lt_trans ; [apply Rabs_triang |].
+ replace eps with (eps / 4 + eps / 4 + eps / 2) by field.
  apply Rplus_lt_compat.
-  unfold dab.
-  replace (e / 4) with (eM * 2 * INR (S N) * (supBnB + 1))
-    by (unfold eM; field; split; replace 0 with (INR O) by auto; try (apply not_INR; omega);
-    apply Rgt_not_eq; apply Rle_lt_0_plus_1; apply Rle_trans with (Rabs (SBn O - lb)); apply Rabs_pos || apply HsupBnB).
-  apply Rle_lt_trans with (sum (fun l => Rabs (An (n - l)%nat) * supBnB) N).
-   apply sum_Rle; intros.
-   rewrite Rmult_comm.
-   rewrite Rabs_mult.
-   apply Rmult_le_compat_l.
-    apply Rabs_pos.
-    apply HsupBnB.
-   
-   rewrite <- scal_sum.
-   rewrite Rmult_comm.
-   apply Rmult_le_0_lt_compat; [
-    apply cond_pos_sum; intro; apply Rabs_pos|
-    apply Rle_trans with (Rabs (SBn O - lb)); apply Rabs_pos || apply HsupBnB | |
-    auto with * ].
-   apply Rle_lt_trans with (eM * INR (S N)); [|
-    replace (eM * INR (S N)) with (eM * 1 * INR (S N)) by ring;
-    apply Rmult_lt_compat_r; replace 0 with (INR O) by auto; try (apply lt_INR; omega);
-    apply Rmult_lt_compat_l; auto; fourier].
-   
-   apply Rle_trans with (sum (fun i => eM) N); [|rewrite sum_cte; auto with *].
-   apply sum_Rle; intros.
-   unfold R_dist in HM'.
-   rewrite <- Rminus_0_r with (An (n - n0)%nat).
-   apply Rlt_le.
-   apply HM'.
-   replace n with (S p + N)%nat by (unfold p; omega).
-   replace (S p + N - n0)%nat with (S p + (N - n0))%nat by omega.
-   apply le_trans with (S p); [|omega].
-   unfold p.
-   apply le_trans with (K - N)%nat; [|omega].
-   replace M' with (M - N)%nat by (unfold M; omega).
-   apply minus_le_compat_r.
-   unfold K; apply le_trans with (max (S N) M); auto with *.
-  
-  replace (e / 4) with (eN * (lna + 1)) by (unfold eN; field; auto with .
-  unfold dab.
-  apply Rle_lt_trans with (sum (fun i => Rabs (An (n - (i + S N))%nat) * eN) p).
-   apply sum_Rle; intros.
-   rewrite Rmult_comm.
-   rewrite Rabs_mult.
-   apply Rmult_le_compat_l; [apply Rabs_pos|].
-   apply Rlt_le; apply HN; omega.
-   
-   rewrite <- scal_sum.
-   apply (Rmult_lt_compat_l _ _ _ eNpos).
-   eapply Rle_lt_trans; [|apply Rlt_plus_1].
-   replace (sum (fun i => Rabs (An (n - (i + S N))%nat)) p)
-     with (sum (fun i => Rseq_abs An (p - i)%nat) p)
-     by (apply Rsum_eq_compat; intro; replace (n - (n0 + S N))%nat with (n - S N - n0)%nat by omega; trivial).
-   rewrite Rseq_reverse.
-   apply growing_ineq.
-    intro i; simpl sum; apply Rplus_le_simpl_l; apply Rabs_pos.
-    apply HNA.
- 
- rewrite Rabs_mult.
- replace e with (eL * 2 * (Rabs lb + 1)) by (unfold eL; field;
-   apply Rgt_not_eq; apply Rle_lt_0_plus_1; apply Rabs_pos).
- cut (Rabs (SAn n - la) < eL).
-  intro.
-  replace (eL * 2 * (Rabs lb + 1) / 2) with (eL * (Rabs lb + 1)) by field.
-  rewrite Rmult_comm.
-  apply Rmult_le_0_lt_compat; auto || apply Rabs_pos || apply Rlt_plus_1.
- apply HL.
- apply le_trans with K; auto.
- unfold K; auto with *.
+  eapply Rle_lt_trans; [apply Rseq_sum_triang |].
+  fold (Rseq_constant lb) (Rseq_mult (Rseq_sum Bn - lb) (fun i => An (n - i)%nat)).
+ pose (Un := | (Rseq_sum Bn - lb) * (fun i => An (n - i)%nat) |) ; fold Un.
+ apply Rle_lt_trans with (Rseq_shifts (Rseq_sum Un) (S N1) (n - S N1)).
+ right ; unfold Rseq_shifts.
+ assert (HNn: (S N1 <= n)%nat).
+  transitivity (max (S N1) (N1 + N2)) ; [| transitivity N ;
+  [| assumption]] ; apply le_max_l.
+ replace (S N1 + (n - S N1))%nat with n by omega ; reflexivity.
+ apply Rle_lt_trans with (Rseq_sum Un N1 + Rseq_sum (Rseq_shifts Un (S N1)) (n - S N1)).
+ rewrite Rseq_sum_shifts_compat ; right ; ring.
+ apply Rplus_lt_compat.
+ apply Rlt_le_trans with (eps3 * 2 * INR (S N1) * (MB + 1)).
+ apply Rle_lt_trans with (Rseq_sum (MB * |(fun i => An (n - i)%nat)|)%Rseq N1).
+ apply Rseq_sum_le_compat ; unfold Un, Rseq_abs, Rseq_mult ; intro p ;
+ rewrite Rabs_mult ; apply Rmult_le_compat_r.
+  apply Rabs_pos.
+  transitivity (Rabs (Rseq_sum Bn p) + Rabs lb) ; unfold Rseq_constant.
+  unfold Rseq_minus ; rewrite <- (Rabs_Ropp lb) ; apply Rabs_triang.
+  apply Rplus_le_compat ; [trivial | reflexivity].
+ rewrite Rseq_sum_scal_compat_l, Rmult_comm.
+ apply Rmult_le_0_lt_compat.
+  unfold Rseq_constant ; left ; trivial.
+  apply Rseq_sum_pos ; intro p ; apply Rabs_pos.
+  apply Rlt_plus_1.
+ transitivity (eps3 * 1 * INR (S N1)).
+ rewrite Rmult_1_r ; apply Rlt_le_trans with (Rseq_sum eps3 N1).
+ apply Rseq_sum_lt_compat_strong ; intros p p_lb.
+  assert ((N1 + N2 <= n)%nat).
+   transitivity (max (S N1) (N1 + N2)) ; [apply le_max_r |
+   transitivity N ; [apply le_max_l | assumption]].
+ unfold Rseq_abs ; apply HN2 ; omega.
+ right ; rewrite Rmult_comm ; apply Rseq_sum_constant_compat.
+ apply Rmult_lt_compat_r ; [| apply Rmult_lt_compat_l].
+  apply lt_0_INR ; omega.
+  assumption.
+  fourier.
+ right ; unfold eps3 ; field ; split.
+ replace 0 with (INR O) by auto ; apply not_INR ; auto.
+ apply Rgt_not_eq ; apply Rle_lt_0_plus_1 ; left ; assumption.
+ apply Rlt_le_trans with (eps2 * (lna + 1)).
+ apply Rle_lt_trans with (Rseq_sum (eps2 * (| Rseq_shifts (fun i => An (n - i)%nat)
+  (S N1)|))%Rseq (n - S N1)).
+ unfold Un ; apply Rseq_sum_le_compat_strong.
+  intros p p_lb ; unfold Rseq_shifts, Rseq_mult, Rseq_abs, Rseq_minus, Rseq_constant ;
+  rewrite Rabs_mult ; apply Rmult_le_compat_r ; [apply Rabs_pos |].
+  left ; apply HN1 ; omega.
+ rewrite Rseq_sum_scal_compat_l ; unfold Rseq_mult, Rseq_constant ;
+  apply Rmult_lt_compat_l ; [assumption |].
+ eapply Rle_lt_trans; [|apply Rlt_plus_1].
+ transitivity (Rseq_sum (fun i => Rabs (An ((n - S N1) - i)%nat)) (n - S N1)).
+ right ; apply Rseq_sum_ext_strong ; intros p p_lb ; unfold Rseq_abs, Rseq_shifts.
+ replace (n - (S N1 + p))%nat with ((n - S N1) - p)%nat by omega ; reflexivity.
+ rewrite <- (Rseq_sum_reindex_compat (fun i => Rabs (An i))).
+(* TODO: remove growing_ineq from std_lib *)
+ apply growing_ineq.
+ intro p ; rewrite Rseq_sum_simpl ; assert (H := Rabs_pos (An (S p))) ; fourier.
+ apply Hlna.
+ right ; unfold eps2 ; field ; apply Rgt_not_eq ; assumption.
+ rewrite Rabs_mult ; apply Rle_lt_trans with (eps4 * Rabs lb).
+ apply Rmult_le_compat_r ; [apply Rabs_pos |].
+ left ; apply HN3, le_trans with N ; [apply le_max_r | assumption].
+ replace eps with (eps4 * 2 * (Rabs lb + 1)) by (unfold eps4 ; field ;
+  apply Rgt_not_eq ; apply Rle_lt_0_plus_1, Rabs_pos).
+ field_simplify ; unfold Rdiv ; apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; fourier.
+ unfold Rseq_prod ; apply Rseq_sum_ext ; intro p ; unfold Rseq_mult, Rseq_minus,
+  Rseq_constant, Rseq_plus ; ring.
 Qed.
-*)
