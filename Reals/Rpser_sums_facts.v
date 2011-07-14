@@ -1,10 +1,22 @@
 Require Import Reals Fourier.
-Require Import Rsequence_def.
-Require Import Rpser_def Rpser_sums Rpser_base_facts Rpser_cv_facts.
+Require Import Rsequence.
+Require Import Rseries_def Rseries_cv_facts.
+Require Import Rpser_def Rpser_sums Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
 
 Require Import Ranalysis_def Rfunction_def Rextensionality.
 
 Open Local Scope R_scope.
+
+(** * Compatibility of Rpser with Rseq_prod *)
+
+Lemma Rpser_prod_compat: forall An Bn x la la' lb,
+  Rpser An x la -> Rpser_abs An x la' -> Rpser Bn x lb ->
+  Rpser (An # Bn) x (la * lb).
+Proof.
+intros An Bn x la la' lb Ha Ha' Hb.
+ eapply Rseq_cv_eq_compat ; [apply Rseq_pps_prod_unfold |].
+ eapply Rser_cv_prod_compat ; eassumption.
+Qed.
 
 (** * Unfolding sums. *)
 
@@ -66,11 +78,15 @@ intros rAnBn x.
  eapply Rpser_unique ; eassumption.
 Qed.
 
-(*
 Lemma sum_mult_compat: forall (rAnBn: infinite_cv_radius (An # Bn)),
-  sum (An # Bn) rAnBn == (sum An rAn * sum Bn rBn).
+  sum (An # Bn) rAnBn == (sum An rAn * sum Bn rBn)%F.
 Proof.
-intros rAnBn x. 
-*)
+intros rAnBn x ; destruct (Rpser_abs_infinite_cv_radius _ rAn x) as [l Ha'].
+ assert (Ha := sum_sums _ rAn x) ;
+ assert (Hb := sum_sums _ rBn x) ;
+ assert (Hab := Rpser_prod_compat _ _ _ _ _ _ Ha Ha' Hb) ;
+ assert (Hab' := sum_sums _ rAnBn x) ;
+ eapply Rpser_unique ; eassumption.
+Qed.
 
 End sum_compatibilities.

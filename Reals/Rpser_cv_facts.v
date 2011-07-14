@@ -201,11 +201,13 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
 Qed.
 
 Lemma Rpser_abel : forall (An : nat -> R) (r : R), 
-     Cv_radius_weak An r -> forall x, Rabs x < r -> {l | Pser An x l}.
+     Cv_radius_weak An r -> forall x, Rabs x < r -> {l | Rpser An x l}.
 Proof.
 intros An r Rho x x_ub.
   apply R_complete ; apply Cauchy_crit_Rseq_pps with r ; assumption.
 Qed.
+
+(** * D'Alembert's criterion *)
 
 Lemma Rpser_alembert_prelim : forall (An : nat -> R) (M : R),
        0 < M -> (forall n : nat, An n <> 0) ->

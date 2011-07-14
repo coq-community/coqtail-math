@@ -88,7 +88,14 @@ Ltac quote_side_equa := fun env s x => match isconst s x with
                 match quote_side_equa env s1 x with
                   | (?env1, ?p) => constr: (env1, scal s2 p)
                 end
-            end
+              | false => 
+                match quote_side_equa env s1 x with
+                  | (?env1, ?p) =>
+                    match quote_side_equa env1 s2 x with
+                      | (?env2, ?q) => constr: (env2, mult p q)
+            	    end
+                end
+	    end
         end
       | Rminus ?s1 ?s2 =>
         match quote_side_equa env s1 x with
@@ -166,6 +173,7 @@ match  isconst s x with | false =>
     | Rmult ?s1 ?s2 =>
       match isconst s2 x with
         | true => replace (Rmult s1 s2)%R with (Rmult s2 s1)%R by (apply Rmult_comm)
+        | false => progress (normalize_rec p s1 x) ; progress (normalize_rec p s2 x)
         | false => progress (normalize_rec p s1 x)
         | false => progress (normalize_rec p s2 x)
       end

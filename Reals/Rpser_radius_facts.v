@@ -13,14 +13,22 @@ Open Local Scope R_scope.
 
 (** Abel's lemma : Normal convergence of the power serie *)
 
-Lemma Rpser_abel2_prelim : forall (An : Rseq) (r : R), 
+Lemma Rpser_abs_cv_radius_weak : forall (An : Rseq) (r : R), 
   Cv_radius_weak An r -> forall x, Rabs x < r ->
-  { l | Rpser (| An |) x l}.
+  { l | Rpser_abs An x l}.
 Proof.
 intros An r Rho x x_bd ;
  assert (Rho' := proj1 (Cv_radius_weak_abs An r) Rho) ;
- pose (l := weaksum_r (| An |) r Rho' x) ;
- exists l ; apply weaksum_r_sums ; assumption.
+ pose (l := weaksum_r (| An |) r Rho' (Rabs x)) ;
+ exists l ; rewrite Rpser_abs_unfold ; apply weaksum_r_sums ;
+ rewrite Rabs_Rabsolu ; assumption.
+Qed.
+
+Lemma Rpser_abs_infinite_cv_radius: forall An,
+  infinite_cv_radius An -> forall x, {l | Rpser_abs An x l}.
+Proof.
+intros An rAn x ; apply (Rpser_abs_cv_radius_weak _ _
+ (rAn (Rabs x + 1)) x (Rlt_n_Sn _)).
 Qed.
 
 Lemma Rpser_abel2 : forall An r, Cv_radius_weak An r ->
@@ -59,11 +67,9 @@ intros An x l Hcv Hncv ; split; intros r Hr.
  apply Cv_radius_weak_le_compat with x.
   rewrite Rabs_pos_eq ; [left |] ; apply Hr.
   apply (Rpser_bound_criteria _ _ l Hcv).
- intro Hf.
- destruct (Rpser_abel2_prelim An r Hf (Rabs x)) as [l' Hl'].
- rewrite Rabs_Rabsolu ; assumption.
- apply Hncv with l'.
- rewrite Rpser_abs_unfold ; apply Hl'.
+ intro Hf ;
+ destruct (Rpser_abs_cv_radius_weak An r Hf x Hr) as [l' Hl'] ;
+ apply Hncv with l' ; assumption.
 Qed.
 
 Lemma Rpser_infinite_cv_radius_caracterization :
@@ -232,7 +238,7 @@ Qed.
 
 (** Using the results on the derivative, we can now talk about Rseq_prod. *)
 
-Lemma Cv_radius_weak_prod:
+Lemma Cv_radius_weak_prod_compat:
   forall (An Bn : Rseq) (r1 r2 : R),
   Cv_radius_weak An r1 ->
   Cv_radius_weak Bn r2 ->
@@ -270,11 +276,11 @@ destruct (Cv_radius_weak_prod_prelim An Bn r1 r2 rAn rBn) as [B HB] ;
   [assumption | apply Rmin_pos ; apply Rabs_pos].
 Qed.
 
-Lemma infinite_cv_radius_prod: forall (An Bn : Rseq),
+Lemma infinite_cv_radius_prod_compat: forall (An Bn : Rseq),
   infinite_cv_radius An -> infinite_cv_radius Bn ->
   infinite_cv_radius (An # Bn).
 Proof.
-intros An Bn rAn rBn r ; apply Cv_radius_weak_prod with (Rabs r + 1) (Rabs r + 1).
+intros An Bn rAn rBn r ; apply Cv_radius_weak_prod_compat with (Rabs r + 1) (Rabs r + 1).
  apply rAn.
  apply rBn.
  apply Rlt_le_trans with (Rabs r + 1) ; [fourier |].

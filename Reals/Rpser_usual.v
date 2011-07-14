@@ -167,7 +167,7 @@ assert (t : (1 > 0)%nat) by constructor ;
  assert (H2 := Rseq_cv_pos_infty_shift_compat_reciprocal _ H) ;
  assert (H3 := Rseq_cv_pos_infty_inv_compat _ H2) ;
  clear t H H2 ; destruct (H3 _ M_pos) as [N HN] ; exists N ;
- intros n.
+ intro n ; unfold Rseq_shifts.
  rewrite Rdiv_exp_seq_simpl ;
  apply Rle_trans with (R_dist ((/ Rseq_shift (Rseq_poly 1))%Rseq (N + n)%nat) 0).
  right ; unfold R_dist, Rseq_shift, Rseq_poly, pow ; apply Rabs_eq_compat ;

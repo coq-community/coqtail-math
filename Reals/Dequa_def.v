@@ -19,7 +19,8 @@ Inductive side_equa : Set :=
     | y    : forall (p : nat) (k : nat), side_equa
     | opp  : forall (s1 : side_equa), side_equa
     | min  : forall (s1 s2 : side_equa), side_equa
-    | plus : forall (s1 s2 : side_equa), side_equa.
+    | plus : forall (s1 s2 : side_equa), side_equa
+    | mult : forall (s1 s2 : side_equa), side_equa.
 
 Definition diff_equa : Set := prod (side_equa) (side_equa).
 
@@ -33,6 +34,8 @@ match s with
                   Bind (interp_side_equa_in_N e2 rho) (fun vn => Return (un - vn)))
   | plus e1 e2 => Bind (interp_side_equa_in_N e1 rho) (fun un =>
                   Bind (interp_side_equa_in_N e2 rho) (fun vn => Return (un + vn)))
+  | mult e1 e2 => Bind (interp_side_equa_in_N e1 rho) (fun un =>
+                  Bind (interp_side_equa_in_N e2 rho) (fun vn => Return (un # vn)))
 end.
 
 Fixpoint interp_side_equa_in_R s (rho : list (sigT infinite_cv_radius)) : option (R -> R) :=
@@ -46,6 +49,8 @@ match s with
                   Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f - g)%F))
   | plus e1 e2 => Bind (interp_side_equa_in_R e1 rho) (fun f =>
                   Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f + g)%F))
+  | mult e1 e2 => Bind (interp_side_equa_in_R e1 rho) (fun f =>
+                  Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f * g)%F))
 end.
 
 Definition Invalid_context := False.
@@ -78,6 +83,7 @@ Notation "`c k" := (cst k) (at level 40) : de_scope.
 Notation "- y" := (opp y) : de_scope.
 Infix "*" := scal : de_scope.
 Infix "+" := plus : de_scope.
+Infix "*" := plus : de_scope.
 Infix "-" := min : de_scope.
 Infix ":=:" := (@pair side_equa side_equa) (at level 50): de_scope.
 

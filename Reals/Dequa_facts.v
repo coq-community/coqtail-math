@@ -119,6 +119,27 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
    inversion HR3.
   inversion HN.
  inversion HN.
+
+ destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
+  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
+   destruct_eq (interp_side_equa_in_R s1 l).
+    destruct_eq (interp_side_equa_in_R s2 l).
+     inversion HN as [Hrew] ; destruct Hrew ;
+     inversion HR3 as [Hrew] ; destruct Hrew.
+     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
+     specify5 IHs1 l r r1 Heqb Heqb1 ;
+     specify5 IHs2 l r0 r2 Heqb0 Heqb2.
+     destruct IHs1 as [rho1 Hrho1] ;
+     destruct IHs2 as [rho2 Hrho2].
+     assert (pr : infinite_cv_radius (r # r0)).
+      apply infinite_cv_radius_prod_compat ; assumption.
+     exists pr.
+     intro x ; unfold mult_fct ; rewrite <- Hrho1, <- Hrho2 ;
+     apply sum_mult_compat.
+    inversion HR3.
+   inversion HR3.
+  inversion HN.
+ inversion HN.
 Qed.
 
 Lemma map_nth_error2 {A B : Type} : forall f l p,
@@ -180,6 +201,17 @@ intro s ; induction s ; intros l un H.
     specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
     specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
     exists (f + g)%F ; rewrite Hf, Hg ; reflexivity.
+   inversion H.
+  inversion H.
+
+ simpl in *.
+  destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;
+  symmetry in Heqb.
+   destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) ;
+   symmetry in Heqb0.
+    specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
+    specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
+    exists (f * g)%F ; rewrite Hf, Hg ; reflexivity.
    inversion H.
   inversion H.
 Qed.
