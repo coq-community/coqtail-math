@@ -343,6 +343,20 @@ Proof.
 intros An x ; apply Rseq_sum_ext ; apply gt_abs_pser_unfold.
 Qed.
 
+Lemma Rseq_pps_prod_unfold: forall An Bn x,
+  Rseq_pps (An # Bn) x == Rseq_sum (gt_pser An x # (gt_pser Bn x)).
+Proof.
+intros An Bn x n ; induction n.
+ unfold Rseq_pps, gt_pser, Rseq_prod, Rseq_mult ; simpl ; ring.
+ rewrite Rseq_sum_simpl, Rseq_pps_simpl, IHn ; apply Rplus_eq_compat_l.
+ etransitivity.
+ symmetry ; eapply (Rseq_sum_scal_compat_r _ _ (S n)).
+ apply Rseq_sum_ext_strong ; fold (pow x (S n)) ; intros p p_lb ;
+ unfold gt_pser, Rseq_mult, Rseq_constant.
+ replace (S n) with (p + (S n - p))%nat by omega ; rewrite pow_add ;
+ replace (p + (S n - p) -p)%nat with (S n - p)%nat by omega ; ring.
+Qed.
+
 (** * Rpser_abs, Rpser *)
 
 Lemma Rpser_abs_unfold : forall An r l,

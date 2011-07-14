@@ -66,4 +66,11 @@ intros rAnBn x.
  eapply Rpser_unique ; eassumption.
 Qed.
 
+(*
+Lemma sum_mult_compat: forall (rAnBn: infinite_cv_radius (An # Bn)),
+  sum (An # Bn) rAnBn == (sum An rAn * sum Bn rBn).
+Proof.
+intros rAnBn x. 
+*)
+
 End sum_compatibilities.

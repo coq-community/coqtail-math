@@ -501,34 +501,23 @@ Qed.
 
 (** A kind of reciprocal for the Abel's lemma*)
 Lemma Rpser_bound_criteria : forall (An : nat -> R) (x l : R),
-    Pser An x l -> Cv_radius_weak An x.
+    Rpser An x l -> Cv_radius_weak An x.
 Proof.
 intros An x l Hxl.
- destruct Hxl with 1 as (N, HN) ; [fourier |].
- assert (H1 : forall n :  nat, (n >= S N)%nat -> gt_abs_pser An (Rabs x) n <= Rmax 2 (Rabs (An 0%nat) + 1)).
-  intros n Hn ; case_eq n ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
-  intro H ; simpl ; rewrite Rmult_1_r ; apply Rle_trans with (Rabs (An 0%nat) +1) ;
-   [intuition | apply RmaxLess2].
-   intros m Hrew ; replace (Rabs (An (S m) * Rabs x ^ S m))
-    with (Rabs ((sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) (S m) - l) +
-         (l - sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m))).
-   apply Rle_trans with (Rabs (sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) (S m) - l)
-         + Rabs (l - sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m)).
-   apply Rabs_triang.
-   apply Rle_trans with 2 ; [|apply RmaxLess1] ; apply Rlt_le ; apply Rplus_lt_compat ;
-   [| rewrite Rabs_minus_sym] ; apply HN ; intuition.
-   simpl sum_f_R0 ; rewrite Rabs_mult ; rewrite RPow_abs ; rewrite Rabs_Rabsolu ;
-   rewrite <- Rabs_mult ; apply Rabs_eq_compat.
-   unfold Rminus ; repeat (rewrite Rplus_assoc).
-   replace (- l + (l + - sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m)) with
-          (- sum_f_R0 (fun n0 : nat => An n0 * x ^ n0) m) by field.
-   rewrite <- Rplus_comm ; rewrite Rplus_assoc ; rewrite Rplus_opp_l.
-   intuition.
+ destruct (Hxl 1) as [N HN] ; [fourier |] ; unfold R_dist in HN.
+ assert (H1: forall n, (S N <= n)%nat -> gt_abs_pser An x n <= Rmax 2 (Rabs (An O))).
+  intros n n_lb ; destruct n ; unfold gt_abs_pser, Rseq_abs.
+   unfold gt_pser, Rseq_mult ; simpl ; rewrite Rmult_1_r ; apply RmaxLess2.
+   transitivity (Rabs ((Rseq_pps An x (S n) - l) - (Rseq_pps An x n - l))).
+    right ; rewrite Rseq_pps_simpl ; apply Rabs_eq_compat ;
+    unfold gt_pser, Rseq_mult ; ring.
+   transitivity (Rabs (Rseq_pps An x (S n) - l) + Rabs (- (Rseq_pps An x n - l))).
+    apply Rabs_triang.
+   transitivity 2 ; [| apply RmaxLess1] ; rewrite Rabs_Ropp.
+    apply Rplus_le_compat ; left ; apply HN ; omega.
    destruct (Rseq_partial_bound (gt_pser An x) (S N)) as (B,HB).
-   exists (Rmax B (Rmax 2 (Rabs (An 0%nat) + 1))).
-   intros y Hy ; destruct Hy as (i,Hi) ; rewrite Hi.
-   case (le_lt_dec i (S N)) ; intro Hi_b.
+   exists (Rmax B (Rmax 2 (Rabs (An O)))).
+   intros y [i Hi] ; subst ; destruct (le_lt_dec i (S N)) as [Hi_b | Hi_b].
    apply Rle_trans with B ; [apply HB | apply RmaxLess1] ; intuition.
-   rewrite <- gt_abs_pser_Rabs_compat ; apply Rle_trans with (Rmax 2 (Rabs (An 0%nat) + 1)) ;
-   [apply H1 | apply RmaxLess2] ; intuition.
+   apply Rle_trans with (Rmax 2 (Rabs (An O))) ; [apply H1 | apply RmaxLess2] ; intuition.
 Qed.
