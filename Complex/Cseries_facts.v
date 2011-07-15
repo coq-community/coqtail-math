@@ -98,29 +98,29 @@ apply Cser_cv_re_im_compat.
   intro; rewrite <- Cre_mul; trivial.
   
   apply Rser_cv_minus_compat.
-   eapply (cauchy_product (fun n => Cre (An n)) (fun n => Cre (Bn n)));
+   eapply (Rser_cv_prod_compat (fun n => Cre (An n)) (fun n => Cre (Bn n)));
      try (apply Cser_cv_re_compat; auto).
    apply HNAre.
    
-   eapply (cauchy_product (fun n => Cim (An n)) (fun n => Cim (Bn n)));
+   eapply (Rser_cv_prod_compat (fun n => Cim (An n)) (fun n => Cim (Bn n)));
      try (apply Cser_cv_im_compat; auto).
    apply HNAim.
  
  rewrite Cim_mul.
- apply Rser_cv_eq_compat with (fun k =>
+ apply Rser_cv_ext with (fun k =>
    sum_f_R0 (fun p => ((Cre (An p) * Cim (Bn (k - p)%nat)))%R) k +
    sum_f_R0 (fun p => ((Cim (An p) * Cre (Bn (k - p)%nat)))%R) k )%R.
-  repeat (intro; rewrite <- sum_f_C0_Cim_compat; rewrite <- plus_sum; apply Rsum_eq_compat).
+  intro; rewrite <- sum_f_C0_Cim_compat ; rewrite <- plus_sum ; apply Rseq_sum_ext.
   intro; rewrite Cim_mul; ring.
   
   apply Rser_cv_plus_compat.
-   eapply (cauchy_product (fun n => Cre (An n)) (fun n => Cim (Bn n))).
+   eapply (Rser_cv_prod_compat (fun n => Cre (An n)) (fun n => Cim (Bn n))).
     apply Cser_cv_re_compat; auto.
     apply Cser_cv_im_compat; auto.
     apply HNAre.
    
    rewrite Rmult_comm.
-   eapply (cauchy_product (fun n => Cim (An n)) (fun n => Cre (Bn n))).
+   eapply (Rser_cv_prod_compat (fun n => Cim (An n)) (fun n => Cre (Bn n))).
     apply Cser_cv_im_compat; auto.
     apply Cser_cv_re_compat; auto.
     apply HNAim.

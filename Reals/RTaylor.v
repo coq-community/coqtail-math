@@ -151,7 +151,7 @@ Proof.
 *) pose (fun n => match n with O => 0 | S _ => / INR n end) as An.
  apply Rseq_cv_not_infty with (sum_f_R0 An); split.
   exists M.
-  refine (Rser_cv_eq_compat _ An M _ Hconv).
+  refine (proj1 (Rser_cv_ext _ An M _) Hconv).
   intros [|n].
    simpl. unfold gt_abs_pser. unfold Rseq_abs. unfold gt_pser. 
    unfold Rseq_mult. simpl. rewrite Rmult_0_l. rewrite Rabs_R0. reflexivity.

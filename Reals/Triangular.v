@@ -159,7 +159,7 @@ Proof.
   intro n.
   unfold Rseq_mult, Rseq_inv, Rseq_constant, inv_snssn, triangle.
   rewrite scal_sum.
-  apply Rsum_eq_compat; intro.
+  apply Rseq_sum_ext; intro.
   elim_ident.
   field.
   INR_solve.

@@ -23,8 +23,7 @@ USA.
 Require Import Reals.
 Require Import Fourier.
 Require Import Rsequence_facts.
-Require Import Rseries_def.
-Require Import Rseries_facts.
+Require Export Rseries.
 Require Import Rsequence_subsequence.
 Require Import Rtactic.
 
@@ -67,20 +66,21 @@ intros Un l Ucv.
 intros e epos.
 destruct (Ucv e epos) as [N Hu].
 exists N; intros n nN.
-replace (sum_f_R0 (fun n0 : nat => Un (2 * n0)%nat + Un (S (2 * n0))) n) with (sum_f_R0 Un (S (2 * n))).
+replace (Rseq_sum (fun n0 : nat => Un (2 * n0)%nat + Un (S (2 * n0))) n)
+ with (Rseq_sum Un (S (2 * n))).
  intros; apply Hu; omega.
  
  clear nN.
  induction n.
   intros; simpl; ring.
   
-  simpl sum_f_R0.
+  simpl Rseq_sum.
   replace (n + S (n + 0))%nat with (S (2 * n)) by ring.
   rewrite IHn.
   ring_simplify.
   assert (SIMPL : forall a b c d, a = c -> a + b + d = b + d + c) by (intros; subst; ring).
   apply SIMPL.
-  apply Rsum_eq_compat; intro.
+  apply Rseq_sum_ext; intro.
   simpl; trivial.
 Qed.
 
@@ -157,7 +157,7 @@ Lemma Sum_antg : Rser_cv antg (PI / 4).
 Proof.
 unfold Rser_cv.
 eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
- apply Rsum_eq_compat.
+ apply Rseq_sum_ext.
  intros n.
  unfold tg_alt, PI_tg, antg.
  INR_group (2 * INR n + 1).
@@ -196,9 +196,9 @@ Qed.
 
 Lemma Sum_antg_neg : Rser_cv antg_neg (PI / 4 + 1).
 Proof.
-apply Rser_cv_shift_reciprocal.
-eapply Rser_cv_eq_compat.
- apply (Rseq_eq_sym _ _ antg_shift_neg_compat).
+ apply Rser_cv_shift_rev2.
+ eapply Rser_cv_ext.
+ apply antg_shift_neg_compat.
  replace (PI / 4 + 1 - antg_neg 0) with (PI / 4) by (compute; field).
  apply Sum_antg.
 Qed.
@@ -263,8 +263,8 @@ Lemma pi_tg2_cv : { l | Rser_cv pi_tg2 l }.
 Proof.
 destruct (exist_PI) as [PI_4 Hc].
 exists PI_4.
-apply Rser_cv_eq_compat with (fun n => tg_alt PI_tg (2 * n) + tg_alt PI_tg (S (2 * n))).
- intro n; symmetry; apply pi_tg2_corresp.
+apply Rser_cv_ext with (fun n => tg_alt PI_tg (2 * n) + tg_alt PI_tg (S (2 * n))).
+ intro n; apply pi_tg2_corresp.
  
  apply Rser_cv_pair_compat.
  intros eps epspos.
@@ -284,7 +284,7 @@ eapply Rser_pos_maj_cv.
  
  intro; apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
  
- intro n; apply Rle_Rinv; try (apply pow_lt; INR_solve).
+ intro n; apply Rle_Rinv; unfold Rseq_shift ; try (apply pow_lt; INR_solve).
  unfold pow; INR_solve.
  apply mult_le_compat; omega.
 Qed.
@@ -1144,7 +1144,7 @@ replace
   assert (RE : forall x, - x = -1 * x) by (intro; ring);
     rewrite RE; clear RE.
   do 2 rewrite scal_sum.
-  apply Rsum_eq_compat; intro i.
+  apply Rseq_sum_ext; intro i.
   unfold shiftp.
   replace (Z_of_nat (S i) + Z_of_nat k)%Z
     with (Z_of_nat (S i + k)).
@@ -1269,7 +1269,7 @@ destruct n.
  replace (sum_f_R0 (fun j : nat => (-1) ^ (j + N - n) * / INR (j + N - n)) (S (2 * n)))
    with ((-1) ^ (N - n) * sum_f_R0 (fun j : nat => (-1) ^ j * / INR (j + N - n)) (S (2 * n))).
   2:rewrite scal_sum.
-  2:apply Rsum_eq_compat; intro.
+  2:apply Rseq_sum_ext; intro.
   2:replace (n0 + N - n)%nat with (n0 + (N - n))%nat by omega.
   2:rewrite Rdef_pow_add; ring.
   
@@ -1285,10 +1285,10 @@ destruct n.
  intro i;
  replace (sum_f_R0 (fun j => (-1) ^ j * / INR (j + N - n)) i)
    with (sum_f_R0 (fun j => (-1) ^ j * / INR (j + k)) i)
-   by (apply Rsum_eq_compat; intro; trivial; inject; unfold k; omega).
+   by (apply Rseq_sum_ext; intro; trivial; inject; unfold k; omega).
  replace (sum_f_R0 (fun j => (-1) ^ j * / INR (j + k)) i)
    with (sum_f_R0 (tg_alt Un) i)
-   by (apply Rsum_eq_compat; intro; trivial).
+   by (apply Rseq_sum_ext; intro; trivial).
  replace (/ INR k) with (Un O) by trivial.
  
  edestruct (alt_bounding Un).
@@ -1355,7 +1355,7 @@ destruct N.
    sum_f_R0  (fun n : nat => / INR (S N - S n + 1) * / INR (2 * n + 1)) (pred (S N)))
  by (
    rewrite <- plus_sum; simpl pred;
-   apply Rsum_eq_compat; intro n;
+   apply Rseq_sum_ext; intro n;
    field; INR_solve
  ).
  rewrite decomp_sum by omega; simpl pred; simpl (Z_of_nat 0);
@@ -1481,7 +1481,7 @@ eapply Rseq_cv_0_pos_maj_compat.
   
   replace (sum_f_R0 (fun n0 : nat => k / INR (S n0)) n)
     with (sum_f_R0 (fun n0 : nat => / INR (S n0) * k) n)
-    by (apply Rsum_eq_compat; intro; field; INR_solve).
+    by (apply Rseq_sum_ext; intro; field; INR_solve).
   rewrite <- scal_sum.
   rewrite <- Rmult_assoc; rewrite Rmult_comm with _ k; rewrite Rmult_assoc.
  
@@ -1578,7 +1578,7 @@ assert (Rseq_cv
  unfold bound1c.
  replace (sum_f_R0 (fun n0 : nat => / INR (S n - S n0 + 1)) (pred (S n)))
    with (sum_f_R0 (fun n0 : nat => / INR (S n0)) (pred (S n)))
-   by (rewrite <- Rsum_switch_index; apply Rsum_eq_compat; intro; inject; omega).
+   by (rewrite <- Rsum_switch_index; apply Rseq_sum_ext; intro; inject; omega).
  apply J; omega.
 Qed.
 
@@ -1604,7 +1604,7 @@ assert (Rseq_cv
  unfold bound2c.
  replace (sum_f_R0 (fun n0 : nat => / INR (S n - S n0 + 1)) (pred (S n)))
    with (sum_f_R0 (fun n0 : nat => / INR (S n0)) (pred (S n)))
-   by (rewrite <- Rsum_switch_index; apply Rsum_eq_compat; intro; inject; omega).
+   by (rewrite <- Rsum_switch_index; apply Rseq_sum_ext; intro; inject; omega).
  apply J; omega.
 Qed.
 
@@ -1617,7 +1617,7 @@ eapply Rseq_cv_eq_compat.
  rewrite <- Rmult_plus_distr_l.
  inject.
  rewrite <- sum_plus.
- apply Rsum_eq_compat; intro; trivial.
+ apply Rseq_sum_ext; intro; trivial.
 Qed.
 
 Lemma bound2_cv : Rseq_cv bound2 0.
@@ -1629,7 +1629,7 @@ eapply Rseq_cv_eq_compat.
  rewrite <- Rmult_plus_distr_l.
  inject.
  rewrite <- sum_plus.
- apply Rsum_eq_compat; intro; trivial.
+ apply Rseq_sum_ext; intro; trivial.
 Qed.
 
 Lemma abound_cv : Rseq_cv abound 0.
@@ -1752,9 +1752,9 @@ Qed.
 
 Lemma Sum_bntg_neg : Rser_cv bntg_neg (sumbntg + 1).
 Proof.
-apply Rser_cv_shift_reciprocal.
-eapply Rser_cv_eq_compat.
- apply (Rseq_eq_sym _ _ bntg_shift_neg_compat).
+apply Rser_cv_shift_rev2.
+eapply Rser_cv_ext.
+ apply bntg_shift_neg_compat.
  replace (sumbntg + 1 - bntg_neg 0) with sumbntg by (compute; field).
  apply Sum_bntg.
 Qed.
@@ -1785,7 +1785,7 @@ Qed.
 (** * Linking even terms of the 1/n² series to the series itself *)
 
 Lemma odd_zeta_evens : Rser_cv (evens (Rseq_shift Rseq_square_inv)) (PI ^ 2 / 8).
-apply Rser_cv_eq_compat with bntg.
+apply Rser_cv_ext with bntg.
  intro n.
  unfold Rseq_shift, evens, Rseq_square_inv, bntg.
  replace (INR (S (2 * n))) with (2 * INR n + 1); [reflexivity | ].
@@ -1805,13 +1805,13 @@ replace (zeta2 / 4) with (/4 * zeta2) by field.
 assert (REW : forall a, (/4 * (4 * a))%Rseq == a).
  intros a n; unfold Rseq_mult, Rseq_inv; field.
  unfold Rseq_constant.
- assert(0<4) by fourier; auto with *.
+ apply Rgt_not_eq ; fourier.
  
- eapply Rser_cv_eq_compat.
-  apply REW.
+ eapply Rser_cv_ext.
+  symmetry ; apply REW.
   
-  apply (Rser_cv_scal_mult_compat _ _ (/ 4)).
-  eapply Rser_cv_eq_compat.
+  apply (Rser_cv_scal_compat_l _ _ (/ 4)).
+  eapply Rser_cv_ext.
    2:unfold zeta2.
    2:destruct Rser_cv_square_inv as [l H].
    2:apply H.
@@ -1855,11 +1855,11 @@ Theorem zeta2_pi_2_6 : Rser_cv (fun n => 1 / (n + 1) ^ 2) (PI ^ 2 / 6).
 Proof.
 rewrite <- zeta2_val.
 unfold zeta2.
-eapply Rser_cv_eq_compat.
+eapply Rser_cv_ext.
  2:destruct Rser_cv_square_inv as [l H].
  2:apply H.
  
- intro n; unfold Rseq_square_inv_s.
+ intro n; unfold Rseq_shift, Rseq_square_inv_s.
  rewrite plus_1_S.
  field.
  INR_solve.

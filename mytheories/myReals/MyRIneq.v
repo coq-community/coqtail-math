@@ -22,6 +22,8 @@ USA.
 Require Import RIneq.
 Require Import Rfunctions.
 
+Require Import Fourier.
+
 Open Scope R_scope.
 
 Implicit Type r : R.
@@ -183,6 +185,26 @@ Lemma Rmult_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 ->
   r1 * r2 = r3 * r4.
 Proof.
 intros r1 r2 r3 r4 [] [] ; reflexivity.
+Qed.
+
+Lemma Rplus_lt_simpl_l : forall r1 r2, 0 < r2 -> r1 < r1 + r2.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rplus_lt_simpl_r : forall r1 r2, 0 < r1 -> r2 < r1 + r2.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rplus_le_simpl_l : forall r1 r2, 0 <= r2 -> r1 <= r1 + r2.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rplus_le_simpl_r : forall r1 r2, 0 <= r1 -> r2 <= r1 + r2.
+Proof.
+intros ; fourier.
 Qed.
 
 Lemma Rmax_lt_lt_lt : forall x y z, Rmax x y < z <-> x < z /\ y < z.

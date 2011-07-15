@@ -181,7 +181,7 @@ assert (H : y <= sum_f_R0 (fun n : nat => / INR (fact n)) b -> False).
  unfold R_dist in *. unfold Rabs in *.
  replace (sum_f_R0 (fun i : nat => / INR (fact i) * 1 ^ i) (max N (S b)))
  with (sum_f_R0 (fun n : nat => / INR (fact n)) (max N (S b))) in * by
- (apply Rsum_eq_compat ; unfold "==" ; intros n; rewrite pow1; ring) .
+ (apply Rseq_sum_ext ; intros n; rewrite pow1; ring).
  destruct (Rcase_abs (sum_f_R0 (fun i : nat => / INR (fact i)) (max N (S b)) - y)) as [H|H].
   apply Rle_minus in Habs. 
   assert (sum_f_R0 (fun n : nat => / INR (fact n)) b - y < 
@@ -355,8 +355,7 @@ assert (He : (infinite_sum (fun i : nat => / INR (fact i)) x)).
 pose (Un := fun n : nat => / INR (fact (n))).
 pose (UUn := fun n : nat => Un (S b + n)%nat).
 assert (Hluu : Rser_cv UUn (x - sum_f_R0 Un b)). 
- apply Rser_cv_shift_n_rev. unfold Rminus. rewrite Rplus_assoc.
- rewrite Rplus_opp_l. rewrite Rplus_0_r. apply He.
+ apply Rser_cv_shifts. assumption.
 
 assert (Hlu : Rser_cv Un x). apply He.
 
@@ -364,7 +363,7 @@ assert (HRser : Rser_cv (fun k => Un (S b+ k)%nat) (Rser_rem Un x Hlu b)).
  apply Rser_rem_cv.
 
 assert (Rser_cv Un (Rser_rem Un x Hlu b + sum_f_R0 Un b)).
- apply Rser_cv_shift_n. assumption.
+ apply Rser_cv_shifts_rev. assumption.
 
 assert (H1 : (x = Rser_rem Un x Hlu b + sum_f_R0 Un b)).
  apply Rser_cv_unique with Un ; assumption.
@@ -372,19 +371,20 @@ assert (H1 : (x = Rser_rem Un x Hlu b + sum_f_R0 Un b)).
 rewrite H1. unfold Un. ring_simplify.
 assert (Hlmachin : Rser_cv Un x). intuition.
 
-apply Rser_cv_scal_mult_compat with Un x (INR (fact b)) in Hlmachin.
-fold Un. rewrite (Rser_rem_scal (INR (fact b)) Un x b Hlu Hlmachin).
+apply Rser_cv_scal_compat_l with Un x (INR (fact b)) in Hlmachin.
+fold Un. apply Rle_lt_trans with ((INR (fact b) * Rser_rem Un x Hlu)%Rseq b).
+reflexivity. rewrite <- (Rser_rem_scal_compat_l Un x (INR (fact b)) Hlmachin).
 
 pose (Vn := (fun n0 : nat => INR (fact b) * / INR (fact n0) )).
 assert (Hlv : (Rser_cv Vn (INR (fact b) * x))).
- unfold Vn. apply Rser_cv_scal_mult_compat. assumption.
+ unfold Vn. apply Rser_cv_scal_compat_l. assumption.
 
 unfold Un. fold Vn.
 pose (Wn := (fun i : nat => /(INR (S b)) * (/ INR (S b)) ^ i)).
 assert (Hlw : Rser_cv Wn (( /INR (S b) *(1/ (1 - / INR (S b)))))).
- unfold Wn. apply Rser_cv_scal_mult_compat. 
- apply Rser_cv_eq_compat with (fun i : nat => (/ INR (S b)) ^ i).
-  intro. reflexivity.
+ unfold Wn. apply Rser_cv_scal_compat_l.
+ apply Rser_cv_ext with (fun i : nat => (/ INR (S b)) ^ i).
+ intro ; reflexivity.
   
   apply Hgeom.
 

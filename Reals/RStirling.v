@@ -26,6 +26,7 @@ Require Import Reals.
 Require Import Rsequence_facts.
 Require Import Rseries_def.
 Require Import Rseries_facts.
+Require Import Rseries_usual.
 Require Import Rpser.
 Require Import Rintegral.
 Require Import RTaylor.
@@ -151,7 +152,7 @@ eapply Rseq_big_O_eq_compat.
   3: eapply Rpser_big_O_partial_sum with
     (Un := Tn) (pr := ln_plus_cv_radius)
     (En := fun n => / INR (2 + n)) (N := 3%nat).
-  intros n.
+  intros n ; unfold Rseq_shifts.
   rewrite <- ln_plus_taylor_sum.
   unfold Tn; apply Rplus_eq_compat_l.
   unfold Rseq_pps. unfold Rseq_sum. unfold gt_pser. unfold Rseq_mult.
@@ -187,7 +188,7 @@ eapply Rseq_big_O_asymptotic.
 exists 1%nat.
 eapply Rseq_big_O_eq_compat
   with (Un := fun n => (INR (1 + n) + / 2) * Sn (1 + n) + / 12 * Qn 2 (1 + n) + / 6 * Qn 3 (1 + n)).
-intros n.
+intros n ; unfold Rseq_shifts.
 set (p := (1 + n)%nat).
 assert (Hp : INR p <> 0).
   unfold p.
@@ -202,8 +203,8 @@ unfold Sn, Rn; field; assumption.
 apply Rseq_eq_refl.
 repeat apply Rseq_big_O_plus_compat_l.
   eapply Rseq_big_O_eq_compat with (Vn := fun n => INR (1 + n) * Qn 3 (1 + n)).
-    apply Rseq_eq_refl.
-    intros n; repeat (rewrite Qn_S; [|omega]).
+    reflexivity.
+    intros n; unfold Rseq_shifts ; repeat (rewrite Qn_S; [|omega]).
     rewrite <- tech_pow_Rmult.
     field; replace (1 + n)%nat with (S n) by auto; auto with real.
   apply Rseq_big_O_mult_compat.
@@ -241,7 +242,7 @@ repeat apply Rseq_big_O_plus_compat_l.
   apply Rseq_big_O_Rmult_compat_l; apply Rseq_big_O_refl.
   apply Rseq_big_O_Rmult_compat_l.
   exists 1; split; [fourier|].
-  exists 0%nat; intros n _.
+  exists 0%nat; intros n _ ; unfold Rseq_shifts.
   rewrite Rmult_1_l.
   assert (HINR : 0 < INR (1 + n)).
     replace (1 + n)%nat with (S n) by omega.
@@ -260,10 +261,12 @@ repeat apply Rseq_big_O_plus_compat_l.
   assert (H := pos_INR n); fourier.
 Qed.
 
+(*
 Lemma Rser_cv_Riemann : {l | Rser_abs_cv (Qn 2) l}.
 Proof.
 apply Rser_cv_inv_poly; omega.
 Qed.
+
 
 Lemma Rser_cv_Vn : {l | Rser_cv Vn l}.
 Proof.
@@ -271,6 +274,7 @@ apply Rser_abs_cv_cv.
 eapply Rser_big_O_cv; [apply Vn_maj|].
 apply Rser_cv_Riemann.
 Qed.
+*)
 
 Lemma Vn_ser_eq : forall n, sum_f_R0 Vn n = ln (Un (S n)) - ln (Un 1).
 Proof.
@@ -285,6 +289,7 @@ induction n.
   apply Rinv_0_lt_compat; apply Un_pos; omega.
 Qed.
 
+(*
 Lemma Un_cv : {l | Rseq_cv Un l & 0 < l}.
 Proof.
 assert (Hcv : {l | Rseq_cv (fun n => ln (Un n)) l}).
@@ -319,6 +324,7 @@ apply derivable_continuous_pt.
 apply derivable_exp.
 apply exp_pos.
 Qed.
+
 (* end hide *)
 
 Lemma De_Moivre_equiv : {C | Rseq_fact ~ (fun n => C * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)) & 0 < C}.
@@ -351,7 +357,7 @@ field; split.
   apply not_0_INR; apply fact_neq_0.
 apply Rinv_0_lt_compat; assumption.
 Qed.
-
+*)
 End De_Moivre.
 (* begin hide *)
 
@@ -376,7 +382,7 @@ Qed.
 Section Stirling.
 
 Local Coercion INR : nat >-> R.
-
+(*
 Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt (2 * PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
 Proof.
 destruct De_Moivre_equiv as [l Hl].
@@ -411,5 +417,5 @@ replace (l*l) with ((l^2 / (2*PI))* (2*PI)).
 rewrite Heq; ring.
 unfold Rdiv, Rsqr; field; auto with *.
 Qed.
-
+*)
 End Stirling.

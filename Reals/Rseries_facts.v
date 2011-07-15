@@ -27,7 +27,7 @@ Require Export Rseries_def Rseries_base_facts Rseries_pos_facts.
 Require Export Rseries_remainder_facts Rseries_cv_facts Rseries_usual.
 Require Import Fourier.
 Require Import Max.
-Require Import Rtactic.
+Require Import Rtactic MyRIneq.
 
 Local Open Scope R_scope.
 (** printing ~	~ *)
@@ -69,58 +69,41 @@ Qed.
 Open Scope Rseq_scope.
 
 
-
-
 (** * Convergence and comparisons between sequences*)
 
 Section Rser_pos_comp.
 
 (** Big-O and bound *)
 
-Lemma Rser_big_O_maj : forall (Un Vn : nat -> R), 
-    (forall n : nat, 0 <= Vn n) -> Un = O (Vn) ->
-        exists K, exists SN, 0<= K /\ 
-            forall n : nat, sum_f_R0 (|Un|) n <= K* (sum_f_R0 Vn n) + SN.
+Lemma Rser_big_O_maj : forall (Un Vn: Rseq), 
+  (forall n : nat, 0 <= Vn n) -> Un = O (Vn) ->
+  exists K, exists SN, 0 <= K /\
+  forall n : nat, Rseq_sum (|Un|) n <= K* (Rseq_sum Vn n) + SN.
 Proof.
-intros Un Vn Vn_pos HO.
-destruct HO as [K [HK [N HN]]].
-apply Rge_le in HK.
-exists K; exists (sum_f_R0 (fun k => Rabs (Un k)) N).
-split.
-apply HK.
-intro n; case (le_lt_dec n N); intro Hn.
-apply Rle_trans with (sum_f_R0 (fun k => Rabs (Un k)) N).
-assert (n = N \/ n < N)%nat.
-omega.
-case H ; intro HnN.
-rewrite HnN; apply Rle_refl.
-rewrite tech2 with (fun k => Rabs (Un k)) n N.
-apply Rplus_le_simpl_l.
-apply cond_pos_sum.
-intro k; apply Rabs_pos.
-apply HnN.
-apply Rplus_le_simpl_r.
-apply Rmult_le_pos; [apply HK | apply cond_pos_sum; apply Vn_pos].
-rewrite tech2 with (|Un|) N n.
-rewrite Rplus_comm.
-apply Rplus_le_compat_r.
-rewrite tech2 with Vn N n.
-rewrite Rmult_plus_distr_l.
-apply Rle_trans with (K * sum_f_R0 (fun i : nat => Vn (S N + i)%nat) (n- (S N)))%R.
-rewrite scal_sum.
-apply sum_Rle.
-intros n0 Hn0.
-rewrite <- Rabs_pos_eq.
-rewrite Rmult_comm; rewrite Rabs_mult.
-rewrite Rabs_pos_eq with K.
-apply HN; omega.
-apply HK.
-apply Rmult_le_pos; [apply Vn_pos | apply HK].
-apply Rplus_le_simpl_r.
-apply Rmult_le_pos; [apply HK | apply cond_pos_sum; apply Vn_pos].
-apply Hn.
-apply Hn.
+intros Un Vn Vn_pos [K [HK [N HN]]] ; apply Rge_le in HK ;
+exists K ; exists (Rseq_sum (| Un |) N) ; split ; [assumption |].
+intro n ; destruct (le_lt_dec n N) as [HnN | HNn].
+ transitivity (Rseq_sum (| Un |) N).
+ destruct (eq_nat_dec n N) as [Heq | Hneq].
+  subst ; reflexivity.
+  unfold Rseq_sum ; rewrite tech2 with (| Un |) n N ; [| omega] ;
+  apply Rplus_le_simpl_l, Rseq_sum_pos ; intros ; apply Rabs_pos.
+  apply Rplus_le_simpl_r, Rmult_le_pos, Rseq_sum_pos ; assumption.
+  unfold Rseq_sum ; rewrite tech2 with (|Un|) N n, Rplus_comm.
+  apply Rplus_le_compat_r ; rewrite tech2 with Vn N n, Rmult_plus_distr_l.
+  transitivity ((K * Rseq_sum (Rseq_shifts Vn (S N)))%Rseq (n - S N)%nat).
+  rewrite <- Rseq_sum_scal_compat_l ; apply Rseq_sum_le_compat ;
+  unfold Rseq_shifts, Rseq_abs, Rseq_mult, Rseq_constant ; intros ;
+  rewrite <- (Rabs_right (Vn _)), HN.
+   reflexivity.
+   omega.
+   apply Rle_ge ; apply Vn_pos.
+  apply Rplus_le_simpl_r, Rmult_le_pos, Rseq_sum_pos, Vn_pos.
+  assumption.
+  assumption.
+  assumption.
 Qed.
+
 
 (** Convergence and big-O *)
 
@@ -237,7 +220,7 @@ intros eps Heps.
 destruct (Heq eps Heps) as [N HN]; exists N.
 intro n; apply HN.
 destruct Hlv as [lv Hlv].
-exists lv; apply Rser_cv_eq_compat with Vn.
+exists lv; apply Rser_cv_ext with Vn.
   intros n; unfold Rseq_abs; rewrite Rabs_right; auto with real.
 assumption.
 destruct Hlv as [lv Hlv].
@@ -537,7 +520,7 @@ assert (Rser_cv (Vn - Un)%Rseq (lv - lu)).
 assert (Hpos : (forall k, (k > n)%nat -> Vn k - Un k >= 0)). 
  intros. apply Rge_minus. apply Rle_ge. apply Hle. assumption.
 
-apply Rminus_gt. generalize (Rser_rem_minus_compat Vn Un lv lu Hlv Hlu n).
+apply Rminus_gt. generalize (Rser_rem_minus_compat Vn Un lv lu Hlv Hlu H n).
 intros Hrewrite. unfold Rseq_minus in Hrewrite. rewrite Hrewrite.
 apply Rser_rem_pos. 
  apply Hpos. 
@@ -618,7 +601,7 @@ assert (Hwn :  Rser_cv Wn (x + INR (S n) * (Un O) - l)).
  assert (H1 : Rser_cv (fun k => Un (k - S n)%nat) (x + INR (S n) * (Un O))).
   apply Rser_cv_reorder. assumption.
  
- apply Rser_cv_eq_compat with ((fun k => Un (k - S n)%nat) - Vn)%Rseq.
+ apply Rser_cv_ext with ((fun k => Un (k - S n)%nat) - Vn)%Rseq.
   intros k. generalize (Hwn11 k) ; intros Hwn1. destruct Hwn1 as (Hwn1, _).
   unfold Rseq_minus. rewrite <- Hwn1. ring.
 
@@ -639,8 +622,9 @@ rewrite (Rser_Rser_rem_equiv Un (Vn + Wn)%Rseq x (l + l1) H1 n).
   destruct Hlt as (k, H2). exists k ; intuition.
   destruct (Hwn11 k) as (Hwn1, Hwn5). unfold Rseq_plus. rewrite Hwn1. intuition.
 
- intros k Hkn.
- destruct (Hwn11 k) as (Hwn1, Hwn5). unfold Rseq_plus. rewrite Hwn1. intuition.
+ intros k.
+ destruct (Hwn11 (S n + k)%nat) as (Hwn1, Hwn5).
+ unfold Rseq_shifts, Rseq_plus. rewrite Hwn1. intuition.
 
  assumption.
 Qed.

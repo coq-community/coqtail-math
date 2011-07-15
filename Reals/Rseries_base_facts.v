@@ -79,6 +79,13 @@ intros An l Hl ; apply Rseq_cv_shift_compat ; apply Rseq_cv_eq_compat with
  apply Rseq_cv_plus_compat ; [assumption | apply Rseq_constant_cv].
 Qed.
 
+Lemma Rser_cv_shift_rev2: forall Un l,
+  Rser_cv (Rseq_shift Un) (l - (Un O)) -> Rser_cv Un l.
+Proof.
+intros ; replace l with (l - Un O + Un O) by ring ;
+ apply Rser_cv_shift_rev ; assumption.
+Qed.
+
 Lemma Rser_cv_shifts : forall k An l, Rser_cv An l ->
   Rser_cv (Rseq_shifts An (S k)) (l - Rseq_sum An k).
 Proof.
