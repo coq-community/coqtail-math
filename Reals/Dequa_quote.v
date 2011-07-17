@@ -114,22 +114,37 @@ Ltac quote_side_equa := fun env s x => match isconst s x with
 (* Function symbols *)
       | derive (sum ?an ?rho) ?c x =>
         match add_var an rho env with
-          | (?p, ?env') => constr: (env', y p 1)
+          | (?p, ?env') => constr: (env', y p 1 1)
         end
       | nth_derive (sum ?an ?rho) ?c x =>
         match add_var an rho env with
           | (?p, ?env') =>
             match type of c with
-              | D ?k (sum an rho) => constr: (env', y p k)
+              | D ?k (sum an rho) => constr: (env', y p k 1)
             end
         end
       | sum ?an ?rho x =>
         match add_var an rho env with
-          | (?p, ?env') => constr: (env', y p 0)
+          | (?p, ?env') => constr: (env', y p 0 1)
         end
       | x =>
         match add_var identity_seq identity_infinite_cv_radius env with
-          | (?p, ?env') => constr: (env', y p 0)
+          | (?p, ?env') => constr: (env', y p 0 1)
+        end
+      | derive (sum ?an ?rho) ?c (?a * x) =>
+        match add_var an rho env with
+          | (?p, ?env') => constr: (env', y p 1 a)
+        end
+      | nth_derive (sum ?an ?rho) ?c (?a * x) =>
+        match add_var an rho env with
+          | (?p, ?env') =>
+            match type of c with
+              | D ?k (sum an rho) => constr: (env', y p k a)
+            end
+        end
+      | sum ?an ?rho (?a * x) =>
+        match add_var an rho env with
+          | (?p, ?env') => constr: (env', y p 0 a)
         end
 (** If everything fails, we output a 404 constant.
     Just for testing; should be removed (TODO) **)
@@ -147,16 +162,35 @@ Proof.
 intros an r1 r2 ; apply sum_ext ; reflexivity.
 Qed.
 
+Lemma nth_derive_sum_PI_O' : forall an (r1 r2 : infinite_cv_radius an),
+ (fun x => nth_derive (sum an r1) (D_infty_Rpser an r1 O) (1 * x)) == sum an r2.
+Proof.
+intros an r1 r2 x ; rewrite Rmult_1_l ; apply nth_derive_sum_PI_O.
+Qed.
+
+
 Lemma nth_derive_sum_PI_1 : forall an (r1 r2 : infinite_cv_radius an) (pr : derivable (sum an r2)),
   nth_derive (sum an r1) (D_infty_Rpser an r1 1%nat) == derive (sum an r2) pr.
 Proof.
-intros an r1 r2 pr ; apply derive_ext ; apply sum_ext ; reflexivity.
+intros an r1 r2 pr ; apply derive_ext, sum_ext ; reflexivity.
+Qed.
+
+Lemma nth_derive_sum_PI_1' : forall an (r1 r2 : infinite_cv_radius an) (pr : derivable (sum an r2)),
+  (fun x => nth_derive (sum an r1) (D_infty_Rpser an r1 1%nat) (1 * x)) == derive (sum an r2) pr.
+Proof.
+intros an r1 r2 pr x ; rewrite Rmult_1_l ; apply nth_derive_sum_PI_1.
 Qed.
 
 Lemma nth_derive_sum_PI: forall (n : nat) an (r1 r2 : infinite_cv_radius an) (pr : D n (sum an r2)),
   nth_derive (sum an r1) (D_infty_Rpser an r1 n) == nth_derive (sum an r2) pr.
 Proof.
-intros n an r1 r2 pr ; apply nth_derive_ext ; apply sum_ext ; reflexivity.
+intros n an r1 r2 pr ; apply nth_derive_ext, sum_ext ; reflexivity.
+Qed.
+
+Lemma nth_derive_sum_PI': forall (n : nat) an (r1 r2 : infinite_cv_radius an) (pr : D n (sum an r2)),
+  (fun x => nth_derive (sum an r1) (D_infty_Rpser an r1 n) (1 * x)) == nth_derive (sum an r2) pr.
+Proof.
+intros n an r1 r2 pr x ; rewrite Rmult_1_l ; apply nth_derive_sum_PI.
 Qed.
 
 (** Normalising the goal **)
@@ -178,19 +212,35 @@ match  isconst s x with | false =>
         | false => progress (normalize_rec p s2 x)
       end
     | sum an ?rho2 x => replace (sum an rho2 x)%R with
-                        (nth_derive (sum an rho) (D_infty_Rpser an rho O) x)%R
-                        by (apply (nth_derive_sum_PI_O an rho rho2 x))
+                        (nth_derive (sum an rho) (D_infty_Rpser an rho O) (1 * x))%R
+                        by (apply (nth_derive_sum_PI_O' an rho rho2 x))
     | derive (sum an ?rho2) ?pr x => replace (derive (sum an rho2) pr x)%R with
-                        (nth_derive (sum an rho) (D_infty_Rpser an rho 1%nat) x)%R
-                        by (apply (nth_derive_sum_PI_1 an rho rho2 pr x))
+                        (nth_derive (sum an rho) (D_infty_Rpser an rho 1%nat) (1 * x))%R
+                        by (apply (nth_derive_sum_PI_1' an rho rho2 pr x))
+    | sum an ?rho2 (?a * x) => replace (sum an rho2 (a * x))%R with
+                        (nth_derive (sum an rho) (D_infty_Rpser an rho O) (a * x))%R
+                        by (apply (nth_derive_sum_PI_O an rho rho2 (a * x)))
+    | derive (sum an ?rho2) ?pr (?a * x) => replace (derive (sum an rho2) pr (a * x))%R with
+                        (nth_derive (sum an rho) (D_infty_Rpser an rho 1%nat) (a * x))%R
+                        by (apply (nth_derive_sum_PI_1 an rho rho2 pr (a * x)))
 (** This case is special: we want to do something iff the nth_derive has not
     the right shape. **)
-    | nth_derive (sum an rho) (D_infty_Rpser an rho ?n) x => idtac
+    | nth_derive (sum an rho) (D_infty_Rpser an rho ?n) x =>
+       replace (nth_derive (sum an rho) (D_infty_Rpser an rho n) x)%R with
+       (nth_derive (sum an rho) (D_infty_Rpser an rho n) (1 * x))%R
+       by (rewrite Rmult_1_l ; reflexivity)
     | nth_derive (sum an ?rho2) ?pr x =>
       match type of pr with | C ?n (sum an rho2) =>
         replace (nth_derive (sum an rho2) pr x)%R with
-        (nth_derive (sum an rho) (D_infty_Rpser an rho n) x)%R
-(*        by (apply nth_derive_sum_PI)*)
+        (nth_derive (sum an rho) (D_infty_Rpser an rho n) (1 * x))%R
+        by (apply nth_derive_sum_PI')
+      end
+    | nth_derive (sum an rho) (D_infty_Rpser an rho ?n) (?a * x) => idtac
+    | nth_derive (sum an ?rho2) ?pr (?a * x) =>
+      match type of pr with | C ?n (sum an rho2) =>
+        replace (nth_derive (sum an rho2) pr (a * x))%R with
+        (nth_derive (sum an rho) (D_infty_Rpser an rho n) (a * x))%R
+        by (apply nth_derive_sum_PI)
       end
   end
 end
@@ -224,7 +274,8 @@ match quote_diff_equa x with
       | |- ?s1 = ?s2 => normalize env s1 x ; normalize env s2 x ;
                         cut ([| p |]N (map (@projT1 _ infinite_cv_radius) env)) ;
                         [intro H ; apply (interp_equa_in_N_R _ _ H x) ; clear H | simpl ;
-                        repeat rewrite An_nth_deriv_0 ; repeat rewrite An_nth_deriv_1]
+                        repeat rewrite An_expand_1 ; repeat rewrite An_nth_deriv_0 ;
+                        repeat rewrite An_nth_deriv_1 ]
     end
 end.
 
@@ -239,7 +290,7 @@ let x := fresh "x" in intro x ; solve_diff_equa_on x.
    working *)
 
 Goal forall an (ra rb : infinite_cv_radius an) x, sum an ra x = sum an rb x.
-intros an ra rb ; solve_diff_equa ; simpl ; reflexivity.
+intros an ra rb ; solve_diff_equa ; reflexivity.
 Qed.
 
 Goal forall an bn (ra: infinite_cv_radius an) (rb rc: infinite_cv_radius bn)

@@ -32,7 +32,57 @@ Open Local Scope R_scope.
 
 (** ** Some lemmas manipulating the definitions. *)
 
+
+(** * Extensionality of radiuses. *)
+
+Section Radius_extensionality.
+
+Variables An Bn : Rseq.
+Hypothesis AnBn_ext : (An == Bn)%Rseq.
+
+Lemma An_deriv_ext : (An_deriv An == An_deriv Bn)%Rseq.
+Proof.
+intro n ; unfold An_deriv, Rseq_mult, Rseq_shift ; rewrite AnBn_ext ; reflexivity.
+Qed.
+
+Lemma An_nth_deriv_ext : forall k, (An_nth_deriv An k == An_nth_deriv Bn k)%Rseq.
+Proof.
+intros n k ; unfold An_nth_deriv, Rseq_mult, Rseq_div, Rseq_shifts ;
+rewrite AnBn_ext ; reflexivity.
+Qed.
+
+Lemma Cv_radius_weak_ext : forall r, Cv_radius_weak An r <-> Cv_radius_weak Bn r.
+Proof.
+intro r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
+ [rewrite <- (gt_abs_pser_ext  _ _ _ AnBn_ext) |
+ rewrite (gt_abs_pser_ext _ _ _ AnBn_ext)] ; apply HB ; exists i ; reflexivity.
+Qed.
+
+Lemma finite_cv_radius_ext : forall r, finite_cv_radius An r <->
+  finite_cv_radius Bn r.
+Proof.
+intro r ; split ; intros [rho_lb rho_ub] ; split ; intros r' Hr' ;
+ [rewrite <- Cv_radius_weak_ext | rewrite <- Cv_radius_weak_ext
+ | rewrite Cv_radius_weak_ext | rewrite Cv_radius_weak_ext] ; auto.
+Qed.
+
+Lemma infinite_cv_radius_ext : infinite_cv_radius An <->
+  infinite_cv_radius Bn.
+Proof.
+split ; intros rho r ; [rewrite <- Cv_radius_weak_ext |
+ rewrite Cv_radius_weak_ext] ; trivial.
+Qed.
+
+End Radius_extensionality.
+
 (** Compatibility of gt_pser with common operations. *)
+
+Lemma gt_pser_expand_compat : forall Un l x,
+  forall n, gt_pser (An_expand Un l) x n = gt_pser Un (l * x) n.
+Proof.
+intros ; unfold gt_pser, An_expand, Rseq_mult, Rseq_pow ;
+rewrite Rpow_mult_distr ; ring.
+Qed. 
 
 Lemma gt_pser_scal_compat_l : forall Un (l : R) x,
   forall n, gt_pser (l * Un) x n = l * gt_pser Un x n.
@@ -238,6 +288,21 @@ destruct (Rseq_partial_bound (gt_pser An r) k) as [C HC] ;
  unfold Rseq_shifts, gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult ; reflexivity.
 Qed.
 
+Lemma Cv_radius_weak_shift_compat : forall An r,
+  Cv_radius_weak An r <-> Cv_radius_weak (Rseq_shift An) r.
+Proof.
+intros An r ; replace (Rseq_shift An) with (Rseq_shifts An 1) by reflexivity ;
+ apply Cv_radius_weak_shifts_compat.
+Qed.
+
+Lemma Cv_radius_weak_expand_compat : forall An r l,
+  Cv_radius_weak An (l * r) <-> Cv_radius_weak (An_expand An l) r.
+Proof.
+intros An r l ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
+apply HB ; exists i ; unfold An_expand, gt_abs_pser, gt_pser, Rseq_mult, Rseq_abs, Rseq_pow ;
+apply Rabs_eq_compat ; rewrite Rpow_mult_distr ; ring.
+Qed.
+
 (** Compatibility of Cv_radius_weak with common operators. *)
 
 Lemma Cv_radius_weak_scal : forall (An : Rseq) (lambda r : R), lambda <> 0 ->
@@ -441,6 +506,28 @@ Qed.
 
 (** Compatibility of the infinite_cv_radius concept with various operations. *)
 
+Lemma infinite_cv_radius_zero : infinite_cv_radius 0.
+Proof.
+intro r ; exists 0 ; intros x [n Hn] ; subst ;
+ unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, Rseq_constant ;
+ rewrite Rmult_0_l, Rabs_R0 ; reflexivity.
+Qed.
+
+Lemma infinite_cv_radius_shift_compat : forall An,
+  infinite_cv_radius (Rseq_shift An) <-> infinite_cv_radius An.
+Proof.
+intro An ; split ; intros rAn r ;
+ [ rewrite Cv_radius_weak_shift_compat
+ | rewrite <- Cv_radius_weak_shift_compat ] ;
+ trivial.
+Qed.
+
+Lemma infinite_cv_radius_expand_compat : forall An l,
+  infinite_cv_radius An -> infinite_cv_radius (An_expand An l).
+Proof.
+intros ; intro r ; rewrite <- Cv_radius_weak_expand_compat ; trivial.
+Qed.
+
 Lemma infinite_cv_radius_scal_compat : forall (An : Rseq) (lam : R), lam <> 0 ->
   (infinite_cv_radius An <-> infinite_cv_radius (lam * An)%Rseq).
 Proof.
@@ -542,6 +629,14 @@ Lemma Rpser_minus_compat : forall An Bn x la lb,
 Proof.
 intros ; unfold Rseq_minus, Rminus ; apply Rpser_add_compat ;
  [| apply Rpser_opp_compat] ; assumption.
+Qed.
+
+Lemma Rpser_expand_compat : forall An l x la,
+  Rpser An (l * x) la -> Rpser (An_expand An l) x la.
+Proof.
+intros ; eapply Rseq_cv_eq_compat.
+ eapply Rseq_sum_ext ; intro ; apply gt_pser_expand_compat.
+ assumption.
 Qed.
 
 Lemma Rpser_unique : forall An (x l1 l2 : R),

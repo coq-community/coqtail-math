@@ -52,3 +52,10 @@ Proof.
 intros n re ; solve_diff_equa ; rewrite An_nth_deriv_S',
  (An_nth_deriv_ext _ exp_seq) ; [reflexivity | apply Deriv_exp_seq_simpl].
 Qed.
+
+Lemma Rexp_mult_simpl : forall a b x,
+  Rexp (a * x) * Rexp (b * x) = Rexp ((a + b) * x).
+Proof.
+intros a b ; unfold Rexp ; solve_diff_equa.
+admit.
+Qed.

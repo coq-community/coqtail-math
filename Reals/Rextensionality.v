@@ -58,39 +58,6 @@ Section Rpser_extensionality.
 Variables An Bn : Rseq.
 Hypothesis AnBn_ext : (An == Bn)%Rseq.
 
-Lemma An_deriv_ext : (An_deriv An == An_deriv Bn)%Rseq.
-Proof.
-intro n ; unfold An_deriv, Rseq_mult, Rseq_shift ; rewrite AnBn_ext ; reflexivity.
-Qed.
-
-Lemma An_nth_deriv_ext : forall k, (An_nth_deriv An k == An_nth_deriv Bn k)%Rseq.
-Proof.
-intros n k ; unfold An_nth_deriv, Rseq_mult, Rseq_div, Rseq_shifts ;
-rewrite AnBn_ext ; reflexivity.
-Qed.
-
-Lemma Cv_radius_weak_ext : forall r, Cv_radius_weak An r <-> Cv_radius_weak Bn r.
-Proof.
-intro r ; split ; intros [B HB] ; exists B ; intros x [i Hi] ; subst ;
- [rewrite <- (gt_abs_pser_ext  _ _ _ AnBn_ext) |
- rewrite (gt_abs_pser_ext _ _ _ AnBn_ext)] ; apply HB ; exists i ; reflexivity.
-Qed.
-
-Lemma finite_cv_radius_ext : forall r, finite_cv_radius An r <->
-  finite_cv_radius Bn r.
-Proof.
-intro r ; split ; intros [rho_lb rho_ub] ; split ; intros r' Hr' ;
- [rewrite <- Cv_radius_weak_ext | rewrite <- Cv_radius_weak_ext
- | rewrite Cv_radius_weak_ext | rewrite Cv_radius_weak_ext] ; auto.
-Qed.
-
-Lemma infinite_cv_radius_ext : infinite_cv_radius An <->
-  infinite_cv_radius Bn.
-Proof.
-split ; intros rho r ; [rewrite <- Cv_radius_weak_ext |
- rewrite Cv_radius_weak_ext] ; trivial.
-Qed.
-
 Lemma sum_f_R0_ext : (sum_f_R0 An == sum_f_R0 Bn)%Rseq.
 Proof.
 intro n ; induction n ; simpl ; rewrite AnBn_ext ;

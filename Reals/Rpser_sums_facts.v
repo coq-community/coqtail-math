@@ -38,6 +38,15 @@ Hypotheses
   (rAn : infinite_cv_radius An)
   (rBn : infinite_cv_radius Bn).
 
+Lemma sum_expand_compat : forall l (rAn' : infinite_cv_radius (An_expand An l)),
+  forall x, sum (An_expand An l) rAn' x = sum An rAn (l * x).
+Proof.
+intros l rAn' x ;
+ assert (H1 := sum_sums _ rAn' x) ;
+ assert (H2 := Rpser_expand_compat _ _ _ _ (sum_sums An rAn (l * x))) ;
+ eapply Rpser_unique ; eassumption.
+Qed.
+
 Lemma sum_scal_compat : forall (r : R) (rAn' : infinite_cv_radius (r * An)%Rseq),
   sum (r * An)%Rseq rAn' == ((fun _ => r) * sum An rAn)%F.
 Proof.

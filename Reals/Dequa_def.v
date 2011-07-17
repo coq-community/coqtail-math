@@ -16,7 +16,7 @@ Local Open Scope Rseq_scope.
 Inductive side_equa : Set :=
     | cst  : forall (r : R), side_equa
     | scal : forall (r : R) (s : side_equa), side_equa
-    | y    : forall (p : nat) (k : nat), side_equa
+    | y    : forall (p : nat) (k : nat) (a : R), side_equa
     | opp  : forall (s1 : side_equa), side_equa
     | min  : forall (s1 s2 : side_equa), side_equa
     | plus : forall (s1 s2 : side_equa), side_equa
@@ -28,7 +28,7 @@ Fixpoint interp_side_equa_in_N s (rho : list Rseq) : option Rseq :=
 match s with
   | cst r      => Return (constant_seq r)
   | scal r e   => Bind (interp_side_equa_in_N e rho) (fun un => Return (r * un))
-  | y i k      => Bind (nth_error rho i) (fun un => Return (An_nth_deriv un k))
+  | y i k a    => Bind (nth_error rho i) (fun un => Return (An_expand (An_nth_deriv un k) a))
   | opp e      => Bind (interp_side_equa_in_N e rho) (fun un => Return (- un))
   | min e1 e2  => Bind (interp_side_equa_in_N e1 rho) (fun un =>
                   Bind (interp_side_equa_in_N e2 rho) (fun vn => Return (un - vn)))
@@ -42,8 +42,8 @@ Fixpoint interp_side_equa_in_R s (rho : list (sigT infinite_cv_radius)) : option
 match s with
   | cst r      => Return (fun _ => r)
   | scal r e   => Bind (interp_side_equa_in_R e rho) (fun f => Return ((fun _ => r) * f)%F)
-  | y i k      => Bind (nth_error rho i) (fun f => Return (nth_derive (sum (projT1 f) (projT2 f))
-                 (D_infty_Rpser (projT1 f) (projT2 f) k)))
+  | y i k a    => Bind (nth_error rho i) (fun f => Return (fun x => nth_derive (sum (projT1 f) (projT2 f))
+                 (D_infty_Rpser (projT1 f) (projT2 f) k) (a * x)%R))
   | opp e      => Bind (interp_side_equa_in_R e rho) (fun f => Return (- f)%F)
   | min e1 e2  => Bind (interp_side_equa_in_R e1 rho) (fun f =>
                   Bind (interp_side_equa_in_R e2 rho) (fun g => Return (f - g)%F))

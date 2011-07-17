@@ -121,3 +121,9 @@ Proof.
 intros An n ; rewrite An_nth_deriv_S ; unfold An_deriv, Rseq_mult, Rseq_shift ;
  rewrite An_nth_deriv_0 ; reflexivity.
 Qed.
+
+Lemma An_expand_1 : forall An, An_expand An 1 == An.
+Proof.
+intros An n ; unfold An_expand, Rseq_pow, Rseq_mult ;
+rewrite pow1, Rmult_1_l ; reflexivity.
+Qed.

@@ -35,6 +35,8 @@ Definition gt_abs_pser An x := | gt_pser An x |.
 
 Definition An_deriv An := Rseq_shift (INR * An).
 Definition An_nth_deriv An k := Rseq_shifts (Rseq_fact * An) k / Rseq_fact.
+Definition An_expand An l := (Rseq_pow l * An).
+
 Definition gt_deriv_Pser An x := gt_pser (An_deriv An) x.
 Definition gt_nth_deriv_Pser An k x := gt_pser (An_nth_deriv An k) x.
 

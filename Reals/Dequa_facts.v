@@ -60,9 +60,12 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
   specify2 Hrew s (eq_refl (Some s)) ; destruct s as [An rAn] ;
   rewrite Hrew in HN ; inversion HN as [HN0] ; destruct HN0 ;
    inversion HR3 as [HR30] ; destruct HR30.
-   assert (pr : infinite_cv_radius (An_nth_deriv An k)).
+   assert (ppr: infinite_cv_radius (An_nth_deriv An k)).
     rewrite <- infinite_cv_radius_nth_derivable_compat ; assumption.
-   exists pr ; intro x ; symmetry ; erewrite <- nth_derive_sum_explicit ; reflexivity.
+   assert (pr : infinite_cv_radius (An_expand (An_nth_deriv An k) a)).
+    apply infinite_cv_radius_expand_compat ; assumption.
+   exists pr ; intro x ; symmetry ; rewrite (sum_expand_compat _ ppr).
+   erewrite <- nth_derive_sum_explicit ; reflexivity.
   inversion HR3.
 
  destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)).
@@ -169,7 +172,7 @@ intro s ; induction s ; intros l un H.
  destruct_eq (nth_error l p).
   specify2 Hrew s (eq_refl (Some s)).
   destruct s as [An rAn] ; simpl in H, Hrew ; rewrite Hrew in H ;
-   simpl in H ; exists (nth_derive (sum An rAn) (D_infty_Rpser An rAn k)) ;
+   simpl in H ; exists (fun x => nth_derive (sum An rAn) (D_infty_Rpser An rAn k) (a * x)) ;
    simpl ; rewrite <- Heqb ; reflexivity.
   symmetry in Heqb ; simpl in H.
  assert (T := map_nth_error2 (@projT1 _ infinite_cv_radius) _ _ Heqb).
