@@ -28,7 +28,7 @@ Require Import RiemannInt.
 Require Import SeqProp.
 Require Import Max.
 Require Import MyRIneq.
-Require Import Ranalysis_def.
+Require Import Ranalysis_def Rinterval.
 Require Import RIVT.
 
 Local Open Scope R_scope.

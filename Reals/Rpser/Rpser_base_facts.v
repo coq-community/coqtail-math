@@ -21,7 +21,7 @@ USA.
 Require Import Reals.
 Require Import Rpser_def Rpser_def_simpl.
 
-Require Import Ranalysis_def.
+Require Import Rinterval.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_rewrite_facts.
 Require Import Rsequence_cv_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.

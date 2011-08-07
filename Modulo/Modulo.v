@@ -22,7 +22,6 @@ USA.
 Require Import NArith.
 Require Import Omega.
 Require Import Max.
-Require Import Tools.
 
 Inductive mod (n:nat) : nat -> nat -> Prop :=
      | mod_base : forall k, k < n -> mod n k k

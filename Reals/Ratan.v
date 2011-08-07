@@ -27,7 +27,7 @@ Require Import Rfunctions.
 Require Import AltSeries.
 Require Import Rseries_def.
 Require Import SeqProp.
-Require Import Ranalysis_def.
+Require Import Rinterval Ranalysis_def.
 Require Import Ranalysis5.
 Require Import RIVT.
 Require Import Rseries_facts.

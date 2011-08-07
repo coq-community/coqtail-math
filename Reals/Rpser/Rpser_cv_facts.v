@@ -28,7 +28,7 @@ Require Import Fourier.
 
 Require Import Max Min.
 Require Import MyRIneq MyNeq.
-Require Import Ranalysis_def.
+Require Import Rinterval.
 Require Import RFsequence RFsequence_facts.
 
 Require Import Ass_handling.

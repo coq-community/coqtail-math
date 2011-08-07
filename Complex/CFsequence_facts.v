@@ -22,7 +22,7 @@ USA.
 (** Properties of real functions sequences. *)
 
 Require Import Rsequence_def.
-Require Import Ranalysis_def.
+Require Import Rinterval Ranalysis_def.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_tactics.
 Require Import MyRIneq.

@@ -3,7 +3,7 @@ Require Import Rsequence.
 Require Import Rseries_def Rseries_cv_facts.
 Require Import Rpser_def Rpser_sums Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
 
-Require Import Ranalysis_def Rfunction_def Rextensionality.
+Require Import Rinterval Rfunction_def Rextensionality.
 
 Open Local Scope R_scope.
 

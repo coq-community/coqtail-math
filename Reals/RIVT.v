@@ -27,8 +27,8 @@ Require Import Rseries_def.
 Require Import Fourier.
 Require Import RiemannInt.
 Require Import SeqProp.
-Require Import Ranalysis_def.
 Require Import MyRIneq.
+Require Import Rinterval Ranalysis_def.
 
 Local Open Scope R_scope.
 
@@ -49,9 +49,9 @@ induction N.
   (middle (Dichotomy_lb x y P N) (Dichotomy_ub x y P N)).
  case (P (middle (Dichotomy_lb x y P N) (Dichotomy_ub x y P N))).
  split.
- apply middle_interval ; intuition.
+ apply interval_middle_compat ; intuition.
  intuition.
- split ; [| apply middle_interval] ; intuition.
+ split ; [| apply interval_middle_compat] ; intuition.
  unfold middle ; reflexivity.
 Qed.
 

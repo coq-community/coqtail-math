@@ -2,7 +2,7 @@ Require Import Reals.
 Require Import Fourier.
 Require Import Rpow_facts.
 
-Require Import Ranalysis_def Rextensionality.
+Require Import Rinterval Rextensionality.
 Require Import Rsequence_facts Rsequence_sums_facts Rsequence_rewrite_facts.
 Require Import RFsequence RFsequence_facts.
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts.

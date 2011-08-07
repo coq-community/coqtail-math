@@ -28,14 +28,11 @@ Require Import Rfunctions.
 Require Import MyRIneq.
 Require Import Ranalysis2.
 Require Import Rtopology.
+Require Import Rinterval.
 
 Local Open Scope R_scope.
 
 (** * Basic notions *)
-
-Definition open_interval (lb ub x:R) := lb < x < ub.
-Definition interval (lb ub x:R) := lb <= x <= ub.
-Definition middle (x:R) (y:R) : R := (x+y)/2.
 
 Definition continuity_open_interval (f : R -> R) (lb ub:R) := forall x:R,
       open_interval lb ub x -> continuity_pt f x.
@@ -85,136 +82,6 @@ Definition reciprocal (f g:R -> R) := forall x, (comp f g) x = id x.
 
 (** Manipulation *)
 
-Lemma middle_identity : forall x, middle x x = x.
-Proof.
-intros ; unfold middle ; field.
-Qed.
-
-Lemma middle_comm : forall x y, middle x y = middle y x.
-Proof.
-intros ; unfold middle ; field.
-Qed.
-
-Lemma middle_unfold : forall x y, middle x y = (x + y) / 2.
-Proof.
-intros ; reflexivity.
-Qed.
-
-Lemma middle_R0 : forall x, middle (- x) x = 0.
-Proof.
-intros ; unfold middle ; field.
-Qed.
-
-Lemma middle_is_in_the_middle : forall x y, x < y -> x < middle x y < y.
-Proof.
-intros x y x_lt_y ; split.
- apply Rle_lt_trans with (middle x x).
- right ; symmetry ; apply middle_identity.
- unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
- apply Rplus_lt_compat_l ; assumption.
- apply Rlt_le_trans with (middle y y).
- unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
- apply Rplus_lt_compat_r ; assumption.
- right ; apply middle_identity.
-Qed.
-
-Lemma Rabs_middle_is_in_the_middle : forall x y, 0 <= x -> x < y ->
-  x < Rabs (middle x y) < y.
-Proof.
-intros x y x_pos x_lt_y.
- assert (mxy_pos : 0 < middle x y).
-  apply Rle_lt_trans with x ;
-  [| apply middle_is_in_the_middle] ;
-  assumption.
- rewrite Rabs_pos_eq ;
- [ apply middle_is_in_the_middle |] ;
- intuition.
-Qed.
-
-Lemma middle_interval : forall lb ub x y, interval lb ub x -> interval lb ub y ->
-       interval lb ub (middle x y).
-Proof.
-intros lb ub x y x_in_I y_in_I.
- split ; unfold middle, interval in *.
- replace lb with ((lb + lb) * /2) by field.
- unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
- replace ub with ((ub + ub) * /2) by field.
- unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
-Qed.
-
-Lemma middle_le_le_pos : forall x y, 0 <= x -> 0 <= y -> 0 <= middle x y.
-Proof.
-intros x y x_pos y_pos ; unfold middle, Rdiv ;
- apply Rle_mult_inv_pos ; fourier.
-Qed.
-
-Lemma middle_lt_lt_pos_lt : forall x y, 0 < x -> 0 < y -> 0 < middle x y.
-Proof.
-intros x y x_pos y_pos ; unfold middle, Rdiv ;
- apply Rlt_mult_inv_pos ; fourier.
-Qed.
-
-Lemma middle_le_lt_pos_lt : forall x y, 0 <= x -> 0 < y -> 0 < middle x y.
-Proof.
-intros x y x_pos y_pos ; unfold middle, Rdiv ;
- apply Rlt_mult_inv_pos ; fourier.
-Qed.
-
-Lemma middle_lt_le_pos_lt : forall x y, 0 < x -> 0 <= y -> 0 < middle x y.
-Proof.
-intros x y x_pos y_pos ; rewrite middle_comm ;
- apply middle_le_lt_pos_lt ; assumption.
-Qed.
-
-Lemma middle_lt_lt_neg_lt : forall x y, x < 0 -> y < 0 -> middle x y < 0.
-Proof.
-intros x y x_neg y_neg ; unfold middle, Rdiv ;
- replace 0 with ((x + y) * 0) by ring ;
- apply Rmult_lt_gt_compat_neg_l ; fourier.
-Qed.
-
-Lemma middle_le_lt_neg_lt : forall x y, x <= 0 -> y < 0 -> middle x y < 0.
-Proof.
-intros x y x_pos y_pos ; unfold middle, Rdiv ;
-  replace 0 with ((x + y) * 0) by ring ;
- apply Rmult_lt_gt_compat_neg_l ; fourier.
-Qed.
-
-Lemma middle_lt_le_neg_lt : forall x y, x < 0 -> y <= 0 -> middle x y < 0.
-Proof.
-intros x y x_neg y_neg ; rewrite middle_comm ;
- apply middle_le_lt_neg_lt ; assumption.
-Qed.
-
-Lemma interval_l : forall lb ub, lb <= ub -> interval lb ub lb.
-Proof.
-intros ; split ; [right |] ; trivial.
-Qed.
-
-Lemma interval_r : forall lb ub, lb <= ub -> interval lb ub ub.
-Proof.
-intros ; split ; [| right] ; trivial.
-Qed.
-
-Lemma open_interval_interval : forall lb ub x,
-     open_interval lb ub x -> interval lb ub x.
-Proof.
- intros ; split ; unfold open_interval in * ; intuition.
-Qed.
-
-Lemma interval_opp_compat : forall lb ub x,
-     interval lb ub x ->
-     interval (-ub) (-lb) (-x).
-Proof.
-intros ; unfold interval in * ; split ; intuition ; fourier.
-Qed.
-
-Lemma open_interval_opp_compat : forall lb ub x,
-     open_interval lb ub x ->
-     open_interval (-ub) (-lb) (-x).
-Proof.
-intros ; unfold open_interval in * ; split ; intuition ; fourier.
-Qed.
 
 Lemma strictly_increasing_strictly_monotonous_interval : forall f lb ub,
       strictly_increasing_interval f lb ub -> strictly_monotonous_interval f lb ub.

@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import MyRIneq.
-Require Import Ranalysis_def.
+Require Import Rinterval Ranalysis_def.
 Require Import Canalysis_def.
 Require Import Canalysis_diff.
 Require Import Cprop_base.

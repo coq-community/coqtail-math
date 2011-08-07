@@ -151,6 +151,19 @@ Proof.
 intros r; exact (Req_dec r 0).
 Qed.
 
+Lemma Rneq_le_lt: forall x y, x <> y -> x <= y -> x < y.
+Proof.
+intros x y Hneq [] ; intuition.
+Qed.
+
+Lemma Rneq_lt_or_gt: forall x y, x <> y -> {x < y} + {y < x}.
+Proof.
+intros x y x_neq_y.
+ destruct (Rle_lt_dec x y).
+  left ; apply Rneq_le_lt ; assumption.
+  right ; assumption.
+Qed.
+
 Lemma Rminus_opp : forall x y, x - - y = x + y.
 Proof.
 intros ; unfold Rminus ; rewrite Ropp_involutive ;
