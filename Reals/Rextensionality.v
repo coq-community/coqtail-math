@@ -1,10 +1,12 @@
 Require Import Reals.
 Require Import Rsequence_def.
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_sums Rpser_cv_facts.
-Require Import Rfunction_facts.
+Require Import Rinterval Ranalysis_def Rfunction_facts.
 Require Import Ass_handling.
 
 (** * Extensionality of the common properties of functions. *)
+
+(** Usual properties. *)
 
 Section Functions_extensionality.
 
@@ -50,6 +52,26 @@ intro x ; unfold derive ; apply derive_pt_ext.
 Qed.
 
 End Functions_extensionality.
+
+(** Restricted to [Rball]s. *)
+
+Section Functions_Rball_extensionality.
+
+Variables f g : R -> R.
+Variables c r : R.
+Hypothesis r_pos : 0 <= r.
+Hypothesis fg_ext : Rball_eq c r r_pos f g.
+
+Lemma continuity_Rball_ext : continuity_Rball f c r r_pos -> continuity_Rball g c r r_pos.
+Proof.
+intros f_cont x x_in eps eps_pos.
+ destruct (f_cont x x_in _ eps_pos) as [delta [delta_pos Hdelta]].
+ exists delta ; split ; [assumption |].
+ intros ; rewrite <- fg_ext ; [| apply H] ;
+  rewrite <- fg_ext ; auto.
+Qed.
+
+End Functions_Rball_extensionality.
 
 (** * Extensionality of power serie related concepts. *)
 

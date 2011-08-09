@@ -1,10 +1,41 @@
 Require Import Rbase Ranalysis.
 Require Import Rfunction_facts Rextensionality.
+Require Import Rinterval Ranalysis_def.
 Require Import Rfunction_classes_def.
 
 Local Open Scope R_scope.
 
+(** * Extensionality of the properties. *)
+
+Lemma D_ext: forall n f g, f == g -> D n f -> D n g.
+Proof.
+intro n ; induction n ; intros f g f_eq_g Dnf.
+ constructor.
+ inversion_clear Dnf.
+ assert (g_deriv : derivable g) by (eapply derivable_ext ; eassumption).
+ apply (D_S _ _ g_deriv).
+ apply IHn with (derive _ pr).
+ intro x ; unfold derive ; rewrite (pr_nu_var2 _ _ _ (pr x) (g_deriv x) f_eq_g) ;
+ reflexivity.
+ assumption.
+Qed.
+
+Lemma C_ext : forall n f g, f == g -> C n f -> C n g.
+Proof.
+intro n ; induction n ; intros f g f_eq_g Cnf.
+ inversion Cnf ; constructor ; eapply continuity_ext ; eassumption.
+ inversion_clear Cnf.
+ assert (g_deriv : derivable g) by (eapply derivable_ext ; eassumption).
+ apply (C_S _ _ g_deriv).
+ apply IHn with (derive _ pr).
+ intro x ; unfold derive ; rewrite (pr_nu_var2 _ _ _ (pr x) (g_deriv x) f_eq_g) ;
+ reflexivity.
+ assumption.
+Qed.
+
 (** * Relations between the D and the C class. *)
+
+(** For the full classes. *)
 
 Lemma C_implies_D : forall n f, C n f -> D n f.
 Proof.
@@ -29,6 +60,37 @@ Lemma D_infty_implies_C_infty : forall f, D_infty f -> C_infty f.
 Proof.
 intros f H n ; apply D_S_implies_C ; trivial.
 Qed.
+
+(** Corresponding lemmas for the restrictions. *)
+
+Lemma C_Rball_implies_D_Rball : forall n f c r r_pos,
+  C_Rball c r r_pos n f -> D_Rball c r r_pos n f.
+Proof.
+intro n ; induction n ; intros f c r r_pos H.
+ constructor.
+ inversion H ; eapply Db_S with pr ; apply IHn ; assumption.
+Qed.
+
+Lemma C_Rball_infty_implies_D_Rball_infty : forall c r r_pos f,
+  C_Rball_infty c r r_pos f -> D_Rball_infty c r r_pos f.
+Proof.
+intros ; intro ; apply C_Rball_implies_D_Rball ; trivial.
+Qed.
+
+(** Links between the full classes and the restrictions. *)
+
+(*
+Lemma C_C_Rball: forall c r r_pos n f,
+  C n f -> C_Rball c r r_pos n f.
+Proof.
+intros c r r_pos n ; induction n ; intros f Cnf ; inversion_clear Cnf.
+ constructor ; apply continuity_continuity_Rball ; assumption.
+ apply Cb_S with (derivable_derivable_Rball c r r_pos f pr).
+
+Need for C_Rball_ext HERE
+
+ apply IHn.
+*)
 
 (** * Basic Properties *)
 
@@ -58,34 +120,6 @@ intro m ; induction m ; intros n f H Cmf.
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
   apply IHm ; [| apply C_pred] ; intuition.
-Qed.
-
-(** Extensionality of the properties. *)
-
-Lemma D_ext: forall n f g, f == g -> D n f -> D n g.
-Proof.
-intro n ; induction n ; intros f g f_eq_g Dnf.
- inversion Dnf ; constructor ; eapply continuity_ext ; eassumption.
- inversion_clear Dnf.
- assert (g_deriv : derivable g) by (eapply derivable_ext ; eassumption).
- apply (D_S _ _ g_deriv).
- apply IHn with (derive _ pr).
- intro x ; unfold derive ; rewrite (pr_nu_var2 _ _ _ (pr x) (g_deriv x) f_eq_g) ;
- reflexivity.
- assumption.
-Qed.
-
-Lemma C_ext : forall n f g, f == g -> C n f -> C n g.
-Proof.
-intro n ; induction n ; intros f g f_eq_g Cnf.
- inversion Cnf ; constructor ; eapply continuity_ext ; eassumption.
- inversion_clear Cnf.
- assert (g_deriv : derivable g) by (eapply derivable_ext ; eassumption).
- apply (C_S _ _ g_deriv).
- apply IHn with (derive _ pr).
- intro x ; unfold derive ; rewrite (pr_nu_var2 _ _ _ (pr x) (g_deriv x) f_eq_g) ;
- reflexivity.
- assumption.
 Qed.
 
 (** * Compatibility of C, D with common operators *)

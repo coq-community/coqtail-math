@@ -1,5 +1,5 @@
 Require Import Rbase Rfunctions Fourier.
-Require Import MyRIneq.
+Require Import MyRIneq MyNeq.
 Require Import Ass_handling.
 
 (** * The definitions used in this file: [middle], [interval], [Rball]. *)
@@ -10,6 +10,32 @@ Definition interval (lb ub x : R) := lb <= x <= ub.
 Definition open_interval (lb ub x:R) := lb < x < ub.
 
 Definition Rball c r (r_pos: 0 <= r) x := Rabs (x - c) < r.
+
+Definition Rball_eq c r r_pos (f g : R -> R) := forall x,
+  Rball c r r_pos x -> f x = g x.
+
+Lemma Rball_eq_refl: forall c r r_pos f, Rball_eq c r r_pos f f.
+Proof.
+unfold Rball_eq ; trivial.
+Qed.
+
+Lemma Rball_eq_sym: forall c r r_pos f g, Rball_eq c r r_pos f g -> Rball_eq c r r_pos g f.
+Proof.
+unfold Rball_eq ; intros ; symmetry ; auto.
+Qed.
+
+Lemma Rball_eq_trans: forall c r r_pos f g h, Rball_eq c r r_pos f g ->
+  Rball_eq c r r_pos g h -> Rball_eq c r r_pos f h.
+Proof.
+unfold Rball_eq ; intros ; transitivity (g x) ; auto.
+Qed.
+
+Require Setoid.
+
+Add Parametric Relation (c r: R) (r_pos: 0 <= r): (R -> R) (Rball_eq c r r_pos)
+reflexivity proved by (Rball_eq_refl c r r_pos)
+symmetry proved by (Rball_eq_sym c r r_pos)
+transitivity proved by (Rball_eq_trans c r r_pos) as Rball_eq'.
 
 (** * [middle]'s properties. *)
 
@@ -163,6 +189,43 @@ intros lb ub x y x_in_I y_in_I.
   unfold Rdiv ; apply Rmult_lt_compat_r ; intuition.
 Qed.
 
+(** Decidability results. *)
+
+Lemma in_interval_dec: forall lb ub x,
+  { interval lb ub x } + { ~ interval lb ub x }.
+Proof.
+intros lb ub x.
+  destruct (Rle_lt_dec lb x).
+   destruct (Rle_lt_dec x ub).
+    left ; split ; assumption.
+    right ; intros [_ Hf] ; fourier.
+   right ; intros [Hf _] ; fourier.
+Qed.
+
+Lemma in_open_interval_dec: forall lb ub x,
+  { open_interval lb ub x } + { ~ open_interval lb ub x }.
+intros lb ub x.
+  destruct (Rlt_le_dec lb x).
+   destruct (Rlt_le_dec x ub).
+    left ; split ; assumption.
+    right ; intros [_ Hf] ; fourier.
+   right ; intros [Hf _] ; fourier.
+Qed.
+
+Lemma interval_open_interval_dec: forall lb ub x,
+  interval lb ub x ->
+  { x = lb } + { open_interval lb ub x } + { x = ub }.
+Proof.
+intros lb ub x [H1 H2].
+  destruct (Req_dec x lb).
+   left ; left ; assumption.
+   destruct (Req_dec x ub).
+    right ; assumption.
+    left ; right ; split.
+     apply Rneq_le_lt ; [symmetry |] ; assumption.
+     apply Rneq_le_lt ; assumption.
+Qed.
+
 (** * [Rabll]'s properties. *)
 
 Lemma Rball_PI: forall c r (r_pos1 r_pos2: 0 <= r) x,
@@ -224,4 +287,15 @@ Lemma Rball_c_0_empty: forall c (pr : 0 <= 0) x,
 Proof.
 intros c pr x Hf ; eapply Rlt_irrefl, Rle_lt_trans ;
  [eapply Rabs_pos | eassumption].
+Qed.
+
+(** Decidability result. *)
+
+Lemma in_Rball_dec: forall c r r_pos x,
+  { Rball c r r_pos x } + { ~ Rball c r r_pos x }.
+Proof.
+intros c r r_pos x ;
+ destruct (in_open_interval_dec (c - r) (c + r) x) as [Ht | Hf].
+  left ; apply interval_Rball ; assumption.
+  right ; intro ; eapply Hf, Rball_interval ; eassumption.
 Qed.

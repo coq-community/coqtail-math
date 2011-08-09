@@ -19,8 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-(* This work has been mainly taken from Guillaume Allais's internship (MARELLE team - INRIA Sophia Antipolis)*)
-
 Require Import Rbase.
 Require Import Ranalysis1.
 Require Import Fourier.
@@ -34,15 +32,57 @@ Local Open Scope R_scope.
 
 (** * Basic notions *)
 
+
+(*** Alternative definition. TODO: migrate code to it!
+Definition continuity_open_interval (f : R -> R) (lb ub:R) :=
+  forall x, open_interval lb ub x ->
+  continue_in f (open_interval lb ub) x.
+Definition continuity_interval (f : R -> R) (lb ub:R) :=
+  forall x, interval lb ub x ->
+  continue_in f (interval lb ub) x.
+*)
 Definition continuity_open_interval (f : R -> R) (lb ub:R) := forall x:R,
-      open_interval lb ub x -> continuity_pt f x.
+  open_interval lb ub x -> continuity_pt f x.
 Definition continuity_interval (f : R -> R) (lb ub:R) := forall x:R,
-      interval lb ub x -> continuity_pt f x.
+  interval lb ub x -> continuity_pt f x.
+Definition continuity_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
+  forall x, Rball c r r_pos x -> continue_in f (D_x (Rball c r r_pos) x) x.
+
+Lemma continuity_continuity_Rball: forall c r r_pos f,
+  continuity f -> continuity_Rball f c r r_pos.
+Proof.
+intros c r r_pos f f_cont x x_in eps eps_pos ;
+ destruct (f_cont x _ eps_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split ; [assumption | intros ; apply Hdelta].
+ split ; [unfold no_cond, D_x ; split ; [trivial |] |] ; apply H.
+Qed.
 
 Definition derivable_open_interval (f : R -> R) (lb ub:R) := forall x:R,
       open_interval lb ub x -> derivable_pt f x.
 Definition derivable_interval (f : R -> R) (lb ub:R) := forall x:R,
       interval lb ub x -> derivable_pt f x.
+Definition derivable_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
+  forall x, Rball c r r_pos x -> derivable_pt f x.
+
+Definition derive_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r)
+  (pr : derivable_Rball f c r r_pos) (x : R) :=
+match in_Rball_dec c r r_pos x with
+  | left P => derive_pt f x (pr x P)
+  | right nP => 0
+end.
+
+Lemma derivable_derivable_Rball : forall c r r_pos f,
+  derivable f -> derivable_Rball f c r r_pos.
+Proof.
+intros c r r_pos f f_deriv x x_in ; apply f_deriv.
+Qed.
+
+Lemma derivable_Rball_PI: forall (f : R -> R) (c r : R) (r_pos1 r_pos2 : 0 <= r),
+  derivable_Rball f c r r_pos1 -> derivable_Rball f c r r_pos2.
+Proof.
+intros f c r r_pos1 r_pos2 Hdr x x_in ; apply Hdr ; rewrite Rball_PI ;
+ eassumption.
+Qed.
 
 Definition injective_interval (f : R -> R) (lb ub:R) := forall (x y:R),
       interval lb ub x -> interval lb ub y -> f x = f y -> x = y.
@@ -81,7 +121,6 @@ Definition reciprocal_open_interval (f g:R -> R) (lb ub:R) := forall x,
 Definition reciprocal (f g:R -> R) := forall x, (comp f g) x = id x.
 
 (** Manipulation *)
-
 
 Lemma strictly_increasing_strictly_monotonous_interval : forall f lb ub,
       strictly_increasing_interval f lb ub -> strictly_monotonous_interval f lb ub.
