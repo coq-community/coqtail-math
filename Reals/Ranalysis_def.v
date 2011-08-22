@@ -26,13 +26,11 @@ Require Import Rfunctions.
 Require Import MyRIneq.
 Require Import Ranalysis2.
 Require Import Rtopology.
-Require Import Rinterval.
+Require Import Rinterval Rfunction_facts.
 
 Require Import Ass_handling.
 
 Local Open Scope R_scope.
-
-
 
 (* Alternative definition. TODO: migrate code to it!
 Definition continuity_open_interval (f : R -> R) (lb ub:R) :=
@@ -191,7 +189,7 @@ intros f lb ub x l pr Hl eps eps_pos ; destruct (Hl _ eps_pos) as [d [d_pos Hd]]
   eapply Rlt_le_trans ; [eassumption | eapply Rmin_r].
 Qed.
 
-Lemma derivale_pt_lim_Rball_derivable_pt_lim: forall f c r r_pos x l,
+Lemma derivable_pt_lim_Rball_derivable_pt_lim: forall f c r r_pos x l,
   Rball c r r_pos x -> derivable_pt_lim_in f (Rball c r r_pos) x l ->
   derivable_pt_lim f x l.
 Proof.
@@ -238,7 +236,27 @@ Lemma derivable_pt_lim_Rball_uniqueness: forall f c r r_pos x l l',
   l = l'.
 Proof.
 intros f c r r_pos x l l' x_in Hl Hl' ; eapply uniqueness_limite ;
- eapply derivale_pt_lim_Rball_derivable_pt_lim ;
+ eapply derivable_pt_lim_Rball_derivable_pt_lim ;
+ eassumption.
+Qed.
+
+
+Lemma continuity_pt_continue_in: forall f (D : R -> Prop) x,
+  D x -> continuity_pt f x -> continue_in f D x.
+Proof.
+intros f D x Dx Hf ; intros eps eps_pos ;
+ destruct (Hf _ eps_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split ; [| intros y [[y_in y_neq] y_bd]] ;
+ [| apply Hdelta] ; repeat split ; assumption.
+Qed.
+
+Lemma derivable_Rball_continuity_Rball: forall c r r_pos f,
+  derivable_Rball f c r r_pos ->
+  continuity_Rball f c r r_pos.
+Proof.
+intros c r r_pos f Hf x x_in ;
+ apply continuity_pt_continue_in ;
+ [| eapply derivable_continuous_pt, derivable_Rball_derivable_pt] ;
  eassumption.
 Qed.
 
@@ -261,6 +279,70 @@ match in_Rball_dec c r r_pos x with
   | left P  => derive_pt_in f (Rball c r r_pos) x (pr x P)
   | right P => 0
 end.
+
+(** Extensionality of the definitions *)
+
+Lemma derivable_pt_lim_Rball_ext: forall f g c r r_pos,
+  Rball_eq c r r_pos f g -> forall x l,
+  Rball c r r_pos x ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derivable_pt_lim_in g (Rball c r r_pos) x l.
+Proof.
+intros f g c r r_pos Heq x l x_in Hf eps eps_pos ;
+ destruct (Hf _ eps_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split.
+  assumption.
+  intros y [[Hy y_neq] y_bd] ; rewrite <- Heq, <- Heq ;
+  [apply Hdelta ; repeat split | |] ; assumption.
+Qed.
+
+Lemma derivable_Rball_ext: forall f g c r r_pos,
+  Rball_eq c r r_pos f g ->
+  derivable_Rball f c r r_pos ->
+  derivable_Rball g c r r_pos.
+Proof.
+intros f g c r r_pos heq Hf x x_in ;
+ destruct (Hf _ x_in) as [l Hl] ; exists l ;
+ eapply derivable_pt_lim_Rball_ext ; eassumption.
+Qed.
+
+Lemma derive_pt_in_Rball_ext: forall f g c r r_pos x
+  (prf: derivable_pt_in f (Rball c r r_pos) x)
+  (prg: derivable_pt_in g (Rball c r r_pos) x),
+  Rball c r r_pos x ->
+  Rball_eq c r r_pos f g ->
+  derive_pt_in f (Rball c r r_pos) x prf =
+  derive_pt_in g (Rball c r r_pos) x prg.
+Proof.
+intros f g c r r_pos x [l1 Hl1] [l2 Hl2] x_in Heq ; simpl ;
+ eapply derivable_pt_lim_Rball_uniqueness ; [eassumption | | eassumption].
+ eapply derivable_pt_lim_Rball_ext ; eassumption.
+Qed.
+
+Lemma derive_Rball_ext: forall f g c r r_pos
+  (prf: derivable_Rball f c r r_pos)
+  (prg: derivable_Rball g c r r_pos),
+  Rball_eq c r r_pos f g ->
+  derive_Rball f c r r_pos prf == derive_Rball g c r r_pos prg.
+Proof.
+intros f g c r r_pos prf prg Heq x ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [HT | HF].
+ apply derive_pt_in_Rball_ext ; assumption.
+ reflexivity.
+Qed.
+
+Lemma derive_derive_Rball: forall f c r r_pos pr pr',
+  Rball_eq c r r_pos (derive f pr) (derive_Rball f c r r_pos pr').
+Proof.
+intros f c r r_pos pr pr' x x_in ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [HT | HF].
+ destruct (pr' x HT) as [l Hl] ; simpl ; unfold derive ;
+  rewrite derive_pt_eq ; eapply derivable_pt_lim_Rball_derivable_pt_lim ;
+  eassumption.
+ destruct (HF x_in).
+Qed.
+
+(** derivable PI *)
 
 Lemma derivable_Rball_PI: forall (f : R -> R) (c r : R) (r_pos1 r_pos2 : 0 <= r),
   derivable_Rball f c r r_pos1 -> derivable_Rball f c r r_pos2.

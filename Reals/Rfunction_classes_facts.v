@@ -13,10 +13,23 @@ intro n ; induction n ; intros f g f_eq_g Dnf.
  constructor.
  inversion_clear Dnf.
  assert (g_deriv : derivable g) by (eapply derivable_ext ; eassumption).
- apply (D_S _ _ g_deriv).
- apply IHn with (derive _ pr).
+ apply (D_S _ _ g_deriv), IHn with (derive _ pr).
  intro x ; unfold derive ; rewrite (pr_nu_var2 _ _ _ (pr x) (g_deriv x) f_eq_g) ;
  reflexivity.
+ assumption.
+Qed.
+
+Lemma D_Rball_ext: forall c r r_pos n f g,
+  Rball_eq c r r_pos f g ->
+  D_Rball c r r_pos n f ->
+  D_Rball c r r_pos n g.
+Proof.
+intros c r r_pos n ; induction n ; intros f g Heq Hf.
+ constructor.
+ inversion_clear Hf.
+ assert (g_deriv: derivable_Rball g c r r_pos) by (eapply derivable_Rball_ext ; eassumption).
+ apply (Db_S _ _ _ _ _ g_deriv), IHn with (derive_Rball _ _ _ _ pr).
+ intros x x_in ; apply derive_Rball_ext ; assumption.
  assumption.
 Qed.
 
@@ -30,6 +43,19 @@ intro n ; induction n ; intros f g f_eq_g Cnf.
  apply IHn with (derive _ pr).
  intro x ; unfold derive ; rewrite (pr_nu_var2 _ _ _ (pr x) (g_deriv x) f_eq_g) ;
  reflexivity.
+ assumption.
+Qed.
+
+Lemma C_Rball_ext: forall c r r_pos n f g,
+  Rball_eq c r r_pos f g ->
+  C_Rball c r r_pos n f ->
+  C_Rball c r r_pos n g.
+Proof.
+intros c r r_pos n ; induction n ; intros f g Heq Hf ; inversion_clear Hf.
+ constructor ; eapply continuity_Rball_ext ; eassumption.
+ assert (g_deriv: derivable_Rball g c r r_pos) by (eapply derivable_Rball_ext ; eassumption).
+ apply (Cb_S _ _ _ _ _ g_deriv), IHn with (derive_Rball _ _ _ _ pr).
+ intros x x_in ; apply derive_Rball_ext ; assumption.
  assumption.
 Qed.
 
@@ -71,6 +97,14 @@ intro n ; induction n ; intros f c r r_pos H.
  inversion H ; eapply Db_S with pr ; apply IHn ; assumption.
 Qed.
 
+Lemma D_Rball_S_implies_C_Rball : forall c r r_pos n f,
+  D_Rball c r r_pos (S n) f -> C_Rball c r r_pos n f.
+Proof.
+intros c r r_pos n ; induction n ; intros f Hf ; inversion Hf.
+ constructor ; apply derivable_Rball_continuity_Rball ; assumption.
+ apply Cb_S with pr ; apply IHn ; assumption.
+Qed.
+
 Lemma C_Rball_infty_implies_D_Rball_infty : forall c r r_pos f,
   C_Rball_infty c r r_pos f -> D_Rball_infty c r r_pos f.
 Proof.
@@ -79,18 +113,15 @@ Qed.
 
 (** Links between the full classes and the restrictions. *)
 
-(*
 Lemma C_C_Rball: forall c r r_pos n f,
   C n f -> C_Rball c r r_pos n f.
 Proof.
 intros c r r_pos n ; induction n ; intros f Cnf ; inversion_clear Cnf.
  constructor ; apply continuity_continuity_Rball ; assumption.
- apply Cb_S with (derivable_derivable_Rball c r r_pos f pr).
-
-Need for C_Rball_ext HERE
-
- apply IHn.
-*)
+ apply Cb_S with (derivable_derivable_in f (Rball c r r_pos) pr).
+ eapply C_Rball_ext ; [| eapply IHn ; eassumption].
+ apply derive_derive_Rball.
+Qed.
 
 (** * Basic Properties *)
 
@@ -99,9 +130,22 @@ Proof.
 intros ; apply C_implies_D, D_S_implies_C ; assumption.
 Qed.
 
+Lemma D_Rball_pred: forall c r r_pos n f,
+  D_Rball c r r_pos (S n) f -> D_Rball c r r_pos n f.
+Proof.
+intros ; apply C_Rball_implies_D_Rball,
+ D_Rball_S_implies_C_Rball ; assumption.
+Qed.
+
 Lemma C_pred : forall n f, C (S n) f -> C n f.
 Proof.
  intros ; apply D_S_implies_C, C_implies_D ; assumption.
+Qed.
+
+Lemma C_Rball_pred : forall c r r_pos n f,
+  C_Rball c r r_pos (S n) f -> C_Rball c r r_pos n f.
+Proof.
+ intros ; apply D_Rball_S_implies_C_Rball, C_Rball_implies_D_Rball ; assumption.
 Qed.
 
 Lemma D_le: forall m n f, (n <= m)%nat -> D m f -> D n f.
@@ -113,6 +157,16 @@ intro m ; induction m ; intros n f Hnm Dmf.
   apply IHm ; [| apply D_pred] ; intuition.
 Qed.
 
+Lemma D_Rball_le: forall c r r_pos m n f, (n <= m)%nat ->
+  D_Rball c r r_pos m f -> D_Rball c r r_pos n f.
+Proof.
+intros c r r_pos m ; induction m ; intros n f Hnm Dmf.
+ destruct n ; [apply Dmf | elim (le_Sn_O _ Hnm)].
+ destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
+  subst ; assumption.
+  apply IHm ; [| apply D_Rball_pred] ; intuition.
+Qed.
+
 Lemma C_le : forall m n f, (n <= m)%nat -> C m f -> C n f.
 Proof.
 intro m ; induction m ; intros n f H Cmf.
@@ -120,6 +174,16 @@ intro m ; induction m ; intros n f H Cmf.
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
   apply IHm ; [| apply C_pred] ; intuition.
+Qed.
+
+Lemma C_Rball_le : forall c r r_pos m n f, (n <= m)%nat ->
+  C_Rball c r r_pos m f -> C_Rball c r r_pos n f.
+Proof.
+intros c r r_pos m ; induction m ; intros n f H Cmf.
+ destruct n ; [apply Cmf | elim (le_Sn_O _ H)].
+ destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
+  subst ; assumption.
+  apply IHm ; [| apply C_Rball_pred] ; intuition.
 Qed.
 
 (** * Compatibility of C, D with common operators *)
