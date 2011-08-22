@@ -5,11 +5,13 @@ Require Import Ass_handling.
 (** * The definitions used in this file: [middle], [interval], [Rball]. *)
 
 Definition middle (x:R) (y:R) : R := (x + y) / 2.
+Definition interval_dist lb ub x := Rmin (x - lb) (ub - x).
 
 Definition interval (lb ub x : R) := lb <= x <= ub.
 Definition open_interval (lb ub x:R) := lb < x < ub.
 
 Definition Rball c r (r_pos: 0 <= r) x := Rabs (x - c) < r.
+Definition Rball_dist c r := interval_dist (c - r) (c + r).
 
 Definition Rball_eq c r r_pos (f g : R -> R) := forall x,
   Rball c r r_pos x -> f x = g x.
@@ -74,6 +76,13 @@ intros x y x_lt_y ; split.
  unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
  apply Rplus_lt_compat_r ; assumption.
  right ; apply middle_identity.
+Qed.
+
+Lemma middle_is_in_the_middle': forall x y, x <= y -> x <= middle x y <= y.
+Proof.
+intros x y xley ; destruct (Req_dec x y).
+ subst ; rewrite middle_identity ; auto.
+ split ; left ; apply middle_is_in_the_middle, Rle_neq_lt ; assumption.
 Qed.
 
 Lemma Rabs_middle_is_in_the_middle : forall x y, 0 <= x -> x < y ->
@@ -226,6 +235,56 @@ intros lb ub x [H1 H2].
      apply Rneq_le_lt ; assumption.
 Qed.
 
+(** Extensional equality implies equality. *)
+
+Lemma open_interval_ext_eq: forall lb1 lb2 ub1 ub2, lb1 < ub1 ->
+  (forall x, open_interval lb1 ub1 x <-> open_interval lb2 ub2 x) ->
+  lb1 = lb2 /\ ub1 = ub2.
+Proof.
+intros lb1 lb2 ub1 ub2 Hord Hext.
+ assert (Hord': lb2 < ub2) by (transitivity (middle lb1 ub1) ;
+  apply Hext, middle_is_in_the_middle ; assumption).
+ destruct (Rlt_le_dec lb1 lb2).
+  destruct (Rlt_le_dec ub1 lb2).
+   assert (Hf: ~ open_interval lb2 ub2 (middle lb1 ub1)).
+    intro Hf ; apply Rlt_irrefl with lb2 ; transitivity (middle lb1 ub1) ;
+    [apply Hf | transitivity ub1 ; [apply middle_is_in_the_middle |]] ;
+    assumption.
+   apply False_ind, Hf, Hext, middle_is_in_the_middle ; assumption.
+   assert (Hf: ~ open_interval lb2 ub2 (middle lb1 lb2)).
+    intro Hf ; apply Rlt_irrefl with (middle lb1 lb2) ; transitivity lb2 ;
+    [apply middle_is_in_the_middle | apply Hf] ; assumption.
+   apply False_ind, Hf, Hext ; split ; [| apply Rlt_le_trans with lb2] ;
+   trivial ; apply middle_is_in_the_middle ; assumption.
+  destruct (Rlt_le_dec lb2 lb1).
+   destruct (Rlt_le_dec lb1 ub2).
+    assert (Hf: ~ open_interval lb1 ub1 (middle lb2 lb1)).
+     intro Hf ; apply Rlt_irrefl with lb1 ; transitivity (middle lb2 lb1) ;
+     [apply Hf | apply middle_is_in_the_middle] ; assumption.
+    apply False_ind, Hf, Hext ; split ; [| transitivity lb1] ; auto ;
+    apply middle_is_in_the_middle ; assumption.
+    assert (Hf: ~ open_interval lb2 ub2 (middle lb1 ub1)).
+     intro Hf ; apply False_ind, Rlt_irrefl with ub2, Rle_lt_trans with lb1 ;
+     [| transitivity (middle lb1 ub1) ; [apply middle_is_in_the_middle | apply Hf]] ;
+     assumption.
+    apply False_ind, Hf, Hext, middle_is_in_the_middle ; assumption.
+   assert (lb_eq: lb1 = lb2) by intuition ; split ; trivial.
+  destruct (Rlt_le_dec ub1 ub2).
+   assert (Hf: ~ open_interval lb1 ub1 (middle ub1 ub2)).
+    intro Hf ; apply Rlt_irrefl with ub1 ; transitivity (middle ub1 ub2) ;
+    [apply middle_is_in_the_middle | apply Hf] ; assumption.
+   apply False_ind, Hf, Hext ; rewrite <- lb_eq ; split ; [transitivity ub1 |] ;
+   auto ; apply middle_is_in_the_middle ; assumption.
+  destruct (Rlt_le_dec ub2 ub1).
+   assert (Hf: ~ open_interval lb2 ub2 (middle ub2 ub1)).
+    intro Hf ; apply Rlt_irrefl with ub2 ; transitivity (middle ub2 ub1) ;
+    [apply middle_is_in_the_middle | apply Hf] ; assumption.
+   apply False_ind, Hf, Hext ; rewrite lb_eq ; split ; [transitivity ub2 |] ;
+   auto ; apply middle_is_in_the_middle ; assumption.
+  intuition.
+Qed.
+
+
 (** * [Rabll]'s properties. *)
 
 Lemma Rball_PI: forall c r (r_pos1 r_pos2: 0 <= r) x,
@@ -298,4 +357,80 @@ intros c r r_pos x ;
  destruct (in_open_interval_dec (c - r) (c + r) x) as [Ht | Hf].
   left ; apply interval_Rball ; assumption.
   right ; intro ; eapply Hf, Rball_interval ; eassumption.
+Qed.
+
+(** Extensional equality implies equality. *)
+
+Lemma Rball_ext_eq: forall c1 c2 r1 r2 r1_pos r2_pos, 0 < r1 ->
+  (forall x, Rball c1 r1 r1_pos x <-> Rball c2 r2 r2_pos x) ->
+  c1 = c2 /\ r1 = r2.
+Proof.
+intros c1 c2 r1 r2 r1_pos r2_pos r1_pos_lt Hext.
+ assert (Hord: c1 - r1 < c1 + r1) by fourier.
+ assert (Heq: c1 - r1 = c2 - r2 /\ c1 + r1 = c2 + r2).
+  apply open_interval_ext_eq.
+   assumption.
+   intro x ; split ; intro H ; eapply Rball_interval,
+   Hext, interval_Rball ; assumption.
+ split.
+  replace c1 with ((c1 - r1 + (c1 + r1)) / 2) by field ;
+  replace c2 with ((c2 - r2 + (c2 + r2)) / 2) by field ;
+  destruct Heq as [H1 H2] ; rewrite H1, H2 ; field.
+  replace r1 with ((c1 + r1 - (c1 - r1)) / 2) by field ;
+  replace r2 with ((c2 + r2 - (c2 - r2)) / 2) by field ;
+  destruct Heq as [H1 H2] ; rewrite H1, H2 ; field.
+Qed.
+
+(** * dist properties *)
+
+Lemma open_interval_dist_pos: forall lb ub x,
+  open_interval lb ub x ->
+  0 < interval_dist lb ub x.
+Proof.
+intros lb ub x [x_lb x_ub] ;
+ apply Rmin_pos_lt ; fourier.
+Qed.
+
+Lemma interval_dist_pos: forall lb ub x,
+  interval lb ub x -> 0 <= interval_dist lb ub x.
+Proof.
+intros lb ub x [x_lb x_ub] ; apply Rmin_pos ; fourier.
+Qed.
+
+Lemma interval_dist_bound: forall lb ub x,
+  open_interval lb ub x ->
+  forall h, Rabs h < interval_dist lb ub x ->
+  open_interval lb ub (x + h).
+Proof.
+intros lb ub x x_in h h_bd ;
+ assert (H := Rabs_def2 _ _ h_bd) ;
+ destruct H as [x_lb x_ub].
+ unfold interval_dist in *.
+  assert (H1: - (x - lb) < h).
+   apply Rle_lt_trans with (- Rmin (x - lb) (ub - x)).
+    apply Ropp_le_contravar, Rmin_l.
+    assumption.
+  assert (H2: h < ub - x).
+   apply Rlt_le_trans with (Rmin (x - lb) (ub - x)).
+    assumption.
+    apply Rmin_r.
+  unfold open_interval ; clear -H1 H2 ; split ; fourier.
+Qed.
+
+Lemma Rball_dist_pos: forall c r r_pos x,
+  Rball c r r_pos x ->
+  0 < Rball_dist c r x.
+Proof.
+intros ; eapply open_interval_dist_pos, Rball_interval ;
+ eassumption.
+Qed.
+
+Lemma Rball_dist_bound: forall c r r_pos x,
+  Rball c r r_pos x ->
+  forall h, Rabs h < Rball_dist c r x ->
+  Rball c r r_pos (x + h).
+Proof.
+intros ; apply interval_Rball, interval_dist_bound.
+ eapply Rball_interval ; eassumption.
+ assumption.
 Qed.

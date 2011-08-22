@@ -28,12 +28,13 @@ Require Import Ranalysis2.
 Require Import Rtopology.
 Require Import Rinterval.
 
+Require Import Ass_handling.
+
 Local Open Scope R_scope.
 
-(** * Basic notions *)
 
 
-(*** Alternative definition. TODO: migrate code to it!
+(* Alternative definition. TODO: migrate code to it!
 Definition continuity_open_interval (f : R -> R) (lb ub:R) :=
   forall x, open_interval lb ub x ->
   continue_in f (open_interval lb ub) x.
@@ -57,25 +58,193 @@ intros c r r_pos f f_cont x x_in eps eps_pos ;
  split ; [unfold no_cond, D_x ; split ; [trivial |] |] ; apply H.
 Qed.
 
-Definition derivable_open_interval (f : R -> R) (lb ub:R) := forall x:R,
-      open_interval lb ub x -> derivable_pt f x.
-Definition derivable_interval (f : R -> R) (lb ub:R) := forall x:R,
-      interval lb ub x -> derivable_pt f x.
-Definition derivable_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
-  forall x, Rball c r r_pos x -> derivable_pt f x.
+(** * (Re)defining the derivability predicate. *)
 
-Definition derive_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r)
-  (pr : derivable_Rball f c r r_pos) (x : R) :=
-match in_Rball_dec c r r_pos x with
-  | left P => derive_pt f x (pr x P)
-  | right nP => 0
+(** The usual definition of the derivability predicate is,
+    contrary to the one of the continuity not modular at all.
+    Here we define a derivability predicate based on the ideas
+    used in the continuity definition.
+    We can then now use this new definitions in specific cases
+    (intervals, balls). **)
+
+Definition derivable_pt_lim_in f D x l :=
+  limit1_in (fun y => (f y - f x) / (y - x)) (D_x D x) l x.
+
+Definition derivable_pt_in f D x := { l | derivable_pt_lim_in f D x l }.
+
+Definition derivable_in f (D : R -> Prop) :=
+  forall x, D x -> derivable_pt_in f D x.
+
+Definition derivable_open_interval (f : R -> R) (lb ub:R) :=
+  derivable_in f (open_interval lb ub).
+
+Definition derivable_interval (f : R -> R) (lb ub:R) :=
+  derivable_in f (interval lb ub).
+
+Definition derivable_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
+  derivable_in f (Rball c r r_pos).
+
+Lemma derivable_pt_lim_open_interval_Rball: forall f x c r r_pos l,
+  derivable_pt_lim_in f (open_interval (c - r) (c + r)) x l ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l.
+Proof.
+intros f x c r r_pos l Hl eps eps_pos ;
+ destruct (Hl _ eps_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split ; [assumption |].
+ intros y [[y_in y_neq] y_bd] ; apply Hdelta ; split ;
+ [split ; [eapply Rball_interval |] |] ; eassumption.
+Qed.
+
+Lemma derivable_pt_lim_Rball_open_interval: forall f x c r r_pos l,
+  derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derivable_pt_lim_in f (open_interval (c - r) (c + r)) x l.
+Proof.
+intros f x lb ub pr l Hl eps eps_pos ;
+ destruct (Hl _ eps_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split ; [assumption |].
+ intros y [[y_in y_neq] y_bd] ; apply Hdelta ; split ;
+ [split ; [eapply interval_Rball |] |] ; eassumption.
+Qed.
+
+Lemma derivable_open_interval_Rball: forall f c r r_pos,
+  derivable_open_interval f (c - r) (c + r) ->
+  derivable_Rball f c r r_pos.
+Proof.
+intros f c r r_pos Hoi x x_in ;
+ destruct (Hoi x (Rball_interval _ _ _ _ x_in)) as [l Hl] ;
+ exists l ; apply derivable_pt_lim_open_interval_Rball, Hl.
+Qed.
+
+Lemma derivable_Rball_open_interval: forall f c r r_pos,
+  derivable_Rball f c r r_pos ->
+  derivable_open_interval f (c - r) (c + r).
+Proof.
+intros f c r r_pos Hoi x x_in ;
+ destruct (Hoi x (interval_Rball _ _ _ _ x_in)) as [l Hl] ;
+ exists l ; eapply derivable_pt_lim_Rball_open_interval, Hl.
+Qed.
+
+(** This new definition is obviously related to the old one. *)
+
+Lemma derivable_pt_lim_derivable_pt_lim_in: forall f D x l,
+  derivable_pt_lim f x l -> derivable_pt_lim_in f D x l.
+Proof.
+intros f D x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [delta Hdelta] ;
+ exists delta ; split.
+  apply delta.
+  intros y [[Dy xny] xy_bd] ; simpl ; unfold R_dist ; replace (f y) with (f (x + (y - x)))
+  by (f_equal ; ring) ; apply Hdelta.
+   intro Hf ; apply xny ; revert Hf ; clear ; intuition.
+   apply xy_bd.
+Qed.
+
+Lemma derivable_pt_derivable_pt_in: forall f D x,
+  derivable_pt f x -> derivable_pt_in f D x.
+Proof.
+intros f D x [l Hl] ; exists l ;
+ apply derivable_pt_lim_derivable_pt_lim_in ;
+ assumption.
+Qed.
+
+Lemma derivable_derivable_in : forall f D,
+  derivable f -> derivable_in f D.
+Proof.
+intros f D Hf x Dx ; apply derivable_pt_derivable_pt_in, Hf.
+Qed.
+
+(** In specific cases we can come back from the specific case to the one
+    with no limitation. *)
+
+Lemma derivable_pt_lim_open_interval_derivable_pt_lim: forall f lb ub x l,
+  open_interval lb ub x -> derivable_pt_lim_in f (open_interval lb ub) x l ->
+  derivable_pt_lim f x l.
+Proof.
+intros f lb ub x l pr Hl eps eps_pos ; destruct (Hl _ eps_pos) as [d [d_pos Hd]] ;
+ simpl in Hd ; unfold R_dist in Hd.
+ pose (delta := Rmin (interval_dist lb ub x) d).
+ assert (delta_pos : 0 < delta).
+  apply Rmin_pos_lt ; [apply open_interval_dist_pos |] ; assumption.
+ exists (mkposreal _ delta_pos) ; intros h h_neq h_bd ;
+ specify Hd (x + h); replace (x + h - x) with h in Hd by ring ;
+ apply Hd ; split.
+  split.
+   apply interval_dist_bound ; [| eapply Rlt_le_trans ;
+   [| eapply Rmin_l]] ; eassumption.
+   clear -h_neq ; intro Hf ; apply h_neq, Rplus_eq_reg_l with x ;
+   rewrite <- Hf ; ring.
+  eapply Rlt_le_trans ; [eassumption | eapply Rmin_r].
+Qed.
+
+Lemma derivale_pt_lim_Rball_derivable_pt_lim: forall f c r r_pos x l,
+  Rball c r r_pos x -> derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derivable_pt_lim f x l.
+Proof.
+intros ; eapply derivable_pt_lim_open_interval_derivable_pt_lim ;
+ [eapply Rball_interval | eapply derivable_pt_lim_Rball_open_interval] ;
+ eassumption.
+Qed.
+
+Lemma derivable_open_interval_derivable_pt: forall f lb ub,
+  derivable_open_interval f lb ub ->
+  forall x, open_interval lb ub x -> derivable_pt f x.
+Proof.
+intros f lb ub H x Dx ; destruct (H x Dx) as [l Hl] ;
+ exists l ; eapply derivable_pt_lim_open_interval_derivable_pt_lim ;
+ eassumption.
+Qed.
+
+Lemma derivable_Rball_derivable_pt: forall f c r r_pos,
+  derivable_Rball f c r r_pos ->
+  forall x, Rball c r r_pos x -> derivable_pt f x.
+Proof.
+intros ; eapply derivable_open_interval_derivable_pt ;
+ [eapply derivable_Rball_open_interval | eapply Rball_interval] ;
+ eassumption.
+Qed.
+
+(** This allows us to get back the unicity of the derivative. *)
+
+Lemma derivable_pt_lim_open_interval_uniqueness: forall f lb ub x l l',
+  open_interval lb ub x ->
+  derivable_pt_lim_in f (open_interval lb ub) x l ->
+  derivable_pt_lim_in f (open_interval lb ub) x l' ->
+  l = l'.
+Proof.
+intros f lb ub x l l' x_in Hl Hl' ; eapply uniqueness_limite ;
+ eapply derivable_pt_lim_open_interval_derivable_pt_lim ;
+ eassumption.
+Qed.
+
+Lemma derivable_pt_lim_Rball_uniqueness: forall f c r r_pos x l l',
+  Rball c r r_pos x ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l' ->
+  l = l'.
+Proof.
+intros f c r r_pos x l l' x_in Hl Hl' ; eapply uniqueness_limite ;
+ eapply derivale_pt_lim_Rball_derivable_pt_lim ;
+ eassumption.
+Qed.
+
+(** We can now define the appropriate projection (aka. derive functions). *)
+
+Definition derive_pt_in f D x (pr : derivable_pt_in f D x) :=
+match pr with | exist l _ => l end.
+
+Definition derive_in f D (pr : derivable_in f D) x (Dx: D x) :=
+  derive_pt_in f D x  (pr x Dx).
+
+Definition derive_open_interval f lb ub (pr : derivable_open_interval f lb ub) x :=
+match in_open_interval_dec lb ub x with
+  | left P  => derive_pt_in f (open_interval lb ub) x (pr x P)
+  | right P => 0
 end.
 
-Lemma derivable_derivable_Rball : forall c r r_pos f,
-  derivable f -> derivable_Rball f c r r_pos.
-Proof.
-intros c r r_pos f f_deriv x x_in ; apply f_deriv.
-Qed.
+Definition derive_Rball f c r r_pos (pr : derivable_Rball f c r r_pos) x :=
+match in_Rball_dec c r r_pos x with
+  | left P  => derive_pt_in f (Rball c r r_pos) x (pr x P)
+  | right P => 0
+end.
 
 Lemma derivable_Rball_PI: forall (f : R -> R) (c r : R) (r_pos1 r_pos2 : 0 <= r),
   derivable_Rball f c r r_pos1 -> derivable_Rball f c r r_pos2.
@@ -83,6 +252,7 @@ Proof.
 intros f c r r_pos1 r_pos2 Hdr x x_in ; apply Hdr ; rewrite Rball_PI ;
  eassumption.
 Qed.
+
 
 Definition injective_interval (f : R -> R) (lb ub:R) := forall (x y:R),
       interval lb ub x -> interval lb ub y -> f x = f y -> x = y.
@@ -216,11 +386,11 @@ intros f lb ub lb_lt_ub f_decr ; assert (flb_lt_fub : f ub < f lb).
  unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
 Qed.
 
-Lemma derivable_continuous_interval : forall f lb ub,
-	derivable_interval f lb ub -> continuity_interval f lb ub.
+Lemma derivable_continuous_open_interval : forall f lb ub,
+	derivable_open_interval f lb ub -> continuity_open_interval f lb ub.
 Proof.
-intros f lb ub H x x_in ; apply derivable_continuous_pt ;
- apply H ; assumption.
+intros f lb ub H x x_in ; eapply derivable_continuous_pt,
+ derivable_open_interval_derivable_pt ; eassumption.
 Qed.
 
 Lemma continuity_open_interval_opp_rev : forall f lb ub,
