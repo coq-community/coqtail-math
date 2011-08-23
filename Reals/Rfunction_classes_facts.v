@@ -1,6 +1,6 @@
 Require Import Rbase Ranalysis.
 Require Import Rfunction_facts Rextensionality.
-Require Import Rinterval Ranalysis_def.
+Require Import Rinterval Ranalysis_def Ranalysis_facts.
 Require Import Rfunction_classes_def.
 
 Local Open Scope R_scope.
@@ -198,6 +198,13 @@ intro n ; induction n ; intros f Dnf.
   apply derivable_pt_lim_opp; destruct (pr x) as [? Hd]; apply Hd.
   apply IHn ; assumption.
 Qed.
+
+Lemma D_Rball_opp: forall c r r_pos n f,
+  D_Rball c r r_pos n f -> D_Rball c r r_pos n (- f)%F.
+Proof.
+intros c r r_pos n ; induction n ; intros f Hf ; inversion_clear Hf.
+ constructor.
+ constructor.
 
 Lemma C_opp: forall n f, C n f -> C n (- f)%F.
 Proof.

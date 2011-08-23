@@ -65,24 +65,9 @@ Qed.
     We can then now use this new definitions in specific cases
     (intervals, balls). **)
 
-Definition derivable_pt_lim_in f D x l :=
-  limit1_in (fun y => (f y - f x) / (y - x)) (D_x D x) l x.
+Definition growth_rate f x := (fun y => (f y - f x) / (y - x)).
 
-(* TODO equivalence of derivable_pt_lim_in and D_in... wtf *)
-Lemma derivable_pt_lim_in_D_in : forall f D x l, derivable_pt_lim_in f D x l -> {d : R -> R | D_in f d D x}.
-Proof.
-intros.
-exists (fun x => l).
-unfold D_in, derivable_pt_lim_in in *.
-apply H.
-Qed.
-
-Lemma D_in_derivable_pt_lim_in : forall f d D x, D_in f d D x -> {l | derivable_pt_lim_in f D x l}.
-Proof.
-intros.
-exists (d x). unfold derivable_pt_lim_in, D_in in *.
-apply H.
-Qed.
+Definition derivable_pt_lim_in f D x l := limit1_in (growth_rate f x) (D_x D x) l x.
 
 Definition derivable_pt_in f D x := { l | derivable_pt_lim_in f D x l }.
 
@@ -146,8 +131,8 @@ Proof.
 intros f D x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [delta Hdelta] ;
  exists delta ; split.
   apply delta.
-  intros y [[Dy xny] xy_bd] ; simpl ; unfold R_dist ; replace (f y) with (f (x + (y - x)))
-  by (f_equal ; ring) ; apply Hdelta.
+  intros y [[Dy xny] xy_bd] ; simpl ; unfold R_dist, growth_rate ;
+   replace (f y) with (f (x + (y - x))) by (f_equal ; ring) ; apply Hdelta.
    intro Hf ; apply xny ; revert Hf ; clear ; intuition.
    apply xy_bd.
 Qed.
@@ -179,8 +164,8 @@ intros f lb ub x l pr Hl eps eps_pos ; destruct (Hl _ eps_pos) as [d [d_pos Hd]]
  assert (delta_pos : 0 < delta).
   apply Rmin_pos_lt ; [apply open_interval_dist_pos |] ; assumption.
  exists (mkposreal _ delta_pos) ; intros h h_neq h_bd ;
- specify Hd (x + h); replace (x + h - x) with h in Hd by ring ;
- apply Hd ; split.
+ specify Hd (x + h) ; unfold growth_rate in * ;
+ replace (x + h - x) with h in Hd by ring ; apply Hd ; split.
   split.
    apply interval_dist_bound ; [| eapply Rlt_le_trans ;
    [| eapply Rmin_l]] ; eassumption.
@@ -292,7 +277,7 @@ intros f g c r r_pos Heq x l x_in Hf eps eps_pos ;
  destruct (Hf _ eps_pos) as [delta [delta_pos Hdelta]] ;
  exists delta ; split.
   assumption.
-  intros y [[Hy y_neq] y_bd] ; rewrite <- Heq, <- Heq ;
+  intros y [[Hy y_neq] y_bd] ; unfold growth_rate ; rewrite <- Heq, <- Heq ;
   [apply Hdelta ; repeat split | |] ; assumption.
 Qed.
 
@@ -484,6 +469,7 @@ intros f lb ub lb_lt_ub f_decr ; assert (flb_lt_fub : f ub < f lb).
  unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
 Qed.
 
+(*
 
 Lemma derivable_in_continue_in : forall f I x,
     derivable_pt_in f I x -> continue_in f I x.
@@ -503,6 +489,7 @@ intros f lb ub H x x_in.
  apply H.
  apply x_in.
 Qed.
+*)
 
 Lemma continuity_open_interval_opp_rev : forall f lb ub,
       continuity_open_interval (-f)%F lb ub ->
