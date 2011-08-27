@@ -527,7 +527,7 @@ exact H8.
 exact H11.
 Defined.
 
-Definition edges_to_path (e : edges) : path.
+Definition edges_to_path : forall (e : edges), path.
 intro.
 exists (edges_to_path2 e). 
 apply edges_to_path2_path.
@@ -1759,7 +1759,7 @@ apply Hback.
 apply Hdec.
 Qed.
 
-Definition adjacences_to_path (a : adjacences) : path.
+Definition adjacences_to_path : forall (a : adjacences), path.
 intro.
 exists (adjacences_to_path2 a). 
 apply adjacences_to_path2_path.
@@ -2230,19 +2230,9 @@ Qed.
 Definition connected_v (v : vertices) (x : vertex->vertex->nat->Prop) : Prop :=
 forall u u0, (belong u v)->(belong u0 v)->(exists n, x u u0 n).
 
-Definition empty (G : Graph) : Prop.
-intro.
-destruct G.
-apply (v=nil).
-Defined.
+Definition empty := fun G : Graph => let (v, _) := G in v = nil.
 
-
-Definition connected (G : Graph) : Prop.
-intro.
-destruct G.
-destruct p.
-apply (connected_v v x).
-Defined.
+Definition connected (G : Graph) := let (v, p) := G in let (x, _) := p in connected_v v x.
 
 Definition deprived (G : Graph) (v : vertex) : Graph.
 intros.
@@ -2255,7 +2245,10 @@ destruct IHv0.
 apply (a::v1,p).
 Defined.
 
+(*
+Lemma connected_decomposition : forall G : Graph, (connected G) -> (not (empty G)) -> (exists u : vertex, (belong u v)).
+*)
 
-Lemma connected_decomposition : forall G : Graph, (connected G)->(not (empty G))->(exists u : vertex, (belong u v))
-
-(*reste : isomorphisme de graphs, définition par matrice, union disjointe de graphes, intersection, union, Delta, puissance de graphe(?), algo de flot//flot(?), graphe chordal, cographe, graphe à distance héréditaire, clique, étoile, stable, décomposition modulaire (?)*)
+(*
+   reste : isomorphisme de graphs, définition par matrice, union disjointe de graphes, intersection, union, Delta, puissance de graphe(?), algo de flot//flot(?), graphe chordal, cographe, graphe à distance héréditaire, clique, étoile, stable, décomposition modulaire (?)
+*)
