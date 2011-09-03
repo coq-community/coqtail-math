@@ -204,7 +204,7 @@ Lemma D_Rball_opp: forall c r r_pos n f,
 Proof.
 intros c r r_pos n ; induction n ; intros f Hf ; inversion_clear Hf.
  constructor.
- constructor.
+ apply Db_S with (derivable_Rball_opp _ _ pr).
 
 Lemma C_opp: forall n f, C n f -> C n (- f)%F.
 Proof.
