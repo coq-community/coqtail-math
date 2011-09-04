@@ -225,7 +225,6 @@ intros f c r r_pos x l l' x_in Hl Hl' ; eapply uniqueness_limite ;
  eassumption.
 Qed.
 
-
 Lemma continuity_pt_continue_in: forall f (D : R -> Prop) x,
   D x -> continuity_pt f x -> continue_in f D x.
 Proof.
@@ -264,6 +263,29 @@ match in_Rball_dec c r r_pos x with
   | left P  => derive_pt_in f (Rball c r r_pos) x (pr x P)
   | right P => 0
 end.
+
+(** Value of the derivative *)
+
+Lemma derivable_pt_lim_derive_pt_Rball: forall f c r r_pos x l pr,
+  Rball c r r_pos x ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derive_pt_in f (Rball c r r_pos) x pr = l.
+Proof.
+intros f c r r_pos x l [l' Hl'] x_in  Hl ; simpl ;
+ eapply derivable_pt_lim_Rball_uniqueness ;
+ eassumption.
+Qed.
+
+Lemma derivable_pt_lim_derive_Rball: forall f c r r_pos x l pr,
+  Rball c r r_pos x ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derive_Rball f c r r_pos pr x = l.
+Proof.
+intros f c r r_pos x l pr x_in Hl ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in2 | x_nin].
+ apply derivable_pt_lim_derive_pt_Rball ; assumption.
+ contradiction.
+Qed.
 
 (** Extensionality of the definitions *)
 

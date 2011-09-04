@@ -28,6 +28,11 @@ Open Scope R_scope.
 
 Implicit Type r : R.
 
+Lemma Rdiv_0_l: forall r, 0 / r = 0.
+Proof.
+intro r ; unfold Rdiv ; apply Rmult_0_l.
+Qed.
+
 Lemma Rmin_opp_opp_Rmax : forall r1 r2, Rmin (-r1) (-r2) = - (Rmax r1 r2).
 Proof.
 intros r1 r2 ; unfold Rmin, Rmax ; destruct (Rle_dec r1 r2) as [L1 | R1] ;

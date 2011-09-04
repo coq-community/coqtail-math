@@ -258,3 +258,147 @@ intros c r r_pos f f_neq Hf x x_in ;
  eapply derivable_pt_Rball_inv_compat ;
  [| eapply f_neq | eapply Hf] ; eassumption.
 Qed.
+
+(** * Compatibility of derive_pt_in with common operations. *)
+
+Lemma derive_pt_Rball_const : forall k c r r_pos x pr,
+  Rball c r r_pos x ->
+  derive_pt_in (fun _ => k) (Rball c r r_pos) x pr = 0.
+Proof.
+intros k c r r_pos x pr x_in ; apply derivable_pt_lim_derive_pt_Rball ;
+ [exact x_in | apply derivable_pt_lim_in_const].
+Qed.
+
+Lemma derive_pt_Rball_opp_compat: forall f c r r_pos x pr pr',
+  Rball c r r_pos x ->
+  derive_pt_in (- f)%F (Rball c r r_pos) x pr =
+  - derive_pt_in f (Rball c r r_pos) x pr'.
+Proof.
+intros f c r r_pos x [l Hl] [l' Hl'] x_in ;
+ eapply derivable_pt_lim_Rball_uniqueness ;
+ [| | eapply derivable_pt_lim_in_opp_compat] ;
+ eassumption. 
+Qed.
+
+Lemma derive_pt_Rball_plus_compat:
+  forall f g c r r_pos x prf prg prfg, Rball c r r_pos x ->
+  derive_pt_in (f + g)%F (Rball c r r_pos) x prfg =
+  derive_pt_in f (Rball c r r_pos) x prf +
+  derive_pt_in g (Rball c r r_pos) x prg.
+Proof.
+intros f g c r r_pos x [lf Hlf] [lg Hlg] [lfg Hlfg] x_in ;
+ eapply derivable_pt_lim_Rball_uniqueness ;
+ [| | eapply derivable_pt_lim_in_plus_compat] ;
+ eassumption.
+Qed.
+
+(** For more complicated cases we (at the moment) deal only
+    with Rball because this is what we need ultimately. *)
+
+Lemma derive_pt_Rball_mult_compat:
+  forall f g c r r_pos x prf prg prfg,
+  Rball c r r_pos x ->
+  derive_pt_in (f * g)%F (Rball c r r_pos) x prfg =
+  derive_pt_in f (Rball c r r_pos) x prf * g x +
+  f x * derive_pt_in g (Rball c r r_pos) x prg.
+Proof.
+intros f g c r r_pos x [lf Hlf] [lg Hlg] [lfg Hlfg] x_in ;
+ eapply derivable_pt_lim_Rball_uniqueness ;
+ [| | eapply derivable_pt_lim_Rball_mult_compat] ;
+ eassumption.
+Qed.
+
+Lemma derive_pt_Rball_div_compat:
+  forall f g c r r_pos x prf prg prfg,
+  Rball c r r_pos x -> g x <> 0 ->
+  derive_pt_in (f / g)%F (Rball c r r_pos) x prfg =
+  (derive_pt_in f (Rball c r r_pos) x prf * g x -
+  f x * derive_pt_in g (Rball c r r_pos) x prg) / (g x) ^ 2.
+Proof.
+intros f g c r r_pos x [lf Hlf] [lg Hlg] [lfg Hlfg] x_in gx_neq ;
+ eapply derivable_pt_lim_Rball_uniqueness ;
+ [| | eapply derivable_pt_lim_Rball_div_compat] ;
+ eassumption.
+Qed.
+
+Lemma derive_pt_Rball_inv_compat:
+  forall f c r r_pos x pr pr',
+  Rball c r r_pos x -> f x <> 0 ->
+  derive_pt_in (/ f)%F (Rball c r r_pos) x pr =
+  (- derive_pt_in f (Rball c r r_pos) x pr') / (f x) ^ 2.
+Proof.
+intros f c r r_pos x [l Hl] [l' Hl'] x_in fx_neq ;
+ eapply derivable_pt_lim_Rball_uniqueness ;
+ [| | eapply derivable_pt_lim_Rball_inv_compat] ;
+ eassumption.
+Qed.
+
+(** * Compatibility of derive_Rball with common operations. *)
+
+Lemma derive_Rball_const : forall k c r r_pos x pr,
+  derive_Rball (fun _ => k) c r r_pos pr x = 0.
+Proof.
+intros k c r r_pos x pr ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_const | reflexivity] ; assumption.
+Qed.
+
+Lemma derive_Rball_opp_compat: forall f c r r_pos x pr pr',
+  derive_Rball (- f)%F c r r_pos pr x =
+  - derive_Rball f c r r_pos pr' x.
+Proof.
+intros f c r r_pos x pr pr' ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_opp_compat ; assumption
+ | rewrite Ropp_0 ; reflexivity].
+Qed.
+
+Lemma derive_Rball_plus_compat:
+  forall f g c r r_pos x prf prg prfg,
+  derive_Rball (f + g)%F c r r_pos prfg x =
+  derive_Rball f c r r_pos prf x +
+  derive_Rball g c r r_pos prg x.
+Proof.
+intros f g c r r_pos x prf prg prfg ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_plus_compat ; assumption
+ | rewrite Rplus_0_r ; reflexivity].
+Qed.
+
+(** For more complicated cases we (at the moment) deal only
+    with Rball because this is what we need ultimately. *)
+
+Lemma derive_Rball_mult_compat: forall f g c r r_pos x prf prg prfg,
+  derive_Rball (f * g)%F c r r_pos prfg x =
+  derive_Rball f c r r_pos prf x * g x +
+  f x * derive_Rball g c r r_pos prg x.
+Proof.
+intros f g c r r_pos x prf prg prfg ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_mult_compat ; assumption
+ | rewrite Rmult_0_r, Rmult_0_l, Rplus_0_r ; reflexivity].
+Qed.
+
+Lemma derive_Rball_div_compat:
+  forall f g c r r_pos x prf prg prfg, g x <> 0 ->
+  derive_Rball (f / g)%F c r r_pos prfg x =
+  (derive_Rball f c r r_pos prf x * g x -
+  f x * derive_Rball g c r r_pos prg x) / (g x) ^ 2.
+Proof.
+intros f g c r r_pos x prf prg prfg ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_div_compat ; assumption
+ | rewrite Rmult_0_r, Rmult_0_l, Rminus_0_r, Rdiv_0_l ; reflexivity].
+Qed.
+
+Lemma derive_Rball_inv_compat:
+  forall f c r r_pos x pr pr', f x <> 0 ->
+  derive_Rball (/ f)%F c r r_pos pr x =
+  (- derive_Rball f c r r_pos pr' x) / (f x) ^ 2.
+Proof.
+Proof.
+intros f c r r_pos x pr pr' fx_neq ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_inv_compat ; assumption
+ | rewrite Ropp_0, Rdiv_0_l ; reflexivity].
+Qed.

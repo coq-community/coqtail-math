@@ -199,12 +199,22 @@ intro n ; induction n ; intros f Dnf.
   apply IHn ; assumption.
 Qed.
 
+Lemma Req_Rball_eq: forall f g c r r_pos,
+  f == g -> Rball_eq c r r_pos f g.
+Proof.
+intros f g c r r_pos Heq x x_in ; apply Heq.
+Qed.
+
 Lemma D_Rball_opp: forall c r r_pos n f,
   D_Rball c r r_pos n f -> D_Rball c r r_pos n (- f)%F.
 Proof.
 intros c r r_pos n ; induction n ; intros f Hf ; inversion_clear Hf.
  constructor.
- apply Db_S with (derivable_Rball_opp _ _ pr).
+ apply Db_S with (derivable_in_opp_compat _ _ pr) ;
+ apply D_Rball_ext with (- derive_Rball f c r r_pos pr)%F.
+ symmetry ; apply Req_Rball_eq ; intro ; apply derive_Rball_opp_compat.
+ apply IHn ; assumption.
+Qed.
 
 Lemma C_opp: forall n f, C n f -> C n (- f)%F.
 Proof.
