@@ -1,6 +1,6 @@
-Require Import Rbase Rfunctions.
+Require Import Rbase Ranalysis Rfunctions Rfunction_def.
 Require Import MyRIneq.
-Require Import Ranalysis_def Ranalysis_facts.
+Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 
 Local Open Scope R_scope.
 
@@ -32,6 +32,23 @@ intros D x x_in ; eapply derivable_pt_in_id.
 Qed.
 
 (** Powers *)
+
+Definition Dpow (n : nat) := match n with
+  | O   => fun _ => 0
+  | S m => fun x => (INR (S m)) * pow x m
+end.
+
+(*
+Lemma derivable_pt_lim_in_pow: forall D x n,
+  derivable_pt_lim_in (fun x => pow x n) D x (Dpow n x).
+Proof.
+intros D x n ; induction n.
+ eapply derivable_pt_lim_in_ext with (fun _ => 1).
+  intro ; reflexivity.
+  apply derivable_pt_lim_in_const.
+ eapply derivable_pt_lim_in_ext with (id * (fun x => pow x n))%F.
+  intro ; reflexivity.
+*)
 
 (** Monomials *)
 

@@ -32,3 +32,7 @@ Ltac specify4 Hyp T1 T2 T3 T4 := let T := fresh "H" in
 Ltac specify5 Hyp T1 T2 T3 T4 T5 := let T := fresh "H" in
   assert (T := Hyp T1 T2 T3 T4 T5) ; clear Hyp ;
   rename T into Hyp.
+
+Ltac ass_apply := match goal with
+ | H: _ |- _ => eapply H
+end.

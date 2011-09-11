@@ -11,7 +11,32 @@ intros f g x Heq y ; unfold growth_rate ;
  do 2 rewrite Heq ; reflexivity.
 Qed.
 
+Lemma derivable_pt_lim_in_ext: forall f g x D l, f == g ->
+  derivable_pt_lim_in f D x l -> derivable_pt_lim_in g D x l.
+Proof.
+intros f g x D l Heq Hf eps eps_pos ;
+ destruct (Hf _ eps_pos) as [alpha [alpha_pos Halpha]] ;
+ exists alpha ; split ; [assumption |].
+ intros ; erewrite growth_rate_ext ; [eapply Halpha | symmetry] ;
+ eassumption.
+Qed.
+
+(** Simplification lemmas on mult_real_fun *)
+
+Lemma mult_real_fct_0: forall f,
+  mult_real_fct 0 f == (fun _ => 0).
+Proof.
+intros f x ; unfold mult_real_fct ; apply Rmult_0_l.
+Qed.
+
 (** Compatibility of growth_rate with common operations *)
+
+Lemma growth_rate_mult_real_fct_compat: forall f (l:R) x y, D_x no_cond x y ->
+  growth_rate (mult_real_fct l f)%F x y = l * growth_rate f x y.
+Proof.
+intros f l x y Dxy ; unfold growth_rate, mult_real_fct ; field ;
+ apply Rminus_eq_contra ; symmetry ; apply Dxy.
+Qed.
 
 Lemma growth_rate_scal_compat: forall f (l:R) x y, D_x no_cond x y ->
   growth_rate ((fun _ => l) * f)%F x y = l * growth_rate f x y.

@@ -22,14 +22,13 @@ USA.
 Require Import Rbase Rpower.
 Require Import Ranalysis.
 Require Import Fourier.
-Require Import Rfunctions.
-Require Import MyRIneq.
+Require Import Rfunctions Rfunction_def.
+Require Import MyRIneq MyR_dist.
 Require Import Rtopology.
-Require Import Rinterval.
 
 Require Import Ass_handling.
-Require Import Rfunction_def.
-Require Import Ranalysis_def Ranalysis_def_simpl.
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
+
 
 Local Open Scope R_scope.
 
@@ -43,6 +42,29 @@ intros D k x eps eps_pos ; exists 1 ; intros ; split.
  intros ; simpl ; unfold R_dist, growth_rate, Rminus, Rdiv ;
  rewrite Rplus_opp_r, Rmult_0_l, Rplus_opp_r, Rabs_R0 ;
  assumption.
+Qed.
+
+Lemma derivable_pt_lim_in_scal: forall D a f x l,
+  derivable_pt_lim_in f D x l ->
+  derivable_pt_lim_in (mult_real_fct a f) D x (a * l).
+Proof.
+intros D a f x l Hf ; destruct (Req_dec a 0).
+ subst ; rewrite Rmult_0_l ; eapply derivable_pt_lim_in_ext.
+  symmetry ; eapply mult_real_fct_0.
+  apply derivable_pt_lim_in_const.
+ intros eps eps_pos ; pose (eps' := eps / Rabs a).
+ assert (eps'_pos: 0 < eps').
+  apply Rlt_mult_inv_pos ; [| apply Rabs_pos_lt] ; assumption.
+ destruct (Hf _ eps'_pos) as [alpha [alpha_pos Halpha]].
+ exists alpha ; split.
+  assumption.
+ intros y [[y_in y_neq] y_bd] ;
+ rewrite growth_rate_mult_real_fct_compat, R_dist_scal_compat.
+ apply Rlt_le_trans with (Rabs a * eps').
+  apply Rmult_lt_compat_l ; [apply Rabs_pos_lt |
+   apply Halpha ; repeat split] ; assumption.
+  right ; unfold eps' ; field ; apply Rabs_no_R0 ; assumption.
+  split ; [exact I | assumption].
 Qed.
 
 Lemma derivable_pt_lim_in_opp_compat: forall D f x l,
@@ -139,6 +161,14 @@ Proof.
 intros ; eexists ; eapply derivable_pt_lim_in_const.
 Qed.
 
+Lemma derivable_pt_in_scal: forall D a f x,
+  derivable_pt_in f D x ->
+  derivable_pt_in (mult_real_fct a f) D x.
+Proof.
+intros D a f x [l Hl] ; eexists ;
+ eapply derivable_pt_lim_in_scal ; eassumption.
+Qed.
+
 Lemma derivable_pt_in_opp_compat: forall (D : R -> Prop) (f : R -> R) (x : R),
   derivable_pt_in f D x -> derivable_pt_in (- f)%F D x.
 Proof.
@@ -208,6 +238,14 @@ Proof.
 intros D k x x_in ; eapply derivable_pt_in_const.
 Qed.
 
+Lemma derivable_in_scal: forall D a f,
+  derivable_in f D ->
+  derivable_in (mult_real_fct a f) D.
+Proof.
+intros D a f Hf x x_in ; specify2 Hf x x_in ;
+ apply derivable_pt_in_scal ; assumption.
+Qed.
+
 Lemma derivable_in_opp_compat: forall (D : R -> Prop) (f : R -> R),
   derivable_in f D -> derivable_in (- f)%F D.
 Proof.
@@ -267,6 +305,16 @@ Lemma derive_pt_Rball_const : forall k c r r_pos x pr,
 Proof.
 intros k c r r_pos x pr x_in ; apply derivable_pt_lim_derive_pt_Rball ;
  [exact x_in | apply derivable_pt_lim_in_const].
+Qed.
+
+Lemma derive_pt_Rball_scal: forall a f c r r_pos x pr pr',
+  Rball c r r_pos x ->
+  derive_pt_in (mult_real_fct a f) (Rball c r r_pos) x pr =
+  a * derive_pt_in f (Rball c r r_pos) x pr'.
+Proof.
+intros a f c r r_pos x pr pr' x_in ; apply derivable_pt_lim_derive_pt_Rball ;
+ [exact x_in | apply derivable_pt_lim_in_scal].
+ destruct pr' ; assumption.
 Qed.
 
 Lemma derive_pt_Rball_opp_compat: forall f c r r_pos x pr pr',
@@ -341,6 +389,15 @@ Proof.
 intros k c r r_pos x pr ; unfold derive_Rball ;
  destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
  [apply derive_pt_Rball_const | reflexivity] ; assumption.
+Qed.
+
+Lemma derive_Rball_scal: forall a f c r r_pos x pr pr',
+  derive_Rball (mult_real_fct a f) c r r_pos pr x =
+  a * derive_Rball f c r r_pos pr' x.
+Proof.
+intros a f c r r_pos x pr pr' ; unfold derive_Rball ;
+ destruct (in_Rball_dec c r r_pos x) as [x_in | x_nin] ;
+ [apply derive_pt_Rball_scal ; assumption | symmetry ; apply Rmult_0_r].
 Qed.
 
 Lemma derive_Rball_opp_compat: forall f c r r_pos x pr pr',
