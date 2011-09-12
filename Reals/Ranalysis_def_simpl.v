@@ -65,3 +65,11 @@ Proof.
 intros f g x y Dxy ; unfold growth_rate, minus_fct ; field ;
  apply Rminus_eq_contra ; symmetry ; apply Dxy.
 Qed.
+
+Lemma growth_rate_mult_decomp: forall f g x y, x <> y ->
+  growth_rate (f * g)%F x y =
+ (growth_rate f x y) * g x + f y * growth_rate g x y.
+Proof.
+intros f g x y Hneq ; unfold growth_rate, mult_fct ; field ;
+ apply Rminus_eq_contra ; symmetry ; assumption.
+Qed.

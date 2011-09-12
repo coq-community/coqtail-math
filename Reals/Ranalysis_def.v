@@ -40,20 +40,32 @@ Definition continuity_interval (f : R -> R) (lb ub:R) :=
   forall x, interval lb ub x ->
   continue_in f (interval lb ub) x.
 *)
-Definition continuity_open_interval (f : R -> R) (lb ub:R) := forall x:R,
-  open_interval lb ub x -> continue_in f (open_interval lb ub) x.
-Definition continuity_interval (f : R -> R) (lb ub:R) := forall x:R,
-  interval lb ub x -> continue_in f (interval lb ub) x.
+
+Definition continue_pt_in f (D : R -> Prop) x := D x -> limit1_in f D (f x) x.
+Definition continue_in f (D : R -> Prop) := forall x, continue_pt_in f D x.
+Definition continuity_open_interval (f : R -> R) (lb ub:R) :=
+  continue_in f (open_interval lb ub).
+Definition continuity_interval (f : R -> R) (lb ub:R) :=
+  continue_in f (interval lb ub).
 Definition continuity_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
-  forall x, Rball c r r_pos x -> continue_in f (Rball c r r_pos) x.
+  continue_in f (Rball c r r_pos).
+
+Lemma continuity_pt_continue_in: forall f (D : R -> Prop) x,
+  continuity_pt f x -> continue_pt_in f D x.
+Proof.
+intros f D x Hf Dx eps eps_pos ;
+ destruct (Hf _ eps_pos) as [alp [alp_pos Halp]] ;
+ exists alp ; split ; [assumption | intros y [Dy y_bd]].
+ destruct (Req_dec x y) as [Heq | Hneq].
+ subst ; rewrite R_dist_eq ; assumption.
+ apply Halp ; repeat split ; assumption.
+Qed.
 
 Lemma continuity_continuity_Rball: forall c r r_pos f,
   continuity f -> continuity_Rball f c r r_pos.
 Proof.
-intros c r r_pos f f_cont x x_in eps eps_pos ;
- destruct (f_cont x _ eps_pos) as [delta [delta_pos Hdelta]] ;
- exists delta ; split ; [assumption | intros ; apply Hdelta].
- split ; [unfold no_cond, D_x ; split ; [trivial |] |] ; apply H.
+intros c r r_pos f f_cont x x_in ; apply continuity_pt_continue_in ;
+ [apply f_cont |] ; assumption.
 Qed.
 
 (** * (Re)defining the derivability predicate. *)
@@ -82,6 +94,16 @@ Definition derivable_interval (f : R -> R) (lb ub:R) :=
 
 Definition derivable_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
   derivable_in f (Rball c r r_pos).
+
+Lemma limit1_in_ext: forall (D : R -> Prop) f g x l,
+  (forall x, D x -> f x = g x) ->
+  limit1_in f D x l -> limit1_in g D x l.
+Proof.
+intros D f g x l Heq Hf eps eps_pos ;
+ destruct (Hf _ eps_pos) as [alp [alp_pos Halp]] ;
+ exists alp ; split ; [assumption |].
+ intros y Hy ; rewrite <- Heq ; [apply Halp |] ; apply Hy.
+Qed.
 
 Lemma derivable_pt_lim_open_interval_Rball: forall f x c r r_pos l,
   derivable_pt_lim_in f (open_interval (c - r) (c + r)) x l ->
@@ -225,22 +247,12 @@ intros f c r r_pos x l l' x_in Hl Hl' ; eapply uniqueness_limite ;
  eassumption.
 Qed.
 
-Lemma continuity_pt_continue_in: forall f (D : R -> Prop) x,
-  D x -> continuity_pt f x -> continue_in f D x.
-Proof.
-intros f D x Dx Hf ; intros eps eps_pos ;
- destruct (Hf _ eps_pos) as [delta [delta_pos Hdelta]] ;
- exists delta ; split ; [| intros y [[y_in y_neq] y_bd]] ;
- [| apply Hdelta] ; repeat split ; assumption.
-Qed.
-
 Lemma derivable_Rball_continuity_Rball: forall c r r_pos f,
   derivable_Rball f c r r_pos ->
   continuity_Rball f c r r_pos.
 Proof.
-intros c r r_pos f Hf x x_in ;
- apply continuity_pt_continue_in ;
- [| eapply derivable_continuous_pt, derivable_Rball_derivable_pt] ;
+intros c r r_pos f Hf x x_in ; apply continuity_pt_continue_in ;
+ [eapply derivable_continuous_pt, derivable_Rball_derivable_pt |] ;
  eassumption.
 Qed.
 
@@ -491,43 +503,59 @@ intros f lb ub lb_lt_ub f_decr ; assert (flb_lt_fub : f ub < f lb).
  unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
 Qed.
 
-(*
-
-Lemma derivable_in_continue_in : forall f I x,
-    derivable_pt_in f I x -> continue_in f I x.
+Lemma derivable_pt_in_continue_in : forall f D x,
+    derivable_pt_in f D x -> continue_pt_in f D x.
 Proof.
-intros f I x Hde.
- destruct Hde as (dx, Hder).
- eapply derivable_pt_lim_in_D_in in Hder.
- destruct Hder as (d, Hder).
-  eapply cont_deriv; eassumption.
+intros f D x [l Hl] Dx eps eps_pos.
+ pose (eps' := Rmin eps (eps / (eps + Rabs l))).
+ assert (eps'_pos: 0 < eps').
+  apply Rmin_pos_lt, Rlt_mult_inv_pos, Rplus_lt_le_0_compat ;
+  [| | | apply Rabs_pos] ; assumption.
+ destruct (Hl _ eps'_pos) as [alp [alp_pos Halp]] ;
+ exists (Rmin alp eps') ; split ; [apply Rmin_pos_lt ; assumption |].
+ intros y [Dy y_bd] ; destruct (Req_dec y x) as [Heq | Hneq].
+  subst ; rewrite R_dist_eq ; assumption.
+  transitivity ((eps + Rabs l) * Rabs (y - x)).
+  apply Rle_lt_trans with (Rabs (growth_rate f x y) * Rabs (y - x)).
+   right ; simpl ; unfold R_dist, growth_rate ; rewrite <- Rabs_mult ;
+   apply Rabs_eq_compat ; field ; apply Rminus_eq_contra ; assumption.
+   apply Rle_lt_trans with ((dist R_met (growth_rate f x y) l + Rabs l) * Rabs (y - x)).
+   apply Rmult_le_compat_r ; [apply Rabs_pos |].
+   apply Rle_trans with (Rabs (growth_rate f x y - l + l)) ;
+   [right ; apply Rabs_eq_compat ; ring | apply Rabs_triang].
+   apply Rmult_lt_compat_r ; [apply Rabs_pos_lt, Rminus_eq_contra ; assumption |].
+   apply Rplus_lt_compat_r, Rlt_le_trans with eps'.
+   apply Halp ; repeat split ; [assumption | symmetry ; assumption |].
+   apply Rlt_le_trans with (Rmin alp eps'), Rmin_l ; assumption.
+   apply Rmin_l.
+   apply Rlt_le_trans with ((eps + Rabs l) * eps').
+   apply Rmult_lt_compat_l.
+    apply Rplus_lt_le_0_compat ; [assumption | apply Rabs_pos].
+    apply Rlt_le_trans with (Rmin alp eps') ; [apply y_bd | apply Rmin_r].
+   transitivity ((eps + Rabs l) * (eps / (eps + Rabs l))).
+   apply Rmult_le_compat_l, Rmin_r ; apply Rplus_le_le_0_compat ;
+   [left ; assumption | apply Rabs_pos].
+   right ; field ; apply Rgt_not_eq, Rplus_lt_le_0_compat, Rabs_pos ; assumption.
 Qed.
-
+   
 Lemma derivable_continuous_open_interval : forall f lb ub,
 	derivable_open_interval f lb ub -> continuity_open_interval f lb ub.
 Proof.
-intros f lb ub H x x_in.
- unfold derivable_open_interval in H. apply derivable_in_continue_in.
- apply H.
- apply x_in.
+intros f lb ub H x x_in ; apply derivable_pt_in_continue_in ;
+ [apply H |] ; assumption.
 Qed.
-*)
 
-Lemma continuity_open_interval_opp_rev : forall f lb ub,
-      continuity_open_interval (-f)%F lb ub ->
-      continuity_open_interval f lb ub.
+Lemma continue_pt_in_opp_rev : forall f D x,
+      continue_pt_in (-f)%F D x ->
+      continue_pt_in f D x.
 Proof.
-intros f lb ub f_cont b b_in_I eps eps_pos ;
- destruct (f_cont b b_in_I eps eps_pos) as [alpha [alpha_pos Halpha]] ;
- exists alpha ; split.
- assumption.
- intros x Hx ; simpl ; unfold R_dist ; rewrite <- Rabs_Ropp.
- unfold Rminus ; rewrite Ropp_plus_distr.
- simpl in * ; unfold R_dist in * ; apply Halpha ; repeat split ; unfold D_x, no_cond.
- apply Hx. apply Hx. apply Hx.
- destruct Hx as [[_ x_neq_b] Hxb]. intuition.
+intros f D x Hf x_in ; apply limit1_in_ext with (- - f)%F.
+ intros y y_in ; apply Ropp_involutive.
+ rewrite <- (Ropp_involutive (f x)) ;
+ apply limit_Ropp, Hf ; assumption.
 Qed.
 
+(*
 Lemma continuity_open_interval_opp_rev2 : forall f lb ub,
       continuity_open_interval (fun x => f(-x)) (-ub) (-lb) ->
       continuity_open_interval f lb ub.
@@ -549,6 +577,7 @@ intros f lb ub f_cont b b_in_I eps eps_pos.
  assert (T := Ropp_eq_compat _ _ Hf) ; repeat rewrite Ropp_involutive in T ; assumption.
  unfold Rminus ; rewrite <- Ropp_plus_distr, Rabs_Ropp ; apply (proj2 Hx).
 Qed.
+*)
 
 Lemma strictly_increasing_strictly_decreasing_interval : forall f lb ub,
     strictly_increasing_interval f lb ub -> strictly_decreasing_interval (-f)%F lb ub.

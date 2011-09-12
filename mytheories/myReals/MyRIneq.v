@@ -187,22 +187,24 @@ Qed.
 
 Lemma Rmult_eq_compat_r : forall r1 r2 r, r1 = r2 -> r1 * r = r2 * r.
 Proof.
-intros r1 r2 r r_neq.
- rewrite Rmult_comm.
- replace (r2 * r) with (r * r2) by field.
- apply Rmult_eq_compat_l ; assumption.
+intros ; subst ; reflexivity.
 Qed.
 
 Lemma Rminus_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 ->
   r1 - r2 = r3 - r4.
 Proof.
-intros r1 r2 r3 r4 [] [] ; reflexivity.
+intros ; subst ; reflexivity.
 Qed.
 
 Lemma Rmult_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 ->
   r1 * r2 = r3 * r4.
 Proof.
-intros r1 r2 r3 r4 [] [] ; reflexivity.
+intros ; subst ; reflexivity.
+Qed.
+
+Lemma Rdiv_eq_compat: forall x y z, x = y -> x / z = y / z.
+Proof.
+intros ; subst ; reflexivity.
 Qed.
 
 Lemma Rplus_lt_simpl_l : forall r1 r2, 0 < r2 -> r1 < r1 + r2.

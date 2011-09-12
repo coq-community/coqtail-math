@@ -29,7 +29,6 @@ Require Import Rtopology.
 Require Import Ass_handling.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
 
-
 Local Open Scope R_scope.
 
 (** * Compatibility of derivable_pt_lim_in with common operations. *)
@@ -99,19 +98,22 @@ intros ; eapply limit1_ext.
  apply limit_minus ; assumption.
 Qed.
 
+Lemma derivable_pt_lim_in_mult_compat: forall (D : R -> Prop) f g x l1 l2, D x ->
+  derivable_pt_lim_in f D x l1 ->
+  derivable_pt_lim_in g D x l2 ->
+  derivable_pt_lim_in (f * g)%F D x (l1 * g x + f x * l2).
+Proof.
+intros D f g x l1 l2 Dx Hf Hg ; eapply limit1_in_ext.
+  intros y [Dy Hneq] ; symmetry ; apply growth_rate_mult_decomp, Hneq.
+  apply limit_plus ; apply limit_mul ; [apply Hf | | | apply Hg].
+  apply limit_free.
+  apply limit1_imp with D.
+   intros y [y_in y_neq] ; exact y_in.
+   apply derivable_pt_in_continue_in ; [eexists |] ; eassumption.
+Qed.
+
 (** For more complicated cases we (at the moment) deal only
     with Rball because this is what we need ultimately. *)
-
-Lemma derivable_pt_lim_Rball_mult_compat: forall c r r_pos f g x l1 l2,
-  Rball c r r_pos x ->
-  derivable_pt_lim_in f (Rball c r r_pos) x l1 ->
-  derivable_pt_lim_in g (Rball c r r_pos) x l2 ->
-  derivable_pt_lim_in (f * g)%F (Rball c r r_pos) x (l1 * g x + f x * l2).
-Proof.
-intros c r r_pos f g x l1 l2 x_in Hf Hg.
- apply derivable_pt_lim_derivable_pt_lim_in, derivable_pt_lim_mult ;
- eapply derivable_pt_lim_Rball_derivable_pt_lim ; eassumption.
-Qed.
 
 Lemma derivable_pt_lim_Rball_div_compat: forall c r r_pos f g x l1 l2,
   Rball c r r_pos x -> g x <> 0 ->
@@ -187,18 +189,17 @@ intros D f g x [] []; eexists ;
  eassumption.
 Qed.
 
+Lemma derivable_pt_in_mult_compat: forall (D : R -> Prop) f g x, D x ->
+  derivable_pt_in f D x ->
+  derivable_pt_in g D x ->
+  derivable_pt_in (f * g)%F D x.
+Proof.
+intros D f g x x_in [] [] ; eexists ;
+ eapply derivable_pt_lim_in_mult_compat ; eassumption.
+Qed.
+
 (** For more complicated cases we (at the moment) deal only
     with Rball because this is what we need ultimately. *)
-
-Lemma derivable_pt_Rball_mult_compat: forall c r r_pos f g x,
-  Rball c r r_pos x ->
-  derivable_pt_in f (Rball c r r_pos) x ->
-  derivable_pt_in g (Rball c r r_pos) x ->
-  derivable_pt_in (f * g)%F (Rball c r r_pos) x.
-Proof.
-intros c r r_pos f g x x_in [] [] ; eexists ;
- eapply derivable_pt_lim_Rball_mult_compat ; eassumption.
-Qed.
 
 Lemma derivable_pt_Rball_div_compat: forall c r r_pos f g x,
   Rball c r r_pos x -> g x <> 0 ->
@@ -262,18 +263,18 @@ intros D f g Hf Hg x x_in ; eapply derivable_pt_in_plus_compat ;
  [eapply Hf | eapply Hg] ; eassumption.
 Qed.
 
-(** For more complicated cases we (at the moment) deal only
-    with Rball because this is what we need ultimately. *)
-
-Lemma derivable_Rball_mult_compat: forall c r r_pos f g,
-  derivable_Rball f c r r_pos ->
-  derivable_Rball g c r r_pos ->
-  derivable_Rball (f * g)%F c r r_pos.
+Lemma derivable_in_mult_compat: forall D f g,
+  derivable_in f D ->
+  derivable_in g D ->
+  derivable_in (f * g)%F D.
 Proof.
-intros c r r_pos f g Hf Hg x x_in ;
- eapply derivable_pt_Rball_mult_compat ;
+intros D f g Hf Hg x x_in ;
+ eapply derivable_pt_in_mult_compat ;
  [| eapply Hf | eapply Hg] ; eassumption.
 Qed.
+
+(** For more complicated cases we (at the moment) deal only
+    with Rball because this is what we need ultimately. *)
 
 Lemma derivable_Rball_div_compat: forall c r r_pos f g,
   (forall x, Rball c r r_pos x -> g x <> 0) ->
@@ -340,19 +341,15 @@ intros f g c r r_pos x [lf Hlf] [lg Hlg] [lfg Hlfg] x_in ;
  eassumption.
 Qed.
 
-(** For more complicated cases we (at the moment) deal only
-    with Rball because this is what we need ultimately. *)
-
 Lemma derive_pt_Rball_mult_compat:
-  forall f g c r r_pos x prf prg prfg,
-  Rball c r r_pos x ->
+  forall f g c r r_pos x prf prg prfg, Rball c r r_pos x ->
   derive_pt_in (f * g)%F (Rball c r r_pos) x prfg =
   derive_pt_in f (Rball c r r_pos) x prf * g x +
   f x * derive_pt_in g (Rball c r r_pos) x prg.
 Proof.
 intros f g c r r_pos x [lf Hlf] [lg Hlg] [lfg Hlfg] x_in ;
  eapply derivable_pt_lim_Rball_uniqueness ;
- [| | eapply derivable_pt_lim_Rball_mult_compat] ;
+ [| | eapply derivable_pt_lim_in_mult_compat] ;
  eassumption.
 Qed.
 
