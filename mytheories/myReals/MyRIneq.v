@@ -28,6 +28,11 @@ Open Scope R_scope.
 
 Implicit Type r : R.
 
+Lemma Rlt_minus_swap: forall x y z, x - y < z -> x - z < y.
+Proof.
+intros ; fourier.
+Qed.
+
 Lemma Rdiv_0_l: forall r, 0 / r = 0.
 Proof.
 intro r ; unfold Rdiv ; apply Rmult_0_l.

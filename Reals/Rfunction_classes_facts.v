@@ -201,12 +201,6 @@ intro n ; induction n ; intros f Dnf.
   apply IHn ; assumption.
 Qed.
 
-Lemma Req_Rball_eq: forall f g c r r_pos,
-  f == g -> Rball_eq c r r_pos f g.
-Proof.
-intros f g c r r_pos Heq x x_in ; apply Heq.
-Qed.
-
 Lemma D_Rball_opp: forall c r r_pos n f,
   D_Rball c r r_pos n f -> D_Rball c r r_pos n (- f)%F.
 Proof.
@@ -430,6 +424,23 @@ intro n ; induction n ; intros f g Dnf Dng ;
   assumption.
 Qed.
 
+Lemma D_Rball_mult : forall c r r_pos n f g,
+  D_Rball c r r_pos n f -> D_Rball c r r_pos n g -> D_Rball c r r_pos n (f * g)%F.
+Proof.
+intros c r r_pos n ; induction n ; intros f g Dnf Dng ;
+ inversion Dnf ; inversion Dng ; subst.
+  constructor.
+
+  assert (pr1 : derivable_in (f * g)%F (Rball c r r_pos))
+   by (apply derivable_in_mult_compat ; assumption).
+  apply Db_S with pr1 ;
+  apply D_Rball_ext with (fun x => (derive_Rball f c r r_pos pr) x * g x
+  + f x * (derive_Rball g c r r_pos pr0) x)%R.
+  apply Req_Rball_eq ; intro ; symmetry ; apply derive_Rball_mult_compat.
+  apply D_Rball_plus ; apply IHn ; [| apply D_Rball_pred | apply D_Rball_pred |] ;
+  assumption.
+Qed.
+
 Lemma C_mult : forall n f g,
   C n f -> C n g -> C n (f * g)%F.
 Proof.
@@ -445,6 +456,23 @@ intro n ; induction n ; intros f g Cnf Cng ;
   apply derive_pt_mult.
   
   apply C_plus ; apply IHn ; [| apply C_pred | apply C_pred |] ;
+  assumption.
+Qed.
+
+Lemma C_Rball_mult : forall c r r_pos n f g,
+  C_Rball c r r_pos n f -> C_Rball c r r_pos n g -> C_Rball c r r_pos n (f * g)%F.
+Proof.
+intros c r r_pos n ; induction n ; intros f g Cnf Cng ;
+ inversion Cnf ; inversion Cng ; subst.
+  constructor ; intros x x_in ; apply limit_mul ; ass_apply ; assumption.
+
+  assert (pr1 : derivable_in (f * g)%F (Rball c r r_pos))
+   by (apply derivable_in_mult_compat ; assumption).
+  apply Cb_S with pr1 ;
+  apply C_Rball_ext with (fun x => (derive_Rball f c r r_pos pr) x * g x
+  + f x * (derive_Rball g c r r_pos pr0) x)%R.
+  apply Req_Rball_eq ; intro ; symmetry ; apply derive_Rball_mult_compat.
+  apply C_Rball_plus ; apply IHn ; [| apply C_Rball_pred | apply C_Rball_pred |] ;
   assumption.
 Qed.
 

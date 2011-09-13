@@ -109,39 +109,63 @@ intros D f g x l1 l2 Dx Hf Hg ; eapply limit1_in_ext.
   apply limit_free.
   apply limit1_imp with D.
    intros y [y_in y_neq] ; exact y_in.
-   apply derivable_pt_in_continue_in ; [eexists |] ; eassumption.
+   apply derivable_pt_in_continue_pt_in ; [eexists |] ; eassumption.
+Qed.
+
+Lemma continue_non_null: forall f (D : R -> Prop) x,
+  D x -> continue_pt_in f D x -> f x <> 0 ->
+  exists alp, 0 < alp /\ forall y, D y -> Rabs (y - x) < alp -> f y <> 0.
+Proof.
+intros f D x Dx Hf Hneq ; pose (eps := Rabs (f x) / 2) ; assert (eps_pos: 0 < eps).
+ unfold eps, Rdiv ; apply Rlt_mult_inv_pos ; [apply Rabs_pos_lt ; assumption | fourier].
+ destruct (Hf Dx eps eps_pos) as [alp [alp_pos Halp]] ; exists alp ; split.
+  assumption.
+  intros y Dy y_bd ; apply Rabs_pos_lt_contravar.
+  transitivity (Rabs (f x) - eps).
+   apply Rlt_le_trans with eps ; [assumption | right ; unfold eps ; field].
+   apply Rlt_minus_swap ; apply Rle_lt_trans with (dist R_met (f x) (f y)) ;
+   [apply Rabs_triang_inv | rewrite R_dist_sym ; apply Halp ; split ;
+   [| unfold R_dist] ; assumption].
+Qed.  
+
+Lemma derivable_pt_lim_in_inv_compat: forall (D : R -> Prop) f x l,
+  D x -> f x <> 0 ->
+  derivable_pt_lim_in f D x l ->
+  derivable_pt_lim_in (/ f)%F D x (- l / (f x ^ 2)).
+Proof.
+intros D f x l Dx Hneq Hf ; assert (f_cont: continue_pt_in f D x)
+ by (eapply derivable_pt_in_continue_pt_in ; eexists ; eassumption).
+ destruct (continue_non_null _ _ _ Dx f_cont Hneq) as [alp [alp_pos Halp]] ;
+ eapply limit1_in_ext_strong.
+  eassumption.
+  intros y y_bd [y_in y_neq] ; symmetry ; eapply growth_rate_inv_decomp ;
+   try assumption.
+   apply Halp ; assumption.
+  replace (- l / f x ^ 2) with (- (l / f x ^ 2)) by (unfold Rdiv ; ring).
+ apply limit_Ropp ; unfold Rdiv ; apply limit_mul ; [apply Hf |].
+  apply limit_inv ; [| apply pow_nonzero ; assumption].
+   apply limit_mul ; [apply limit_free | rewrite Rmult_1_r] ;
+   eapply limit1_imp, f_cont.
+    intros y [y_in y_neq] ; assumption.
+    assumption.
+Qed.
+
+Lemma derivable_pt_lim_in_div_compat: forall (D : R -> Prop) f g x l1 l2,
+  D x -> g x <> 0 ->
+  derivable_pt_lim_in f D x l1 ->
+  derivable_pt_lim_in g D x l2 ->
+  derivable_pt_lim_in (f / g)%F D x ((l1 * g x - f x * l2) / g x ^ 2).
+Proof.
+intros D f g x l1 l2 Dx Hneq Hf Hg ; apply derivable_pt_lim_in_ext with (f * / g)%F.
+ intro ; reflexivity.
+ replace ((l1 * g x - f x * l2) / g x ^ 2) with ((l1 * (/ g)%F x) + f x * (- l2 / g x ^ 2)).
+ eapply derivable_pt_lim_in_mult_compat ; try eassumption.
+ eapply derivable_pt_lim_in_inv_compat ; try eassumption.
+ unfold inv_fct ; field ; assumption.
 Qed.
 
 (** For more complicated cases we (at the moment) deal only
     with Rball because this is what we need ultimately. *)
-
-Lemma derivable_pt_lim_Rball_div_compat: forall c r r_pos f g x l1 l2,
-  Rball c r r_pos x -> g x <> 0 ->
-  derivable_pt_lim_in f (Rball c r r_pos) x l1 ->
-  derivable_pt_lim_in g (Rball c r r_pos) x l2 ->
-  derivable_pt_lim_in (f / g)%F (Rball c r r_pos) x ((l1 * g x - f x * l2) / (g x) ^ 2).
-Proof.
-intros c r r_pos f g x l1 l2 x_in gx_neq Hf Hg.
- replace ((l1 * g x - f x * l2) / g x ^ 2) with ((l1 * g x - l2 * f x) / (g x) ² ).
- apply derivable_pt_lim_derivable_pt_lim_in, derivable_pt_lim_div ; [| | assumption] ;
- eapply derivable_pt_lim_Rball_derivable_pt_lim ; eassumption.
- unfold Rsqr ; simpl ; field ; assumption.
-Qed.
-
-Lemma derivable_pt_lim_Rball_inv_compat: forall c r r_pos f x l,
-  Rball c r r_pos x -> f x <> 0 ->
-  derivable_pt_lim_in f (Rball c r r_pos) x l ->
-  derivable_pt_lim_in (/ f)%F (Rball c r r_pos) x (- l / (f x) ^ 2).
-Proof.
-intros c r r_pos f x l x_in fx_neq Hf ;
- apply limit1_ext with (growth_rate ((fun _ => 1) / f)%F x).
- intros y [y_in y_neq] ; apply growth_rate_ext ; intro u ;
-  unfold div_fct, Rdiv, inv_fct ; ring.
- replace (- l / f x ^ 2) with ((0 * f x - (fun _ => 1) x * l) / (f x ^ 2)).
- apply derivable_pt_lim_Rball_div_compat ; try assumption.
- apply derivable_pt_lim_in_const.
- simpl ; field ; assumption.
-Qed.
 
 Lemma derivable_pt_lim_Rball_comp_compat: forall c r r_pos f g x l1 l2,
   Rball c r r_pos x ->
@@ -198,27 +222,27 @@ intros D f g x x_in [] [] ; eexists ;
  eapply derivable_pt_lim_in_mult_compat ; eassumption.
 Qed.
 
+Lemma derivable_pt_in_inv_compat: forall (D : R -> Prop) f x,
+  D x -> f x <> 0 ->
+  derivable_pt_in f D x ->
+  derivable_pt_in (/ f)%F D x.
+Proof.
+intros D f x Dx Hneq [] ; eexists ;
+ eapply derivable_pt_lim_in_inv_compat ; eassumption.
+Qed.
+
+Lemma derivable_pt_in_div_compat: forall (D : R -> Prop) f g x,
+  D x -> g x <> 0 ->
+  derivable_pt_in f D x ->
+  derivable_pt_in g D x ->
+  derivable_pt_in (f / g)%F D x.
+Proof.
+intros D f g x Dx Hneq [] [] ; eexists ;
+ eapply derivable_pt_lim_in_div_compat ; eassumption.
+Qed.
+
 (** For more complicated cases we (at the moment) deal only
     with Rball because this is what we need ultimately. *)
-
-Lemma derivable_pt_Rball_div_compat: forall c r r_pos f g x,
-  Rball c r r_pos x -> g x <> 0 ->
-  derivable_pt_in f (Rball c r r_pos) x ->
-  derivable_pt_in g (Rball c r r_pos) x ->
-  derivable_pt_in (f / g)%F (Rball c r r_pos) x.
-Proof.
-intros c r r_pos f g x x_in g_neq [] [] ; eexists ;
- eapply derivable_pt_lim_Rball_div_compat ; eassumption.
-Qed.
-
-Lemma derivable_pt_Rball_inv_compat: forall c r r_pos f x,
-  Rball c r r_pos x -> f x <> 0 ->
-  derivable_pt_in f (Rball c r r_pos) x ->
-  derivable_pt_in (/ f)%F (Rball c r r_pos) x.
-Proof.
-intros c r r_pos f x x_in f_neq [] ; eexists ;
- eapply derivable_pt_lim_Rball_inv_compat ; eassumption.
-Qed.
 
 Lemma derivable_pt_Rball_comp_compat: forall c r r_pos f g x,
   Rball c r r_pos x ->
@@ -273,29 +297,24 @@ intros D f g Hf Hg x x_in ;
  [| eapply Hf | eapply Hg] ; eassumption.
 Qed.
 
-(** For more complicated cases we (at the moment) deal only
-    with Rball because this is what we need ultimately. *)
-
-Lemma derivable_Rball_div_compat: forall c r r_pos f g,
-  (forall x, Rball c r r_pos x -> g x <> 0) ->
-  derivable_Rball f c r r_pos ->
-  derivable_Rball g c r r_pos ->
-  derivable_Rball (f / g)%F c r r_pos.
+Lemma derivable_in_inv_compat: forall (D : R -> Prop) f,
+  (forall x, D x -> f x <> 0) ->
+  derivable_in f D ->
+  derivable_in (/ f)%F D.
 Proof.
-intros c r r_pos f g g_neq Hf Hg x x_in ;
- eapply derivable_pt_Rball_div_compat ;
- [| eapply g_neq | eapply Hf | eapply Hg] ;
- eassumption.
+intros D f Hneq Hf x x_in ; apply derivable_pt_in_inv_compat ;
+ [| apply Hneq | apply Hf] ; assumption.
 Qed.
 
-Lemma derivable_Rball_inv_compat: forall c r r_pos f,
-  (forall x, Rball c r r_pos x -> f x <> 0) ->
-  derivable_Rball f c r r_pos ->
-  derivable_Rball (/ f)%F c r r_pos.
+Lemma derivable_in_div_compat: forall (D : R -> Prop) f g,
+  (forall x, D x -> g x <> 0) ->
+  derivable_in f D ->
+  derivable_in g D ->
+  derivable_in (f / g)%F D.
 Proof.
-intros c r r_pos f f_neq Hf x x_in ;
- eapply derivable_pt_Rball_inv_compat ;
- [| eapply f_neq | eapply Hf] ; eassumption.
+intros D f g Hneq Hf Hg x x_in ; apply derivable_pt_in_mult_compat ;
+ [| apply Hf | apply derivable_in_inv_compat ; [apply Hneq | apply Hg |]] ;
+ eassumption.
 Qed.
 
 (** * Compatibility of derive_pt_in with common operations. *)
@@ -362,7 +381,7 @@ Lemma derive_pt_Rball_div_compat:
 Proof.
 intros f g c r r_pos x [lf Hlf] [lg Hlg] [lfg Hlfg] x_in gx_neq ;
  eapply derivable_pt_lim_Rball_uniqueness ;
- [| | eapply derivable_pt_lim_Rball_div_compat] ;
+ [| | eapply derivable_pt_lim_in_div_compat] ;
  eassumption.
 Qed.
 
@@ -374,7 +393,7 @@ Lemma derive_pt_Rball_inv_compat:
 Proof.
 intros f c r r_pos x [l Hl] [l' Hl'] x_in fx_neq ;
  eapply derivable_pt_lim_Rball_uniqueness ;
- [| | eapply derivable_pt_lim_Rball_inv_compat] ;
+ [| | eapply derivable_pt_lim_in_inv_compat] ;
  eassumption.
 Qed.
 

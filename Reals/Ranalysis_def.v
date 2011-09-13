@@ -97,12 +97,27 @@ Definition derivable_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) :=
 
 Lemma limit1_in_ext: forall (D : R -> Prop) f g x l,
   (forall x, D x -> f x = g x) ->
-  limit1_in f D x l -> limit1_in g D x l.
+  limit1_in f D l x -> limit1_in g D l x.
 Proof.
 intros D f g x l Heq Hf eps eps_pos ;
  destruct (Hf _ eps_pos) as [alp [alp_pos Halp]] ;
  exists alp ; split ; [assumption |].
  intros y Hy ; rewrite <- Heq ; [apply Halp |] ; apply Hy.
+Qed.
+
+Lemma limit1_in_ext_strong: forall (D : R -> Prop) alp f g x l,
+  0 < alp -> (forall y, Rabs (y - x) < alp -> D y -> f y = g y) ->
+  limit1_in f D l x -> limit1_in g D l x.
+Proof.
+intros D alp f g x l alp_pos Heq Hf eps eps_pos ;
+ destruct (Hf _ eps_pos) as [bet [bet_pos Hbet]] ;
+ exists (Rmin alp bet) ; split.
+ apply Rmin_pos_lt ; assumption.
+ intros y [Dy y_bd] ; rewrite <- Heq.
+  apply Hbet ; split ; [assumption | apply Rlt_le_trans with (Rmin alp bet) ;
+  [assumption | apply Rmin_r]].
+ apply Rlt_le_trans with (Rmin alp bet) ; [apply y_bd | apply Rmin_l].
+ assumption.
 Qed.
 
 Lemma derivable_pt_lim_open_interval_Rball: forall f x c r r_pos l,
@@ -224,6 +239,19 @@ intros ; eapply derivable_open_interval_derivable_pt ;
 Qed.
 
 (** This allows us to get back the unicity of the derivative. *)
+
+Definition dense (D : R -> Prop) x := forall eps, 0 < eps ->
+  exists y, D_x D x y /\ R_dist y x < eps.
+
+Lemma derivable_pt_lim_in_uniqueness: forall (D : R -> Prop) f x l l',
+  dense D x -> derivable_pt_lim_in f D x l ->
+  derivable_pt_lim_in f D x l' ->
+  l = l'.
+Proof.
+intros D f x l l' Dx Hl ; eapply single_limit ; try eassumption ;
+ intros eps eps_pos ; destruct (Dx _ eps_pos) as [y [y_h y_bd]] ;
+ exists y.
+Qed.
 
 Lemma derivable_pt_lim_open_interval_uniqueness: forall f lb ub x l l',
   open_interval lb ub x ->
@@ -503,7 +531,7 @@ intros f lb ub lb_lt_ub f_decr ; assert (flb_lt_fub : f ub < f lb).
  unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
 Qed.
 
-Lemma derivable_pt_in_continue_in : forall f D x,
+Lemma derivable_pt_in_continue_pt_in : forall f D x,
     derivable_pt_in f D x -> continue_pt_in f D x.
 Proof.
 intros f D x [l Hl] Dx eps eps_pos.
@@ -541,7 +569,7 @@ Qed.
 Lemma derivable_continuous_open_interval : forall f lb ub,
 	derivable_open_interval f lb ub -> continuity_open_interval f lb ub.
 Proof.
-intros f lb ub H x x_in ; apply derivable_pt_in_continue_in ;
+intros f lb ub H x x_in ; apply derivable_pt_in_continue_pt_in ;
  [apply H |] ; assumption.
 Qed.
 

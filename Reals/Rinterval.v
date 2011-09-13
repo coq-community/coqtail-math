@@ -1,4 +1,4 @@
-Require Import Rbase Rfunctions Fourier.
+Require Import Rbase Rfunctions Rfunction_def Fourier.
 Require Import MyRIneq MyNeq.
 Require Import Ass_handling.
 
@@ -15,6 +15,12 @@ Definition Rball_dist c r := interval_dist (c - r) (c + r).
 
 Definition Rball_eq c r r_pos (f g : R -> R) := forall x,
   Rball c r r_pos x -> f x = g x.
+
+Lemma Req_Rball_eq: forall f g c r r_pos,
+  f == g -> Rball_eq c r r_pos f g.
+Proof.
+intros f g c r r_pos Heq x x_in ; apply Heq.
+Qed.
 
 Lemma Rball_eq_refl: forall c r r_pos f, Rball_eq c r r_pos f f.
 Proof.

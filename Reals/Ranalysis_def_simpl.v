@@ -73,3 +73,13 @@ Proof.
 intros f g x y Hneq ; unfold growth_rate, mult_fct ; field ;
  apply Rminus_eq_contra ; symmetry ; assumption.
 Qed.
+
+Lemma growth_rate_inv_decomp: forall f x y,
+  x <> y -> f x <> 0 -> f y <> 0 ->
+  growth_rate (/ f)%F x y =
+  - ((growth_rate f x y) * / (f x * f y)).
+Proof.
+intros ; unfold growth_rate, inv_fct ; field ;
+ repeat split ; [| | apply Rminus_eq_contra ; symmetry ] ;
+ assumption.
+Qed.
