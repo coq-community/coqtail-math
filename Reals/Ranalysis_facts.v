@@ -323,8 +323,9 @@ Lemma derive_pt_Rball_const : forall k c r r_pos x pr,
   Rball c r r_pos x ->
   derive_pt_in (fun _ => k) (Rball c r r_pos) x pr = 0.
 Proof.
-intros k c r r_pos x pr x_in ; apply derivable_pt_lim_derive_pt_Rball ;
- [exact x_in | apply derivable_pt_lim_in_const].
+intros k c r r_pos x pr x_in ;
+  eapply derivable_pt_lim_derive_pt_Rball with r_pos r_pos ;
+ [eexact x_in | eapply derivable_pt_lim_in_const].
 Qed.
 
 Lemma derive_pt_Rball_scal: forall a f c r r_pos x pr pr',
@@ -332,8 +333,9 @@ Lemma derive_pt_Rball_scal: forall a f c r r_pos x pr pr',
   derive_pt_in (mult_real_fct a f) (Rball c r r_pos) x pr =
   a * derive_pt_in f (Rball c r r_pos) x pr'.
 Proof.
-intros a f c r r_pos x pr pr' x_in ; apply derivable_pt_lim_derive_pt_Rball ;
- [exact x_in | apply derivable_pt_lim_in_scal].
+intros a f c r r_pos x pr pr' x_in ;
+  eapply derivable_pt_lim_derive_pt_Rball with r_pos r_pos ;
+ [eexact x_in | eapply derivable_pt_lim_in_scal].
  destruct pr' ; assumption.
 Qed.
 

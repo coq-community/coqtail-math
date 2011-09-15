@@ -135,11 +135,7 @@ Qed.
 (** Handy abstractions: a function together with the proof
 that it is C_infty *)
 
-Lemma Cinfty_zero : Cinfty.
-
-Proof.
-exists (fct_cte 0) ; apply C_infty_zero.
-Defined.
+Definition Cinfty_zero : Cinfty := existT _ _ C_infty_zero.
 
 Hint Resolve C_infty_const : CD_hint.
 Hint Resolve C_infty_id : CD_hint.

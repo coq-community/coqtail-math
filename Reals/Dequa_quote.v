@@ -197,7 +197,7 @@ Qed.
 
 Ltac normalize_rec := fun p s x =>
 match p with | (existT _ ?an ?rho) =>
-match  isconst s x with | false =>
+match isconst s x with | false =>
   match constr: s with
     | Ropp ?s1 => progress (normalize_rec p s1 x)
     | Rplus ?s1 ?s2 => progress (normalize_rec p s1 x)
@@ -295,7 +295,7 @@ Qed.
 
 Goal forall an bn (ra: infinite_cv_radius an) (rb rc: infinite_cv_radius bn)
  (rab: infinite_cv_radius (an + bn + bn)), forall (u x : R),
-  (sum (an + bn + bn)%Rseq rab x = sum an ra x + sum bn rb x + sum bn rc x)%R.
+  (sum (an + bn + bn)%Rseq rab x = sum bn rb x + sum an ra x + sum bn rc x)%R.
 intros an bn ra rb rc rab x.
- solve_diff_equa ; reflexivity.
+ solve_diff_equa ; intro n ; unfold Rseq_plus ; ring.
 Qed.

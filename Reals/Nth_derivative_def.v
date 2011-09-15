@@ -29,15 +29,9 @@ Next Obligation.
 apply D_Rball_derive ; assumption.
 Qed.
 
-Definition nth_derive' {m : nat} (n : nat) (f : R -> R) (pr : D m f)
-  (nlem : (n <= m)%nat) : R -> R.
-Proof.
-intros ; eapply nth_derive ;
- [eapply D_le |] ; eassumption.
-Defined.
+Definition nth_derive' {m : nat} (n : nat) f (pr : D m f) (nlem : (n <= m)%nat) : R -> R :=
+  nth_derive f (D_le _ _ _ nlem pr).
 
-Definition nth_derive_Rball_n' {m : nat} c r r_pos n f (pr: D_Rball c r r_pos m f)
-  (nlem: (n <= m)%nat) : R -> R.
-Proof.
-intros ; eapply nth_derive_Rball ; [eapply D_Rball_le |] ; eassumption.
-Defined.
+Definition nth_derive_Rball' {m : nat} c r r_pos n f (pr: D_Rball c r r_pos m f)
+  (nlem: (n <= m)%nat) : R -> R :=
+  nth_derive_Rball c r r_pos f (D_Rball_le _ _ _ _ _ _ nlem pr).
