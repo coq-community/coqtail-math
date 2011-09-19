@@ -151,8 +151,7 @@ intros An r rho r' r'_bd.
 Qed.
 
 Lemma Cv_radius_weak_derivable_compat_rev : forall An r,
-         Cv_radius_weak (An_deriv An) r ->
-         Cv_radius_weak An r.
+  Cv_radius_weak (An_deriv An) r -> Cv_radius_weak An r.
 Proof.
 intros An r [B HB] ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
  intros x [i Hi] ; subst.

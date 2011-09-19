@@ -324,7 +324,7 @@ Qed.
 (** Inclusion of [Rball]s. *)
 
 Lemma Rball_included: forall c r1 r2 r1_pos r2_pos x,
-  r1 < r2 -> Rball c r1 r1_pos x -> Rball c r2 r2_pos x.
+  r1 <= r2 -> Rball c r1 r1_pos x -> Rball c r2 r2_pos x.
 Proof.
 unfold Rball ; intros ; fourier.
 Qed.

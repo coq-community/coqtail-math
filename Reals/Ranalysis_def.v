@@ -19,12 +19,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Rbase.
-Require Import Ranalysis1.
-Require Import Fourier.
+Require Import Rbase Rpower Fourier.
+Require Import Ranalysis1 Ranalysis2.
 Require Import Rfunctions.
 Require Import MyRIneq.
-Require Import Ranalysis2.
 Require Import Rtopology.
 Require Import Rinterval Rfunction_facts.
 
@@ -209,6 +207,35 @@ intros f lb ub x l pr Hl eps eps_pos ; destruct (Hl _ eps_pos) as [d [d_pos Hd]]
    clear -h_neq ; intro Hf ; apply h_neq, Rplus_eq_reg_l with x ;
    rewrite <- Hf ; ring.
   eapply Rlt_le_trans ; [eassumption | eapply Rmin_r].
+Qed.
+
+Lemma derivable_pt_lim_Rball_included: forall f c r r' r_pos r'_pos x l,
+  Rball c r' r'_pos x -> r' <= r ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l ->
+  derivable_pt_lim_in f (Rball c r' r'_pos) x l.
+Proof.
+intros ; eapply limit1_imp ; [| eassumption] ; intros y [y_in y_neq] ;
+ split ; [eapply Rball_included |] ; eassumption.
+Qed.
+
+Lemma derivable_pt_lim_Rball_included_rev: forall f c r r' r_pos r'_pos x l,
+  Rball c r' r'_pos x -> r' <= r ->
+  derivable_pt_lim_in f (Rball c r' r'_pos) x l ->
+  derivable_pt_lim_in f (Rball c r r_pos) x l.
+Proof.
+intros f c r r' r_pos r'_pos x l x_in r'ler Hl eps eps_pos.
+ destruct (Hl _ eps_pos) as [alp [alp_pos Halp]] ;
+ exists (Rmin alp (Rball_dist c r' x)) ; split.
+  apply Rmin_pos_lt ; [assumption |].
+  eapply Rball_dist_pos ; eassumption.
+  intros y [[y_in y_neq] y_bd] ; apply Halp ; repeat split.
+   replace y with (x + (y - x)) by ring ; apply Rball_dist_bound.
+    assumption.
+    apply Rlt_le_trans with (Rmin alp (Rball_dist c r' x)) ;
+     [apply y_bd | apply Rmin_r].
+   assumption.
+   apply Rlt_le_trans with (Rmin alp (Rball_dist c r' x)) ;
+    [apply y_bd | apply Rmin_l].
 Qed.
 
 Lemma derivable_pt_lim_Rball_derivable_pt_lim: forall f c r r_pos x l,
@@ -858,7 +885,8 @@ assert (forall x l, lb < x < ub -> (derivable_pt_abs f x l <-> derivable_pt_abs 
  elim (Hyp eps eps_pos) ; intros delta Hyp2.
  assert (Pos_cond : Rmin delta (Rmin (ub - a) (a - lb)) > 0).
   clear-a lb ub a_encad delta.
-  apply Rmin_pos ; [exact (delta.(cond_pos)) | apply Rmin_pos ] ; apply Rlt_Rminus ; intuition.
+  apply Rmin_pos_lt ; [exact (delta.(cond_pos)) | apply Rmin_pos_lt ] ;
+  apply Rlt_Rminus ; intuition.
  exists (mkposreal (Rmin delta (Rmin (ub - a) (a - lb))) Pos_cond).
  intros h h_neq h_encad.
  replace (g (a + h) - g a) with (f (a + h) - f a).
@@ -896,7 +924,8 @@ assert (forall x l, lb < x < ub -> (derivable_pt_abs f x l <-> derivable_pt_abs 
  elim (Hyp eps eps_pos) ; intros delta Hyp2.
  assert (Pos_cond : Rmin delta (Rmin (ub - a) (a - lb)) > 0).
   clear-a lb ub a_encad delta.
-  apply Rmin_pos ; [exact (delta.(cond_pos)) | apply Rmin_pos ] ; apply Rlt_Rminus ; intuition.
+  apply Rmin_pos_lt ; [exact (delta.(cond_pos)) | apply Rmin_pos_lt ] ;
+  apply Rlt_Rminus ; intuition.
  exists (mkposreal (Rmin delta (Rmin (ub - a) (a - lb))) Pos_cond).
  intros h h_neq h_encad.
  replace (f (a + h) - f a) with (g (a + h) - g a).
