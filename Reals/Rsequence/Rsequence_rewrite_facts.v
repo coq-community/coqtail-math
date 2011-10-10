@@ -2,6 +2,19 @@ Require Import Rsequence_def.
 
 Local Open Scope Rseq_scope.
 
+Lemma Rseq_shift_shifts: forall Un n,
+  Rseq_shifts Un (S n) == Rseq_shift (Rseq_shifts Un n).
+Proof.
+intros Un n k ; unfold Rseq_shift, Rseq_shifts ;
+ f_equal ; apply plus_n_Sm.
+Qed.
+
+Lemma Rseq_shifts_shift: forall Un n,
+  Rseq_shifts Un (S n) == Rseq_shifts (Rseq_shift Un) n.
+Proof.
+intros Un n k ; reflexivity.
+Qed.
+
 Lemma Rseq_minus_simpl : forall Un Vn,
   Un - Vn == Un + - Vn.
 Proof.
