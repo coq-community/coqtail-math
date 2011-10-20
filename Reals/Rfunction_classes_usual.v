@@ -1,5 +1,6 @@
 Require Import Reals Rsequence_def.
 Require Import Rfunction_facts.
+Require Import Rinterval Ranalysis_def Ranalysis_facts.
 Require Import Rfunction_classes_def Rfunction_classes_facts.
 Require Import Rextensionality.
 
@@ -123,14 +124,27 @@ Qed.
 Lemma D_infty_Rpser : forall (An : Rseq) (Rho : infinite_cv_radius An),
  D_infty (sum An Rho).
 Proof.
-intros An Rho n ; generalize Rho ; generalize An.
- clear An Rho ; induction n ; intros An Rho.
+intros An rho n ; revert rho ; revert An ; induction n ; intros An Rho.
   constructor.
   apply D_S with (derivable_sum An Rho) ;
   apply D_ext with (sum_derive An Rho).
   intro x ; symmetry ; apply derive_pt_eq_0 ; apply derivable_pt_lim_sum.
   apply IHn.
 Qed.
+
+Lemma D_Rball_infty_Rpser: forall An r r_pos (rho: finite_cv_radius An r),
+  D_Rball_infty 0 r r_pos (sum_r An r rho).
+Proof.
+intros An r r_pos rho n ; revert rho ; revert r_pos ; revert r ; revert An ;
+ induction n ; intros An r r_pos rho.
+ constructor.
+ apply Db_S with (derivable_Rball_sum_r An r r_pos rho).
+ apply D_Rball_ext with (sum_r_derive An r rho).
+ intros x x_in ; symmetry ; apply derivable_pt_lim_in_derive_Rball with r_pos r_pos.
+  assumption.
+  apply derivable_pt_lim_in_sum_r ; assumption.
+  apply IHn.
+Qed. 
 
 (** Handy abstractions: a function together with the proof
 that it is C_infty *)

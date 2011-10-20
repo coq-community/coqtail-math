@@ -343,7 +343,7 @@ intros f c r rp1 rp2 rp3 x l [l' Hl'] x_in  Hl ; simpl ;
  eassumption.
 Qed.
 
-Lemma derivable_pt_lim_derive_Rball: forall f c r rp1 rp2 rp3 x l pr,
+Lemma derivable_pt_lim_in_derive_Rball: forall f c r rp1 rp2 rp3 x l pr,
   Rball c r rp1 x ->
   derivable_pt_lim_in f (Rball c r rp2) x l ->
   derive_Rball f c r rp3 pr x = l.

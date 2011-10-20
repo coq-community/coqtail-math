@@ -236,12 +236,38 @@ intros An r r' rp r'p rho rho' x x_in x_in'.
  apply derivable_pt_lim_in_weaksum_r ; assumption.
 Qed.
 
+Lemma derivable_pt_in_weaksum_r: forall An r r_pos
+  (rho : Cv_radius_weak An r) x (x_in: Rball 0 r r_pos x),
+  derivable_pt_in (weaksum_r An r rho) (Rball 0 r r_pos) x.
+Proof.
+intros An r r_pos rho x x_in ; pose (r' := middle (Rabs x) r) ;
+ assert (r'_pos: 0 <= r').
+  apply middle_le_le_pos ; [apply Rabs_pos | assumption]. 
+ assert (rho': Cv_radius_weak (An_deriv An) r').
+  eapply Cv_radius_weak_derivable_compat ; [eassumption|].
+   rewrite Rabs_right ; [rewrite (Rabs_right r) |].
+   apply middle_is_in_the_middle ; erewrite <- Rball_0_simpl ; eassumption.
+  apply Rle_ge ; assumption.
+  apply Rle_ge ; assumption.
+ exists (weaksum_r (An_deriv An) r' rho' x).
+ apply derivable_pt_lim_in_weaksum_r_strong with r'_pos.
+  assumption.
+  apply Rball_0_simpl, middle_is_in_the_middle ;
+  erewrite <- Rball_0_simpl ; eassumption.
+Qed.
+
+Lemma derivable_Rball_weaksum_r: forall An r r_pos (rho : Cv_radius_weak An r),
+  derivable_Rball (weaksum_r An r rho) 0 r r_pos.
+Proof.
+intros An r r_pos rho x x_in ; apply derivable_pt_in_weaksum_r ; assumption.
+Qed.
+   
 (** Sum of the formal derivative *)
 
 Definition weaksum_r_derive An r (rho : Cv_radius_weak An r) (x : R) : R.
 Proof.
 destruct (Rlt_le_dec (Rabs x) r) as [x_bd | x_bd].
-eapply (weaksum_r (An_deriv An) (middle (Rabs x) r)).
+apply (weaksum_r (An_deriv An) (middle (Rabs x) r)).
 apply Cv_radius_weak_derivable_compat with r.
  assumption.
  rewrite (Rabs_pos_eq r).
@@ -340,30 +366,6 @@ Proof.
 intros An r rho x x_bd ; eexists ; eapply derivable_pt_lim_weaksum_r ; assumption.
 Qed.
 
-Lemma derivable_pt_in_weaksum_r : forall An r r_pos (Pr : Cv_radius_weak An r) x,
-  Rabs x < r -> derivable_pt_in (weaksum_r An r Pr) (Rball 0 r r_pos) x.
-Proof.
-intros An r r_pos pr x x_in.
- assert (mid_pos: 0 <= middle (Rabs x) r) by (apply middle_le_le_pos ;
-  [apply Rabs_pos | assumption]).
- assert (rho: Cv_radius_weak (An_deriv An) (middle (Rabs x) r)).
-  eapply Cv_radius_weak_derivable_compat ; [eassumption |].
-  rewrite Rabs_right ; [rewrite (Rabs_right r) |] ;
-   [apply middle_is_in_the_middle ; assumption | |] ;
-   apply Rle_ge ; assumption.
- exists (weaksum_r (An_deriv An) _ rho x) ;
- apply derivable_pt_lim_in_weaksum_r_strong with mid_pos.
- rewrite Rball_0_simpl ; assumption.
- rewrite Rball_0_simpl ; apply middle_is_in_the_middle ; assumption.
-Qed.
-
-Lemma derivable_Rball_weaksum_r: forall An r r_pos (pr : Cv_radius_weak An r),
-  derivable_Rball (weaksum_r An r pr) 0 r r_pos.
-Proof.
-intros An r r_pos pr x x_in ; apply derivable_pt_in_weaksum_r ;
- unfold Rball in x_in ; rewrite Rminus_0_r in x_in ; assumption.
-Qed.
-
 Lemma derive_Rball_weaksum_r: forall An r r_pos (rho : Cv_radius_weak An r) pr,
   (derive_Rball (weaksum_r An r rho) 0 r r_pos pr ==
   weaksum_r_derive An r rho)%F.
@@ -442,15 +444,40 @@ assert (pr : Cv_radius_weak An (middle (Rabs z) r)).
  assumption.
 Qed.
 
+Lemma derivable_pt_lim_in_sum_r: forall An r r_pos (rho : finite_cv_radius An r) x,
+  Rball 0 r r_pos x ->
+  derivable_pt_lim_in (sum_r An r rho) (Rball 0 r r_pos) x (sum_r_derive An r rho x).
+Proof.
+intros ; apply derivable_pt_lim_derivable_pt_lim_in, derivable_pt_lim_sum_r ;
+ erewrite <- Rball_0_simpl ; eassumption.
+Qed.
 
 (** This implies the derivability & continuity of the sum_rs. *)
 
-Lemma derivable_pt_sum_r : forall An r (Pr : finite_cv_radius An r), forall x,
-      Rabs x < r -> derivable_pt (sum_r An r Pr) x.
+Lemma derivable_Rball_sum_r: forall An r r_pos (rho: finite_cv_radius An r),
+  derivable_Rball (sum_r An r rho) 0 r r_pos.
 Proof.
-intros An r rho x x_bd ;
- exists (sum_r_derive An r rho x) ;
- apply derivable_pt_lim_sum_r ; assumption.
+intros An r r_pos rho x x_in ; eexists ;
+  apply derivable_pt_lim_in_sum_r ; assumption.
+Qed.
+
+Lemma derive_Rball_sum_r: forall An r r_pos (rho: finite_cv_radius An r)
+  (pr: derivable_Rball (sum_r An r rho) 0 r r_pos),
+  Rball_eq 0 r r_pos (derive_Rball (sum_r An r rho) 0 r r_pos pr)
+  (sum_r_derive An r rho).
+Proof.
+intros An r r_pos rho pr x x_in ;
+ eapply derivable_pt_lim_in_derive_Rball, derivable_pt_lim_in_sum_r ;
+ eassumption.
+Qed.
+
+Lemma derivable_pt_sum_r : forall An r (Pr : finite_cv_radius An r) x,
+  Rabs x < r -> derivable_pt (sum_r An r Pr) x.
+Proof.
+intros An r rho x x_bd ; assert (r_pos: 0 <= r) by (transitivity (Rabs x) ;
+ [apply Rabs_pos | left ; assumption]) ; eapply derivable_Rball_derivable_pt
+ with (r_pos := r_pos) ; [eapply derivable_Rball_sum_r | eapply Rball_0_simpl ;
+ eassumption].
 Qed.
 
 (* TODO: Lemma derive_pt_sum_r (see Lemma derive_pt_sum) *)
