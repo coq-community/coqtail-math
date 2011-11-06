@@ -66,6 +66,23 @@ intros c r r_pos f f_cont x x_in ; apply continuity_pt_continue_in ;
  [apply f_cont |] ; assumption.
 Qed.
 
+Lemma continuity_interval_continuity_pt: forall f lb ub x, lb < ub ->
+  continuity_interval f lb ub -> open_interval lb ub x ->
+  continuity_pt f x.
+Proof.
+intros f lb ub x lb_lt_ub Hf x_in eps eps_pos ;
+ assert (x_in' := open_interval_interval _ _ _ x_in) ;
+ destruct (Hf _ x_in' _ eps_pos) as [alpha [alpha_pos Halpha]].
+ exists (Rmin alpha (interval_dist lb ub x)) ; split.
+  apply Rmin_pos_lt, open_interval_dist_pos ; assumption.
+  intros y [[_ x_neq_y] y_bd] ; apply Halpha ; split.
+   replace y with (x + (y -x)) by ring ; apply open_interval_interval, interval_dist_bound.
+    assumption.
+    eapply Rlt_le_trans ; [eassumption | apply Rmin_r].
+    eapply Rlt_le_trans ; [eassumption | apply Rmin_l].
+Qed.
+
+
 (** * (Re)defining the derivability predicate. *)
 
 (** The usual definition of the derivability predicate is,

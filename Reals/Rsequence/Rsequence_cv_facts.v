@@ -21,7 +21,7 @@ USA.
 
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
-Require Import Max Fourier.
+Require Import Max Rinterval Ranalysis_def Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -238,6 +238,20 @@ destruct (Req_dec lu (Un n)) as [Heq|Heq].
 rewrite Heq; rewrite R_dist_eq; assumption.
 apply H; split; [compute; tauto|].
 apply HN; assumption.
+Qed.
+
+(**********)
+Lemma Rseq_cv_continuity_interval_compat : forall Un lu f a b,
+  interval a b lu -> (forall n, interval a b (Un n)) ->
+  Rseq_cv Un lu -> continuity_interval f a b ->
+  Rseq_cv (fun n => f (Un n)) (f lu).
+Proof.
+intros Un lu f a b lu_in Un_in Hu Hf eps eps_pos.
+ destruct (Hf _ lu_in _ eps_pos) as [h [h_pos Hh]] ; simpl in Hh.
+ destruct (Hu _ h_pos) as [N HN] ; exists N ; intros n n_lb.
+  destruct (Req_dec lu (Un n)) as [Heq | Hneq].
+   rewrite Heq, R_dist_eq ; assumption.
+   apply Hh ; split ; [apply Un_in | apply HN ; assumption].
 Qed.
 
 (**********)
@@ -1173,7 +1187,7 @@ eapply Rle_lt_trans.
   apply HNu; eapply le_trans; [apply Max.le_max_l|eassumption].
 Qed.
 
-(** * Limit of non negative terms *)
+(** * Limit of (non) negative terms *)
 
 (**********)
 Lemma Rseq_positive_limit : forall (An : nat -> R) (a : R),
@@ -1191,7 +1205,16 @@ pose proof Hpos N as Hposn.
 destruct (Rcase_abs (An N - a)); intro; fourier.
 Qed.
 
-(** * Compatibility of Rle with the limit *)
+(**********)
+Lemma Rseq_negative_limit : forall (An : nat -> R) (a : R),
+  (forall n, An n <= 0) -> Rseq_cv An a -> a <= 0.
+Proof.
+intros An a Hneg Ha ; apply Ropp_le_cancel ; rewrite Ropp_0 ;
+ eapply Rseq_positive_limit, Rseq_cv_opp_compat, Ha.
+ intro n ; apply Ropp_0_ge_le_contravar, Rle_ge, Hneg.
+Qed.
+
+(** * Compatibility of Rle and interval with the limit *)
 
 (**********)
 Lemma Rseq_limit_comparison: forall (An Bn : nat -> R) (a b : R),
@@ -1206,6 +1229,19 @@ assert (0 <= b - a).
   apply Rseq_cv_minus_compat; auto.
  fourier.
 Qed.
+
+Lemma Rseq_interval_compat : forall (An : Rseq) (a lb ub : R),
+  (forall n, interval lb ub (An n)) -> Rseq_cv An a ->
+  interval lb ub a.
+Proof.
+intros An a lb ub Hcomp Ha ; split ; eapply Rseq_limit_comparison.
+ intro ; apply (proj1 (Hcomp n)).
+  apply Rseq_constant_cv.
+  assumption.
+ intro n ; apply (proj2 (Hcomp n)).
+  assumption.
+  apply Rseq_constant_cv.
+Qed. 
 
 End Rseq_cv_others.
 
