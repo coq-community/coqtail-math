@@ -52,4 +52,12 @@ Proof.
 intros x n ; induction n.
  unfold D, Fp ; simpl ; ring.
 
- 
+ replace (INR(S(S n))) with (1+ INR(S n)) by (simpl; auto with *). 
+ rewrite Rmult_plus_distr_r; simpl Fp at 3.
+ rewrite Rmult_comm with  (x - INR n) (Fp n x).
+ rewrite <- Rmult_assoc.
+ rewrite <- IHn.
+ unfold D, Fp.
+ replace (INR (S n)) with (1 + INR n) by (simpl; case n; auto with *).
+ ring.
+Qed.
