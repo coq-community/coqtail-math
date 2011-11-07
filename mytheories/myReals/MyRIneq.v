@@ -28,6 +28,15 @@ Open Scope R_scope.
 
 Implicit Type r : R.
 
+Require Setoid.
+
+Add Parametric Relation : R Rle
+reflexivity proved by Rle_refl
+transitivity proved by Rle_trans as Rle.
+
+Add Parametric Relation : R Rlt
+transitivity proved by Rlt_trans as Rlt.
+
 Lemma Rlt_minus_swap: forall x y z, x - y < z -> x - z < y.
 Proof.
 intros ; fourier.
@@ -233,66 +242,31 @@ intros ; fourier.
 Qed.
 
 Lemma Rmax_lt_lt_lt : forall x y z, Rmax x y < z <-> x < z /\ y < z.
- intros x y z. split.
-  unfold Rmax. case (Rle_dec x y) ; intros Hyp Hyp2.
-  split. apply Rle_lt_trans with (r2:=y) ; assumption. assumption.
-  split. assumption. apply Rlt_trans with (r2:=x).
-  assert (Temp : forall x y, ~ x <= y -> x > y).
-   intros m n Hypmn. intuition.
-  apply Temp ; clear Temp ; assumption.
-  assumption.
-  intros Hyp.
-  unfold Rmax. case (Rle_dec x y).
-  intro ; exact (proj2 Hyp).
-  intro ; exact (proj1 Hyp).
+Proof.
+intros x y z ; unfold Rmax ; destruct (Rle_dec x y) ; split ; intuition.
+ apply Rle_lt_trans with y ; assumption.
+ transitivity x ; [apply Rnot_le_lt |] ; assumption.
 Qed.
 
 Lemma Rmax_le_le_le : forall x y z, Rmax x y <= z <-> x <= z /\ y <= z.
- intros x y z. split.
-  unfold Rmax. case (Rle_dec x y) ; intros Hyp Hyp2.
-  split. apply Rle_trans with (r2:=y) ; assumption. assumption.
-  split. assumption. apply Rle_trans with (r2:=x).
-  assert (Temp : forall x y, ~ x <= y -> x > y).
-   intros m n Hypmn. intuition.
-   left ; apply Temp ; clear Temp ; assumption.
-  assumption.
-  intros Hyp.
-  unfold Rmax. case (Rle_dec x y).
-  intro ; exact (proj2 Hyp).
-  intro ; exact (proj1 Hyp).
+Proof.
+intros x y z ; unfold Rmax ; destruct (Rle_dec x y) ; split ; intuition.
+ transitivity y ; assumption.
+ transitivity x ; [left ; apply Rnot_le_lt |] ; assumption.
 Qed.
 
-Lemma Rmin_gt_gt_gt : forall x y z, Rmin x y > z <-> x > z /\ y > z.
- intros x y z. split.
-  unfold Rmin. case (Rle_dec x y) ; intros Hyp Hyp2.
-  split. assumption.
-  apply Rlt_le_trans with (r2:=x) ; intuition.
-  split.
-  apply Rlt_trans with (r2:=y). intuition.
-  assert (Temp : forall x y, ~ x <= y -> x > y).
-   intros m n Hypmn. intuition.
-  apply Temp ; clear Temp ; assumption.
-  assumption.
-  intros Hyp.
-  unfold Rmin. case (Rle_dec x y).
-  intro ; exact (proj1 Hyp).
-  intro ; exact (proj2 Hyp).
+Lemma Rmin_lt_lt_lt : forall x y z, z < Rmin x y <-> z < x /\ z < y.
+Proof.
+intros x y z ; unfold Rmin ; destruct (Rle_dec x y) ; split ; intuition.
+ apply Rlt_le_trans with x ; assumption.
+ transitivity y ; [| apply Rnot_le_lt] ; assumption.
 Qed.
 
-Lemma Rmin_ge_ge_ge : forall x y z, Rmin x y >= z <-> x >= z /\ y >= z.
- intros x y z. split.
-  unfold Rmin. case (Rle_dec x y) ; intros Hyp Hyp2.
-  split ; [assumption | apply Rle_ge].
-  apply Rle_trans with (r2:=x) ; intuition.
-  split ; [apply Rle_ge | assumption].
-  apply Rle_trans with (r2:=y). intuition.
-  assert (Temp : forall x y, ~ x <= y -> x > y).
-   intros m n Hypmn. intuition.
-   left ; apply Temp ; clear Temp ; assumption.
-  intros Hyp.
-  unfold Rmin. case (Rle_dec x y).
-  intro ; exact (proj1 Hyp).
-  intro ; exact (proj2 Hyp).
+Lemma Rmin_le_le_le : forall x y z, z <= Rmin x y <-> z <= x /\ z <= y.
+Proof.
+intros x y z ; unfold Rmin ; destruct (Rle_dec x y) ; split ; intuition.
+ transitivity x ; assumption.
+ transitivity y ; [| left ; apply Rnot_le_lt] ; assumption.
 Qed.
 
 Lemma Rle_neq_lt : forall x y, x <= y -> x <> y -> x < y.
@@ -341,12 +315,3 @@ Lemma Rmult_minus_distr_r: forall x y z,
 Proof.
 intros ; ring.
 Qed.
-
-Require Setoid.
-
-Add Parametric Relation : R Rle
-reflexivity proved by Rle_refl
-transitivity proved by Rle_trans as Rle.
-
-Add Parametric Relation : R Rlt
-transitivity proved by Rlt_trans as Rlt.

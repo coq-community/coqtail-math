@@ -166,11 +166,36 @@ Proof.
  intros ; split ; unfold open_interval in * ; intuition.
 Qed.
 
+Lemma interval_inhabited : forall lb ub x,
+  interval lb ub x -> lb <= ub.
+Proof.
+intros ; etransitivity ; ass_apply.
+Qed.
+
+Lemma open_interval_inhabited : forall lb ub x,
+  open_interval lb ub x -> lb < ub.
+Proof.
+intros ; etransitivity ; ass_apply.
+Qed.
+
 Lemma interval_opp_compat : forall lb ub x,
      interval lb ub x ->
      interval (-ub) (-lb) (-x).
 Proof.
 intros ; unfold interval in * ; split ; intuition ; fourier.
+Qed.
+
+Lemma interval_minus_compat : forall lb ub x y,
+  interval lb ub x -> interval (lb - y) (ub - y) (x - y).
+Proof.
+intros lb ub x y [Hlb Hub] ; split ; fourier.
+Qed.
+
+Lemma interval_minus_compat_0 : forall lb ub x,
+  interval lb ub x -> interval (lb - x) (ub - x) 0.
+Proof.
+intros lb ub x ; replace 0 with (x - x) by ring ;
+ apply interval_minus_compat.
 Qed.
 
 Lemma open_interval_opp_compat : forall lb ub x,

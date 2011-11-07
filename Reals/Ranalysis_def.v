@@ -82,6 +82,52 @@ intros f lb ub x lb_lt_ub Hf x_in eps eps_pos ;
     eapply Rlt_le_trans ; [eassumption | apply Rmin_l].
 Qed.
 
+Lemma continuity_interval_restriction_compat : forall f a b a' b',
+  continuity_interval f a b -> interval a b a' ->
+  interval a b b' -> continuity_interval f a' b'.
+Proof.
+intros f a b a' b' Hf a'_in b'_in x x_in ;
+ assert (Himp : forall x, interval a' b' x -> interval a b x) by
+ (intros y [ya' yb'] ; split ; destruct a'_in, b'_in ; fourier)
+ ; eapply limit1_imp, Hf, Himp ; assumption.
+Qed.
+
+Lemma continuity_interval_const : forall c a b,
+  continuity_interval (fun _ => c) a b.
+Proof.
+intros c a b eps eps_pos ; exists 1 ; split ; [fourier |] ;
+ intros x x_in ; rewrite R_dist_eq ; assumption.
+Qed.
+
+Lemma continuity_interval_opp_compat : forall f a b,
+  continuity_interval f a b -> continuity_interval (- f)%F a b.
+Proof.
+intros f a b Hf x x_in ; apply limit_Ropp, Hf ; assumption.
+Qed.
+
+Lemma continuity_interval_plus_compat : forall f g a b,
+  continuity_interval f a b -> continuity_interval g a b ->
+  continuity_interval (f + g)%F a b.
+Proof.
+intros f g a b Hf Hg x x_in ; apply limit_plus ; ass_apply ;
+ assumption.
+Qed.
+
+Lemma continuity_interval_minus_compat : forall f g a b,
+  continuity_interval f a b -> continuity_interval g a b ->
+  continuity_interval (f - g)%F a b.
+Proof.
+intros f g a b Hf Hg x x_in ; apply limit_minus ; ass_apply ;
+ assumption.
+Qed.
+
+Lemma continuity_interval_mult_compat : forall f g a b,
+  continuity_interval f a b -> continuity_interval g a b ->
+  continuity_interval (f * g)%F a b.
+Proof.
+intros f g a b Hf Hg x x_in ; apply limit_mul ; ass_apply ;
+ assumption.
+Qed.
 
 (** * (Re)defining the derivability predicate. *)
 
@@ -473,6 +519,20 @@ Definition reciprocal_open_interval (f g:R -> R) (lb ub:R) := forall x,
 
 Definition reciprocal (f g:R -> R) := forall x, (comp f g) x = id x.
 
+Lemma strictly_increasing_interval_image : forall f lb ub x,
+  strictly_increasing_interval f lb ub -> open_interval lb ub x ->
+  open_interval (f lb) (f ub) (f x).
+Proof.
+intros f lb ub x Hf x_in ; assert (lb_le_ub : lb <= ub) by
+ (left ; eapply open_interval_inhabited ; eassumption) ; split ; apply Hf.
+ apply interval_l ; assumption.
+ apply open_interval_interval ; assumption.
+ apply x_in.
+ apply open_interval_interval ; assumption.
+ apply interval_r ; assumption.
+ apply x_in.
+Qed. 
+
 (** Manipulation *)
 
 Lemma strictly_increasing_strictly_monotonous_interval : forall f lb ub,
@@ -837,30 +897,6 @@ intros f g lb ub f_recip_g x x_in_I.
  unfold interval in * ; destruct x_in_I.
  split ; fourier.
  reflexivity.
-Qed.
-
-Lemma strictly_increasing_interval_image : forall f lb ub b,
-       lb <= ub -> increasing_interval f lb ub ->
-       interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) b ->
-       interval (f lb) (f ub) b.
-Proof.
-intros f lb ub b lb_le_ub f_incr b_bd.
- assert (Hf : f lb <= f ub).
-   apply f_incr.
-   split ; [right ; reflexivity | apply lb_le_ub].
-   split ; [apply lb_le_ub | right ; reflexivity].
-   assumption.
- split.
- apply Rle_trans with (Rmin (f lb) (f ub)).
-  right ; unfold Rmin ; destruct (Rle_dec (f lb) (f ub)) as [flb_le_fub | fub_lt_flb].
-  reflexivity.
-  elim (fub_lt_flb Hf).
-  unfold interval in b_bd ; intuition.
- apply Rle_trans with (Rmax (f lb) (f ub)).
-   unfold interval in b_bd ; intuition.
-  right ; unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) as [flb_le_fub | fub_lt_flb].
-  reflexivity.
-  elim (fub_lt_flb Hf).
 Qed.
 
 Lemma strictly_increasing_open_interval_image : forall f lb ub b,

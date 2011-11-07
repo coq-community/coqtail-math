@@ -27,191 +27,137 @@ Require Import Fourier.
 Require Import RiemannInt.
 Require Import SeqProp.
 Require Import Max.
-Require Import MyRIneq.
+Require Import RIneq MyRIneq.
 Require Import Ranalysis_def Rinterval.
 Require Import RIVT.
 
 Local Open Scope R_scope.
 
-(* begin hide *)
-Ltac case_le H :=
-   let t := type of H in 
-   let h' := fresh in 
-      match t with ?x <= ?y => case (total_order_T x y);
-         [intros h'; case h'; clear h' | 
-          intros h'; clear -H h'; elimtype False; fourier ] end.
-(* end hide *)
-
 (** The image of an interval by a continuous function is an interval *)
 
 Lemma continuity_interval_image_interval : forall (f:R->R) (lb ub y:R),
-       lb <= ub ->
-       interval (f lb) (f ub) y ->
-       continuity_interval f lb ub ->
-       {x | interval lb ub x /\ f x = y}.
+ lb <= ub -> interval (f lb) (f ub) y ->
+ continuity_interval f lb ub -> {x | interval lb ub x /\ f x = y}.
 Proof.
-intros f lb ub y lb_le_ub y_encad f_cont_interv.
- case (Rle_lt_or_eq_dec _ _ lb_le_ub) ; clear lb_le_ub ; intro lb_lt_ub.
- case y_encad ; intro y_encad1.
-   case_le y_encad1 ; intros y_encad2 y_encad3 ; case_le y_encad3.
-    intro y_encad4.
-     clear y_encad y_encad1 y_encad3.
-     assert (Cont : forall a : R, lb <= a <= ub -> continuity_pt (fun x => f x - y) a).
-      intros a a_encad. unfold continuity_pt, continue_in, limit1_in, limit_in ; simpl ; unfold R_dist.
-      intros eps eps_pos. elim (f_cont_interv a a_encad eps eps_pos).
-      intros alpha alpha_pos. destruct alpha_pos as (alpha_pos,Temp).
-      exists alpha. split.
-      assumption. intros x  x_cond.
-      replace (f x - y - (f a - y)) with (f x - f a) by field.
-      exact (Temp x x_cond).
-     assert (H1 : interval (f lb - y) (f ub - y) 0).
-      split ; left ; [apply Rlt_minus | apply Rgt_minus] ; assumption.
-     destruct (IVT_interv (fun x => f x - y) lb ub Cont lb_lt_ub H1) as (x,Hx).
-     exists x.
-     destruct Hx as (Hyp,Result).
-     split ; [assumption | intuition].
-     intro H ; exists ub ; repeat split ; intuition.
-     intro H ; exists lb ; repeat split ; intuition.
-     intro H ; exists ub ; repeat split ; intuition.
-     exists lb ; repeat split ; intuition.
-     subst ; apply Rle_antisym ; unfold interval in * ; intuition.
+intros f lb ub y lb_le_ub y_in Hf ;
+ destruct (IVT_interval (f - (fun _ => y))%F lb ub) as [z [z_in Hz]].
+  apply continuity_interval_minus_compat ;
+  [assumption | apply continuity_interval_const].
+  assumption.
+  apply interval_minus_compat_0 ; assumption.
+  exists z ; split ; [assumption |].
+  apply Rminus_diag_uniq, Hz.
+Qed.
+
+Lemma interval_restriction_compat : forall a b a' b' x,
+  interval a b a' -> interval a b b' ->
+  interval a' b' x -> interval a b x.
+Proof.
+intros a b a' b' x [] [] [] ; split ; fourier.
+Qed.
+
+Lemma open_interval_restriction_compat : forall a b a' b' x,
+  interval a b a' -> interval a b b' ->
+  open_interval a' b' x -> open_interval a b x.
+Proof.
+intros a b a' b' x [] [] [] ; split ; fourier.
+Qed.
+
+Lemma strictly_increasing_interval_restriction_compat :
+ forall f a b a' b', interval a b a' -> interval a b b' ->
+ strictly_increasing_interval f a b ->
+ strictly_increasing_interval f a' b'.
+Proof.
+intros f a b a' b' a'_in b'_in Hf x y x_in y_in ;
+ apply Hf ; apply interval_restriction_compat with a' b' ;
+ assumption.
+Qed.
+
+Lemma Rlt_minus_sort : forall a b c, a < c + b -> a - c < b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rlt_minus_sort2 : forall a b c, a - c < b -> - c < b - a.
+Proof.
+intros ; fourier.
 Qed.
 
 (** * Continuity of the reciprocal function *)
 
-Lemma continuity_reciprocal_strictly_increasing_interval : forall (f g:R->R) (lb ub:R),
-       lb <= ub ->
-       strictly_increasing_interval f lb ub -> 
-       reciprocal_interval g f lb ub ->
-       continuity_interval f lb ub ->
-       continuity_open_interval g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)).
+Lemma continuity_reciprocal_strictly_increasing_open_interval :
+  forall (f g:R->R) (lb ub:R), lb <= ub ->
+  strictly_increasing_interval f lb ub -> 
+  reciprocal_interval g f lb ub -> continuity_interval f lb ub ->
+  continuity_open_interval g (f lb) (f ub).
 Proof.
-intros f g lb ub lb_le_ub f_incr f_eq_g f_cont_interv b b_encad.
-  assert (f_incr2 := strictly_increasing_increasing_interval _ _ _ f_incr).
-  intros eps eps_pos ; simpl ; unfold R_dist.
-   assert (b_encad2 : open_interval (f lb) (f ub) b).
-    apply strictly_increasing_open_interval_image ; assumption.
-   assert (b_encad3 := open_interval_interval _ _ _ b_encad2).
-   elim (continuity_interval_image_interval f lb ub b lb_le_ub b_encad3 f_cont_interv) ;
-   intros x [x_encad f_x_b].
-   assert (x_encad2 : open_interval lb ub x).
-    split.
-    assert (Temp : x <> lb).
-     intro Hfalse ; rewrite Hfalse in f_x_b.
-     assert (Temp' : b <> f lb).
-      apply Rgt_not_eq ; exact (proj1 b_encad2).
-     apply Temp' ; symmetry ; assumption.
-    apply Rle_neq_lt ; unfold interval in * ; intuition.
-    assert (Temp : x <> ub).
-    intro Hfalse ; rewrite Hfalse in f_x_b.
-    assert (Temp' : b <> f ub).
-     apply Rlt_not_eq ; exact (proj2 b_encad2).
-    apply Temp' ; symmetry ; assumption.
-    apply Rle_neq_lt ; unfold interval in * ; intuition.
-   pose (x1 := Rmax (x - eps) lb).
-   pose (x2 := Rmin (x + eps) ub).
-   assert (x1_encad : interval lb ub x1).
-    split. apply RmaxLess2.
-    apply Rlt_le. unfold x1 ; rewrite Rmax_lt_lt_lt ;
-    split ; apply Rlt_trans with (r2:=x).
-    fourier.
-    apply (proj2 x_encad2).
-    apply (proj1 x_encad2).
-    apply (proj2 x_encad2).
-  assert (x2_encad : interval lb ub x2).
-   split. apply Rlt_le ; unfold x2 ; apply Rgt_lt ; rewrite Rmin_gt_gt_gt ;
-   split ; apply Rgt_trans with (r2:=x).
-   fourier.
-   apply (proj1 x_encad2).
-   apply (proj2 x_encad2).
-   apply (proj1 x_encad2).
-   apply Rmin_r.
- assert (x_lt_x2 : x < x2).
-  unfold x2 ; apply Rgt_lt ; rewrite Rmin_gt_gt_gt ;
-  split ; unfold open_interval in * ; intuition ; fourier.
- assert (x1_lt_x : x1 < x).
-  unfold x1 ; rewrite Rmax_lt_lt_lt ; split ; unfold open_interval in * ; intuition ; fourier.
- exists (Rmin (f x - f x1) (f x2 - f x)).
- split.
- apply Rmin_pos_lt ; apply Rgt_minus. apply f_incr ; assumption.
- apply f_incr ; assumption.
- intros y [_ y_cond].
-  rewrite <- f_x_b in y_cond.
-  assert (Temp : forall x y d1 d2, d1 > 0 -> d2 > 0 -> Rabs (y - x) < Rmin d1 d2 -> x - d1 <= y <= x + d2).
-   intros.
-    split. assert (H10 : forall x y z, x - y <= z -> x - z <= y). intuition. fourier.
-    apply H10. apply Rle_trans with (r2:=Rabs (y0 - x0)).
-    replace (Rabs (y0 - x0)) with (Rabs (x0 - y0)). apply RRle_abs.
-    rewrite <- Rabs_Ropp. unfold Rminus ; rewrite Ropp_plus_distr. rewrite Ropp_involutive.
-    intuition.
-    apply Rle_trans with (r2:= Rmin d1 d2). apply Rlt_le ; assumption.
-    apply Rmin_l.
-    assert (H10 : forall x y z, x - y <= z -> x <= y + z). intuition. fourier.
-    apply H10. apply Rle_trans with (r2:=Rabs (y0 - x0)). apply RRle_abs.
-    apply Rle_trans with (r2:= Rmin d1 d2). apply Rlt_le ; assumption.
-    apply Rmin_r.
-  assert (Temp' := Temp (f x) y (f x - f x1) (f x2 - f x)).
-  replace (f x - (f x - f x1)) with (f x1) in Temp' by field.
-  replace (f x + (f x2 - f x)) with (f x2) in Temp' by field.
-  assert (T : f x - f x1 > 0).
-   apply Rgt_minus. apply f_incr ; assumption.
-  assert (T' : f x2 - f x > 0).
-   apply Rgt_minus. apply f_incr ; assumption.
-  assert (Main := Temp' T T' y_cond).
-  clear Temp Temp' T T'.
-  assert (x1_lt_x2 : x1 < x2).
-   apply Rlt_trans with (r2:=x) ; assumption.
-   assert (f_cont_myinterv : forall a : R, x1 <= a <= x2 -> continuity_pt f a).
-    intros ; apply f_cont_interv ; split ; unfold interval in *.
-    apply Rle_trans with (r2 := x1) ; intuition.
-    apply Rle_trans with (r2 := x2) ; intuition.
-    assert (x1_le_x2 : x1 <= x2) by intuition.
-    assert (f_cont_interv2 : continuity_interval f x1 x2).
-     intros a a_in_I ; apply f_cont_interv.
-     split ; unfold interval in *.
-     apply Rle_trans with (r2 := x1) ; intuition.
-     apply Rle_trans with (r2 := x2) ; intuition.
-   destruct (continuity_interval_image_interval f x1 x2 y x1_le_x2 Main f_cont_interv2) as
-   [x' [x'_encad f_x'_y]].
-   rewrite <- f_x_b ; rewrite <- f_x'_y.
-   unfold reciprocal_interval, comp in f_eq_g.
-   repeat rewrite f_eq_g.
-   unfold id.
-   assert (x'_encad2 : interval (x - eps) (x + eps) x').
-    split ; unfold interval in *.
-    apply Rle_trans with (r2:=x1) ; [ apply RmaxLess1|] ; intuition.
-    apply Rle_trans with (r2:=x2) ; [ | apply Rmin_l] ; intuition.
-   assert (x1_neq_x' : x1 <> x').
-    intro Hfalse. rewrite Hfalse, f_x'_y in y_cond.
-    assert (Hf : Rabs (y - f x) < f x - y).
-     apply Rlt_le_trans with (r2:=Rmin (f x - y) (f x2 - f x)). fourier.
-     apply Rmin_l.
-     assert(Hfin : f x - y < f x - y).
-      apply Rle_lt_trans with (r2:=Rabs (y - f x)).
-      rewrite Rabs_minus_sym ; apply RRle_abs.
+intros f g lb ub lb_le_ub f_incr Hfg Hf b b_in.
+ destruct (continuity_interval_image_interval f lb ub b) as [a [Ia Ha]] ;
+  try assumption. apply open_interval_interval ; assumption.
+  assert (a_in : open_interval lb ub a).
+   apply interval_open_interval ; [assumption | |].
+    intro Hfalse ; rewrite Hfalse, Ha in b_in ; apply (Rlt_irrefl b), b_in.
+    intro Hfalse ; rewrite Hfalse, Ha in b_in ; apply (Rlt_irrefl b), b_in.
+  clear Ia.
+  intros eps eps_pos ; pose (xlb := Rmax (a - eps) lb) ;
+   pose (xub := Rmin (a + eps) ub).
+   assert (xlb_in : interval lb ub xlb).
+    split ; [apply RmaxLess2 |].
+     unfold xlb ; apply Rmax_le_le_le ; split.
+      transitivity a ; [fourier | left ; apply a_in].
       assumption.
-      elim (Rlt_irrefl _ Hfin).
-    assert (x'_lb : x - eps < x').
-     apply Rle_lt_trans with x1 ; [apply Rmax_l |].
-     apply Rle_neq_lt ; [apply x'_encad | assumption].
-    assert (x2_neq_x' : x' <> x2).
-     intro Hfalse ; assert (Hf : Rabs (y - f x) < y - f x).
-      rewrite <- Hfalse, f_x'_y in y_cond.
-      apply Rlt_le_trans with (r2:=Rmin (f x - f x1) (y - f x)). fourier.
-      apply Rmin_r.
-      assert(Hfin : y - f x < y - f x).
-       apply Rle_lt_trans with (r2:=Rabs (y - f x)). apply RRle_abs. fourier.
-      elim (Rlt_irrefl _ Hfin).
-     assert (x'_ub : x' < x + eps).
-     apply Rlt_le_trans with (r2:=x2).
-     apply Rle_neq_lt ; [apply x'_encad | apply x2_neq_x'].
-     apply Rmin_l.
-     apply Rabs_def1 ; clear -x'_lb x'_ub ; fourier.
-    assumption.
-    split ; [apply Rle_trans with x1 | apply Rle_trans with x2] ; unfold interval in * ;
-    intuition.
+   assert (xub_in : interval lb ub xub).
+    split ; [| apply Rmin_r].
+     unfold xub ; apply Rmin_le_le_le ; split.
+      transitivity a ; [left ; apply a_in | fourier].
+      assumption.
+   assert (a_in' : open_interval xlb xub a).
+    split ; [apply Rmax_lt_lt_lt | apply Rmin_lt_lt_lt] ;
+    split ; (fourier || apply a_in).
+   exists (interval_dist (f xlb) (f xub) (f a)) ; split.
+    apply open_interval_dist_pos, strictly_increasing_interval_image.
+     eapply strictly_increasing_interval_restriction_compat ; eassumption.
+     assumption.
+    intros x [x_in x_bd] ; rewrite <- Ha in x_bd.
+    destruct (continuity_interval_image_interval f xlb xub x) as [a' [a'_in Ha']].
+     left ; eapply open_interval_inhabited ; eassumption.
+     replace x with (f a + (x - f a)) by ring ;
+     apply open_interval_interval, interval_dist_bound.
+     apply strictly_increasing_interval_image ;
+     [eapply strictly_increasing_interval_restriction_compat |] ;
+     eassumption.
+     apply x_bd.
+     eapply continuity_interval_restriction_compat ; eassumption.
+    rewrite <- Ha, <- Ha'.
+    assert (Hrew := Hfg a (open_interval_interval _ _ _ a_in)) ;
+     unfold comp, id in Hrew ; rewrite Hrew ; clear Hrew.
+    assert (Hrew := Hfg a') ; unfold comp, id in Hrew ;
+     rewrite Hrew ; clear Hrew.
+     simpl ; apply Rabs_def1.
+      apply Rlt_minus_sort, Rlt_le_trans with xub ; [| apply Rmin_l].
+       apply Rle_neq_lt ; [apply a'_in |].
+       intro Hfalse ; rewrite <- Hfalse, <- Ha' in x_bd ;
+       apply (Rlt_irrefl (f a' - f a)), Rlt_le_trans with
+       (interval_dist (f xlb) (f a') (f a)) ; [| apply Rmin_r].
+       eapply Rle_lt_trans, x_bd ; right ; symmetry ; simpl ;
+        apply Rabs_right ; left ; apply Rgt_minus, f_incr.
+         eapply open_interval_interval, open_interval_restriction_compat with lb ub ;
+         try (apply interval_l || apply interval_r || rewrite Hfalse) ; eassumption.
+         rewrite Hfalse ; assumption.
+         rewrite Hfalse ; apply a_in'.
+       apply Rlt_minus_sort2, Rle_lt_trans with xlb ; [apply RmaxLess1 |].
+       apply Rle_neq_lt ; [apply a'_in |].
+       intro Hfalse ; rewrite Hfalse, <- Ha' in x_bd ;
+       apply (Rlt_irrefl (f a - f a')), Rlt_le_trans with
+       (interval_dist (f a') (f xub) (f a)) ; [| apply Rmin_l].
+       eapply Rle_lt_trans, x_bd ; right ; symmetry ; simpl.
+        rewrite R_dist_sym ; apply Rabs_right ; left ; apply Rgt_minus, f_incr.
+         rewrite <- Hfalse ; assumption.
+         eapply open_interval_interval, open_interval_restriction_compat with lb ub ;
+         try (apply interval_l || apply interval_r || rewrite <- Hfalse) ; eassumption.
+         rewrite <- Hfalse ; apply a_in'.
+       apply interval_restriction_compat with xlb xub ; eassumption.
 Qed.
-
 
 Lemma continuity_reciprocal_strictly_decreasing_interval : forall (f g:R->R) (lb ub:R),
        lb <= ub ->
