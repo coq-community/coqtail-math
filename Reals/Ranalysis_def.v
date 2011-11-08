@@ -594,39 +594,45 @@ intros f c r Hf ; destruct Hf as [f_incr | f_decr] ;
 Qed.
 
 Lemma strictly_increasing_Rmin_simpl : forall f lb ub,
-     lb < ub -> strictly_increasing_interval f lb ub ->
+     lb <= ub -> strictly_increasing_interval f lb ub ->
      Rmin (f lb) (f ub) = f lb.
 Proof.
-intros f lb ub lb_lt_ub f_incr ; assert (flb_lt_fub : f lb < f ub).
+intros f lb ub [Hneq | Heq] f_incr. 
+ assert (flb_lt_fub : f lb < f ub).
  apply f_incr ; [apply interval_l | apply interval_r |] ; intuition.
  unfold Rmin ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
+ subst ; apply Rmin_diag.
 Qed.
 
 Lemma strictly_increasing_Rmax_simpl : forall f lb ub,
-     lb < ub -> strictly_increasing_interval f lb ub ->
+     lb <= ub -> strictly_increasing_interval f lb ub ->
      Rmax (f lb) (f ub) = f ub.
 Proof.
-intros f lb ub lb_lt_ub f_incr ; assert (flb_lt_fub : f lb < f ub).
+intros f lb ub [Hneq | Heq] f_incr.
+ assert (flb_lt_fub : f lb < f ub).
  apply f_incr ; [apply interval_l | apply interval_r |] ; intuition.
  unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
+ subst ; apply Rmax_diag.
 Qed.
 
 Lemma strictly_decreasing_Rmin_simpl : forall f lb ub,
-     lb < ub -> strictly_decreasing_interval f lb ub ->
+     lb <= ub -> strictly_decreasing_interval f lb ub ->
      Rmin (f lb) (f ub) = f ub.
 Proof.
-intros f lb ub lb_lt_ub f_decr ; assert (flb_lt_fub : f ub < f lb).
+intros f lb ub [Hneq | Heq] f_decr. assert (flb_lt_fub : f ub < f lb).
  apply f_decr ; [apply interval_l | apply interval_r |] ; intuition.
  unfold Rmin ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
+ subst ; apply Rmin_diag.
 Qed.
 
 Lemma strictly_decreasing_Rmax_simpl : forall f lb ub,
-     lb < ub -> strictly_decreasing_interval f lb ub ->
+     lb <= ub -> strictly_decreasing_interval f lb ub ->
      Rmax (f lb) (f ub) = f lb.
 Proof.
-intros f lb ub lb_lt_ub f_decr ; assert (flb_lt_fub : f ub < f lb).
+intros f lb ub [Hneq | Heq] f_decr. assert (flb_lt_fub : f ub < f lb).
  apply f_decr ; [apply interval_l | apply interval_r |] ; intuition.
  unfold Rmax ; destruct (Rle_dec (f lb) (f ub)) ; intuition.
+ subst ; apply Rmax_diag.
 Qed.
 
 Lemma derivable_pt_in_continue_pt_in : forall f D x,

@@ -21,7 +21,7 @@ USA.
 
 Require Import Rbase.
 Require Import Ranalysis.
-Require Import Rfunctions.
+Require Import Rfunctions Rfunction_def.
 Require Import Rseries_def.
 Require Import Fourier.
 Require Import RiemannInt.
@@ -159,172 +159,131 @@ intros f g lb ub lb_le_ub f_incr Hfg Hf b b_in.
        apply interval_restriction_compat with xlb xub ; eassumption.
 Qed.
 
-Lemma continuity_reciprocal_strictly_decreasing_interval : forall (f g:R->R) (lb ub:R),
-       lb <= ub ->
-       strictly_decreasing_interval f lb ub -> 
-       reciprocal_interval g f lb ub ->
-       continuity_interval f lb ub ->
-       continuity_open_interval g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)).
+Lemma continuity_open_interval_opp_compat : forall f lb ub,
+  continuity_open_interval f lb ub ->
+  continuity_open_interval (- f)%F lb ub.
 Proof.
-intros f g lb ub lb_le_ub f_decr f_eq_g f_cont_interv.
- assert (f_incr := strictly_decreasing_strictly_increasing_interval2 _ _ _ f_decr).
- assert (ub_le_lb : - ub <= - lb) by fourier.
- assert ( T : reciprocal_interval (- g)%F (fun x : R => f (- x)) (- ub) (- lb)).
-  intros x x_in_I ; unfold comp ; simpl.
-  replace ((- g)%F (f (- x))) with (- (comp g f) (-x)).
-  rewrite f_eq_g.
-  unfold id ; simpl ; ring.
-  unfold interval in * ; split ; destruct x_in_I ;
-  fourier.
-  reflexivity.
-
- assert (T2 : continuity_interval (fun x : R => f (- x)) (- ub) (- lb)).
-  intros x x_in_I eps eps_pos.
-  assert (x_interv : interval lb ub (-x)).
-   unfold interval in * ; split ; intuition ; fourier.
-  destruct (f_cont_interv (-x) x_interv eps eps_pos) as [alpha [alpha_pos Halpha]] ;
-  exists alpha.
-  split.
-  assumption.
-  intros a Ha.
-  case (Req_dec x a) ; intro Hxa.
-  subst ; simpl ; unfold R_dist ; unfold Rminus ; rewrite Rplus_opp_r, Rabs_R0 ;
-  assumption.
-  apply Halpha ; split.
-  unfold D_x, no_cond ; split.
-  intuition.
-  intro Hf ; apply Hxa.
-  replace x with (- -x) by (apply Ropp_involutive).
-  replace a with (- - a) by (apply Ropp_involutive).
-  apply Ropp_eq_compat ; assumption.
-  simpl ; unfold R_dist, Rminus ; rewrite <- Ropp_plus_distr, Rabs_Ropp ;
-  apply (proj2 Ha).
-
-
- assert (H := continuity_reciprocal_strictly_increasing_interval
-  (fun x => f(-x)) (-g)%F (-ub) (-lb) ub_le_lb f_incr T T2).
- simpl in H ; repeat rewrite Ropp_involutive in H.
- 
-apply continuity_open_interval_opp_rev ; rewrite Rmin_comm, Rmax_comm ;
-assumption.
+intros f lb ub Hf b b_in ; apply limit_Ropp, Hf ; assumption.
 Qed.
 
-Lemma continuity_reciprocal_strictly_monotonous_interval : forall (f g:R->R) (lb ub:R),
-       lb <= ub ->
-       strictly_monotonous_interval f lb ub -> 
-       reciprocal_interval g f lb ub ->
-       continuity_interval f lb ub ->
-       continuity_open_interval g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)).
+Lemma continuity_open_interval_ext : forall (f g : R -> R) lb ub,
+  (f == g)%F -> continuity_open_interval f lb ub ->
+  continuity_open_interval g lb ub.
+Proof.
+intros f g lb ub Heq Hf b b_in ; eapply limit1_in_ext.
+ intros ; apply Heq.
+ rewrite <- (Heq b) ; apply Hf ; assumption.
+Qed.
+
+Lemma R_dist_Ropp_compat : forall x y,
+  R_dist (- x) (- y) = R_dist x y.
+Proof.
+intros x y ; unfold R_dist, Rminus ; rewrite <- Ropp_plus_distr ;
+ apply Rabs_Ropp.
+Qed.
+
+Lemma continuity_open_interval_Ropp_compat : forall f lb ub,
+  continuity_open_interval f lb ub ->
+  continuity_open_interval (fun x => f (- x)) (- ub) (- lb).
+Proof.
+intros f lb ub Hf b b_in eps eps_pos.
+ assert (mb_in : open_interval lb ub (- b)).
+  destruct b_in ; split ; fourier.
+ destruct (Hf _ mb_in _ eps_pos) as [alpha [alpha_pos Halpha]] ;
+ exists alpha ; split ; [assumption | intros x [x_in x_bd]].
+ apply Halpha ; split ; simpl.
+  destruct x_in ; split ; fourier.
+  rewrite R_dist_Ropp_compat ; assumption.
+Qed.
+
+Lemma continuity_open_interval_Ropp_compat_rev : forall f lb ub,
+  continuity_open_interval (fun x => f (- x)) (- ub) (- lb) ->
+  continuity_open_interval f lb ub.
+Proof.
+intros f lb ub Hf ; pose (F := fun x => f (- x)) ;
+ apply continuity_open_interval_ext with (fun x => F (- x)).
+ intro x ; unfold F ; f_equal ; apply Ropp_involutive.
+  rewrite <- (Ropp_involutive lb), <- (Ropp_involutive ub) ;
+  apply continuity_open_interval_Ropp_compat, Hf.
+Qed.
+
+Lemma continuity_reciprocal_strictly_decreasing_open_interval :
+  forall (f g:R->R) (lb ub:R), lb <= ub ->
+  strictly_decreasing_interval f lb ub -> 
+  reciprocal_interval g f lb ub -> continuity_interval f lb ub ->
+  continuity_open_interval g (f ub) (f lb).
+Proof.
+intros f g lb ub lb_le_ub f_incr Hfg Hf ;
+ apply continuity_open_interval_Ropp_compat_rev.
+ apply (continuity_reciprocal_strictly_increasing_open_interval (- f)%F).
+  assumption.
+  apply strictly_decreasing_strictly_increasing_interval ; assumption.
+  apply reciprocal_opp_compat_interval ; assumption.
+  apply continuity_interval_opp_compat ; assumption.
+Qed.
+
+Lemma continuity_reciprocal_strictly_monotonous_open_interval :
+  forall (f g:R->R) (lb ub:R), lb <= ub ->
+  strictly_monotonous_interval f lb ub -> 
+  reciprocal_interval g f lb ub -> continuity_interval f lb ub ->
+  continuity_open_interval g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)).
 Proof.
 intros f g lb ub lb_le_ub f_mono f_eq_g f_cont_interv.
- destruct f_mono as [f_incr | f_decr] ;
- [apply continuity_reciprocal_strictly_increasing_interval |
- apply continuity_reciprocal_strictly_decreasing_interval] ; assumption.
+ destruct f_mono as [f_incr | f_decr].
+ rewrite strictly_increasing_Rmax_simpl, strictly_increasing_Rmin_simpl ;
+ try assumption ; apply continuity_reciprocal_strictly_increasing_open_interval ;
+ assumption.
+ rewrite strictly_decreasing_Rmax_simpl, strictly_decreasing_Rmin_simpl ;
+ try assumption ; apply continuity_reciprocal_strictly_decreasing_open_interval ;
+ assumption.
 Qed.
 
 (** * Derivability of the reciprocal function *)
 
-Lemma derivable_pt_lim_reciprocal_interval : forall (f g:R->R) (lb ub:R)
-       (f_deriv : derivable_interval f (g lb) (g ub)),
-       reciprocal_interval f g lb ub ->
-       forall x (g_incr : interval (g lb) (g ub) (g x)),
-       continuity_pt g x ->
-       open_interval lb ub x ->
-       derive_pt f (g x) (f_deriv (g x) g_incr) <> 0 ->
-       derivable_pt_lim g x (1 / derive_pt f (g x) (f_deriv (g x) g_incr)).
+Lemma derivable_pt_lim_in_reciprocal_interval : forall f g lb ub,
+  reciprocal_interval f g lb ub -> forall x Df_gx,
+  interval (g lb) (g ub) (g x) ->
+  continuity_pt g x -> open_interval lb ub x ->
+  derive_pt f (g x) Df_gx <> 0 ->
+  derivable_pt_lim_in g (open_interval lb ub) x
+    (/ derive_pt f (g x) Df_gx).
 Proof.
-intros f g lb ub f_deriv f_recip_g x g_incr g_cont x_in_I df_neq ; pose (y := g x) ;
- assert (x_encad2 := open_interval_interval _ _ _ x_in_I) ;
- elim (f_deriv (g x)); simpl; intros l Hl ; assert (l_neq : l <> 0) by (intro l_null ;
- rewrite l_null in Hl ; apply df_neq ; rewrite derive_pt_eq ; assumption) ;
- intros eps eps_pos ; fold y.
- assert (Hlinv := limit_inv).
- destruct (Hl eps eps_pos) as [delta Hdelta] ; simpl in Hlinv ; unfold R_dist in Hlinv.
- assert (Hlinv' := Hlinv (fun h => (f (y+h) - f y)/h) (fun h => h <>0) l 0).
- unfold limit1_in, limit_in in Hlinv' ; simpl in Hlinv' ; unfold R_dist in Hlinv'.
- assert (Premisse : (forall eps:R, eps > 0 -> exists alp : R,
-     alp > 0 /\ (forall x : R, (fun h => h <>0) x /\ Rabs (x - 0) < alp ->
-     Rabs ((f (y + x) - f y) / x - l) < eps))).
-  intros eps0 eps0_pos ; elim (Hl eps0 eps0_pos) ; intros delta2 Hdelta2 ;
-  exists delta2 ; split ; [apply delta2.(cond_pos) |].
- intros h [h_neq h_bd] ; rewrite Rminus_0_r in h_bd ; apply Hdelta2 ; assumption.
-  destruct (Hlinv' Premisse l_neq eps eps_pos) as [alpha [alpha_neq Halpha]] ;
-  clear Premisse Hlinv Hlinv' Hl.
-  pose (mydelta := Rmin delta alpha) ; assert (mydelta_pos : 0 < mydelta).
-   unfold mydelta ; apply Rmin_pos_lt ; [apply delta.(cond_pos) | assumption].
-   destruct (g_cont mydelta mydelta_pos) as [delta' [delta'_pos Hdelta']].
-  pose (mydelta'' := Rmin delta' (Rmin (x - lb) (ub - x))) ; assert(mydelta''_pos : mydelta'' > 0).
-   unfold mydelta'' ; repeat apply Rmin_pos_lt ; [assumption | |] ; unfold open_interval in * ;
-   intuition ; fourier.
-  pose (delta'' := mkposreal mydelta'' mydelta''_pos) ; exists delta'' ; intros h h_neq h_bd.
-  assert (Sublemma2 : forall x y, Rabs x < Rabs y -> y > 0 -> x < y).
-   intros m n Hyp_abs y_pos ; apply Rlt_le_trans with (r2:=Rabs n).
-   apply Rle_lt_trans with (r2:=Rabs m) ; [ | assumption] ; apply RRle_abs.
-   apply Req_le ; apply Rabs_right ; apply Rgt_ge ; assumption.
-  assert (xh_encad : interval lb  ub (x +h)).
-   split.
-   assert (Sublemma : forall x y z, -z <= y - x -> x <= y + z) by (intros ; fourier) ;
-   apply Sublemma ; apply Rlt_le ; apply Sublemma2.
-   rewrite Rabs_Ropp.
-   apply Rlt_le_trans with (r2:=x-lb) ; [| apply RRle_abs] ;
-   apply Rlt_le_trans with (r2:=Rmin (x - lb) (ub - x)) ; [| apply Rmin_l] ;
-   apply Rlt_le_trans with (r2:=Rmin delta' (Rmin (x - lb) (ub - x))).
-   assumption.
-   apply Rmin_r.
-   unfold open_interval in * ; intuition ; fourier.
-   assert (Sublemma : forall x y z, y <= z - x -> x + y <= z) by (intros ; fourier) ;
-   apply Sublemma ; apply Rlt_le ; apply Sublemma2.
-   apply Rlt_le_trans with (r2:=ub-x) ; [| apply RRle_abs] ;
-   apply Rlt_le_trans with (r2:=Rmin (x - lb) (ub - x)) ; [| apply Rmin_r] ;
-   apply Rlt_le_trans with (r2:=Rmin delta' (Rmin (x - lb) (ub - x))) ; [| apply Rmin_r] ; assumption.
-   unfold open_interval in * ; intuition ; fourier.
-  assert (g(x+h) - y <> 0).
-   intro Hf ; apply Rminus_diag_uniq in Hf.
-   assert (Hfalse : (comp f g) (x+h) = (comp f g) x).
-    intros ; unfold comp ; rewrite Hf ; trivial.
-   do 2 rewrite f_recip_g in Hfalse ; unfold id in Hfalse.
-   apply Rplus_0_r_uniq in Hfalse ; apply h_neq ; assumption.
-   assumption. assumption. assumption.
-  replace ((g (x + h) - y) / h) with (1/ (h / (g (x + h) - y))).
-  assert (Hrew : h = (comp f g ) (x+h) - (comp f g) x).
-  repeat rewrite f_recip_g ; unfold id ; [ring | |] ; assumption.
-  rewrite Hrew at 1 ; unfold comp ; replace (g(x+h)) with (y + (g (x+h) - y)) by ring ;
-  pose (h':=g (x+h) - y) ; fold y h' ; replace (y + h' - y) with h' by ring.
-  apply Rle_lt_trans with (Rabs (/ ((f (y + h') - f y) / h') - / l)) ;
-  [right ; apply Rabs_eq_compat ; field |] ; repeat split.
-  assumption. assumption.
-  unfold h' ; intro Hf ; replace (y + (g (x+h) -y)) with (g (x+h)) in Hf.
-  unfold reciprocal_interval, comp in f_recip_g ; unfold y in Hf ;
-  do 2 rewrite f_recip_g in Hf ; unfold id in Hf.
-  apply h_neq ; ring_simplify in Hf ; assumption.
-  assumption. assumption. assumption.
-  unfold y ; ring.
-  apply Halpha ; split.
-  assumption.
-  apply Rlt_le_trans with mydelta ; [| apply Rmin_r].
-  rewrite Rminus_0_r ; simpl in Hdelta' ; unfold R_dist, y in * ; apply Hdelta' ;
-  split.
-  unfold D_x, no_cond ; split ; [trivial |].
-  intro Hf ; apply h_neq ; apply Rplus_eq_reg_l with x ; rewrite Rplus_0_r ;
-  symmetry ; assumption.
-  replace (x + h - x) with h by ring ; apply Rlt_le_trans with mydelta''.
-  assumption.
-  apply Rmin_l.
-  field ; split ; assumption.
+intros f g lb ub Hfg x Df_gx gx_in Hgx x_in df_neq.
+ apply limit1_in_ext with (fun y => / ((f (g y) - f (g x)) / (g y - g x))).
+  unfold reciprocal_interval, comp in Hfg ; intros y [y_in y_neq] ;
+  unfold growth_rate ; rewrite Rinv_Rdiv.
+  do 2 (rewrite Hfg ; [| apply open_interval_interval ; assumption]) ;
+   reflexivity.
+  do 2 (rewrite Hfg ; [| apply open_interval_interval ; assumption]).   
+  apply Rminus_eq_contra ; symmetry ; assumption.
+  apply Rminus_eq_contra ; intro Hf ; apply y_neq ; fold (id y) (id x) ;
+  do 2 (rewrite <- Hfg ;  [| apply open_interval_interval ; assumption]) ;
+  rewrite Hf ; reflexivity.
+ apply limit_inv ; [| assumption].
+ destruct Df_gx as [l Hl] ; intros eps eps_pos ;
+ destruct (Hl _ eps_pos) as [[alpha alpha_pos] Halpha] ;
+ destruct (Hgx _ alpha_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split ; [assumption |].
+ intros y [[y_in y_neq] y_bd] ; rewrite (derive_pt_eq_0 _ _ _ _ Hl) ;
+  replace (f (g y)) with (f (g x + (g y - g x))) by (f_equal ; ring) ;
+  simpl ; apply Halpha.
+  apply Rminus_eq_contra ; intro Hf ; apply y_neq ; fold (id y) (id x) ;
+  do 2 (rewrite <- Hfg ;  [| apply open_interval_interval ; assumption]) ;
+  unfold comp ; rewrite Hf ; reflexivity.
+  simpl in Hdelta ; apply Hdelta ; split.
+ split ; unfold no_cond ; trivial.
+ assumption.
 Qed.
 
-Lemma derivable_pt_reciprocal_interval : forall (f g:R->R) (lb ub:R)
-       (f_deriv : derivable_interval f (g lb) (g ub)),
-       reciprocal_interval f g lb ub ->
-       forall x (g_incr : interval (g lb) (g ub) (g x)),
-       continuity_pt g x ->
-       open_interval lb ub x ->
-       derive_pt f (g x) (f_deriv (g x) g_incr) <> 0 ->
-       derivable_pt g x.
+Lemma derivable_pt_reciprocal_interval : forall f g lb ub,
+  reciprocal_interval f g lb ub -> forall x Df_gx,
+  interval (g lb) (g ub) (g x) ->
+  continuity_pt g x -> open_interval lb ub x ->
+  derive_pt f (g x) Df_gx <> 0 ->
+  derivable_pt_in g (open_interval lb ub) x.
 Proof.
-intros ; exists (1 / derive_pt f (g x) (f_deriv (g x) g_incr)) ;
- apply derivable_pt_lim_reciprocal_interval ;
- assumption.
+intros ; eexists ; eapply derivable_pt_lim_in_reciprocal_interval ;
+ eassumption.
 Qed.
 
 Lemma derivable_pt_reciprocal_interval_rev :forall (f g:R->R) (lb ub x : R),
