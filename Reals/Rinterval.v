@@ -428,15 +428,14 @@ Proof.
 intros lb ub x [x_lb x_ub] ; apply Rmin_pos ; fourier.
 Qed.
 
-Lemma interval_dist_bound: forall lb ub x,
-  open_interval lb ub x ->
+Lemma open_interval_dist_bound:
+  forall lb ub x, interval lb ub x ->
   forall h, Rabs h < interval_dist lb ub x ->
   open_interval lb ub (x + h).
 Proof.
 intros lb ub x x_in h h_bd ;
  assert (H := Rabs_def2 _ _ h_bd) ;
  destruct H as [x_lb x_ub].
- unfold interval_dist in *.
   assert (H1: - (x - lb) < h).
    apply Rle_lt_trans with (- Rmin (x - lb) (ub - x)).
     apply Ropp_le_contravar, Rmin_l.
@@ -445,7 +444,36 @@ intros lb ub x x_in h h_bd ;
    apply Rlt_le_trans with (Rmin (x - lb) (ub - x)).
     assumption.
     apply Rmin_r.
-  unfold open_interval ; clear -H1 H2 ; split ; fourier.
+  split ; clear -H1 H2 ; fourier.
+Qed.
+
+Lemma Ropp_eq_compat_l : forall x y, - x = y -> x = - y.
+Proof.
+intros x y [] ; symmetry ; apply Ropp_involutive.
+Qed.
+
+Lemma interval_dist_bound:
+  forall lb ub x : R, interval lb ub x ->
+  forall h : R,
+  Rabs h <= interval_dist lb ub x -> interval lb ub (x + h).
+Proof.
+intros lb ub x x_in h [h_bd | heq].
+ apply open_interval_interval, open_interval_dist_bound ;
+  assumption.
+ unfold Rabs in heq ; destruct (Rcase_abs h).
+  split ; rewrite (Ropp_eq_compat_l _ _ heq).
+   transitivity (x + - (x - lb)) ; [right ; ring |] ;
+   apply Rplus_le_compat_l, Ropp_le_contravar, Rmin_l.
+   transitivity (ub + - (interval_dist lb ub x)).
+    apply Rplus_le_compat_r, x_in.
+    transitivity (ub + - 0) ; [| right ; ring].
+    apply Rplus_le_compat_l, Ropp_le_contravar,
+     interval_dist_pos ; assumption.
+  split ; subst.
+   transitivity (x + 0) ; [ring_simplify ; apply x_in |].
+    apply Rplus_le_compat_l, interval_dist_pos ; assumption.
+   transitivity (x + (ub - x)) ; [| right ; ring].
+    apply Rplus_le_compat_l, Rmin_r.
 Qed.
 
 Lemma Rball_dist_pos: forall c r r_pos x,
@@ -461,7 +489,7 @@ Lemma Rball_dist_bound: forall c r r_pos x,
   forall h, Rabs h < Rball_dist c r x ->
   Rball c r r_pos (x + h).
 Proof.
-intros ; apply interval_Rball, interval_dist_bound.
- eapply Rball_interval ; eassumption.
+intros ; apply interval_Rball, open_interval_dist_bound.
+ eapply open_interval_interval, Rball_interval ; eassumption.
  assumption.
 Qed.
