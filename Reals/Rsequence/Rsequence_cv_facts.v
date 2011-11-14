@@ -309,7 +309,7 @@ Qed.
 (**********)
 Lemma Rseq_cv_finite_plus_pos_infty_r : forall l,
   Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
-    Rseq_cv_pos_infty (Un + Vn).
+  Rseq_cv_pos_infty (Un + Vn).
 Proof.
 intros l Hl Hf m.
 destruct (Hl 1 Rlt_zero_1) as [N HN].
@@ -338,10 +338,10 @@ Qed.
 
 (**********)
 Lemma Rseq_cv_finite_plus_pos_infty_l : forall l,
-  Rseq_cv Un l -> Rseq_cv_pos_infty Vn ->
-    Rseq_cv_pos_infty (Vn + Un).
+  Rseq_cv_pos_infty Vn -> Rseq_cv Un l -> 
+  Rseq_cv_pos_infty (Vn + Un).
 Proof.
-intros l Hl Hf m.
+intros l Hf Hl m.
 destruct (Hl 1 Rlt_zero_1) as [N HN].
 destruct (Hf (m-(l -1))%R) as [N0 HN0].
 exists (N+N0)%nat.
@@ -369,7 +369,7 @@ Qed.
 (**********)
 Lemma Rseq_cv_pos_pos_infty_mult :
   Rseq_cv_pos_infty Un -> Rseq_cv_pos_infty Vn ->
-    Rseq_cv_pos_infty (Un * Vn).
+  Rseq_cv_pos_infty (Un * Vn).
 Proof.
 intros Hu Hv M.
 destruct (Hu (Rabs M)) as [Nu HNu].
@@ -446,7 +446,7 @@ Qed.
 (**********)
 Lemma Rseq_cv_finite_plus_neg_infty_r : forall l, 
   Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
-    Rseq_cv_neg_infty (Un + Vn).
+  Rseq_cv_neg_infty (Un + Vn).
 Proof.
 intros l Hl Hf M.
 destruct (Hl 1 Rlt_zero_1) as [N HN].
@@ -471,10 +471,10 @@ Qed.
 
 (**********)
 Lemma Rseq_cv_finite_plus_neg_infty_l : forall l, 
-  Rseq_cv Un l -> Rseq_cv_neg_infty Vn ->
-    Rseq_cv_neg_infty (Vn + Un).
+  Rseq_cv_neg_infty Vn -> Rseq_cv Un l ->
+  Rseq_cv_neg_infty (Vn + Un).
 Proof.
-intros l Hl Hf M.
+intros l Hf Hl M.
 destruct (Hl 1 Rlt_zero_1) as [N HN].
 destruct (Hf (M-(l +1))%R) as [N0 HN0].
 exists (N+N0)%nat.
