@@ -28,8 +28,8 @@ apply Rser_pos_maj_cv with (/ (Rseq_shift INR * Rseq_shifts INR 2)).
   destruct p ; [| assert (H := lt_0_INR _ (lt_0_Sn p))] ; fourier.
   rewrite <- Rminus_0_r ; apply Rseq_cv_minus_compat ; [apply Rseq_constant_cv |].
    apply Rseq_cv_pos_infty_inv_compat ; eapply Rseq_cv_pos_infty_eq_compat ;
-   [| eapply Rseq_cv_finite_plus_pos_infty_l ; [eexact (Rseq_constant_cv 2) |
-   eapply (Rseq_poly_cv 1)]].
+   [| eapply Rseq_cv_finite_plus_pos_infty_l ; [eapply (Rseq_poly_cv 1) |
+   eexact (Rseq_constant_cv 2)]].
   intro p ; unfold Rseq_shifts, Rseq_poly, Rseq_plus, Rseq_constant, pow ;
    rewrite plus_INR ; simpl ; ring.
   apply lt_O_Sn.
