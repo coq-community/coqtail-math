@@ -488,6 +488,11 @@ Definition injective_interval (f : R -> R) (lb ub:R) := forall (x y:R),
 Definition surjective_interval (f : R -> R) (lb ub:R) := forall y:R,
       interval lb ub y -> exists x:R, y = f x.
 
+Definition injective_open_interval (f : R -> R) (lb ub:R) := forall (x y:R),
+      open_interval lb ub x -> open_interval lb ub y -> f x = f y -> x = y.
+Definition surjective_open_interval (f : R -> R) (lb ub:R) := forall y:R,
+      open_interval lb ub y -> exists x:R, y = f x.
+
 Definition injective (f : R -> R) := forall (x y:R), f x = f y -> x = y.
 Definition surjective (f : R -> R) := forall y:R, exists x:R, y = f x.
 Definition bijective (f : R -> R) := injective f /\ surjective f.
@@ -498,6 +503,14 @@ Definition strictly_decreasing_interval (f : R -> R) (lb ub:R) := forall x y,
        interval lb ub x -> interval lb ub y -> x < y -> f y < f x.
 Definition strictly_monotonous_interval (f : R -> R) (lb ub : R) :=
      {strictly_increasing_interval f lb ub} + {strictly_decreasing_interval f lb ub}.
+
+Definition strictly_increasing_open_interval (f : R -> R) (lb ub:R) :=
+  forall x y, open_interval lb ub x -> open_interval lb ub y -> x < y -> f x < f y.
+Definition strictly_decreasing_open_interval (f : R -> R) (lb ub:R) :=
+  forall x y, open_interval lb ub x -> open_interval lb ub y -> x < y -> f y < f x.
+Definition strictly_monotonous_open_interval (f : R -> R) (lb ub : R) :=
+  {strictly_increasing_open_interval f lb ub}
+  + {strictly_decreasing_open_interval f lb ub}.
 
 Definition increasing_interval (f : R -> R) (lb ub:R) := forall x y,
        interval lb ub x -> interval lb ub y -> x <= y -> f x <= f y.

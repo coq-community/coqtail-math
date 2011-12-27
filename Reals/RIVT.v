@@ -97,7 +97,7 @@ intros x y z [xz zy] x_neq y_neq ; split ;
  apply Rle_neq_lt ; auto.
 Qed.
 
-Lemma IVT_open_interval : forall (f : R -> R) (x y : R),
+Lemma IVT_open_interval_prelim : forall (f : R -> R) (x y : R),
   continuity_interval f x y -> x < y -> open_interval (f x) (f y) 0 ->
   {z : R | open_interval x y z /\ f z = 0}.
 Proof.
@@ -114,6 +114,7 @@ intros f x y Hf xlty O_in ; assert (xley := Rlt_le _ _ xlty) ;
   apply Rseq_negative_limit with (fun n => f (Zn' n)).
   intro n ; left ; rewrite <- cond_positivity_car' ; fold (P (Zn' n)) ;
   apply dicho_lb_car ; unfold P ; rewrite cond_positivity_car' ; apply O_in.
+
   eapply Rseq_cv_continuity_interval_compat ; [eapply dicho_interval_compat |
   intro ; apply dicho_steps_interval_compat | |] ; eassumption.
 
@@ -132,18 +133,31 @@ intros f x y Hf xlty O_in ; assert (xley := Rlt_le _ _ xlty) ;
    apply Rlt_le_trans with (f z) ; [apply O_in | right ; apply fz_eq].
 Qed.
 
-Lemma IVT_interval : forall (f : R -> R) (x y : R),
-  continuity_interval f x y -> x <= y -> interval (f x) (f y) 0 ->
-  {z : R | interval x y z /\ f z = 0}.
+Lemma IVT_open_interval : forall (f : R -> R) (x y : R) l,
+  continuity_interval f x y -> x < y -> open_interval (f x) (f y) l ->
+  { z : R | open_interval x y z /\ f z = l }.
 Proof.
-intros f x y Hf xley [fxleO Olefy] ;
+intros f x y l Hf Hxy Hl ;
+ destruct IVT_open_interval_prelim with (f - (fun _ => l))%F x y as [z [z_in Hz]].
+  apply continuity_interval_minus_compat, continuity_interval_const ; assumption.
+  assumption.
+  clear - Hl; destruct Hl ; split ; unfold minus_fct ; fourier.
+ exists z ; split ; [assumption |].
+  clear - Hz ; unfold minus_fct in * ; intuition.
+Qed. 
+
+Lemma IVT_interval : forall (f : R -> R) (x y : R) l,
+  continuity_interval f x y -> x <= y -> interval (f x) (f y) l ->
+  {z : R | interval x y z /\ f z = l}.
+Proof.
+intros f x y l Hf xley [fxlel llefy] ;
  destruct (Rle_lt_or_eq_dec _ _ xley) as [xlty | xeqy].
- destruct (Rle_lt_or_eq_dec _ _ fxleO) as [fxltO | fxeqO].
- destruct (Rle_lt_or_eq_dec _ _ Olefy) as [Oltfy | Oeqfy].
- destruct (IVT_open_interval _ _ _ Hf xlty) as [z [z_in Hz]].
+ destruct (Rle_lt_or_eq_dec _ _ fxlel) as [fxltl | fxeql].
+ destruct (Rle_lt_or_eq_dec _ _ llefy) as [lltfy | leqfy].
+ destruct (IVT_open_interval _ _ _ l Hf xlty) as [z [z_in Hz]].
   split ; assumption.
   exists z ; split ; [apply open_interval_interval |] ; assumption.
   exists y ; split ; [apply interval_r |] ; auto.
   exists x ; split ; [apply interval_l |] ; auto.
   exists y ; subst ; split ; [apply interval_r | apply Rle_antisym] ; auto.
-Qed.  
+Qed.

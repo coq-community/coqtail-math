@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Rbase.
+Require Import Rbase Rtactic.
 Require Import PSeries_reg.
 Require Import Fourier.
 Require Import Ranalysis.
@@ -27,255 +27,233 @@ Require Import Rfunctions.
 Require Import AltSeries.
 Require Import Rseries_def.
 Require Import SeqProp.
-Require Import Rinterval Ranalysis_def.
+Require Import Rinterval Ranalysis_def Ranalysis_facts.
 Require Import Ranalysis5.
 Require Import RIVT.
 Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
+
 Open Scope R_scope.
 
-(* Proofs largely inspired from Guillaume Allais's work on sin(PI/2) = 1 *)
-Open Scope R_scope.
-
-(** * Positivity of cosine *)
-
-Lemma cos_pos : forall x, -PI/2 < x < PI/2 -> cos x > 0.
-Proof. intros.
-apply Rlt_gt.
-apply cos_gt_0. unfold Rdiv in *. destruct H. ring_simplify.
-assumption.
-destruct H. assumption.
-Qed.
-
-Lemma derivable_pt_tan : forall x, -PI/2 < x < PI/2 -> derivable_pt tan x.
+Lemma cos_pos : forall x, open_interval (- PI/2) (PI/2) x -> 0 < cos x.
 Proof.
-intros.
- unfold derivable_pt, tan. 
- apply derivable_pt_div ; [reg | reg | ].
- apply Rgt_not_eq.
- unfold Rgt ; apply cos_pos ; split ; destruct H ; assumption. 
+intros x [xlb xub] ; apply cos_gt_0 ; unfold Rdiv ;
+ ring_simplify ; assumption.
 Qed.
 
-Lemma derive_pt_tan2 : forall (x:R), forall (Pr1:cos x <> 0),
- forall (Prtan:derivable_pt tan x), derive_pt tan x Prtan = 1 + (tan x)^2.
+Lemma derivable_derivable_open_interval : forall f lb ub,
+  derivable f -> derivable_open_interval f lb ub.
 Proof.
-intros.
- unfold tan.
- reg.
- unfold pow, Rsqr.
- field; assumption.
+intros f lb ub pr x x_in ; apply derivable_pt_derivable_pt_in, pr.
 Qed.
 
-Lemma derive_pt_tan : forall (x:R),
- forall (Pr:-PI/2 < x < PI/2),
- derive_pt tan x (derivable_pt_tan x Pr) = 1 + (tan x)^2.
+Lemma derivable_open_interval_id : forall lb ub, derivable_open_interval id lb ub.
 Proof.
-intros.
- apply derive_pt_tan2.
- apply Rgt_not_eq.
- apply cos_pos ; split ; destruct Pr ; assumption.
+intros ; apply derivable_derivable_open_interval, derivable_id.
 Qed.
 
-Lemma derive_increasing_interv :
-  forall (a b:R) (f:R -> R),
-    a < b ->
-    forall (pr:forall x, a < x < b -> derivable_pt f x),
-    (forall t:R, forall (t_encad : a < t < b), 0 < derive_pt f t (pr t t_encad)) ->
-    forall x y:R, a < x < b -> a < y < b -> x < y -> f x < f y.
+Lemma derive_pt_id : forall x pr, derive_pt id x pr = 1.
 Proof.
-intros a b f a_lt_b pr Df_gt_0 x y x_encad y_encad x_lt_y.
- assert (derivable_id_interv : forall c : R, x < c < y -> derivable_pt id c).
-  intros ; apply derivable_pt_id.
- assert (derivable_f_interv :  forall c : R, x < c < y -> derivable_pt f c).
-  intros c c_encad. apply pr. split.
-  apply Rlt_trans with (r2:=x) ; [exact (proj1 x_encad) | exact (proj1 c_encad)].
-  apply Rlt_trans with (r2:=y) ; [exact (proj2 c_encad) | exact (proj2 y_encad)].
- assert (f_cont_interv : forall c : R, x <= c <= y -> continuity_pt f c).
-  intros c c_encad; apply derivable_continuous_pt ; apply pr. split.
-  apply Rlt_le_trans with (r2:=x) ; [exact (proj1 x_encad) | exact (proj1 c_encad)].
-  apply Rle_lt_trans with (r2:=y) ; [ exact (proj2 c_encad) | exact (proj2 y_encad)].
- assert (id_cont_interv : forall c : R, x <= c <= y -> continuity_pt id c).
-  intros ; apply derivable_continuous_pt ; apply derivable_pt_id. 
- elim (MVT f id x y derivable_f_interv derivable_id_interv x_lt_y f_cont_interv id_cont_interv).
-  intros c Temp ; elim Temp ; clear Temp ; intros Pr eq.
-   replace (id y - id x) with (y - x) in eq by intuition.
-   replace (derive_pt id c (derivable_id_interv c Pr)) with 1 in eq.
-   assert (Hyp : f y - f x > 0).
-    rewrite Rmult_1_r in eq. rewrite <- eq.
-    apply Rmult_gt_0_compat.
-    apply Rgt_minus ; assumption.
-    assert (c_encad2 : a <= c < b).
-     split.
-     apply Rlt_le ; apply Rlt_trans with (r2:=x) ; [exact (proj1 x_encad) | exact (proj1 Pr)].
-     apply Rle_lt_trans with (r2:=y) ; [apply Rlt_le ; exact (proj2 Pr) | exact (proj2 y_encad)].
-     assert (c_encad : a < c < b).
-      split.
-      apply Rlt_trans with (r2:=x) ; [exact (proj1 x_encad) | exact (proj1 Pr)].
-      apply Rle_lt_trans with (r2:=y) ; [apply Rlt_le ; exact (proj2 Pr) | exact (proj2 y_encad)].
-     assert (Temp := Df_gt_0 c c_encad).
-     assert (Temp2 := pr_nu f c (derivable_f_interv c Pr) (pr c c_encad)).
-     rewrite Temp2 ; apply Temp.
-   apply Rminus_gt ; exact Hyp.
-   symmetry ; rewrite derive_pt_eq ; apply derivable_pt_lim_id.
+intros ; rewrite <- derive_pt_id with x ; apply pr_nu_var ; reflexivity.
 Qed.
 
-(* begin hide *)
-Lemma plus_Rsqr_gt_0 : forall x, 1 + x ^ 2 > 0.
-intro m. replace 0 with (0+0) by intuition.
- apply Rplus_gt_ge_compat. intuition.
- elim (total_order_T m 0) ; intro s'. case s'.
- intros m_cond. replace 0 with (0*0) by intuition.
-  replace (m ^ 2) with ((-m)^2).
-  apply Rle_ge ; apply Rmult_le_compat ; intuition ; apply Rlt_le ; rewrite Rmult_1_r ; intuition.
-  field.
-  intro H' ; rewrite H' ; right ; field.
-   left. intuition.
-Qed.
-(* end hide *)
-
-Lemma tan_increasing :
-  forall x y:R,
-    -PI/2 < x ->
-    x < PI/2 -> -PI/2 < y -> y < PI/2 -> x < y -> tan x < tan y.
+Lemma derivable_open_interval_tan : derivable_open_interval tan (- PI / 2) (PI / 2).
 Proof.
-intros x y x_encad1 x_encad2 y_encad1 y_encad2 Hyp.
- assert (x_encad : -PI/2 < x < PI/2) by intuition.
- assert (y_encad : -PI/2 < y < PI/2) by intuition.
- assert (local_derivable_pt_tan : forall x : R, -PI/2 < x < PI/2 -> derivable_pt tan x).
-  intros ; apply derivable_pt_tan ; intuition.
- apply derive_increasing_interv with (a:=-PI/2) (b:=PI/2) (pr:=local_derivable_pt_tan) ; intuition.
- fourier.
- assert (t_encad1 : -PI/2 < t < PI/2) by intuition.
- assert (Temp := pr_nu tan t (derivable_pt_tan t t_encad1) (local_derivable_pt_tan t t_encad)) ;
- rewrite <- Temp ; clear Temp.
- assert (Temp := derive_pt_tan t t_encad1) ; rewrite Temp ; clear Temp.
- apply plus_Rsqr_gt_0. 
+intros x x_in ; apply derivable_pt_derivable_pt_in, derivable_pt_div ;
+ try reg ; apply Rgt_not_eq, cos_pos ; assumption.
 Qed.
 
-Lemma tan_increasing2 :
-  forall x y:R,
-    -PI/2 < x ->
-    x < y -> 
-    y < PI/2 -> tan x < tan y.
+Lemma continuity_open_interval_tan : continuity_open_interval tan (- PI / 2) (PI / 2).
 Proof.
-intros x y Z_le_x x_lt_y y_le_1.
- assert (x_encad : -PI/2 < x < PI/2).
-  split ; [assumption | apply Rlt_trans with (r2:=y) ; assumption].
- assert (y_encad : -PI/2 < y < PI/2).
-  split ; [apply Rlt_trans with (r2:=x) ; intuition | intuition ].
- assert (local_derivable_pt_tan : forall x : R, -PI/2 < x < PI/2 -> derivable_pt tan x).
-  intros ; apply derivable_pt_tan ; intuition.
- apply derive_increasing_interv with (a:=-PI/2) (b:=PI/2) (pr:=local_derivable_pt_tan) ; intuition.
- fourier.
- assert (t_encad1 : -PI/2 < t < PI/2) by intuition.
- assert (Temp := pr_nu tan t (derivable_pt_tan t t_encad1) (local_derivable_pt_tan t t_encad)) ;
- rewrite <- Temp ; clear Temp.
- assert (Temp := derive_pt_tan t t_encad1) ; rewrite Temp ; clear Temp.
- apply plus_Rsqr_gt_0.
+intros ; apply derivable_continuous_open_interval, derivable_open_interval_tan.
 Qed.
 
-Lemma tan_is_inj : forall x y, -PI/2 < x < PI/2 -> -PI/2 < y < PI/2 -> tan x = tan y -> x = y.
-  intros a b a_encad b_encad fa_eq_fb.
-  case(total_order_T a b).
-  intro s ; case s ; clear s.
-  intro Hf.
-  assert (Hfalse := tan_increasing a b (proj1 a_encad) (proj2 a_encad) (proj1 b_encad) (proj2 b_encad) Hf).
-  apply False_ind. apply (Rlt_not_eq (tan a) (tan b)) ; assumption.
-  intuition.
-  intro Hf. assert (Hfalse := tan_increasing b a (proj1 b_encad) (proj2 b_encad) (proj1 a_encad) (proj2 a_encad) Hf).
-  apply False_ind. apply (Rlt_not_eq (tan b) (tan a)) ; [|symmetry] ; assumption.
-Qed.
-
-Lemma tan_interv_is_interv : forall lb ub y, lb < ub -> -PI/2 < lb -> ub < PI/2 ->
- tan lb < y < tan ub -> {x | lb < x < ub /\ tan x = y}.
+Lemma derive_pt_tan : forall x (cosx_neq: cos x <> 0) (pr: derivable_pt tan x),
+ derive_pt tan x pr = 1 + (tan x) ^ 2.
 Proof.
-intros lb ub y lb_lt_ub lb_cond ub_cond y_encad.
- case y_encad ; intro y_encad1.
-  intros y_encad2.
-     assert (f_cont : forall a : R, lb <= a <= ub -> continuity_pt tan a).
-      intros a a_encad. apply derivable_continuous_pt ; apply derivable_pt_tan.
-      split. Focus 2.
-      apply Rle_lt_trans with (r2:=ub) ; intuition. 
-      apply Rlt_le_trans with (r2:=lb) ; intuition.
-     assert (Cont : forall a : R, lb <= a <= ub -> continuity_pt (fun x => tan x - y) a).
-      intros a a_encad. unfold continuity_pt, continue_in, limit1_in, limit_in ; simpl ; unfold R_dist.
-      intros eps eps_pos. elim (f_cont a a_encad eps eps_pos).
-      intros alpha alpha_pos. destruct alpha_pos as (alpha_pos,Temp).
-      exists alpha. split.
-      assumption. intros x  x_cond.
-      replace (tan x - y - (tan a - y)) with (tan x - tan a) by field.
-      exact (Temp x x_cond).
-     assert (H1 : (fun x : R => tan x - y) lb < 0).
-       apply Rlt_minus. assumption.
-      assert (H2 : 0 < (fun x : R => tan x - y) ub).
-       apply Rgt_minus. assumption.
-      assert (Hinterval : interval ((fun x : R => tan x - y) lb) ( (fun x : R => tan x - y) ub) 0) by
-       (unfold interval ; split ; intuition).
-     destruct (IVT_interv (fun x => tan x - y) lb ub Cont lb_lt_ub Hinterval) as (x,Hx).
-     exists x.
-     destruct Hx as (Hyp,Result).
-     intuition.
-     assert (Temp2 : x <> lb).
-      intro Hfalse. rewrite Hfalse in Result.
-      assert (Temp2 : y <> tan lb).
-       apply Rgt_not_eq ; assumption.
-      clear - Temp2 Result. apply Temp2.
-      intuition.
-     clear -Temp2 Hyp.
-      case (proj1 Hyp) ; intuition. apply False_ind ; apply Temp2 ; symmetry ; assumption.
-      assert (Temp : x <> ub).
-      intro Hfalse. rewrite Hfalse in Result.
-      assert (Temp2 : y <> tan ub).
-       apply Rlt_not_eq ; assumption.
-      clear - Temp2 Result. apply Temp2.
-      intuition.
-      case (proj2 Hyp) ; intuition.
+intros ; unfold tan ; reg ; unfold Rsqr ; simpl ; field ; assumption.
 Qed.
 
-Lemma exists_myatan : forall lb ub y, -PI/2 < lb -> ub < PI/2 -> lb < ub ->
-      tan lb <= y <= tan ub -> {x | lb <= x <= ub /\  tan x = y}.
+Lemma derive_pt_derive_open_interval : forall f lb ub x
+  (pr1 : derivable_open_interval f lb ub) (pr2 : derivable_pt f x),
+  open_interval lb ub x ->
+  derive_open_interval f lb ub pr1 x = derive_pt f x pr2.
 Proof.
- intros lb ub y lb_def ub_def lb_lt_ub y_encad. assert (Temp := PI_RGT_0).
-destruct y_encad as [y_encad1 y_encad2].
-destruct (total_order_T (tan lb) y) as [[ysup|yeq]|yinf] ;
-destruct (total_order_T (tan ub) y) as [[ysup1|yeq1]|yinf1].
-fourier.
-exists ub. intuition.
-assert (H : {x | lb < x < ub /\ tan x = y}).
-apply tan_interv_is_interv ; intuition.
-destruct H as (x, H).
-exists x. intuition.
-exists lb. intuition.
-rewrite <- yeq in yeq1. apply tan_is_inj in yeq1.
-rewrite yeq1 in lb_lt_ub. fourier. intuition. 
-eapply Rlt_trans. apply lb_def. apply lb_lt_ub.
-intuition. eapply Rlt_trans. apply lb_lt_ub. apply ub_def.
-exists lb. intuition.
-fourier.
-fourier.
-fourier.
+intros f lb ub x pr1 [l Hl] Hx ; unfold derive_open_interval ;
+ destruct (in_open_interval_dec lb ub x) as [x_in | x_out].
+  destruct (pr1 x x_in) as [l' Hl'] ; apply uniqueness_limite with f x.
+   eapply derivable_pt_lim_open_interval_derivable_pt_lim ; eassumption.
+   assumption.
+  contradiction.
 Qed.
 
-Lemma lim_cos : limit1_in  cos (fun x => True /\ PI/2 <> x) 0 (PI/2).
+Lemma derive_open_interval_tan : forall x (x_in : open_interval (- PI / 2) (PI / 2) x)
+ (pr : derivable_open_interval tan (- PI / 2) (PI / 2)),
+ derive_open_interval tan (- PI / 2) (PI / 2) pr x = 1 + (tan x) ^ 2.
+Proof.
+intros x x_in pr.
+ assert (cos_neq : cos x <> 0) by (apply Rgt_not_eq, cos_pos ; assumption).
+ assert (pr' : derivable_pt tan x) by (apply derivable_pt_div ; (reg || assumption)).
+ rewrite <- (derive_pt_tan _ cos_neq pr') ; apply derive_pt_derive_open_interval ;
+ assumption.
+Qed.
+
+Lemma derive_open_interval_pos_strictly_increasing_open_interval :
+  forall f lb ub (pr : derivable_open_interval f lb ub),
+  (forall x (x_in : open_interval lb ub x), 0 < derive_open_interval f lb ub pr x) ->
+  strictly_increasing_open_interval f lb ub.
+Proof.
+intros f lb ub pr Df_pos x y x_in y_in Hxy.
+ assert (pr1 : forall c : R, x < c < y -> derivable_pt f c).
+  intros ; eapply derivable_open_interval_derivable_pt ; [eapply pr |].
+   eapply open_interval_restriction_compat ; try eassumption ;
+   apply open_interval_interval ; eassumption.
+ assert (pr2 : forall c : R, x < c < y -> derivable_pt id c) by (intros ; apply derivable_id).
+ destruct (MVT f id x y pr1 pr2) as [c [c_in Hc]].
+  assumption.
+  intros ; eapply derivable_continuous_pt, derivable_open_interval_derivable_pt ;
+   [eapply pr | apply interval_open_restriction_compat with x y ; assumption].
+  intros ; reg.
+  unfold id in Hc ; fold id in Hc ; replace (derive_pt id c (pr2 c c_in)) with 1 in Hc ;
+   [rewrite Rmult_1_r in Hc |].
+  apply Rminus_gt ; rewrite <- Hc ; apply Rmult_lt_0_compat ; [fourier |].
+   erewrite <- derive_pt_derive_open_interval ; [eapply Df_pos |] ;
+    eapply open_interval_restriction_compat ;
+    try (eapply open_interval_interval || apply c_in) ; eassumption.
+  symmetry ; apply derive_pt_id.
+Qed.
+
+Lemma sqr_pos : forall x, 0 <= x ^ 2.
+Proof.
+ intros ; rewrite <- Rsqr_pow2 ; apply Rle_0_sqr.
+Qed.
+
+Lemma One_plus_sqr_pos_lt : forall x, 0 < 1 + x ^ 2.
+Proof.
+intro x ; replace 0 with (0 + 0) by ring ;
+ apply Rplus_lt_le_compat ; [fourier | apply sqr_pos].
+Qed.
+
+Lemma strictly_increasing_open_interval_tan :
+  strictly_increasing_open_interval tan (- PI / 2) (PI / 2).
+Proof.
+apply derive_open_interval_pos_strictly_increasing_open_interval
+ with (derivable_open_interval_tan).
+intros x x_in ; rewrite derive_open_interval_tan ;
+ [apply One_plus_sqr_pos_lt | assumption].
+Qed.
+
+Lemma strictly_increasing_injective_open_interval : forall f lb ub,
+  strictly_increasing_open_interval f lb ub -> injective_open_interval f lb ub.
+Proof.
+intros f lb ub Hf x y x_in y_in Heq ; destruct (Rlt_le_dec x y) as [x_lt_y | y_le_x].
+ destruct (Rlt_irrefl (f x)) ; apply Rlt_le_trans with (f y).
+  apply Hf ; assumption.
+  rewrite Heq ; reflexivity.
+ destruct y_le_x as [y_lt_x | y_eq_x] ; [| symmetry ; trivial].
+  destruct (Rlt_irrefl (f x)) ; apply Rle_lt_trans with (f y).
+   right ; assumption.
+   apply Hf ; assumption.
+Qed.
+
+Lemma strictly_increasing_open_interval_order : forall f lb ub a b,
+  open_interval lb ub a -> open_interval lb ub b ->
+  strictly_increasing_open_interval f lb ub ->
+  f a < f b -> a < b.
+Proof.
+intros f lb ub a b a_in b_in Hf Hfafb ; destruct (Rlt_le_dec a b) as [altb | blea].
+ assumption.
+ destruct blea as [blta | beqa].
+  destruct (Rlt_irrefl (f a)) ; transitivity (f b).
+   assumption.
+   apply Hf ; assumption.
+  rewrite beqa in Hfafb ; destruct (Rlt_irrefl _ Hfafb).
+Qed.
+
+Lemma strictly_increasing_interval_order : forall f lb ub a b,
+  open_interval lb ub a -> open_interval lb ub b ->
+  strictly_increasing_open_interval f lb ub ->
+  f a <= f b -> a <= b.
+Proof.
+intros f lb ub a b a_in b_in Hf Hfafb ; destruct (Rle_lt_dec a b) as [aleb | blta].
+ assumption.
+ destruct (Rlt_irrefl (f a)) ; apply Rle_lt_trans with (f b).
+  assumption.
+  apply Hf ; assumption.
+Qed.
+
+Lemma strictly_increasing_injective_interval : forall f lb ub,
+  strictly_increasing_interval f lb ub -> injective_interval f lb ub.
+Proof.
+intros f lb ub Hf x y x_in y_in Heq ; destruct (Rlt_le_dec x y) as [x_lt_y | y_le_x].
+ destruct (Rlt_irrefl (f x)) ; apply Rlt_le_trans with (f y).
+  apply Hf ; assumption.
+  rewrite Heq ; reflexivity.
+ destruct y_le_x as [y_lt_x | y_eq_x] ; [| symmetry ; trivial].
+  destruct (Rlt_irrefl (f x)) ; apply Rle_lt_trans with (f y).
+   right ; assumption.
+   apply Hf ; assumption.
+Qed.
+
+Lemma injective_open_interval_tan : injective_open_interval tan (- PI / 2) (PI / 2).
+Proof.
+apply strictly_increasing_injective_open_interval ;
+apply strictly_increasing_open_interval_tan.
+Qed.
+
+Lemma continuity_open_interval_continuity_interval : forall f lb ub x y,
+  continuity_open_interval f lb ub -> open_interval lb ub x ->
+  open_interval lb ub y -> continuity_interval f x y.
+Proof.
+intros f lb ub x y Hf x_in y_in z z_in ; eapply limit1_imp, Hf.
+ intros t t_in ; eapply interval_open_restriction_compat, t_in ; assumption.
+ eapply interval_open_restriction_compat, z_in ; assumption.
+Qed.
+
+Lemma tan_reciprocal_image : forall lb ub y,
+  open_interval (- PI / 2) (PI / 2) lb ->
+  open_interval (- PI / 2) (PI / 2) ub ->
+  open_interval (tan lb) (tan ub) y ->
+  { x | open_interval lb ub x /\ tan x = y }.
+Proof.
+intros lb ub y lb_in ub_in y_in ; apply IVT_open_interval.
+ eapply continuity_open_interval_continuity_interval ; try eassumption.
+ apply continuity_open_interval_tan.
+ eapply strictly_increasing_open_interval_order ; try eassumption.
+  apply strictly_increasing_open_interval_tan.
+  eapply open_interval_inhabited ; eassumption.
+ assumption.
+Qed.
+
+Lemma exists_atan : forall lb ub y,
+  open_interval (- PI / 2) (PI / 2) lb ->
+  open_interval (- PI / 2) (PI / 2) ub ->
+  interval (tan lb) (tan ub) y ->
+  { x | interval lb ub x /\ tan x = y }.
+Proof.
+intros lb ub y lb_in ub_in y_bd.
+ assert (Hbd: lb <= ub).
+  eapply strictly_increasing_interval_order ; try eassumption.
+  eapply strictly_increasing_open_interval_tan.
+  eapply interval_inhabited ; eassumption.
+ destruct (interval_open_interval_dec _ _ _ y_bd) as [l | yeq].
+ destruct l as [yeq | y_in].
+  exists lb ; split ; [apply interval_l | symmetry] ; assumption.
+  destruct (tan_reciprocal_image _ _ _ lb_in ub_in y_in) as [z [z_in Hz]] ;
+   exists z ; split ; [apply open_interval_interval |] ; assumption.
+  exists ub ; split ; [apply interval_r | symmetry] ; assumption.
+Qed.
+
+Lemma lim_cos : limit1_in cos (fun x => PI/2 <> x) 0 (PI/2).
 Proof.
 generalize continuity_cos. intros.
 unfold continuity in H.
 generalize (H (PI/2)). intros.
-unfold continuity_pt in H0.
-unfold continue_in in H0.
+unfold continuity_pt, continue_in in H0.
 simpl in *. rewrite cos_PI2 in H0.
 unfold D_x in H0.
 unfold no_cond in *.
 apply H0.
-Qed.
-
-Lemma nat_ind2 : forall (P : nat -> Prop), 
-  P O -> P (S O) -> (forall m, P m -> P (S (S m))) -> forall n, P n. 
-Proof.
-intros P H0 H1 H n.
-assert (P n /\ P (S n)).
- induction n; split; try assumption; [ | apply H]; apply IHn.
- apply H2.
 Qed.
 
 Lemma sin_first_order : forall x, 0 <= x -> sin x <= x.
