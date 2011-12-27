@@ -65,6 +65,13 @@ Proof.
 intros a b a' b' x [] [] [] ; split ; fourier.
 Qed.
 
+Lemma interval_open_restriction_compat : forall a b a' b' x,
+  open_interval a b a' -> open_interval a b b' ->
+  interval a' b' x -> open_interval a b x.
+Proof.
+intros a b a' b' x [] [] [] ; split ; fourier.
+Qed.
+
 Lemma strictly_increasing_interval_restriction_compat :
  forall f a b a' b', interval a b a' -> interval a b b' ->
  strictly_increasing_interval f a b ->
@@ -461,11 +468,10 @@ Qed.
 (****************************************************)
 
 Lemma derive_pt_recip_interv_prelim0 : forall (f g:R->R) (lb ub x:R)
-       (Prf:derivable_pt f (g x)) (Prg:derivable_pt g x),
-       lb < x < ub ->
-       reciprocal_open_interval f g lb ub ->
-       derive_pt f (g x) Prf <> 0 ->
-       derive_pt g x Prg = 1 / (derive_pt f (g x) Prf).
+  (Prf:derivable_pt f (g x)) (Prg:derivable_pt g x),
+  open_interval lb ub x -> reciprocal_open_interval f g lb ub ->
+  derive_pt f (g x) Prf <> 0 ->
+  derive_pt g x Prg = 1 / (derive_pt f (g x) Prf).
 Proof.
 intros f g lb ub x Df Dg x_in_I local_recip Df_neq.
  replace (derive_pt g x Dg) with
@@ -473,37 +479,24 @@ intros f g lb ub x Df Dg x_in_I local_recip Df_neq.
   by (field ; assumption).
  unfold Rdiv ; apply Rmult_eq_compat_r.
  rewrite Rmult_comm, <- derive_pt_comp.
- assert (x_encad2 : lb <= x <= ub) by intuition.
- rewrite pr_nu_var2_interv with (g:=id)
-  (pr2:= derivable_pt_id x) (lb:=lb) (ub:=ub).
-  reg.
-  assumption.
- assumption.
+ erewrite pr_nu_var2_interv ; [eapply derive_pt_id | |] ; eassumption.
 Qed.
 
-Lemma derive_pt_recip_interv_prelim1_0 : forall (f g:R->R) (lb ub x:R), 
-       lb <= ub -> open_interval (f lb) (f ub) x ->
-       strictly_increasing_interval f lb ub ->
-       (forall x : R, interval (f lb) (f ub) x -> interval lb ub (g x)) ->
-       reciprocal_interval f g (f lb) (f ub) ->
-       open_interval lb ub (g x).
+Lemma derive_pt_recip_interv_prelim1_0 : forall f g lb ub x, lb <= ub ->
+  open_interval (f lb) (f ub) x -> strictly_increasing_interval f lb ub ->
+  (forall x : R, interval (f lb) (f ub) x -> interval lb ub (g x)) ->
+  reciprocal_interval f g (f lb) (f ub) -> open_interval lb ub (g x).
 Proof.
 intros f g lb ub x lb_lt_ub x_in_I f_incr g_ok f_recip_g ;
- assert (f_incr2 := strictly_increasing_increasing_interval _ _ _ f_incr) ;
- assert (H : f lb <= f ub).
-  apply f_incr2 ; [apply interval_l | apply interval_r |] ; assumption.
- assert (f_recip_g2 : reciprocal_interval f g (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub))).
-  rewrite Rmin_eq_l, Rmax_eq_r ; assumption.
- assert (g_ok2 : forall x : R,
-        interval (Rmin (f lb) (f ub)) (Rmax (f lb) (f ub)) x ->
-        interval lb ub (g x)).
-  rewrite Rmin_eq_l, Rmax_eq_r ; assumption.
- assert (Hrew := strictly_increasing_reciprocal_interval_comm
-            f g lb ub f_incr f_recip_g2 g_ok2).
+ assert (f lb <= f ub).
+  eapply strictly_increasing_increasing_interval ;
+  [| apply interval_l | apply interval_r |] ; assumption.
+ assert (Hrew := strictly_increasing_reciprocal_interval_comm f g lb ub g_ok
+        f_incr f_recip_g) ;
  assert (g_incr := strictly_increasing_reciprocal_interval_compat
             _ _ _ _ f_incr f_recip_g g_ok).
  split ; unfold reciprocal_interval, comp, id in Hrew ;
-  [rewrite <- Hrew with (x := lb) | rewrite <- Hrew].
+  [rewrite <- (Hrew lb) | rewrite <- Hrew].
  apply g_incr ; [apply interval_l | apply open_interval_interval |
  apply (proj1 x_in_I)] ; assumption.
  apply interval_l ; assumption.
@@ -512,239 +505,132 @@ intros f g lb ub x lb_lt_ub x_in_I f_incr g_ok f_recip_g ;
  apply interval_r ; assumption.
 Qed.
 
-
-Lemma derive_pt_recip_interv_prelim1_1 : forall (f g:R->R) (lb ub x:R), 
-       lb <= ub ->
-       open_interval (f lb) (f ub) x ->
-       strictly_increasing_interval f lb ub ->
-       (forall x : R, interval (f lb) (f ub) x  -> interval lb ub (g x)) ->
-       reciprocal_interval f g (f lb) (f ub) ->
-       interval lb ub (g x).
+Lemma derive_pt_recip_interv_prelim1_1 : forall f g lb ub x, lb <= ub ->
+  open_interval (f lb) (f ub) x -> strictly_increasing_interval f lb ub ->
+  (forall x : R, interval (f lb) (f ub) x  -> interval lb ub (g x)) ->
+  reciprocal_interval f g (f lb) (f ub) -> interval lb ub (g x).
 Proof.
-intros f g lb ub x lb_le_ub x_encad f_incr g_wf f_eq_g.
- assert (Temp := derive_pt_recip_interv_prelim1_0 f g lb ub x lb_le_ub x_encad
- f_incr g_wf f_eq_g).
- split ; apply Rlt_le ; unfold interval, open_interval in * ; intuition.
+intros ; eapply open_interval_interval, derive_pt_recip_interv_prelim1_0 ;
+ eassumption.
 Qed.
 
-Lemma ub_lt_2_pos : forall x ub lb, lb < x -> x < ub -> 0 < (ub-lb)/2.
-Proof.
-intros x ub lb lb_lt_x x_lt_ub.
- assert (T : 0 < ub - lb).
-  fourier.
- unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition.
-Qed.
-
-Definition mkposreal_lb_ub : forall (x lb ub:R) (x_in_I : open_interval lb ub x), posreal.
-intros x lb ub x_in_I.
- apply (mkposreal ((ub-lb)/2) (ub_lt_2_pos x ub lb (proj1 x_in_I) (proj2 x_in_I))).
+Definition interval_size lb ub (pr : lb < ub) : posreal.
+ apply mkposreal with ((ub - lb) / 2), Rlt_mult_inv_pos ; fourier.
 Defined.
+
+Lemma interval_size_Boule_middle : forall lb ub c (pr : lb < ub),
+  open_interval lb ub c -> Boule (middle lb ub) (interval_size lb ub pr) c.
+Proof.
+intros ; unfold Boule, interval_size, middle ; simpl ; apply Rabs_def1.
+ apply Rlt_minus_sort ; do 2 (field_simplify ; unfold Rdiv) ;
+  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
+ apply Rlt_minus_sort2 ; do 2 (field_simplify ; unfold Rdiv) ;
+  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
+Qed. 
 
 Require Import Rsequence_def.
 
-Lemma Dfn_CVU_implies_Df_exists : forall (fn fn':nat -> R -> R) (f g:R->R)
-      (x lb ub:R) (x_in_I : open_interval lb ub x),
-      (forall (x:R) (n:nat), open_interval lb ub x -> derivable_pt_lim (fn n) x (fn' n x)) ->
-      (forall (x:R), open_interval lb ub x -> Rseq_cv (fun n => fn n x) (f x)) ->
-      (CVU fn' g ((lb + ub)/2) (mkposreal_lb_ub x lb ub x_in_I)) ->
-      (forall (x:R), open_interval lb ub x -> continuity_pt g x) ->
-      derivable_pt_lim f x (g x).
+Lemma Rneq_lt_gt_dec : forall a b, a <> b -> { a < b } + { b < a }.
 Proof.
-intros fn fn' f g x lb ub x_in_I Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos.
- assert (eps_8_pos : 0 < eps / 8) by fourier.
- elim (g_cont x x_in_I (eps/8) eps_8_pos) ; clear g_cont ; intros delta1 Hdelta1 ;
- destruct Hdelta1 as (delta1_pos, g_cont).
- assert (delta_pos : 0 < Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1).
-  apply Rmin_pos_lt ; [apply Rmin_pos_lt | intuition] ; unfold Rdiv ;
-  apply Rlt_mult_inv_pos ; intuition ; apply Rlt_Rminus ;
-  [apply (proj1 x_in_I) | apply (proj2 x_in_I)].
- pose (delta := mkposreal (Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1) (delta_pos)).
- exists delta ; intros h h_neq h_ub.
- assert (eps'_pos : 0 < (Rabs h) * eps / 4).
-  unfold Rdiv ; rewrite Rmult_assoc ; apply Rmult_lt_0_compat.
-  apply Rabs_pos_lt ; assumption.
-  fourier.
- elim (fn_CV_f x x_in_I ((Rabs h) * eps / 4) eps'_pos) ; intros N2 fnx_CV_fx.
- assert(lb_lt_xh : lb < x + h).
-  apply Rlt_trans with (x - delta).
-  unfold delta.
-  assert (Temp : forall a b c, a + c < b -> a < b - c).
-   intros ; fourier.
-  apply Temp ; clear Temp ; apply Rle_lt_trans with (lb + Rmin ((x - lb) / 2) ((ub - x) / 2)).
-  apply Rplus_le_compat_l ; apply Rmin_l.
-  apply Rle_lt_trans with (lb + (x - lb) / 2).
-  apply Rplus_le_compat_l ; apply Rmin_l.
-  replace (lb + (x - lb) / 2) with ((lb + x)/2) by field.
-  assert (Temp : forall a b, a < b -> (a+b)/2 < b).
-   clear ; intros a b a_lt_b.
-   unfold Rdiv ; rewrite Rmult_plus_distr_r.
-   fourier.
-  apply Temp ; apply (proj1 x_in_I).
-  apply Rplus_lt_compat_l. 
-  exact (proj2 (Rabs_def2 h delta h_ub)).
- assert(xh_lt_ub : x + h < ub).
-  apply Rlt_trans with (x + delta).
-  apply Rplus_lt_compat_l. 
-  exact (proj1 (Rabs_def2 h delta h_ub)).
-  unfold delta.
-  apply Rle_lt_trans with (x + Rmin ((x - lb) / 2) ((ub - x) / 2)).
-  apply Rplus_le_compat_l ; apply Rmin_l.
-  apply Rle_lt_trans with (x + (ub - x) / 2).
-  apply Rplus_le_compat_l ; apply Rmin_r.
-  replace (x + (ub - x) / 2) with ((ub + x)/2) by field.
-  assert (Temp : forall a b, a < b -> (b+a)/2 < b).
-   clear ; intros a b a_lt_b.
-   unfold Rdiv ; rewrite Rmult_plus_distr_r.
-   fourier.
-  apply Temp ; apply (proj2 x_in_I).
-  assert (xh_in_I : open_interval lb ub (x+h)) by (split ; assumption).
- elim (fn_CV_f (x+h) xh_in_I ((Rabs h) * eps / 4) eps'_pos) ;
- clear fn_CV_f ; intros N1 fnxh_CV_fxh.
- elim (fn'_CVU_g (eps/8) eps_8_pos) ; intros N3 fn'c_CVU_gc.
+intros a b ab_neq ; destruct (Rlt_le_dec a b).
+ left ; assumption.
+ right ; apply Rle_neq_lt ; [| symmetry] ; assumption.
+Qed.
+
+Lemma Dfn_CVU_implies_Df_exists :
+  forall (fn fn' : nat -> R -> R) f g x lb ub (pr : lb < ub),
+  open_interval lb ub x -> (forall n x, open_interval lb ub x ->
+  derivable_pt_lim_in (fn n) (open_interval lb ub) x (fn' n x)) ->
+  (forall x, open_interval lb ub x -> Rseq_cv (fun n => fn n x) (f x)) ->
+  (CVU fn' g (middle lb ub) (interval_size lb ub pr)) ->
+  (continue_in g (open_interval lb ub)) ->
+  derivable_pt_lim f x (g x).
+Proof.
+intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos.
+ assert (eps_6_pos : 0 < (eps / 3) / 2).
+  apply  Rlt_mult_inv_pos ; [apply Rlt_mult_inv_pos |] ; fourier.
+ destruct (g_cont _ x_in _ eps_6_pos) as [d1 [d1_pos Hd1]].
+ pose (delta := Rmin (interval_dist lb ub x) d1) ; assert (delta_pos : 0 < delta).
+  apply Rmin_pos_lt ; [apply open_interval_dist_pos |] ; assumption.
+ exists (mkposreal _ delta_pos) ; intros h h_neq h_bd.
+ pose (eps1 := Rabs h * eps / 3) ; assert (eps1_pos : 0 < eps1).
+  unfold eps1 ; repeat apply Rmult_lt_0_compat ;
+  [apply Rabs_pos_lt ; assumption | |] ; fourier.
+ destruct (fn_CV_f x x_in _ eps1_pos) as [N1 HN1].
+ assert (xh_in : open_interval lb ub (x + h)).
+  apply open_interval_dist_bound.
+   apply open_interval_interval ; assumption.
+   eapply Rlt_le_trans ; [eassumption | apply Rmin_l].
+ destruct (fn_CV_f (x + h) xh_in _ eps1_pos) as [N2 HN2].
+ destruct (fn'_CVU_g _ eps_6_pos) as [N3 HN3].
  pose (N := max (max N1 N2) N3).
- assert (Main : Rabs ((f (x+h) - fn N (x+h)) - (f x - fn N x) + (fn N (x+h) - fn N x - h * (g x))) < (Rabs h)*eps).
- apply Rle_lt_trans with (Rabs (f (x + h) - fn N (x + h) - (f x - fn N x)) +  Rabs ((fn N (x + h) - fn N x - h * g x))).
- apply Rabs_triang.
- apply Rle_lt_trans with (Rabs (f (x + h) - fn N (x + h)) + Rabs (- (f x - fn N x)) + Rabs (fn N (x + h) - fn N x - h * g x)).
- apply Rplus_le_compat_r ; apply Rabs_triang.
+ apply Rle_lt_trans with (Rabs ((f (x + h) - f x) - h * g x) * Rabs (/ h)).
+ right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ; field ; assumption.
+ apply Rlt_le_trans with (Rabs h * eps * Rabs (/ h)).
+ apply Rmult_lt_compat_r ; [apply Rabs_pos_lt, Rinv_neq_0_compat ; assumption |].
+ apply Rle_lt_trans with (Rabs (f (x + h) - fn N (x + h) + - (f x - fn N x)
+                          + ((fn N (x + h) - fn N x) - h * g x))).
+ right ; apply Rabs_eq_compat ; ring.
+ eapply Rle_lt_trans ; [eapply Rabs_triang |].
+ eapply Rle_lt_trans ; [eapply Rplus_le_compat_r, Rabs_triang |].
  rewrite Rabs_Ropp.
- case (Rlt_le_dec h 0) ; intro sgn_h.
+ destruct (Rneq_lt_gt_dec _ _ h_neq) as [h_neg | h_pos].
+ assert (c_deduc : forall c, interval (x + h) x c -> open_interval lb ub c).
+  intros ; eapply interval_open_restriction_compat ; [| | eassumption].
+   apply open_interval_dist_bound ; [apply open_interval_interval
+   | eapply Rlt_le_trans, Rmin_l] ; eassumption.
+   assumption.
  assert (pr1 : forall c : R, x + h < c < x -> derivable_pt (fn N) c).
-  intros c c_encad ; unfold derivable_pt.
-  assert (lb_lt_c : lb < c).
-   apply Rlt_trans with (x+h) ; intuition.
-  assert (c_lt_ub : c < ub).
-   apply Rlt_trans with x ; intuition ; apply (proj2 x_in_I).
- exists (fn' N c) ; apply Dfn_eq_fn' ; split ; assumption.
+  intros c c_encad ; exists (fn' N c) ;
+   apply derivable_pt_lim_open_interval_derivable_pt_lim with lb ub, Dfn_eq_fn' ;
+   apply c_deduc ; apply open_interval_interval ; assumption.
  assert (pr2 : forall c : R, x + h < c < x -> derivable_pt id c).
-  intros c c_encad ; apply derivable_id.
- assert (xh_x : x+h < x).
+  intros ; apply derivable_pt_id.
+ destruct (MVT (fn N) id (x + h) x pr1 pr2) as [c [c_in H]].
   fourier.
- assert (pr3 : forall c : R, x + h <= c <= x -> continuity_pt (fn N) c).
-  intros c c_encad ; apply derivable_continuous_pt.
-  exists (fn' N c) ; apply Dfn_eq_fn' ; split.
-  apply Rlt_le_trans with (x+h) ; intuition.
-  apply Rle_lt_trans with x ; intuition ; apply (proj2 x_in_I).
- assert (pr4 : forall c : R, x + h <= c <= x -> continuity_pt id c).
-  intros c c_encad ; apply derivable_continuous ; apply derivable_id.
- elim (MVT (fn N) id (x+h) x pr1 pr2 xh_x pr3 pr4) ; intros c Hc ; elim Hc ; clear Hc ; intros P Hc.
- assert (Hc' : h * derive_pt (fn N) c (pr1 c P) = (fn N (x+h) - fn N x)).
-  apply Rmult_eq_reg_l with (-1).
-  replace (-1 * (h * derive_pt (fn N) c (pr1 c P))) with (-h * derive_pt (fn N) c (pr1 c P)) by field.
-  replace (-1 * (fn N (x + h) - fn N x)) with (- (fn N (x + h) - fn N x)) by field.
-  replace (-h) with (id x - id (x + h)).
-  rewrite <- Rmult_1_r ; replace 1 with (derive_pt id c (pr2 c P)) by reg.
-  replace (- (fn N (x + h) - fn N x)) with (fn N x - fn N (x + h)) by field.
-  assumption.
-  unfold id ; field.
-  apply Rlt_not_eq ; intuition.
- clear Hc.
- rewrite <- Hc'.
- replace (derive_pt (fn N) c (pr1 c P)) with (fn' N c).
- replace (h * fn' N c - h * g x) with (h * (fn' N c - g x)) by field.
+  intros c c_encad ; apply derivable_continuous_pt ; exists (fn' N c) ;
+   apply derivable_pt_lim_open_interval_derivable_pt_lim with lb ub,
+   Dfn_eq_fn' ; apply c_deduc ; assumption.
+  intros ; apply derivable_continuous, derivable_id.
+  unfold id in H ; rewrite (derive_pt_eq_0 _ _ _ _ (derivable_pt_lim_id c)), Rmult_1_r in H ;
+  ring_simplify in H.
+ assert (Hc : fn N (x + h) - fn N x = h * derive_pt (fn N) c (pr1 c c_in)).
+  apply Rmult_eq_reg_l with (-1) ; [| apply Ropp_neq_0_compat, R1_neq_R0] ;
+   unfold Rminus in H ; ring_simplify ; rewrite H ; apply Rplus_comm.
+ rewrite Hc ; clear Hc H.
+ replace (derive_pt (fn N) c (pr1 c c_in)) with (fn' N c).
+ replace (h * fn' N c - h * g x) with (h * (fn' N c - g x)) by ring.
  rewrite Rabs_mult.
- apply Rlt_trans with (Rabs h * eps / 4 + Rabs (f x - fn N x) + Rabs h * Rabs (fn' N c - g x)).
- apply Rplus_lt_compat_r ; apply Rplus_lt_compat_r ; unfold R_dist in fnxh_CV_fxh ;
- rewrite Rabs_minus_sym ; apply fnxh_CV_fxh.
- unfold N ; apply le_trans with (max N1 N2) ; apply le_max_l.
- apply Rlt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 + Rabs h * Rabs (fn' N c - g x)).
- apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l.
- unfold R_dist in fnx_CV_fx ; rewrite Rabs_minus_sym ; apply fnx_CV_fx.
- unfold N ; apply le_trans with (max N1 N2) ; [apply le_max_r | apply le_max_l].
- replace (fn' N c - g x)  with ((fn' N c - g c) +  (g c - g x)) by field.
- apply Rle_lt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 +
-          Rabs h * Rabs (fn' N c - g c) + Rabs h * Rabs (g c - g x)).
- rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite Rplus_assoc ;
- apply Rplus_le_compat_l ; apply Rplus_le_compat_l ; rewrite <- Rmult_plus_distr_l ;
- apply Rmult_le_compat_l. apply Rabs_pos.
- apply Rabs_triang.
- apply Rlt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 + Rabs h * (eps / 8) +
+ transitivity (eps1 + Rabs (f x - fn N x) + Rabs h * Rabs (fn' N c - g x)).
+ do 2 apply Rplus_lt_compat_r ; rewrite Rabs_minus_sym ; apply HN2.
+ apply le_trans with (max N1 N2) ; [apply le_max_r | apply le_max_l].
+ transitivity (eps1 + eps1 + Rabs h * Rabs (fn' N c - g x)).
+ apply Rplus_lt_compat_r, Rplus_lt_compat_l ; unfold R_dist in HN1 ;
+ rewrite Rabs_minus_sym ; apply HN1, le_trans with (max N1 N2) ; apply le_max_l.
+ replace (fn' N c - g x)  with ((fn' N c - g c) +  (g c - g x)) by ring.
+ apply Rle_lt_trans with (eps1 + eps1 + Rabs h * Rabs (fn' N c - g c) + Rabs h * Rabs (g c - g x)).
+ do 3 rewrite Rplus_assoc ; do 2 apply Rplus_le_compat_l ; rewrite <- Rmult_plus_distr_l ;
+ apply Rmult_le_compat_l ; [apply Rabs_pos | apply Rabs_triang].
+ apply Rlt_trans with (eps1 + eps1 + Rabs h * ((eps / 3) / 2) +
           Rabs h * Rabs (g c - g x)).
- apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l ; apply Rmult_lt_compat_l.
- apply Rabs_pos_lt ; assumption.
- rewrite Rabs_minus_sym ; apply fn'c_CVU_gc.
- unfold N ; apply le_max_r.
- unfold Boule.
- assert (Rabs (c - (lb + ub) / 2) < (ub - lb) / 2).
-  apply Rabs_def1.
-  assert (Temp : forall a b c, a < b + c -> a - b < c). intros ; fourier.
-  apply Temp ; clear Temp ; replace ((lb + ub) / 2 + (ub - lb) / 2) with ub by field.
-  apply Rlt_trans with x ; [exact (proj2 P) | intuition ; apply (proj2 x_in_I)].
-  assert (Temp : forall a b c, a - b < c -> - b < c - a) by (intros ; fourier).
-  apply Temp ; clear Temp ; replace ((lb + ub) / 2 - ((ub - lb) / 2)) with lb by field.
-  apply Rlt_trans with (x+h) ; [intuition | exact (proj1 P)].
-  assumption.
- apply Rlt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 + Rabs h * (eps / 8) +
-         Rabs h * (eps / 8)).
- rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite Rplus_assoc ;
- apply Rplus_lt_compat_l ; apply Rplus_lt_compat_l ; rewrite <- Rmult_plus_distr_l ;
- rewrite <- Rmult_plus_distr_l ; apply Rmult_lt_compat_l.
- apply Rabs_pos_lt ; assumption.
- apply Rplus_lt_compat_l ; simpl in g_cont ; apply g_cont ; split ; [unfold D_x ; split |].
- unfold no_cond ; intuition. apply Rgt_not_eq ; exact (proj2 P).
- unfold R_dist. apply Rlt_trans with (Rabs h).
- apply Rabs_def1. apply Rlt_trans with 0.
- assert (Temp : forall a b, a < b -> a - b < 0).
-  intros ; fourier.
- apply Temp ; exact (proj2 P).
- apply Rabs_pos_lt ; assumption.
- apply Rle_lt_trans with h.
- rewrite Rabs_left1.
- apply Req_le ; field.
- apply Rlt_le ; assumption.
- assert (Temp : forall a b c, a + b < c -> b < c - a). intros ; fourier.
- apply Temp ; clear Temp ; exact (proj1 P).
- apply Rlt_le_trans with delta ; [intuition | unfold delta ; apply Rmin_r].
- rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite <- Rmult_plus_distr_l.
- replace (Rabs h * eps / 4 + (Rabs h * eps / 4 + Rabs h * (eps / 8 + eps / 8))) with
-      (Rabs h * (eps / 4 + eps / 4 + eps / 8 + eps / 8)) by field.
- apply Rmult_lt_compat_l. 
- apply Rabs_pos_lt ; assumption.
- fourier.
- assert (lb_lt_c : lb < c).
-   apply Rlt_trans with (x+h) ; intuition ; exact (proj1 P).
-  assert (c_lt_ub : c < ub).
-   apply Rlt_trans with x ; intuition ; [exact (proj2 P) | exact (proj2 x_in_I)].
- assert (H := pr1 c P) ; elim H ; clear H ; intros l Hl.
- assert (Temp : l = fn' N c).
-  assert (c_in_I : open_interval lb ub c) by (split ; assumption).
-  assert (Hl' := Dfn_eq_fn' c N c_in_I).
-  unfold derivable_pt_abs in Hl.
-  clear -Hl Hl'.
-  apply uniqueness_limite with (f:= fn N) (x:=c) ; assumption.
-  rewrite <- Temp.
-  assert (Hl' : derivable_pt (fn N) c).
-   exists l ; apply Hl.
-  rewrite pr_nu_var with (g:= fn N) (pr2:=Hl').
-  elim Hl' ; clear Hl' ; intros l' Hl'.
-  assert (Main : l = l').
- apply uniqueness_limite with (f:= fn N) (x:=c) ; assumption.
- rewrite Main ; reflexivity.
- reflexivity.
- assert (h_pos : h > 0).
-  case sgn_h ; intro Hyp.
-  assumption.
-  apply False_ind ; apply h_neq ; symmetry ; assumption.
- clear sgn_h.
- assert (pr1 : forall c : R, x < c < x + h -> derivable_pt (fn N) c).
-  intros c c_encad ; unfold derivable_pt.
-  assert (lb_lt_c : lb < c).
-   apply Rlt_trans with x ; intuition ; apply (proj1 x_in_I).
-  assert (c_lt_ub : c < ub).
-   apply Rlt_trans with (x+h) ; intuition.
-  exists (fn' N c) ; apply Dfn_eq_fn' ; split ; assumption.
- assert (pr2 : forall c : R, x < c < x + h -> derivable_pt id c).
-  intros c c_encad ; apply derivable_id.
- assert (xh_x : x < x + h).
-  fourier.
- assert (pr3 : forall c : R, x <= c <= x + h -> continuity_pt (fn N) c).
-  intros c c_encad ; apply derivable_continuous_pt.
-  exists (fn' N c) ; apply Dfn_eq_fn' ; intuition.
-  split.
-  apply Rlt_le_trans with x ; [exact (proj1 x_in_I) | assumption].
-  apply Rle_lt_trans with (x+h) ; intuition.
- assert (pr4 : forall c : R, x <= c <= x + h -> continuity_pt id c).
-  intros c c_encad ; apply derivable_continuous ; apply derivable_id.
+ apply Rplus_lt_compat_r, Rplus_lt_compat_l, Rmult_lt_compat_l.
+  apply Rabs_pos_lt ; assumption.
+  rewrite Rabs_minus_sym ; apply HN3 ; [apply le_max_r |].
+   apply interval_size_Boule_middle, c_deduc, open_interval_interval ; assumption.
+ apply Rlt_le_trans with (eps1 + eps1 + Rabs h * (eps / 3 / 2) + Rabs h * (eps / 3 / 2)) ;
+  [| right ; unfold eps1 ; field] ; repeat rewrite Rplus_assoc ;
+  do 3 apply Rplus_lt_compat_l ; apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption |].
+ simpl in Hd1 ; apply Hd1 ; split.
+  apply c_deduc, open_interval_interval ; assumption.
+  transitivity (Rabs h) ; [| apply Rlt_le_trans with delta ; [apply h_bd | apply Rmin_r]].
+  rewrite Rabs_left ; [| assumption] ; apply Rabs_def1 ; clear -c_in h_neg ;
+   destruct c_in ; [transitivity 0 |] ; fourier.
+ destruct (pr1 c c_in) as [l Hl] ; eapply uniqueness_limite ; eauto.
+ eapply derivable_pt_lim_open_interval_derivable_pt_lim, Dfn_eq_fn' ;
+  apply c_deduc, open_interval_interval ; assumption.
+
+(** here *)
+
  elim (MVT (fn N) id x (x+h) pr1 pr2 xh_x pr3 pr4) ; intros c Hc ; elim Hc ; clear Hc ; intros P Hc.
  assert (Hc' : h * derive_pt (fn N) c (pr1 c P) = (fn N (x+h) - fn N x)).
   replace (h * derive_pt (fn N) c (pr1 c P)) with ((id (x+h) - id x)* derive_pt (fn N) c (pr1 c P)).
@@ -848,6 +734,9 @@ intros fn fn' f g x lb ub x_in_I Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos
  field ; apply Rgt_not_eq ; apply Rabs_pos_lt ; assumption.
  assumption.
  field. assumption.
+
+
+ right ; rewrite (Rabs_Rinv _ h_neq) ; field ; apply Rabs_no_R0 ; assumption.
 Qed.
 
 
