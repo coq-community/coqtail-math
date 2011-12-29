@@ -32,13 +32,47 @@ Require Import Ranalysis5.
 Require Import RIVT.
 Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
+Require Import MyRIneq.
+Require Import Ass_handling.
 
 Open Scope R_scope.
+
+Lemma Zero_in : open_interval (- PI / 2) (PI / 2) 0.
+Proof.
+replace (- PI / 2) with (- (PI / 2)) by field ; split ;
+ [apply _PI2_RLT_0 | apply PI2_RGT_0].
+Qed.
+
+Lemma PI6_in : open_interval (- PI / 2) (PI / 2) (PI / 6).
+Proof.
+replace (- PI / 2) with (- (PI / 2)) by field ; split.
+ transitivity 0 ; [apply _PI2_RLT_0 | apply PI6_RGT_0].
+ apply PI6_RLT_PI2.
+Qed.
+
+Lemma PI4_in : open_interval (- PI / 2) (PI / 2) (PI / 4).
+Proof.
+replace (- PI / 2) with (- (PI / 2)) by field ; split.
+ transitivity 0 ; [apply _PI2_RLT_0 | apply PI4_RGT_0].
+ apply PI4_RLT_PI2.
+Qed.
+
+Lemma _PI2_Rlt_PI2 : - PI / 2 < PI / 2.
+replace (- PI / 2) with (- (PI / 2)) by field ;
+ transitivity 0 ; [apply _PI2_RLT_0 | apply PI2_RGT_0].
+Qed.
 
 Lemma cos_pos : forall x, open_interval (- PI/2) (PI/2) x -> 0 < cos x.
 Proof.
 intros x [xlb xub] ; apply cos_gt_0 ; unfold Rdiv ;
  ring_simplify ; assumption.
+Qed.
+
+Lemma strictly_increasing_interval_sin :
+  strictly_increasing_interval sin (- PI / 2) (PI / 2).
+Proof.
+ replace (- PI / 2) with (- (PI / 2)) by field.
+ do 5 intro ; apply sin_increasing_1 ; ass_apply.
 Qed.
 
 Lemma derivable_derivable_open_interval : forall f lb ub,
@@ -210,7 +244,7 @@ intros f lb ub x y Hf x_in y_in z z_in ; eapply limit1_imp, Hf.
  eapply interval_open_restriction_compat, z_in ; assumption.
 Qed.
 
-Lemma tan_reciprocal_image : forall lb ub y,
+Lemma tan_reciprocal_image_open_interval : forall lb ub y,
   open_interval (- PI / 2) (PI / 2) lb ->
   open_interval (- PI / 2) (PI / 2) ub ->
   open_interval (tan lb) (tan ub) y ->
@@ -225,7 +259,7 @@ intros lb ub y lb_in ub_in y_in ; apply IVT_open_interval.
  assumption.
 Qed.
 
-Lemma exists_atan : forall lb ub y,
+Lemma tan_reciprocal_image_interval : forall lb ub y,
   open_interval (- PI / 2) (PI / 2) lb ->
   open_interval (- PI / 2) (PI / 2) ub ->
   interval (tan lb) (tan ub) y ->
@@ -239,399 +273,229 @@ intros lb ub y lb_in ub_in y_bd.
  destruct (interval_open_interval_dec _ _ _ y_bd) as [l | yeq].
  destruct l as [yeq | y_in].
   exists lb ; split ; [apply interval_l | symmetry] ; assumption.
-  destruct (tan_reciprocal_image _ _ _ lb_in ub_in y_in) as [z [z_in Hz]] ;
+  destruct (tan_reciprocal_image_open_interval _ _ _ lb_in ub_in y_in) as [z [z_in Hz]] ;
    exists z ; split ; [apply open_interval_interval |] ; assumption.
   exists ub ; split ; [apply interval_r | symmetry] ; assumption.
 Qed.
 
-Lemma lim_cos : limit1_in cos (fun x => PI/2 <> x) 0 (PI/2).
+Lemma Rle_Rminus : forall a b, a <= b -> 0 <= b - a.
 Proof.
-generalize continuity_cos. intros.
-unfold continuity in H.
-generalize (H (PI/2)). intros.
-unfold continuity_pt, continue_in in H0.
-simpl in *. rewrite cos_PI2 in H0.
-unfold D_x in H0.
-unfold no_cond in *.
-apply H0.
+intros ; fourier.
+Qed.
+
+Lemma Rle_Rminus_rev : forall a b, 0 <= b - a -> a <= b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rlt_Rminus_rev : forall a b, 0 < b - a -> a < b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat : forall a b c, 0 < a -> a * b < c -> b < c * / a.
+Proof.
+intros a b c a_pos Habc ; apply Rle_lt_trans with (a * b * / a).
+ right ; field ; apply Rgt_not_eq ; assumption.
+ apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_rev : forall a b c, 0 < a -> b < c * / a -> a * b < c.
+Proof.
+intros a b c a_pos Habc ; apply Rlt_le_trans with (a * (c * / a)).
+ apply Rmult_lt_compat_l ; assumption.
+ right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma derive_pt_minus : forall f g x prf prg pr,
+  derive_pt (f - g)%F x pr = derive_pt f x prf - derive_pt g x prg.
+Proof.
+intros f g x prf prg pr ; erewrite pr_nu_var with
+ (pr2 := derivable_pt_minus _ _ x prf prg) ;
+ [apply derive_pt_minus | reflexivity].
+Qed.
+
+Lemma derive_pt_cos : forall x pr, derive_pt cos x pr = - sin x.
+Proof.
+intros x pr ; erewrite pr_nu_var with (pr2 := derivable_pt_cos x) ;
+ [apply derive_pt_cos | reflexivity].
+Qed.
+
+Lemma derive_pt_sin : forall x pr, derive_pt sin x pr = cos x.
+Proof.
+intros x pr ; erewrite pr_nu_var with (pr2 := derivable_pt_sin x) ;
+ [apply derive_pt_sin | reflexivity].
 Qed.
 
 Lemma sin_first_order : forall x, 0 <= x -> sin x <= x.
 Proof.
-intros x xpos.
-pose (g := fun x => x - sin x).
-cut (0 <= g x).
- intro; unfold g in *; fourier.
-replace 0 with (g 0) by (unfold g; rewrite sin_0; field).
-assert (Hg : derivable g) by (unfold g; reg).
-apply (nonneg_derivative_1 g Hg); auto.
-clear xpos x.
-intro.
-apply Rle_trans with (1 - cos x).
- pose proof COS_bound x; intuition; fourier.
- 
- apply Req_le.
- pose proof derive_pt_id as Hid.
- pose proof derive_pt_sin as Hsin.
- rewrite <- Hid with x.
- rewrite <- Hsin.
- rewrite <- derive_pt_minus.
- apply pr_nu_var.
- trivial.
+intros x xpos ; apply Rle_Rminus_rev ; pose (g := (id - sin)%F).
+ transitivity (g 0) ; [unfold g, minus_fct, id ; rewrite sin_0, Rminus_0_r ; reflexivity |].
+ transitivity (g x) ; [| reflexivity].
+ assert (Hg : derivable g) by (unfold g ; reg).
+ eapply nonneg_derivative_1 with Hg ; [| eassumption].
+ clear ; intro x ; erewrite derive_pt_minus with (prg := derivable_pt_sin x)
+ (prf := derivable_pt_id x), derive_pt_id, derive_pt_sin.
+ apply Rle_Rminus, COS_bound.
 Qed.
 
-Lemma sin_cv_0_right_sig : forall eps, eps > 0 -> {x | 0 < x /\ sin x < eps}.
+Lemma sin_cv_0_right : forall eps a, 0 < eps -> 0 < a ->
+  { x | open_interval 0 a x /\ sin x < eps }.
 Proof.
-intros e epos.
-exists (e / 2); split; [fourier | ].
-eapply Rle_lt_trans.
- apply sin_first_order; fourier.
+intros eps a eps_pos a_pos ; pose (f := Rmin eps a) ;
+ assert (f_pos : 0 < f) by (apply Rmin_pos_lt ; assumption) ;
+ exists (f / 2) ; repeat split.
+  apply Rlt_mult_inv_pos ; [assumption | fourier].
+ apply Rlt_le_trans with f ; [fourier | apply Rmin_r].
+ apply Rle_lt_trans with (f / 2) ; [apply sin_first_order |
+  apply Rlt_le_trans with f, Rmin_l] ; fourier.
+Qed.
+
+Lemma cos_cv_0_left : forall eps a, 0 < eps -> a < PI / 2 ->
+  { x | open_interval a (PI / 2) x /\ cos x < eps }.
+Proof.
+intros eps a eps_pos a_ub ;
+ destruct (sin_cv_0_right _ (PI / 2 - a) eps_pos) as [x [[x_lb x_ub] Hx]].
  fourier.
+ exists (PI / 2 - x) ; rewrite cos_shift ; repeat split ; (trivial || fourier).
 Qed.
 
-Lemma sin_cv_0_right_sig_local : forall e a, e > 0 -> a > 0 -> {x | 0 < x < a /\ sin x < e}.
+Lemma tan_cv_pos_infty_prelim : forall y , 0 < y ->
+  { x | open_interval (- PI / 2) (PI / 2) x /\ y < tan x }.
 Proof.
-intros e a epos apos.
-destruct (Rle_lt_dec e a).
- exists (e / 2); repeat split; [fourier | | ].
- apply Rlt_le_trans with e; auto; fourier.
- eapply Rle_lt_trans.
-  apply sin_first_order; fourier.
-  fourier.
- 
- exists (a / 2); repeat split; auto; try fourier.
- apply Rlt_le_trans with a; try fourier.
- eapply Rle_lt_trans.
-  apply sin_first_order; fourier.
-  fourier.
+intros y y_pos ; destruct (cos_cv_0_left (/ (2 * y)) (PI / 6)) as [x [x_in Hx]].
+ apply Rinv_0_lt_compat ; fourier.
+ apply PI6_in.
+ assert (x_bd : open_interval (- PI / 2) (PI / 2) x).
+  eapply open_interval_restriction_compat.
+   eapply open_interval_interval, PI6_in.
+   eapply interval_r ; left ; exact _PI2_Rlt_PI2.
+   assumption.
+ assert (cosx_pos : 0 < cos x) by (apply cos_pos ; assumption).
+ exists x ; split ; [assumption |].
+  apply Rlt_le_trans with (/ (2 * cos x)).
+   rewrite <- Rinv_involutive with y ; [apply Rinv_lt_contravar | apply Rgt_not_eq ; fourier].
+    apply Rlt_mult_inv_pos ; [apply Rmult_lt_0_compat |] ; (assumption || fourier).
+    apply Rmult_Rinv_lt_compat_rev ; [| rewrite <- Rinv_mult_distr, Rmult_comm] ;
+    (assumption || apply Rgt_not_eq || idtac) ; fourier.
+   rewrite Rinv_mult_distr ; try (apply Rgt_not_eq ; (assumption || fourier)) ;
+    apply Rmult_le_compat_r ; [left ; apply Rinv_0_lt_compat ; assumption |].
+    transitivity (sin (PI / 6)).
+     right ; rewrite sin_PI6 ; unfold Rdiv ; ring.
+     left ; apply strictly_increasing_interval_sin ;
+      try apply open_interval_interval ; (exact PI6_in || ass_apply).
 Qed.
 
-Lemma cos_cv_0_left_sig_local : forall e a, e > 0 -> a < PI / 2 -> {x | a < x < PI / 2 /\ cos x < e}.
+Lemma tan_cv_pos_infty : forall y ,
+  { x | open_interval (- PI / 2) (PI / 2) x /\ y < tan x }.
 Proof.
-intros e a epos ainf.
-destruct (sin_cv_0_right_sig_local e (PI / 2 - a) epos) as [x Hx].
- fourier.
-exists (PI / 2 - x); repeat split; intuition; try fourier.
-rewrite cos_shift.
-auto.
+intro y ; destruct (Req_dec y 0) as [y_eq | y_neq].
+ exists (PI / 4) ; split ; [exact PI4_in |] ; subst ; apply tan_gt_0 ;
+  [apply PI4_RGT_0 | apply PI4_RLT_PI2].
+ assert (y_pos : 0 < Rabs y) by (apply Rabs_pos_lt ; assumption) ;
+  destruct (tan_cv_pos_infty_prelim _ y_pos) as [x [x_in Hx]] ;
+  exists x ; split ; [| apply Rgt_ge_trans with (Rabs y), Rle_ge,
+  Rle_abs] ; assumption.
 Qed.
 
-Lemma tan_cv_pos_infty : forall y, {x | - PI / 2 < x < PI/2 /\ tan x > y}.
+Lemma Ropp_Rdiv_compat_l : forall a b, b <> 0 -> - a / b = - (a / b).
 Proof.
-intros y.
-assert (__PI2_PI2 : - PI / 2 = - (PI / 2)) by field.
-destruct (total_order_T 0 y) as [[Cy|Cy]|Cy].
- cut (forall e, e > 0 -> {x | PI / 6 < x < PI / 2 /\ 0 < cos x < e}).
-  intro cos_small.
-  destruct (cos_small (/ (2 * y))) as [x [[Hxi Hxs] Hx]].
-   apply Rlt_gt.
-   apply Rinv_0_lt_compat.
-   fourier.
-  assert (xpos : 0 < x).
-   apply Rlt_trans with (PI / 6); auto.
-   fourier.
-  exists x; repeat split.
-   apply Rlt_trans with 0.
-    rewrite __PI2_PI2; apply _PI2_RLT_0.
-    auto.
-   auto.
-   
-   unfold tan.
-   apply Rlt_le_trans with (/ (cos x * 2)).
-    rewrite <- Rinv_involutive with y; [|apply Rgt_not_eq; fourier].
-    apply Rinv_lt_contravar; intuition.
-     apply Rlt_mult_inv_pos; fourier.
-     
-     replace (/ y) with (/ (2 * y) * 2) by (field; apply Rgt_not_eq; auto).
-     apply Rmult_lt_compat_r; auto; fourier.
-    
-    replace (/ (cos x * 2)) with (/ 2 / cos x) by (field; apply Rgt_not_eq; intuition; fourier).
-    unfold Rdiv.
-    apply Rmult_le_compat_r.
-     apply Rlt_le; apply Rinv_0_lt_compat; intuition.
-     replace (/ 2) with (1 / 2) by field.
-     rewrite <- sin_PI6.
-     apply sin_incr_1; fourier.
-  
-  clear Cy y.
-  intros e epos.
-  destruct (cos_cv_0_left_sig_local e (PI / 6) epos) as [x Hx].
-   exact PI6_RLT_PI2.
-  exists x.
-  intuition.
-  apply cos_gt_0; fourier.
- 
- exists (PI / 4); repeat split.
-  apply Rlt_trans with 0.
-   rewrite __PI2_PI2; apply _PI2_RLT_0.
-   apply PI4_RGT_0.
-  apply PI4_RLT_PI2.
-  rewrite tan_PI4; subst.
-  fourier.
-  
- exists 0; repeat split.
-  rewrite __PI2_PI2; apply _PI2_RLT_0.
-  apply PI2_RGT_0.
-  
-  unfold tan.
-  rewrite sin_0.
-  unfold Rdiv; rewrite Rmult_0_l.
-  intuition.
+intros ; field ; assumption.
 Qed.
 
-Lemma tan_cv_neg_infty : forall y, {x | - PI / 2 < x < PI / 2 /\ tan x < y}.
+Lemma tan_cv_neg_infty : forall y,
+  { x | open_interval (- PI / 2) (PI / 2) x /\ tan x < y }.
 Proof.
-intros y.
-assert (__PI2_PI2 : - PI / 2 = - (PI / 2)) by field.
-destruct (tan_cv_pos_infty (- y)) as [x [Hxi Hxs] Hx].
-exists (- x); repeat split.
- rewrite __PI2_PI2; apply Ropp_lt_contravar; intuition.
- apply Ropp_lt_cancel; rewrite Ropp_involutive; rewrite <- __PI2_PI2; intuition.
- rewrite tan_neg; apply Ropp_lt_cancel; rewrite Ropp_involutive; intuition.
+intro y ; destruct (tan_cv_pos_infty (- y)) as [x [x_in Hx]] ;
+ exists (- x) ; split.
+  rewrite <- (Ropp_involutive (PI /2)), Ropp_Rdiv_compat_l ;
+   [apply open_interval_opp_compat ; rewrite <- Ropp_Rdiv_compat_l |] ;
+   (assumption || apply Rgt_not_eq ; fourier).
+ rewrite tan_neg ; apply Ropp_lt_cancel ; rewrite Ropp_involutive ; assumption.
 Qed.
 
-Lemma inv_lt : forall x y, x > 0 -> y > 0 -> /x < /y -> x > y.
+Lemma Rinv_lt_contravar_rev : forall x y, 0 < x -> 0 < y -> /x < /y -> y < x.
 Proof.
-intros x y Hx Hy H.
-assert ((- x) * / x > (- x) * / y) as H0.
-apply Rmult_lt_gt_compat_neg_l ; intuition.
-repeat rewrite Ropp_mult_distr_l_reverse in H0.
-apply Ropp_lt_cancel in H0.
-rewrite Rinv_r in H0.
-assert ((-y) * 1 > (-y) * (x * /y)) as H3.
-apply Rmult_lt_gt_compat_neg_l ; intuition.
-repeat rewrite Ropp_mult_distr_l_reverse in H3.
-apply Ropp_lt_cancel in H3.
-rewrite Rmult_1_r in H3. rewrite Rmult_comm in H3.
-rewrite Rmult_assoc in H3. rewrite Rinv_l in H3. 
-rewrite Rmult_1_r in H3. assumption.
-intro H5. rewrite H5 in Hy. fourier.
-intro H5. rewrite H5 in Hx. fourier.
+intros x y x_pos y_pos Hxy ; rewrite <- (Rinv_involutive x), <- (Rinv_involutive y) ;
+ try (apply Rgt_not_eq ; assumption).
+ apply Rinv_lt_contravar ; [| assumption] ; apply Rmult_lt_0_compat ;
+ apply Rinv_0_lt_compat ; assumption.
 Qed.
 
-Lemma Rgt_Rinv : forall x y : R, 0 < x -> 0 < y -> x > y -> / y > / x.
+Lemma injective_interval_sin : injective_interval sin (- PI / 2) (PI / 2).
 Proof.
-intros x y H H1 H2.
-rewrite <- Rmult_1_l.
-replace (/y) with (1 * /y) by ring.
-rewrite <- Rinv_r with y.
-replace (y * / y * / y) with (/y * (y * /y)) by ring.
-replace (y * / y * / x) with (/y * (y * /x)) by ring.
-apply Rmult_gt_compat_l. intuition.
-rewrite <- Rmult_1_l. 
-rewrite Rinv_r.
-rewrite <- Rinv_l with x.
-replace (/x * x * (y * /x)) with (/x * ((x*/x)*y)) by ring.
-apply Rmult_gt_compat_l. intuition.
-rewrite Rinv_r. rewrite Rmult_1_l.
-assumption. intro H10. rewrite H10 in *. fourier.
-intro H10. rewrite H10 in *. fourier.
-intro H10. rewrite H10 in *. fourier.
-intro H10. rewrite H10 in *. fourier.
+apply strictly_increasing_injective_interval, strictly_increasing_interval_sin.
 Qed.
 
-Lemma sin_incr : forall x y, -(PI/2) <= x -> -(PI/2) <= y ->
-x <= PI/2 -> y <= PI/2 -> sin x = sin y -> x = y.
+Lemma strictly_increasing_open_interval_atan : forall x y,
+  open_interval (- PI / 2) (PI / 2) x ->
+  open_interval (- PI / 2) (PI / 2) y ->
+  tan x < tan y -> x < y.
 Proof.
-intros x y Hmx Hmy Hpx Hpy H.
-destruct (total_order_T x y) as [[H1|H1]|H1].
-apply sin_increasing_1 in H1 ; intuition.
-rewrite H in H1. fourier. intuition.
-apply sin_increasing_1 in H1 ; intuition.
-rewrite H in H1. fourier.
+intros x y x_in y_in Hxy ; destruct (total_order_T x y) as [[Hlt | Heq] | Hgt].
+ assumption.
+ subst ; destruct (Rlt_irrefl _ Hxy).
+ destruct (Rlt_irrefl (tan x)) ; transitivity (tan y).
+  assumption.
+  apply strictly_increasing_open_interval_tan ; assumption.
 Qed.
 
-Lemma tan_increasing3 :
-  forall x y:R,
-    -PI/2 < x ->
-    x < PI/2 -> -PI/2 < y -> y < PI/2 -> tan x < tan y -> x < y.
+Lemma exists_atan : forall y : R, { x | open_interval (- PI / 2) (PI / 2) x /\ tan x = y }.
 Proof.
-intros.
-destruct (total_order_T (x) (y)) as [[H4|H4]|H4].
-assumption.
-rewrite H4 in *.
-fourier.
-apply tan_increasing in H4.
-fourier.
-assumption.
-assumption.
-assumption.
-assumption.
+intro y ;
+ destruct (tan_cv_neg_infty y) as [lb [lb_in Hlb]] ;
+ destruct (tan_cv_pos_infty y) as [ub [ub_in Hub]] ;
+ assert (y_in : open_interval (tan lb) (tan ub) y) by (split ; assumption) ;
+ destruct (tan_reciprocal_image_open_interval _ _ _ lb_in ub_in y_in) as [x [x_in Hx]] ;
+ exists x ; split.
+  eapply open_interval_restriction_compat ; try eassumption ;
+   eapply open_interval_interval ; assumption.
+  assumption.
 Qed.
 
-Lemma M_PI2_MPI_2_same : forall x, - (PI / 2) < x <-> - PI / 2 < x.
+Definition atan (y : R) : R := let (x, _) := exists_atan y in x.
+
+Lemma reciprocal_tan_atan : reciprocal tan atan.
 Proof.
-split; replace (- PI / 2) with (- (PI / 2)) by field; auto.
+intro y ; unfold comp, id, atan ; destruct (exists_atan y) ; ass_apply.
 Qed.
 
-Lemma tan_increasing_5 : forall lb ub y, 
-- PI/2 < lb < PI/2 -> - PI/2 < ub < PI/2 ->
-tan lb < y -> tan ub > y -> ub > lb.
+Lemma reciprocal_open_interval_atan_tan :
+  reciprocal_open_interval atan tan (- PI / 2) (PI / 2).
 Proof.
-intros lb ub y H1 H2 H3 H4.
-assert (H : tan ub > tan lb).
-destruct H1. destruct H2.
-eapply Rlt_trans ; eauto.
-apply tan_increasing3; intuition.
-Qed.
-(*
-Definition myatan2 (lb ub y:R) (lb_def : - PI / 2 < lb) (ub_def : ub < PI / 2)
- (lb_lt_ub : lb < ub) (Pr: tan lb <= y <= tan ub) :=
- let (a,_) := (exists_myatan lb ub y lb_def ub_def lb_lt_ub Pr) in a.
-
-Definition myarctan : R -> R.
-Proof.
-intro y.
-destruct (tan_cv_neg_infty y) as (lb, H).
-destruct (tan_cv_pos_infty y) as (ub, H1).
-destruct H as (lb_def, H).
-destruct H1 as (ub_def, H1). 
-assert (lb_lt_ub : lb < ub). 
-apply Rgt_lt.
-apply (tan_increasing_5 lb ub y); intuition; replace (- PI / 2) with (- (PI / 2)) by field; auto.
-destruct lb_def as (lb_def, _).
-destruct ub_def as (_, ub_def).
-assert (Pr : tan lb <= y <= tan ub).
-split ; fourier.
-destruct (exists_myatan lb ub y lb_def ub_def lb_lt_ub Pr) as (x, atanx).
-exact x.
-Defined.
-*)
-Lemma exists_arctan : forall y : R, {x : R| -PI/2 < x < PI/2 /\ tan x = y }.
-Proof.
-intro y.
-destruct (tan_cv_neg_infty y) as (lb, H).
-destruct (tan_cv_pos_infty y) as (ub, H1).
-destruct H as (lb_def, H).
-destruct H1 as (ub_def, H1). 
-assert (lb_lt_ub : lb < ub).
-apply Rgt_lt. apply (tan_increasing_5 lb ub y); auto.
-destruct lb_def as (lb_def, _).
-destruct ub_def as (_, ub_def).
-assert (Pr : tan lb <= y <= tan ub).
-split ; fourier.
-destruct (exists_myatan lb ub y lb_def ub_def lb_lt_ub Pr) as (x, atanx).
-exists x.
-destruct atanx. intuition.
-eapply Rlt_le_trans. apply lb_def. assumption. 
-eapply Rle_lt_trans; [|apply ub_def]; assumption.
-Defined.
-
-Definition arctan : R -> R.
-Proof.
-intro y.
-destruct (exists_arctan y).
-exact x.
-Defined.
-
-Lemma tanarctan : forall y, tan (arctan y) = y.
-Proof.
-intros y.
-unfold arctan.
-destruct (exists_arctan y).
-intuition.
+intros x x_in ; unfold comp, id, atan ;
+ destruct (exists_atan (tan x)) as [x' [x'_in Hx']] ;
+ apply injective_open_interval_tan ; assumption.
 Qed.
 
-Lemma arctantan : forall x, -PI/2 < x < PI/2 -> arctan (tan x) = x.
+Lemma atan_in : forall y, open_interval (- PI / 2) (PI / 2) (atan y).
 Proof.
-intros x H.
-unfold arctan. 
-destruct (exists_arctan (tan x)).
-apply tan_is_inj ; intuition.
+intro y ; unfold atan ; destruct (exists_atan y) as [x [x_in _]] ; exact x_in.
 Qed.
 
-Lemma tanarctandev1 : forall x, derivable_pt (fun x => tan (arctan x)) x ->
- derivable_pt (fun y:R => y) x.
+Ltac fold_comp := match goal with
+  | |- context G[?f (?g ?x)] => fold (comp f g x)
+end.
+
+Lemma strictly_increasing_atan : strictly_increasing atan.
 Proof.
-intros x.
-unfold derivable_pt.
-unfold derivable_pt_abs.
-unfold derivable_pt_lim.
-intros H.
-destruct H as (l, H).
-exists l.
-intros eps Heps.
-generalize (H eps Heps). intro H1.
-destruct H1 as (delta, H1).
-exists delta.
-intros h H0h Habsh.
-replace (x + h - x) with (tan (arctan (x + h)) - tan (arctan x)).
-apply H1. assumption. assumption.
-do 2 rewrite tanarctan. reflexivity.
+intros x y Hxy ; apply strictly_increasing_open_interval_atan ;
+ try apply atan_in ; repeat fold_comp ;
+ do 2 rewrite reciprocal_tan_atan ; ass_apply.
 Qed.
 
-Lemma tanarctandev2 : forall x, derivable_pt (fun y:R => y) x 
--> derivable_pt (fun x => tan (arctan x)) x.
+Lemma injective_atan : injective atan.
 Proof.
-intros x.
-unfold derivable_pt.
-unfold derivable_pt_abs.
-unfold derivable_pt_lim.
-intros H.
-destruct H as (l, H).
-exists l.
-intros eps Heps.
-generalize (H eps Heps). intro H1.
-destruct H1 as (delta, H1).
-exists delta.
-intros h H0h Habsh.
-replace (x + h - x) with (tan (arctan (x + h)) - tan (arctan x)).
-do 2 rewrite tanarctan.
-apply H1. assumption. assumption.
-do 2 rewrite tanarctan. reflexivity.
+unfold atan ; intros x y Hxy ;
+ destruct (exists_atan x) as [z1 [_ Hz1]] ;
+ destruct (exists_atan y) as [z2 [_ Hz2]] ;
+ subst ; reflexivity.
 Qed.
 
-Lemma arctan_lt_mPI2 : forall x, arctan x > -PI/2.
+Lemma continuity_arctan : continuity atan.
 Proof.
-intros x.
-unfold arctan.
-destruct (exists_arctan x).
-intuition.
-Qed.
+(** here *)
 
-Lemma arctan_lt_PI2 : forall x, arctan x < PI/2.
-Proof.
-intros x.
-unfold arctan.
-destruct (exists_arctan x).
-intuition.
-Qed.
-
-Lemma arctan_increasing : forall x y, x < y -> arctan x < arctan y.
-Proof.
-intros x y H.
-apply tan_increasing3.
-apply arctan_lt_mPI2.
-apply arctan_lt_PI2.
-apply arctan_lt_mPI2.
-apply arctan_lt_PI2.
-do 2 rewrite tanarctan.
-assumption.
-Qed.
-
-Lemma arctan_inj : forall x y, arctan x = arctan y -> x = y.
-Proof.
-intros x y H.
-unfold arctan in H.
-destruct (exists_arctan x) as (x1, H2).
-destruct (exists_arctan y) as (y1, H3).
-destruct H2 as (H2, H4).
-destruct H3 as (H3, H5).
-rewrite <- H4. rewrite <- H5.
-rewrite H.
-reflexivity.
-Qed.
-
-Lemma continuity_open_interval_tan : continuity_open_interval tan (-PI/2) (PI/2).
-Proof.
-intros x Hx.
-apply derivable_continuous_pt.
-apply derivable_pt_tan.
-assumption.
-Qed.
-
-Lemma continuity_arctan : forall b, continuity_pt arctan b.
-Proof.
 intros y.
 destruct (tan_cv_neg_infty y) as (lb, H).
 destruct (tan_cv_pos_infty y) as (ub, H1).
