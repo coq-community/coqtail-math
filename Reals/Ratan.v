@@ -132,6 +132,22 @@ intros x x_in pr.
  assumption.
 Qed.
 
+Lemma derive_open_interval_tan_strong :
+ forall lb ub x (x_in : open_interval lb ub x)
+ (pr : derivable_open_interval tan lb ub),
+ open_interval (- PI / 2) (PI / 2) lb ->
+ open_interval (- PI / 2) (PI / 2) ub ->
+ derive_open_interval tan lb ub pr x = 1 + (tan x) ^ 2.
+Proof.
+intros lb ub x x_in pr lb_in ub_in.
+ assert (cos_neq : cos x <> 0).
+  apply Rgt_not_eq, cos_pos ; eapply open_interval_restriction_compat ;
+   try eassumption ; apply open_interval_interval ; assumption.
+ assert (pr' : derivable_pt tan x) by (apply derivable_pt_div ; (reg || assumption)).
+ rewrite <- (derive_pt_tan _ cos_neq pr') ; apply derive_pt_derive_open_interval ;
+ assumption.
+Qed.
+
 Lemma derive_open_interval_pos_strictly_increasing_open_interval :
   forall f lb ub (pr : derivable_open_interval f lb ub),
   (forall x (x_in : open_interval lb ub x), 0 < derive_open_interval f lb ub pr x) ->
@@ -577,6 +593,18 @@ intros ; eapply derivable_pt_lim_in_imp_compat ; [| eassumption].
   try eapply y_in ; assumption.
 Qed.
 
+Lemma derivable_pt_lim_open_interval_restriction_compat' :
+  forall (f : R -> R) (a b a' b' : R) l x,
+  open_interval a' b' x ->
+  open_interval a b a' -> open_interval a b b' ->
+  derivable_pt_lim_in f (open_interval a b) x l ->
+  derivable_pt_lim_in f (open_interval a' b') x l.
+Proof.
+intros ; eapply derivable_pt_lim_in_imp_compat ; [| eassumption].
+ intros y y_in ; eapply open_interval_restriction_compat ; try eassumption ;
+  eapply open_interval_interval ; eassumption.
+Qed.
+
 Lemma derivable_open_interval_restriction_compat :
   forall (f : R -> R) (a b a' b' : R),
   open_interval a b a' -> open_interval a b b' ->
@@ -589,7 +617,20 @@ intros f a b a' b' a'_in b'_in Hf x x_in ; destruct (Hf x) as [l Hl].
   eassumption.
 Qed.
 
-Lemma continuity_arctan : continuity atan.
+Lemma derivable_open_interval_restriction_compat' :
+  forall (f : R -> R) (a b a' b' : R),
+  open_interval a b a' -> open_interval a b b' ->
+  derivable_open_interval f a b ->
+  derivable_open_interval f a' b'.
+Proof.
+intros f a b a' b' a'_in b'_in Hf x x_in ; destruct (Hf x) as [l Hl].
+ eapply open_interval_restriction_compat ; try eapply x_in ;
+  eapply open_interval_interval ; eassumption.
+ exists l ; eapply derivable_pt_lim_open_interval_restriction_compat' ;
+  eassumption.
+Qed.
+
+Lemma continuity_atan : continuity atan.
 Proof.
 intro y ; apply continuity_open_interval_continuity ; intros lb ub x x_in.
  replace lb with (id lb) by reflexivity ; replace ub with (id ub) by reflexivity ;
@@ -626,135 +667,60 @@ intros f x lb ub [l Hl] [l' Hl'] Hlu x_in ;
  ass_apply.
 Qed.
 
-Lemma derivable_atan : derivable atan.
+Lemma derivable_pt_lim_atan : forall x, derivable_pt_lim atan x (/ (1 + x ^ 2)).
 Proof.
-apply derivable_open_interval_derivable ; intros lb ub x x_in ;
- replace lb with (id lb) by reflexivity ; replace ub with (id ub) by reflexivity ;
- do 2 rewrite <- reciprocal_tan_atan ; unfold comp.
- assert (pr : derivable_interval tan (atan lb) (atan ub)).
-  eapply derivable_open_interval_restriction_compat,
-  derivable_open_interval_tan ; apply atan_in.
- assert (atanx_in : interval (atan lb) (atan ub) (atan x)).
-  split ; apply increasing_atan ; left ; apply x_in.
- apply derivable_pt_recip_interv with (pr (atan x) atanx_in).
-  eapply strictly_increasing_atan, open_interval_inhabited ; eassumption.
-  do 2 (fold_comp ; rewrite reciprocal_tan_atan) ; apply x_in.
-  apply reciprocal_reciprocal_interval, reciprocal_tan_atan.
-  intro y ; do 2 (fold_comp ; rewrite reciprocal_tan_atan) ;
-   unfold id ; intro y_in ; split ; apply increasing_atan ; apply y_in.
-  eapply strictly_increasing_open_interval_restriction_compat ;
-   (eapply atan_in || exact strictly_increasing_open_interval_tan).
-  eapply derivable_open_interval_restriction_compat ;
-   (apply atan_in || exact derivable_open_interval_tan).
-  apply Rgt_not_eq.
-  apply Rlt_le_trans with (1 + tan (atan x) ^ 2) ; [| right ; symmetry].
-   apply One_plus_sqr_pos_lt.
-   apply derivable_pt_lim_derive_pt_interval.
-    eapply strictly_increasing_atan, open_interval_inhabited ; eassumption.
-    assumption.
-    assert (prx : derivable_pt tan (atan x)).
-     eapply derivable_open_interval_derivable_pt, atan_in ; eapply derivable_open_interval_tan.
-    eapply derivable_pt_lim_derivable_pt_lim_in, derive_pt_eq_1 with prx.
-    apply derive_pt_tan, Rgt_not_eq, cos_pos, atan_in.
+intro x ; pose (d := interval_dist (- PI / 2) (PI / 2) (atan x)) ;
+ assert (d_pos : 0 < d) by (apply open_interval_dist_pos, atan_in) ;
+ pose (lb := atan x - d / 2) ; pose (ub := atan x + d / 2).
+ assert (lb_in : open_interval (- PI / 2) (PI / 2) lb).
+  apply open_interval_dist_bound ; [apply open_interval_interval, atan_in |].
+  rewrite Rabs_Ropp, Rabs_right ; fold d ; fourier.
+ assert (ub_in : open_interval (- PI / 2) (PI / 2) ub).
+  apply open_interval_dist_bound ; [apply open_interval_interval, atan_in |].
+  rewrite Rabs_right ; fold d ; fourier.
+ assert (x_in : open_interval (tan lb) (tan ub) x).
+ split.
+  apply Rlt_le_trans with (tan (atan x)).
+   apply strictly_increasing_open_interval_tan ;
+    [assumption | apply atan_in | unfold lb ; fourier].
+   right ; apply reciprocal_tan_atan.
+  apply Rle_lt_trans with (tan (atan x)).
+   right ; symmetry ; apply reciprocal_tan_atan.
+   apply strictly_increasing_open_interval_tan ;
+    [apply atan_in | assumption | unfold ub ; fourier].
+ apply derivable_pt_lim_open_interval_derivable_pt_lim with (tan lb) (tan ub).
+  assumption.
+  replace (x ^ 2) with (tan (atan x) ^ 2) by (f_equal ; apply reciprocal_tan_atan).
+  assert (pr : derivable_open_interval tan (atan (tan lb)) (atan (tan ub))).
+   eapply derivable_open_interval_restriction_compat', derivable_open_interval_tan ;
+    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+  rewrite <- derive_open_interval_tan_strong with (atan (tan lb)) (atan (tan ub)) (atan x) pr.
+   eapply derivable_pt_lim_in_reciprocal_open_interval.
+   apply reciprocal_reciprocal_interval, reciprocal_tan_atan.
+   split ; apply strictly_increasing_atan ; apply x_in.
+   apply continuity_pt_continue_in, continuity_atan.
+   assumption.
+   rewrite derive_open_interval_tan_strong.
+    apply Rgt_not_eq, One_plus_sqr_pos_lt.
+    split ; apply strictly_increasing_atan ; apply x_in.
+    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    split ; apply strictly_increasing_atan ; apply x_in.
+    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
 Qed.
 
-(* here
+Lemma derivable_atan : derivable atan.
+Proof.
+intro x ; eexists ; eapply derivable_pt_lim_atan.
+Qed.
+
 Lemma derive_pt_atan : forall x (pr : derivable_pt atan x),
   derive_pt atan x pr = 1 / (1 + x ^ 2).
 Proof.
-
-
-
-intros y Pratan.
-destruct (tan_cv_neg_infty y) as (lb, H).
-destruct (tan_cv_pos_infty y) as (ub, H1).
-destruct H as (lb_def, H).
-destruct H1 as (ub_def, H1). 
-assert (lb_lt_ub : lb < ub). 
-apply Rgt_lt. apply (tan_increasing_5 lb ub y) ; assumption.
-destruct lb_def as (lb_def, _).
-destruct ub_def as (_, ub_def).
-assert (Pr : tan lb <= y <= tan ub).
-split ; fourier.
-destruct (exists_myatan lb ub y lb_def ub_def lb_lt_ub Pr) as (x, atanx).
-assert (x_encad : tan lb < y < tan ub) by intuition.
-assert (f_eq_g : forall x, tan lb <= x -> x <= tan ub -> comp tan arctan x = id x).
-intuition. apply tanarctan.
-assert (g_wf:forall x : R, tan lb <= x -> x <= tan ub -> lb <= arctan x <= ub).
-intuition. rewrite <- (arctantan lb).
-apply arctan_increasing_le. assumption.
-split. assumption. eapply Rlt_trans. apply lb_lt_ub. assumption.
-rewrite <- (arctantan ub). 
-apply arctan_increasing_le. assumption.
-split. eapply Rlt_trans. apply lb_def. assumption. assumption.
-assert (f_incr:forall x y : R, lb <= x -> x < y -> y <= ub -> tan x < tan y).
-intros. apply tan_increasing2 ; intuition.
-eapply Rlt_le_trans. apply lb_def. assumption.
-eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
-assert (fderivable : forall a : R, lb <= a <= ub -> derivable_pt tan a).
-intros. apply derivable_pt_tan. intuition.
-eapply Rlt_le_trans. apply lb_def. assumption.
-eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
-destruct atanx as (atanx1, atanx2).
-assert (PR : -PI/2 < x < PI/2).
-destruct atanx1 as (atanx11, atanx12).
-split. eapply Rlt_le_trans. apply lb_def. assumption.
-eapply Rle_lt_trans. Focus 2. apply ub_def. assumption.
-assert (arctanx : x = arctan y).
-rewrite <- (arctantan x). rewrite atanx2. reflexivity. assumption.
-assert (Prf : derivable_pt tan (arctan y)).
-apply derivable_pt_tan. rewrite <- arctanx. assumption.
-assert (Prg : derivable_pt arctan y). apply derivable_pt_arctan.
-
-rewrite <- atanx2 at 2. 
-rewrite <- (derive_pt_tan x PR).
-rewrite (derive_pt_recip_interv_prelim0 tan arctan (tan lb) (tan ub) y Prf).
-destruct derivable_pt_tan.
-destruct Prf.
-unfold derive_pt.
-simpl.
-rewrite arctanx in *.
-assert (x1 = x0). apply (uniqueness_limite tan (arctan y)).
-assumption. assumption.
-intuition. intuition. unfold reciprocal_open_interval ; intros ; apply f_eq_g ;
-try (apply open_interval_interval ; assumption) ; intuition.
-left ; apply (proj1 H0).
-left ; apply (proj2 H0).
-intro Hf.
-assert (1 + tan (arctan y) ^ 2 > 0).
-apply plus_Rsqr_gt_0.
-rewrite derive_pt_tan2 in Hf.
-fourier.
-intro Hf2 ; apply cos_eq_0_0 in Hf2.
-destruct Hf2 as (k, H11).
-generalize (arctan_lt_PI2 y).
-generalize (arctan_lt_mPI2 y).
-intros H12 H14.
-induction k. simpl in H11. rewrite Rmult_0_l in H11.
-rewrite Rplus_0_l in H11. fourier.
-simpl in H11. destruct (nat_of_P p).
-simpl in H11. rewrite Rmult_0_l in H11.
-rewrite Rplus_0_l in H11. fourier.
-assert (INR (S n) * PI + PI/2 > arctan y).
-intros. replace (arctan y) with ((arctan y) + 0) by ring.
-rewrite Rplus_comm.
-apply Rplus_gt_compat. assumption.
-apply Rmult_gt_0_compat. intuition. apply PI_RGT_0.
-fourier.
-simpl in H11. destruct (nat_of_P p).
-simpl in H11. ring_simplify in H11. fourier.
-assert (-INR (S n) * PI + PI/2 < arctan y).
-intros. rewrite S_INR. unfold Rdiv. ring_simplify. 
-replace (- INR n * PI+PI */ 2 - PI) with (- INR n * PI + -PI * / 2).
-replace (arctan y) with ((arctan y) + 0) by ring.
-rewrite Rplus_comm. destruct n. simpl. ring_simplify. intuition.
-apply Rplus_gt_compat. assumption.
-rewrite Ropp_mult_distr_l_reverse. apply Ropp_0_lt_gt_contravar.
-apply Rmult_gt_0_compat. intuition. apply PI_RGT_0.
-field.
-fourier.
+intros x pr ; unfold Rdiv ; rewrite Rmult_1_l ;
+ apply derive_pt_eq_0, derivable_pt_lim_atan.
 Qed.
-*)
 
 Lemma atan_0 : atan 0 = 0.
 Proof.
@@ -770,49 +736,42 @@ unfold atan ; destruct (exists_atan 1) as [x [x_in Hx]].
  rewrite tan_PI4 ; assumption.
 Qed.
 
-Lemma arctancos : forall x, cos (arctan x) = 1/ (sqrt( 1 + x^2)).
+Lemma cos_atan : forall x, cos (atan x) = 1/ (sqrt (1 + x ^ 2)).
 Proof.
-intro x.
-destruct (exists_arctan x) as (a, H).
-destruct H as (H1, H2).
-generalize (cos_pos a). intros H10.
-rewrite <- H2. rewrite arctantan.
-unfold tan.
-field_simplify (1 + (sin a / cos a) ^ 2).
+intro x ; destruct (exists_atan x) as [a [a_in Ha]] ;
+ assert (cosa_pos : 0 < cos a) by (apply cos_pos ; assumption).
+ rewrite <- Ha ; fold (comp atan tan a) ;
+  rewrite reciprocal_open_interval_atan_tan ; [| assumption].
+ unfold tan ; field_simplify (1 + (sin a / cos a) ^ 2).
 replace ((sin a) ^ 2 + (cos a) ^2) with (Rsqr (sin a) + Rsqr (cos a)) by
 (unfold Rsqr ; simpl ; ring).
-rewrite (sin2_cos2 a).
-replace (1 / (cos a) ^ 2) with ((/cos a) * (/cos a)).
-rewrite sqrt_square. unfold Rdiv. rewrite Rmult_1_l.
-rewrite Rinv_involutive. reflexivity.
-intro H11. rewrite H11 in H10. intuition. fourier.
-left. apply Rinv_0_lt_compat. apply H10. assumption.
-field. 
-intro H11. rewrite H11 in H10. intuition. fourier.
-intro H11. rewrite H11 in H10. intuition. fourier.
-assumption.
+ rewrite sin2_cos2.
+ replace (1 / (cos a) ^ 2) with ((/cos a) * (/cos a)).
+ rewrite sqrt_square.
+  unfold Rdiv ; rewrite Rmult_1_l, Rinv_involutive.
+  reflexivity.
+ apply Rgt_not_eq ; assumption.
+ left ; apply Rinv_0_lt_compat ; assumption.
+field.
+ apply Rgt_not_eq ; assumption.
+ apply Rgt_not_eq ; assumption.
 Qed.
 
-Lemma arctansin : forall x, sin (arctan x) = x / (sqrt (1 + x ^ 2)).
+Lemma sin_atan : forall x, sin (atan x) = x / (sqrt (1 + x ^ 2)).
 Proof.
-intro x.
-destruct (exists_arctan x) as (a, H).
-destruct H as (H1, H2).
-generalize (cos_pos a). intros H10.
-rewrite <- H2. rewrite arctantan.
-unfold tan.
-field_simplify (1 + (sin a / cos a) ^ 2).
-replace ((sin a) ^ 2 + (cos a) ^2) with (Rsqr (sin a) + Rsqr (cos a)) by
-(unfold Rsqr ; simpl ; ring).
-rewrite (sin2_cos2 a).
-replace (1 / (cos a) ^ 2) with ((/cos a) * (/cos a)).
-rewrite sqrt_square. field.
-intro H11. rewrite H11 in H10. intuition. fourier.
-left. apply Rinv_0_lt_compat. apply H10. assumption.
-field. 
-intro H11. rewrite H11 in H10. intuition. fourier.
-intro H11. rewrite H11 in H10. intuition. fourier.
-assumption.
+intro x ; destruct (exists_atan x) as [a [a_in Ha]] ;
+ assert (cosa_pos : 0 < cos a) by (apply cos_pos ; assumption).
+ rewrite <- Ha ; fold (comp atan tan a) ; rewrite reciprocal_open_interval_atan_tan ;
+ [| assumption].
+ unfold tan ; field_simplify (1 + (sin a / cos a) ^ 2) ; [| apply Rgt_not_eq ; assumption].
+ replace ((sin a) ^ 2 + (cos a) ^2) with (Rsqr (sin a) + Rsqr (cos a))
+  by (unfold Rsqr ; simpl ; ring).
+ rewrite sin2_cos2.
+ replace (1 / (cos a) ^ 2) with ((/cos a) * (/cos a)).
+ rewrite sqrt_square ; [unfold id ; field |].
+  apply Rgt_not_eq ; assumption.
+  left ; apply Rinv_0_lt_compat ; assumption.
+ field ; apply Rgt_not_eq ; assumption.
 Qed.
 
 Lemma arctan_inv_PI2_1 : forall x0, x0 > 0 -> 

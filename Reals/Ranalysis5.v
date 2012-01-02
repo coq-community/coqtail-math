@@ -313,6 +313,17 @@ intros f lb ub x l [l' Hl'] x_in Hl ;
  eassumption.
 Qed.
 
+Lemma derivable_pt_lim_derive_pt_open_interval: forall f lb ub x l
+  (pr : derivable_pt_in f (open_interval lb ub) x),
+  open_interval lb ub x ->
+  derivable_pt_lim_in f (open_interval lb ub) x l ->
+  derive_pt_in f (open_interval lb ub) x pr = l.
+Proof.
+intros f lb ub x l [l' Hl'] x_in Hl ;
+ eapply derivable_pt_lim_open_interval_uniqueness ;
+ eassumption.
+Qed.
+
 Lemma derive_pt_derivable_pt_lim_interval: forall f lb ub x l
   (pr : derivable_pt_in f (interval lb ub) x),
   lb < ub -> interval lb ub x ->
@@ -323,6 +334,52 @@ intros f lb ub x l [l' Hl'] Hlt x_in Hl ; subst ; assumption.
 Qed.
 
 (** * Derivability of the reciprocal function *)
+
+Lemma derivable_pt_lim_in_reciprocal_open_interval : forall f g lb ub,
+  reciprocal_interval f g lb ub -> forall x Df_g,
+  open_interval (g lb) (g ub) (g x) ->
+  continue_pt_in g (open_interval lb ub) x -> open_interval lb ub x ->
+  derive_open_interval f (g lb) (g ub) Df_g (g x) <> 0 ->
+  derivable_pt_lim_in g (open_interval lb ub) x
+    (/ derive_open_interval f (g lb) (g ub) Df_g (g x)).
+Proof.
+intros f g lb ub Hfg x Df_g gx_in Hgx x_in df_neq ;
+ assert (glbub := open_interval_inhabited _ _ _ gx_in).
+ apply limit1_in_ext with (fun y => / ((f (g y) - f (g x)) / (g y - g x))).
+  unfold reciprocal_interval, comp in Hfg ; intros y [y_in y_neq] ;
+  unfold growth_rate ; rewrite Rinv_Rdiv.
+  do 2 (rewrite Hfg ; [| apply open_interval_interval ; assumption]) ;
+   reflexivity.
+  do 2 (rewrite Hfg ; [| apply open_interval_interval ; assumption]).   
+  apply Rminus_eq_contra ; symmetry ; assumption.
+  apply Rminus_eq_contra ; intro Hf ; apply y_neq ; fold (id y) (id x) ;
+  do 2 (rewrite <- Hfg ;  [| apply open_interval_interval ; assumption]) ;
+  rewrite Hf ; reflexivity.
+ apply limit_inv ; [| assumption].
+ unfold derive_open_interval ; destruct (in_open_interval_dec (g lb) (g ub) (g x))
+  as [x_in' |] ; [| contradiction] ; destruct (Df_g _ x_in') as [l Hl] ;
+  intros eps eps_pos ; destruct (Hl _ eps_pos) as [alpha [alpha_pos Halpha]].
+ pose (beta := Rmin (interval_dist (g lb) (g ub) (g x)) alpha) ;
+ assert (beta_pos : 0 < beta) by (apply Rmin_pos_lt ;
+ [apply open_interval_dist_pos |] ; assumption) ;
+ destruct (Hgx x_in _ beta_pos) as [delta [delta_pos Hdelta]] ;
+ exists delta ; split ; [assumption |].
+ intros y [[y_in y_neq] y_bd] ;
+ rewrite (derivable_pt_lim_derive_pt_open_interval _ _ _ _ _ _ gx_in Hl) ;
+  apply Halpha ; split. split.
+   replace (g y) with (g x + (g y - g x)) by ring ; apply open_interval_dist_bound.
+   apply open_interval_interval ; assumption.
+   apply Rlt_le_trans with beta ; [simpl in Hdelta ; apply Hdelta |
+   apply Rmin_l] ; split ; assumption.
+   intro Hf ; apply y_neq ; replace x with (id x) by reflexivity ;
+    replace y with (id y) by reflexivity ; rewrite <- Hfg, <- Hfg.
+     unfold comp ; rewrite Hf ; reflexivity.
+     apply open_interval_interval ; assumption.
+     apply open_interval_interval ; assumption.
+     apply Rlt_le_trans with beta ; [apply Hdelta | apply Rmin_r] ;
+      split ; assumption.
+Qed.
+
 
 Lemma derivable_pt_lim_in_reciprocal_interval : forall f g lb ub,
   reciprocal_interval f g lb ub -> forall x Df_gx,
