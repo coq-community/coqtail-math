@@ -309,18 +309,32 @@ Proof.
 intros ; fourier.
 Qed.
 
-Lemma Rmult_Rinv_lt_compat : forall a b c, 0 < a -> a * b < c -> b < c * / a.
+Lemma Rmult_Rinv_lt_compat_r : forall a b c, 0 < a -> a * b < c -> b < c * / a.
 Proof.
 intros a b c a_pos Habc ; apply Rle_lt_trans with (a * b * / a).
  right ; field ; apply Rgt_not_eq ; assumption.
  apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
 Qed.
 
-Lemma Rmult_Rinv_lt_compat_rev : forall a b c, 0 < a -> b < c * / a -> a * b < c.
+Lemma Rmult_Rinv_lt_compat_r_rev : forall a b c, 0 < a -> b < c * / a -> a * b < c.
 Proof.
 intros a b c a_pos Habc ; apply Rlt_le_trans with (a * (c * / a)).
  apply Rmult_lt_compat_l ; assumption.
  right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_l : forall a b c, 0 < c -> a < b * c -> a * / c < b.
+Proof.
+intros a b c a_pos Habc ; apply Rlt_le_trans with (b * c * / c).
+ apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+ right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_l_rev : forall a b c, 0 < c -> a * / c < b -> a < b * c.
+Proof.
+intros a b c a_pos Habc ; apply Rle_lt_trans with (a * / c * c).
+ right ; field ; apply Rgt_not_eq ; assumption.
+ apply Rmult_lt_compat_r ; assumption.
 Qed.
 
 Lemma derive_pt_minus : forall f g x prf prg pr,
@@ -392,7 +406,7 @@ intros y y_pos ; destruct (cos_cv_0_left (/ (2 * y)) (PI / 6)) as [x [x_in Hx]].
   apply Rlt_le_trans with (/ (2 * cos x)).
    rewrite <- Rinv_involutive with y ; [apply Rinv_lt_contravar | apply Rgt_not_eq ; fourier].
     apply Rlt_mult_inv_pos ; [apply Rmult_lt_0_compat |] ; (assumption || fourier).
-    apply Rmult_Rinv_lt_compat_rev ; [| rewrite <- Rinv_mult_distr, Rmult_comm] ;
+    apply Rmult_Rinv_lt_compat_r_rev ; [| rewrite <- Rinv_mult_distr, Rmult_comm] ;
     (assumption || apply Rgt_not_eq || idtac) ; fourier.
    rewrite Rinv_mult_distr ; try (apply Rgt_not_eq ; (assumption || fourier)) ;
     apply Rmult_le_compat_r ; [left ; apply Rinv_0_lt_compat ; assumption |].
@@ -716,10 +730,9 @@ intro x ; eexists ; eapply derivable_pt_lim_atan.
 Qed.
 
 Lemma derive_pt_atan : forall x (pr : derivable_pt atan x),
-  derive_pt atan x pr = 1 / (1 + x ^ 2).
+  derive_pt atan x pr = / (1 + x ^ 2).
 Proof.
-intros x pr ; unfold Rdiv ; rewrite Rmult_1_l ;
- apply derive_pt_eq_0, derivable_pt_lim_atan.
+intros x pr ; apply derive_pt_eq_0, derivable_pt_lim_atan.
 Qed.
 
 Lemma atan_0 : atan 0 = 0.
@@ -774,137 +787,62 @@ intro x ; destruct (exists_atan x) as [a [a_in Ha]] ;
  field ; apply Rgt_not_eq ; assumption.
 Qed.
 
-Lemma arctan_inv_PI2_1 : forall x0, x0 > 0 -> 
-forall Pf : derivable_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0,
-    derive_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0 Pf = 0.
+Lemma derivable_pt_lim_in_id : forall D x,
+  derivable_pt_lim_in id D x 1.
 Proof.
-intros x0 Hx.
-replace (/x0) with (/ id x0). Focus 2. intuition.
-assert (Pf : derivable_pt (fun x => arctan x + arctan (/ id x)) x0).
-reg.
-intro H1. replace (id x0) with x0 in H1 by intuition. rewrite H1 in Hx. fourier.
-apply derivable_arctan.
-apply derivable_arctan.
-assert (forall (Pf : derivable_pt (fun x => arctan x + arctan (/ id x)) x0),
- derive_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0 (Pf) = 0).
-intros Pf0.
-reg.
-replace 0 with (1/ (1 + x0 ^ 2) + -1 / (1 + x0 ^ 2)). Focus 2. field. 
-assert (1 + x0 ^ 2 > 0). apply plus_Rsqr_gt_0. intro H10. rewrite H10 in *. fourier.
-assert (H3 : derivable_pt (fun x => arctan(/id x)) x0). reg.
-replace (1/(1 + x0^2)) with (derive_pt arctan x0 H).
-Focus 2. rewrite derive_pt_arctan. reflexivity.
-replace (-1/(1 + x0^2)) with (derive_pt (fun x0 => arctan (/ id x0)) x0 H3).
-Focus 2.
-replace (-1 / (1 + x0 ^ 2)) with ((-1 / x0 ^ 2) * 1 / (1 + (1 / x0 ^ 2))).
-Focus 2. field. split. assert (1 + x0 ^2 > 0) by (apply plus_Rsqr_gt_0). 
-intro H10. rewrite H10 in *. fourier.
-intuition.
-Focus 2. assert (H4 : (derivable_pt (/id) x0)). reg.
-replace (-1 / x0 ^2) with (derive_pt (/id) x0 H4). Focus 2. 
-assert (H6 : derivable_pt id x0). reg.
-replace 1 with (derive_pt id x0 H6). replace (x0 ^ 2) with (Rsqr (id x0)).
-rewrite <- (derive_pt_inv id x0 H6 H1).
-destruct derivable_pt_inv. simpl. unfold derive_pt. destruct H4.
-simpl.
-apply (uniqueness_limite (/id)%F x0 x1 x).
-assumption. assumption. unfold Rsqr. simpl. intuition.
-reg.
-rewrite <- derive_pt_plus.
-reg. destruct derivable_pt_plus. destruct Pf0. simpl.
-apply (uniqueness_limite (fun x => arctan x + arctan (/id x)) x0 x1 x).
-assumption. assumption.
-unfold Rdiv. rewrite Rmult_assoc.
-replace (1 */ (1 + 1 */ x0 ^ 2)) with (derive_pt arctan (/id x0) H0).
-rewrite Rmult_comm.
-reg. rewrite <- derive_pt_comp.
-reg. destruct H3. destruct derivable_pt_comp. simpl.
-apply (uniqueness_limite (fun x : R => arctan (/ id x)) x0).
-assumption. assumption.
-rewrite derive_pt_arctan. compute. field.
-split. intuition. generalize (plus_Rsqr_gt_0 x0). intro H10.
-intro H11. rewrite <- H11 in H10. ring_simplify in H10. fourier.
-intro H10. rewrite H10 in Hx. fourier.
-apply derivable_pt_arctan.
-apply derivable_pt_arctan.
-assumption.
+intros ; apply derivable_pt_lim_derivable_pt_lim_in,
+ derivable_pt_lim_id.
 Qed.
 
-Lemma arctan_inv_mPI2_1 : forall x0, x0 < 0 -> 
-forall Pf : derivable_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0,
-    derive_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0 Pf = 0.
+Lemma atan_inv_constant_pos : forall x, x <> 0 ->
+  derivable_pt_lim (atan + comp atan (/ id))%F x 0.
 Proof.
-intros x0 Hx.
-assert (Pf : derivable_pt (fun x => arctan x + arctan (/ id x)) x0).
-reg.
-intro H1. replace (id x0) with x0 in H1 by intuition. rewrite H1 in Hx. fourier.
-apply derivable_arctan.
-apply derivable_arctan.
-assert (forall (Pf : derivable_pt (fun x => arctan x + arctan (/ id x)) x0),
- derive_pt (fun x : R => (arctan x + arctan (/ id x))%R) x0 (Pf) = 0).
-intros Pf0.
-reg.
-replace 0 with (1/ (1 + x0 ^ 2) + -1 / (1 + x0 ^ 2)). Focus 2. field. 
-assert (1 + x0 ^ 2 > 0). apply plus_Rsqr_gt_0. intro H10. rewrite H10 in *. fourier.
-assert (H3 : derivable_pt (fun x => arctan(/id x)) x0). reg.
-replace (1/(1 + x0^2)) with (derive_pt arctan x0 H).
-Focus 2. rewrite derive_pt_arctan. reflexivity.
-replace (-1/(1 + x0^2)) with (derive_pt (fun x0 => arctan (/ id x0)) x0 H3).
-Focus 2.
-replace (-1 / (1 + x0 ^ 2)) with ((-1 / x0 ^ 2) * 1 / (1 + (1 / x0 ^ 2))).
-Focus 2. field. split. assert (1 + x0 ^2 > 0) by (apply plus_Rsqr_gt_0). 
-intro H10. rewrite H10 in *. fourier.
-intuition.
-Focus 2. assert (H4 : (derivable_pt (/id) x0)). reg.
-replace (-1 / x0 ^2) with (derive_pt (/id) x0 H4). Focus 2. 
-assert (H6 : derivable_pt id x0). reg.
-replace 1 with (derive_pt id x0 H6). replace (x0 ^ 2) with (Rsqr (id x0)).
-rewrite <- (derive_pt_inv id x0 H6 H1).
-destruct derivable_pt_inv. simpl. unfold derive_pt. destruct H4.
-simpl.
-apply (uniqueness_limite (/id)%F x0 x1 x).
-assumption. assumption. unfold Rsqr. simpl. intuition.
-reg.
-rewrite <- derive_pt_plus.
-reg. destruct derivable_pt_plus. destruct Pf0. simpl.
-apply (uniqueness_limite (fun x => arctan x + arctan (/id x)) x0 x1 x).
-assumption. assumption.
-unfold Rdiv. rewrite Rmult_assoc.
-replace (1 */ (1 + 1 */ x0 ^ 2)) with (derive_pt arctan (/id x0) H0).
-rewrite Rmult_comm.
-reg. rewrite <- derive_pt_comp.
-reg. destruct H3. destruct derivable_pt_comp. simpl.
-apply (uniqueness_limite (fun x : R => arctan (/ id x)) x0).
-assumption. assumption.
-rewrite derive_pt_arctan. compute. field.
-split. intuition. generalize (plus_Rsqr_gt_0 x0). intro H10.
-intro H11. rewrite <- H11 in H10. ring_simplify in H10. fourier.
-intro H10. rewrite H10 in Hx. fourier.
-apply derivable_pt_arctan.
-apply derivable_pt_arctan.
-assumption.
+intros x x_pos ; replace 0 with (/ (1 + x ^ 2) - / (1 + x ^ 2)) by ring.
+ apply derivable_pt_lim_plus.
+  apply derivable_pt_lim_atan.
+  replace (- / (1 + x ^ 2)) with (/ (1 + (/ id)%F x ^ 2) * (- 1 / (id x ^ 2))).
+  apply derivable_pt_lim_comp.
+   apply derivable_pt_lim_open_interval_derivable_pt_lim with (x - 1) (x + 1).
+    apply x_in_Rball1.
+    apply derivable_pt_lim_in_inv_compat.
+     apply x_in_Rball1.
+     assumption.
+     apply derivable_pt_lim_in_id.
+     apply derivable_pt_lim_atan.
+    unfold id, inv_fct ; field ; split ;
+    [apply Rgt_not_eq ; apply One_plus_sqr_pos_lt | assumption].
 Qed.
 
-Lemma exist_0_mPI : forall x, 
-  {k : Z| forall x1, (x1 = IZR k * PI - x) -> 
-    0 < x1 <= PI}.
+Lemma Rminus_lt_compat_l : forall a b c, a < b + c -> a - b < c.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_le_compat_l : forall a b c, a <= b + c -> a - b <= c.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_le_compat_r : forall a b c, a + c <= b -> a <= b - c.
 Proof.
-intros x.
-exists (up (x/PI)).
-intros x1 H.
-destruct (archimed (x/PI)).
-apply (Rmult_gt_compat_r PI) in H0.
-apply (Rmult_le_compat_r PI) in H1.
-unfold Rdiv in *. rewrite Rmult_assoc in H0.
-rewrite <- Rinv_l_sym in H0. unfold Rminus in *.
-rewrite Rmult_plus_distr_r in H1. 
-replace (-(x */PI) * PI) with (-x) in H1 by (field ; apply PI_neq0).
-rewrite Rmult_1_l in H1. rewrite Rmult_1_r in H0.
-apply Rgt_minus in H0.
-rewrite H. intuition.
-apply PI_neq0. left. assert (2 * PI > 0). apply Rgt_2PI_0.
-fourier. 
-assert (2 * PI > 0). apply Rgt_2PI_0. fourier.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_le_compat_l_rev : forall a b c, a - b <= c -> a <= b + c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma x_modulo_PI : forall x, { k : Z | 0 < IZR k * PI - x <= PI }.
+Proof.
+intro x ; pose (k := up (x / PI)) ; exists k.
+ destruct (archimed (x / PI)) as [x_lb x_ub] ; fold k in x_lb, x_ub.
+  split.
+  apply Rlt_Rminus, Rmult_Rinv_lt_compat_l_rev, x_lb ; exact PI_RGT_0.
+  apply Rminus_le_compat_l, Rminus_le_compat_l_rev.
+  apply Rmult_le_reg_r with (/ PI).
+   apply Rinv_0_lt_compat, PI_RGT_0.
+   transitivity (IZR k - x / PI).
+    right ; field ; apply Rgt_not_eq, PI_RGT_0.
+    rewrite Rinv_r ; [assumption | apply Rgt_not_eq, PI_RGT_0].
 Qed.
 
 Lemma cos2PI_period : forall x k, cos x = cos (x + 2 * IZR ( k ) * PI).
