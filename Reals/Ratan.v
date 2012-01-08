@@ -817,6 +817,16 @@ Lemma Rminus_lt_compat_l : forall a b c, a < b + c -> a - b < c.
 intros ; fourier.
 Qed.
 
+Lemma Rminus_lt_compat_r : forall a b c, a + c < b -> a < b - c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_lt_compat_l_rev : forall a b c, a - b < c -> a < b + c.
+Proof.
+intros ; fourier.
+Qed.
+
 Lemma Rminus_le_compat_l : forall a b c, a <= b + c -> a - b <= c.
 intros ; fourier.
 Qed.
