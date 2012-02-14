@@ -63,4 +63,24 @@ repeat split;
   ring.
 Qed.
 
+Lemma H_unit_is_unit : forall x, H_unit x -> is_H_unit x.
+Proof.
+  intros x Ux.
+  exists (hconj x).
+  destruct Ux as [[]|[]|[]|[]|[] [] [] []]; auto.
+Qed.
+
+Lemma hnorm2_conj : forall x, hnorm2 (hconj x) = hnorm2 x.
+Proof.
+  intros [a b c d]; intros.
+  unfold hnorm2, hconj, hmul, h.
+  ring.
+Qed.
+
+Lemma H_unit_characterization : forall x, is_H_unit x -> H_unit x.
+Proof.
+  intros x Ux.
+  (* destruction bourrine *)
+Admitted.
+
 End basic_lemmas.

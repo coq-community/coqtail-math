@@ -62,31 +62,7 @@ Definition hsmul (k : Z) (h1 : Hurwitz) : Hurwitz :=
   let (h1, i1, j1, k1) := h1 in
   mkHurwitz (k * h1) (k * i1) (k * j1) (k * k1).
 
-
-(** Relation to quaternions *)
-
-Definition H1 := mkHurwitz 2 (- 1) (- 1) (- 1).
-Definition Hh := mkHurwitz 1 0 0 0.
-Definition Hi := mkHurwitz 0 1 0 0.
-Definition Hj := mkHurwitz 0 0 1 0.
-Definition Hk := mkHurwitz 0 0 0 1.
-
-Definition is_real (x : Hurwitz) : Prop :=
-  h x + 2 * i x = 0 /\ i x = j x /\ i x = k x.
-
-(* Les entiers de Hurwitz ne sont pas à composantes entières
-Definition Q1 (h1 : Hurwitz) : Z := h h1 / 2.
-Definition Qi (h1 : Hurwitz) : Z := h h1 / 2 + i h1.
-Definition Qj (h1 : Hurwitz) : Z := h h1 / 2 + j h1.
-Definition Qk (h1 : Hurwitz) : Z := h h1 / 2 + k h1.
-
-Lemma quat_spec : forall h, h =
-  hsmul (Q1 h) H1
-  h+ hsmul (Qi h) Hi
-  h+ hsmul (Qj h) Hj
-  h+ hsmul (Qk h) Hk.
-Admitted.
-*)
+(** Conjugate, norm *)
 
 Definition hconj (h : Hurwitz) :=
   let (a, b, c, d) := h in
@@ -94,4 +70,45 @@ Definition hconj (h : Hurwitz) :=
 
 Definition hnorm2 (h1 : Hurwitz) := (2 * h (hmul h1 (hconj h1)))%Z.
 
+Definition is_real (x : Hurwitz) : Prop :=
+  h x + 2 * i x = 0 /\ i x = j x /\ i x = k x.
 
+
+(** Divisibility, units *)
+
+Definition h1 := mkHurwitz 2 (- 1) (- 1) (- 1).
+Definition hh := mkHurwitz 1 0 0 0.
+Definition hi := mkHurwitz 0 1 0 0.
+Definition hj := mkHurwitz 0 0 1 0.
+Definition hk := mkHurwitz 0 0 0 1. 
+
+Definition divide (x y : Hurwitz) := { d | hmul x d = y }.
+
+Definition is_H_unit (x : Hurwitz) := { y | hmul x y = IZH 1 }.
+
+Inductive Z_unit := Z_one | Z_mone.
+
+Definition halfsub (u v : Z_unit) : Z :=
+  match u, v with
+  | Z_one, Z_one => 0
+  | Z_one, Z_mone => 1
+  | Z_mone, Z_one => -1
+  | Z_mone, Z_mone => 0
+  end.
+
+Definition Z_of_Z_unit (u : Z_unit) :=
+  match u with
+  | Z_one => 1
+  | Z_mone => -1
+  end.
+
+Inductive H_unit : Hurwitz -> Type :=
+  | H_unit_1 : forall u, let n := Z_of_Z_unit u in H_unit (mkHurwitz (2 * n) (- n) (- n) (- n))
+  | H_unit_i : forall u, H_unit (mkHurwitz 0 (Z_of_Z_unit u) 0 0)
+  | H_unit_j : forall u, H_unit (mkHurwitz 0 0 (Z_of_Z_unit u) 0)
+  | H_unit_k : forall u, H_unit (mkHurwitz 0 0 0 (Z_of_Z_unit u))
+  | H_unit_h : forall u v w z, H_unit (mkHurwitz
+      (Z_of_Z_unit u)
+      (halfsub v u)
+      (halfsub w u)
+      (halfsub z u)).
