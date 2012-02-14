@@ -117,10 +117,32 @@ Proof.
   ring.
 Qed.
 
+Lemma hnorm2_lower_bound : forall a b c d,
+  a * a <= 2 * hnorm2 (mkHurwitz a b c d).
+Proof.
+  (* Modifier la borne, elle ne suffit pas *)
+  admit.
+Qed.
+
+
 Lemma H_unit_characterization : forall x, is_H_unit x -> H_unit x.
 Proof.
-  intros x Ux.
-  (* destruction bourrine *)
+  intros x (y, Ixy).
+  assert (Nx : hnorm2 x = 1).
+    admit (* la norme distribue sur le produit, le conj, et est entière .. *).
+  
+  assert (Ny : hnorm2 y = 1).
+    admit.
+  
+  (* Une fois qu'on a ça, c'est pas si facile. Chez les quaternions
+  on peut borner |a+bi+cj+dk|>=|a|+|b|+|c|+|d| mais comme le changement
+  est dans une base pas trop orthonormée, c'est moins facile, mais c'est
+  possible quand même. *)
+  (*intros [[|p|p] [|q|q] [|r|r] [|s|s]] (y, Uxy).*)
+  
+  (* idée : on peut énumérer les x, y de norme bornée (par 1), et après
+  on peut vérifier que si xy=1 c'est que H_unit x. Peut-être avoir la 
+  décidabilité de H_unit aidera. *)
 Admitted.
 
 End basic_lemmas.
