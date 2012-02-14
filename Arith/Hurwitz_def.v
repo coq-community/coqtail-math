@@ -68,7 +68,7 @@ Definition hconj (h : Hurwitz) :=
   let (a, b, c, d) := h in
   mkHurwitz a (- a - b) (- a - c) (- a - d).
 
-Definition hnorm2 (h1 : Hurwitz) := (2 * h (hmul h1 (hconj h1)))%Z.
+Definition hnorm2 (h1 : Hurwitz) := (- i (hmul h1 (hconj h1)))%Z.
 
 Definition is_real (x : Hurwitz) : Prop :=
   h x + 2 * i x = 0 /\ i x = j x /\ i x = k x.

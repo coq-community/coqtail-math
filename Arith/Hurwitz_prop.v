@@ -1,9 +1,16 @@
-Require Import ZArith Zpow_facts MyZ.
+Require Import ZArith Znumtheory Zpow_facts MyZ.
 Require Import Hurwitz_def.
 
 Section basic_lemmas.
 
 Variable h1 h2 h3 : Hurwitz.
+
+(* eq *)
+
+Lemma Hurwitz_dec : { h1 = h2 } + { h1 <> h2 }.
+Proof.
+repeat decide equality.
+Qed.
 
 (* hopp *)
 
@@ -84,7 +91,24 @@ Qed.
 
 (* norm *)
 
-Lemma real_norm2 : is_real (hmul h1 (hconj h1)).
+Lemma hnorm2_IZH : forall z, hnorm2 (IZH z) = z ^ 2.
+Proof.
+intro z ; unfold hnorm2, hconj, IZH, hmul, i ; ring.
+Qed.
+
+Lemma hnorm2_hconj : hnorm2 (hconj h1) = hnorm2 h1.
+Proof.
+destruct h1 ; intros ; unfold hnorm2 , hconj , hmul, Hurwitz_def.i ;
+ ring.
+Qed.
+
+Lemma hnorm2_hmul : hnorm2 (h1 h* h2) = hnorm2 h1 * hnorm2 h2.
+Proof.
+destruct h1, h2 ; unfold hnorm2, hconj, hmul, Hurwitz_def.i ;
+ ring.
+Qed.
+
+Lemma real_hnorm2 : is_real (hmul h1 (hconj h1)).
 Proof.
 destruct h1 ; intros; unfold hmul, hconj.
 repeat split;
@@ -93,15 +117,36 @@ repeat split;
   ring.
 Qed.
 
+Lemma Zmult_le_reg_l : forall m n p, 0 < p -> p * m <= p * n -> m <= n.
+Proof.
+intros m n p p_pos ; do 2 rewrite (Zmult_comm p) ;
+ apply Zmult_le_reg_r, Zlt_gt ; assumption.
+Qed.
+
 Lemma hnorm2_pos : 0 <= hnorm2 h1.
 Proof.
 destruct h1 ; intros ; unfold hnorm2, hmul, hconj.
- cbv delta [Hurwitz_def.h] ; cbv beta ; cbv iota ; cbv beta.
+ cbv delta [Hurwitz_def.i] ; cbv beta iota.
  ring_simplify.
+ apply Zmult_le_reg_l with 4 ; [omega |].
  transitivity ((h + 2 * i) ^ 2 + (h + 2 * j) ^ 2 + (h + 2 * k) ^ 2 + h ^ 2).
  do 4 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Zge_le, sqr_pos.
  apply eq_Zle ; ring.
 Qed.
+
+Lemma h_Zle_hnorm2 : (h h1) ^ 2 <= 4 * hnorm2 h1.
+Proof.
+destruct h1 ; intros ; unfold hnorm2, hmul, hconj.
+ cbv delta [Hurwitz_def.h Hurwitz_def.i] ; cbv beta iota.
+ apply Zle_0_minus_le ; ring_simplify.
+ transitivity ((h + 2 * i) ^ 2 + (h + 2 * j) ^ 2 + (h + 2 * k) ^ 2).
+ do 3 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Zge_le, sqr_pos.
+ apply eq_Zle ; ring.
+Qed.
+
+End basic_lemmas.
+
+(* units *)
 
 Lemma H_unit_is_unit : forall x, H_unit x -> is_H_unit x.
 Proof.
@@ -110,29 +155,87 @@ Proof.
   destruct Ux as [[]|[]|[]|[]|[] [] [] []]; auto.
 Qed.
 
-Lemma hnorm2_conj : forall x, hnorm2 (hconj x) = hnorm2 x.
+Lemma is_H_unit_hnorm2_1 : forall x, is_H_unit x -> hnorm2 x = 1.
 Proof.
-  intros [a b c d]; intros.
-  unfold hnorm2, hconj, hmul, h.
-  ring.
+intros x (y, Ixy).
+ assert (H : hnorm2 x  * hnorm2 y = 1).
+  etransitivity ; [symmetry ; eapply hnorm2_hmul |].
+  rewrite Ixy ; apply hnorm2_IZH.
+ eapply Zmult_one ; [apply Zle_ge, hnorm2_pos | eassumption].
 Qed.
 
-Lemma hnorm2_lower_bound : forall a b c d,
-  a * a <= 2 * hnorm2 (mkHurwitz a b c d).
+Lemma H_unit_dec : forall x, H_unit x + (H_unit x -> False).
 Proof.
-  (* Modifier la borne, elle ne suffit pas *)
-  admit.
+intro h ; pose (np := Z_of_Z_unit Z_one) ; pose (nn := Z_of_Z_unit Z_mone).
+ destruct (Hurwitz_dec h (mkHurwitz (2 * np) (- np) (- np) (- np))) as [e | Hnp_1].
+  left ; subst ; apply H_unit_1.
+ destruct (Hurwitz_dec h (mkHurwitz (2 * nn) (- nn) (- nn) (- nn))) as [e | Hnn_1].
+  left ; subst ; apply H_unit_1.
+ destruct (Hurwitz_dec h (mkHurwitz 0 np 0 0)) as [e | Hnp_i].
+  left ; subst ; apply H_unit_i.
+ destruct (Hurwitz_dec h (mkHurwitz 0 nn 0 0)) as [e | Hnn_i].
+  left ; subst ; apply H_unit_i.
+ destruct (Hurwitz_dec h (mkHurwitz 0 0 np 0)) as [e | Hnp_j].
+  left ; subst ; apply H_unit_j.
+ destruct (Hurwitz_dec h (mkHurwitz 0 0 nn 0)) as [e | Hnn_j].
+  left ; subst ; apply H_unit_j.
+ destruct (Hurwitz_dec h (mkHurwitz 0 0 0 np)) as [e | Hnp_k].
+  left ; subst ; apply H_unit_k.
+ destruct (Hurwitz_dec h (mkHurwitz 0 0 0 nn)) as [e | Hnn_k].
+  left ; subst ; apply H_unit_k.
+ pose (hpp := halfsub Z_one Z_one) ; pose (hpn := halfsub Z_one Z_mone) ;
+ pose (hnp := halfsub Z_mone Z_one) ; pose (hnn := halfsub Z_mone Z_mone).
+ destruct (Hurwitz_dec h (mkHurwitz np hpp hpp hpp)) as [e | Hh_0].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hpp hpp hnp)) as [e | Hh_1].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hpp hnp hpp)) as [e | Hh_2].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hpp hnp hnp)) as [e | Hh_3].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hnp hpp hpp)) as [e | Hh_4].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hnp hpp hnp)) as [e | Hh_5].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hnp hnp hpp)) as [e | Hh_6].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz np hnp hnp hnp)) as [e | Hh_7].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hpn hpn hpn)) as [e | Hh_8].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hpn hpn hnn)) as [e | Hh_9].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hpn hnn hpn)) as [e | Hh_A].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hpn hnn hnn)) as [e | Hh_B].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hnn hpn hpn)) as [e | Hh_C].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hnn hpn hnn)) as [e | Hh_D].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hnn hnn hpn)) as [e | Hh_E].
+  left ; subst ; apply H_unit_h.
+ destruct (Hurwitz_dec h (mkHurwitz nn hnn hnn hnn)) as [e | Hh_F].
+  left ; subst ; apply H_unit_h.
+ right ; intros Hf ; inversion Hf.
+  destruct u ; [apply Hnp_1 | apply Hnn_1] ; auto.
+  destruct u ; [apply Hnp_i | apply Hnn_i] ; auto.
+  destruct u ; [apply Hnp_j | apply Hnn_j] ; auto.
+  destruct u ; [apply Hnp_k | apply Hnn_k] ; auto.
+  destruct u ; destruct v ; destruct w ; destruct z ;
+  [ apply Hh_0 | apply Hh_1 | apply Hh_2 | apply Hh_3 | apply Hh_4 |
+    apply Hh_5 | apply Hh_6 | apply Hh_7 | apply Hh_8 | apply Hh_9 |
+    apply Hh_A | apply Hh_B | apply Hh_C | apply Hh_D | apply Hh_E |
+    apply Hh_F ] ; auto.
 Qed.
-
+  
 
 Lemma H_unit_characterization : forall x, is_H_unit x -> H_unit x.
 Proof.
-  intros x (y, Ixy).
-  assert (Nx : hnorm2 x = 1).
-    admit (* la norme distribue sur le produit, le conj, et est entière .. *).
-  
-  assert (Ny : hnorm2 y = 1).
-    admit.
+intros x Hx ; assert (Nx := is_H_unit_hnorm2_1 _ Hx) ; destruct Hx as [y Ixy].
+ assert (Ny : hnorm2 y = 1).
+  apply Zmult_reg_l with 1 ; [omega |] ; rewrite <- Zpower_2,
+   <- hnorm2_IZH, <- Ixy, <- Nx ; symmetry ; apply hnorm2_hmul.
   
   (* Une fois qu'on a ça, c'est pas si facile. Chez les quaternions
   on peut borner |a+bi+cj+dk|>=|a|+|b|+|c|+|d| mais comme le changement
@@ -145,4 +248,3 @@ Proof.
   décidabilité de H_unit aidera. *)
 Admitted.
 
-End basic_lemmas.
