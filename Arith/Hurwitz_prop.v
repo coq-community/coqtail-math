@@ -1,4 +1,4 @@
-Require Import ZArith.
+Require Import ZArith Zpow_facts MyZ.
 Require Import Hurwitz_def.
 
 Section basic_lemmas.
@@ -34,33 +34,73 @@ Proof.
 destruct h1, h2, h3 ; simpl ; f_equal ; ring.
 Qed.
 
+(* hmul *)
+
 Lemma hmul_assoc : forall a b c, hmul a (hmul b c) = hmul (hmul a b) c.
 Proof.
 intros () () (); intros.
  unfold hmul ; f_equal ; ring.
 Qed.
 
-Lemma hmul_1_l : forall a, hmul (IZH 1) a = a.
+Lemma hmul_1_l : hmul (IZH 1) h1 = h1.
 Proof.
-intros (); intros.
+destruct h1 ; intros.
 unfold hmul, IZH.
 f_equal; ring.
 Qed.
 
-Lemma hmul_1_r : forall a, hmul a (IZH 1) = a.
+Lemma hmul_1_r : hmul h1 (IZH 1) = h1.
 Proof.
-intros (); intros.
+destruct h1 ; intros.
 unfold hmul, IZH.
 f_equal; ring.
 Qed.
 
-Lemma real_norm2 : forall a, is_real (hmul a (hconj a)).
+(* conjugate *)
+
+Lemma hconj_invol : hconj (hconj h1) = h1.
 Proof.
-intros (); intros; unfold hmul, hconj.
+destruct h1 ; intros ; unfold hconj ; f_equal ; ring.
+Qed.
+
+Lemma hconj_hopp : hconj (h- h1) = h- (hconj h1).
+unfold hconj, hopp ; destruct h1 ; intros ; f_equal ; ring.
+Qed.
+
+Lemma hconj_hadd : hconj (h1 h+ h2) = hconj h1 h+ hconj h2.
+Proof.
+unfold hconj, hadd ; destruct h1, h2 ; intros ; f_equal ; ring.
+Qed.
+
+Lemma hconj_hminus : hconj (h1 h- h2) = (hconj h1) h- (hconj h2).
+Proof.
+unfold hminus, hadd, hopp, hconj ; destruct h1, h2 ; intros ; f_equal ; ring.
+Qed.
+
+Lemma hconj_hmul : hconj (h1 h* h2) = (hconj h2) h* (hconj h1).
+Proof.
+unfold hmul, hconj ; destruct h1, h2 ; f_equal ; ring.
+Qed.
+
+(* norm *)
+
+Lemma real_norm2 : is_real (hmul h1 (hconj h1)).
+Proof.
+destruct h1 ; intros; unfold hmul, hconj.
 repeat split;
   cbv delta [Hurwitz_def.h Hurwitz_def.i Hurwitz_def.j Hurwitz_def.k];
   cbv iota beta;
   ring.
+Qed.
+
+Lemma hnorm2_pos : 0 <= hnorm2 h1.
+Proof.
+destruct h1 ; intros ; unfold hnorm2, hmul, hconj.
+ cbv delta [Hurwitz_def.h] ; cbv beta ; cbv iota ; cbv beta.
+ ring_simplify.
+ transitivity ((h + 2 * i) ^ 2 + (h + 2 * j) ^ 2 + (h + 2 * k) ^ 2 + h ^ 2).
+ do 4 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Zge_le, sqr_pos.
+ apply eq_Zle ; ring.
 Qed.
 
 Lemma H_unit_is_unit : forall x, H_unit x -> is_H_unit x.

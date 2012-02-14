@@ -52,7 +52,7 @@ Definition hmul (h1 h2 : Hurwitz) : Hurwitz :=
 Notation "h-" := hopp.
 Infix " h+ " := hadd (at level 50).
 Infix " h- " := hminus (at level 10).
-Infix " h* " := hmul (at level 70).
+Infix " h* " := hmul (at level 60).
 
 (** External operations *)
 
