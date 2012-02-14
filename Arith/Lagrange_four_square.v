@@ -19,6 +19,10 @@ Qed.
 Definition sum_of_2_squares (n : Z) : Type :=
   sigT (fun a => sig (fun b => n = sqr a + sqr b)).
 
+Definition sum_of_4_squares (n : Z) : Type :=
+  sigT (fun a => sigT (fun b => sigT (fun c => sig (fun d =>
+    n = sqr a + sqr b + sqr c + sqr d)))).
+
 (*
 Definition even n := sig (fun _ : True => Zeven n).
 Definition odd n := sig (fun _ : True => Zodd n).
@@ -66,6 +70,26 @@ Proof.
       apply even_add; auto.
       apply even_sub; auto.
 Qed.
+
+Variable prime : Z -> Type.
+
+Variable prime_ind : forall P,
+  (forall n, prime n -> P n) ->
+  (forall a b, 2 <= a -> 2 <= b -> P a -> P b -> P (a * b)) ->
+    forall n, P n.
+
+Lemma odd_prime_divisor : forall p, prime p -> odd p ->	
+  sigT (fun l => sig (fun m => p = 1 + sqr l + sqr m)).
+(* Raisonnement modulo, pas de quaternions ici *)
+Admitted.
+
+Variable hurwitz_prime : Z -> Type. (* Prop ? *)
+
+Variable hurwitz_composite : Z -> Type.
+
+Lemma prime_not_hurwitz : forall p,
+  prime p -> hurwitz_composite p -> sum_of_4_squares p.
+Admitted.
 
 (*
 http://planetmath.org/encyclopedia/ProofOfLagrangesFourSquareTheorem.html
