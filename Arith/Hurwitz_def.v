@@ -4,7 +4,6 @@ Open Scope Z_scope.
 
 Record Hurwitz : Set := mkHurwitz { h : Z ; i : Z ; j : Z ; k : Z }.
 
-
 (** Internal operations *)
 
 Definition hopp (h1 : Hurwitz) : Hurwitz :=
@@ -52,11 +51,8 @@ Definition hmul (h1 h2 : Hurwitz) : Hurwitz :=
 
 Notation "h-" := hopp.
 Infix " h+ " := hadd (at level 50).
-Infix " h- " := hminus (at level 60).
+Infix " h- " := hminus (at level 10).
 Infix " h* " := hmul (at level 70).
-
-Ltac hastuce := unfold hminus, hopp, hadd ; simpl ; f_equal ; ring.
-
 
 (** External operations *)
 

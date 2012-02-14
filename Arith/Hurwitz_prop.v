@@ -1,3 +1,4 @@
+Require Import ZArith.
 Require Import Hurwitz_def.
 
 Section basic_lemmas.
@@ -8,30 +9,35 @@ Variable h1 h2 h3 : Hurwitz.
 
 Lemma hopp_invol : h- (h- h1) = h1.
 Proof.
-destruct h1 ; hastuce.
+destruct h1 ; simpl ; f_equal ; ring.
 Qed.
 
 Lemma hopp_hadd_distrib : h- (h1 h+ h2) = h- h1 h+ h- h2.
 Proof.
-destruct h1, h2, h3; hastuce.
+destruct h1, h2, h3 ; simpl ; f_equal ; ring.
 Qed.
+
+Lemma hopp_hadd_hminus : h- h1 h+ h2 = h2 h- h1.
+Proof.
+destruct h1, h2 ; simpl ; f_equal ; ring.
+Qed.
+
+(* hadd *)
 
 Lemma hadd_comm : h1 h+ h2 = h2 h+ h1.
 Proof.
-destruct h1, h2; hastuce.
+destruct h1, h2 ; simpl ; f_equal ; ring.
 Qed.
 
 Lemma hadd_assoc : h1 h+ h2 h+ h3 = h1 h+ (h2 h+ h3).
 Proof.
-destruct h1, h2, h3; hastuce.
+destruct h1, h2, h3 ; simpl ; f_equal ; ring.
 Qed.
 
 Lemma hmul_assoc : forall a b c, hmul a (hmul b c) = hmul (hmul a b) c.
 Proof.
 intros () () (); intros.
-unfold hmul.
-(* ok maintenant on a un problème de scope *)
-f_equal; ring.
+ unfold hmul ; f_equal ; ring.
 Qed.
 
 Lemma hmul_1_l : forall a, hmul (IZH 1) a = a.
