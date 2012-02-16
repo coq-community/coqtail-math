@@ -135,6 +135,7 @@ Variable prime : nat -> Type.
 
 Variable prime_ge_2 : forall n, prime n -> (2 <= n)%nat.
 
+(* renommer : conflit avec Datatypes.prod que j'ai eu envie d'utiliser *)
 Fixpoint prod n f :=
   match n with
   | O => S O
@@ -310,8 +311,10 @@ Admitted.
 
 (** 4-square property on prime numbers (the interesting part) *)
 
-Lemma prime_dividing_sum_of_two_squares_plus_one : forall p, prime p -> (2 <= p)%nat ->	
-  sigT (fun l => sigT (fun m => sig (fun k => p * k = 1 + l * l + m * m)%nat)).
+Lemma prime_dividing_sum_of_two_squares_plus_one : forall p,
+  prime p -> (3 <= p)%nat ->	
+    sigT (fun l => sigT (fun m => sig (fun k =>
+      p * k = 1 + l * l + m * m /\ 2 * m <= p + 1 /\  2 * l <= p + 1)%nat)).
 Proof.
   intros p Pp Op.
   (* arithmétique modulaire, pas forcément dans Z d'ailleurs *)
@@ -357,10 +360,47 @@ Proof.
   (* Arithmétique modulaire et compliquée *)
 Admitted.
 
+
+(* Ça devrait être quelque part, mais je n'ai pas trouvé. Peut-être aussi qu'on
+   peut utiliser un induction scheme au lieu d'utiliser ce résultat ? *)
+Definition lt_wf_rect :=
+  fun p (P : nat -> Type) F =>
+    well_founded_induction_type
+      (well_founded_ltof nat (fun m => m)) P F p.
+
 Lemma sum_of_4_squares_prime : forall p, prime p -> sum_of_4_squares p.
 Proof.
-  (* Application itérée du précédent lemme *)
-Admitted.
+  intros p Pp.
+  destruct (eq_nat_dec p 2) as [E | E].
+    do 2 exists 1%nat; do 2 exists O; auto.
+    
+    assert (3 <= p)%nat as Op by (pose proof (prime_ge_2 p Pp); omega); clear E.
+    
+    assert (sigT (fun m => (sum_of_4_squares (m * p) * (1 < m < p)%nat)%type)) as Hm.
+      destruct (prime_dividing_sum_of_two_squares_plus_one p Pp Op) as (l, (m, (k, (Ep, (Bl, Bm))))).
+      exists k; split.
+        exists O; exists (S O); exists l; exists m.
+        simpl in *; rewrite <- Ep.
+        intuition.
+        
+        (* inequations un peu pénibles. Ne PAS faire tant que les bornes ne
+        sont pas confirmées par le lemme utilisé *)
+        admit.
+    
+    clear Op.
+    destruct Hm as (m, Hm).
+    generalize p Pp m Hm; clear Hm m Pp p.
+    intros p Pp m.
+    refine (lt_wf_rect m (fun m => sum_of_4_squares (m * p) * (1 < m < p)%nat -> sum_of_4_squares p) _).
+    clear m; intros m IH (Hm, (LBm, UBm)).
+    
+    destruct (sum_of_4_squares_prime_factor_decreasing p Pp _ (conj LBm UBm) Hm) as (n, ((LBn, UBn), Hn)).
+      destruct n as [ | [ | n ]].
+        exfalso; inversion LBn.
+        replace p with (1 * p)%nat; intuition.
+        apply (IH (S (S n)));
+          repeat split; intuition.
+Qed.
 
 
 (** Trivial application of the previous lemma and euler's identity *)
