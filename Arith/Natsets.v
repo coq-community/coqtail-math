@@ -6,7 +6,8 @@ Require Import ZArith Omega MyNat Div2.
 (** Tactics *)
 
 Ltac rem t x Hx :=
-  pose (x := t); assert (Hx : t = x) by reflexivity; rewrite Hx in *; clearbody x.
+  pose (x := t); assert (Hx : x = t) by reflexivity;
+    try rewrite <- Hx in *; clearbody x.
 
 Ltac destruct_if t :=
   lazymatch t with

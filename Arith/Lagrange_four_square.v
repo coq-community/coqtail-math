@@ -394,13 +394,341 @@ Proof.
       omega.
 Qed.
 
+Definition modsym x m := (x + m / 2) mod m - m / 2.
+
+Ltac SET x v := replace x with v; [ | admit ]; simpl; unfold Pminus, Zdiv; simpl.
+(*
+      SET m 4; SET hm 2; SET x 1; simpl.
+*)
+
+Lemma modsym_bounds : forall x m, 0 < m -> - m <= 2 * modsym x m < m.
+Proof.
+  intros x m Pm; unfold modsym.
+  pose proof Z_mod_lt (x + m / 2) m.
+  pose proof Z_mod_lt m 2.
+  split; ring_simplify; rewrite Z_mult_div_mod; omega.
+Qed.
+
+Lemma modsym_mod_compat : forall x m, (modsym x m) mod m = x mod m.
+Proof.
+  intros x m; unfold modsym.
+  rewrite Zminus_mod_idemp_l.
+  f_equal; ring.
+Qed.
+
+Lemma mod_modsym_compat : forall x m, modsym (x mod m) m = modsym x m.
+Proof.
+  intros x m; unfold modsym.
+  rewrite Zplus_mod_idemp_l; auto.
+Qed.
+
+Lemma modsym_mod_diff : forall x m, 0 < m -> { k | modsym x m = x mod m + m * k }.
+Proof.
+  intros x m.
+  exists ((modsym x m - x mod m) / m).
+  rewrite Z_mult_div_mod; [ | auto with * ].
+  rewrite Zminus_mod, modsym_mod_compat.
+  rewrite Zminus_mod_idemp_l.
+  do 2 rewrite Zminus_mod_idemp_r.
+  rewrite Zminus_diag, Zmod_0_l.
+  ring.
+Qed.
+
+Notation " a ≡ b [ p ] " := ( eqm p a b ) (at level 70).
+
+Lemma modsym_eqm : forall x m, modsym x m ≡ x [ m ].
+Proof.
+  intros x m.
+  apply modsym_mod_compat.
+Qed.
+
+Lemma mod0_eqm : forall x m, x ≡ 0 [m] <-> x mod m = 0.
+Proof.
+  intros x m.
+  rewrite <- Zmod_0_l with m.
+  intuition.
+Qed.
+
+Lemma divide_eqm : forall x m, m <> 0 -> (x ≡ 0 [m] <-> (m | x)).
+Proof.
+  intros x m Nm; split; rewrite mod0_eqm; intros H.
+    apply Zmod_divide; auto.
+    apply Zdivide_mod; auto.
+Qed.
+
+Lemma eq_eqm : forall m a b, a = b -> a ≡ b [m].
+Proof.
+  intros; subst; reflexivity.
+Qed.
+
+Lemma eqm_diag : forall m, m ≡ 0 [m].
+Proof.
+  intros; red; rewrite Z_mod_same_full; reflexivity.
+Qed.
+
+
+Section EqualityModulo.
+  
+  Variable p : Z.
+  
+  Lemma eqm_ring_theory : @ring_theory Z 0 1 Zplus Zmult Zminus Zopp (eqm p).
+  Proof.
+    split; intros; eauto; red; unfold eqm; f_equal; ring.
+  Qed.
+  
+  Add Ring eqm_Ring : eqm_ring_theory.
+  
+End EqualityModulo.
+
+Goal 0 ≡ 0 [2].
+Proof.
+  try ring. (*  :-(  *)
+  reflexivity.
+Qed.
+
+Lemma multiple_eqm : forall x m k, (x = k * m \/ x = m * k) -> x ≡ 0 [m].
+Proof.
+  intros x m k EE.
+  rewrite Zmult_comm in EE; assert (E : x = m * k) by tauto; clear EE.
+  eapply eq_eqm in E.
+  rewrite (eqm_diag m) in E; rewrite E.
+  ring_simplify (0 * k).
+  reflexivity.
+Qed.
+
+Lemma Zdivide_inf : forall a b, (a | b) -> { q | b = q * a }.
+Proof.
+  intros a b D.
+  exists (b / a).
+  rewrite Zmult_comm.
+  destruct (Z_eq_dec a 0).
+    subst; destruct D; omega.
+    
+    apply Z_div_exact_full_2; auto with *.
+    apply Zdivide_mod; auto.
+Qed.
+
+Lemma Zdivide_square : forall a b, (a | b) -> (a * a | b * b).
+Proof.
+  intros a b (k, Ek).
+  exists (k * k); subst; ring.
+Qed.
+
+Lemma Zdivide_square_rev : forall a b, (a * a | b * b) -> (a | b).
+Proof.
+  intros a b D.
+  destruct (Z_eq_dec a 0).
+    subst; simpl in D.
+    destruct D as (q, Hq); ring_simplify (q * 0) in Hq.
+    destruct b; inversion Hq.
+    exists 0; ring.
+    
+    exists (b / a).
+    rewrite Zmult_comm, Z_mult_div_mod; auto.
+    admit (* Un peu intéressant, c'est dur environ comme
+    (~ sqrt(n) irrationnel) mais on n'en a pas besoin pour la suite *).
+Qed.
+
+Lemma Zle_0_square : forall a, 0 <= a * a.
+Proof.
+  intros []; intuition.
+  simpl; intro H; inversion H.
+Qed.
+
+Lemma Zeq_0_square : forall a, a * a = 0 -> a = 0.
+Proof.
+  intros [] H; intuition simpl; inversion H.
+Qed.
+
+Lemma prime_div_false : forall a p, prime p -> (a | p) -> 1 < a < p -> False.
+Proof.
+  intros a p Pp D Bp.
+  destruct (prime_divisors p Pp a D) as [|[|[|]]]; omega.
+Qed.
+
+Lemma Zmult_divide_compat_rev_l: forall a b c : Z, c <> 0 -> (c * a | c * b) -> (a | b).
+Proof.
+  intros a b c Nc (k, Hk).
+  exists k.
+  eapply Zmult_reg_l; eauto.
+  rewrite Hk; ring.
+Qed.
+
+Lemma Zbounding_square : forall x m, 0 < m -> -m <= x <= m -> x ^ 2 <= m ^ 2.
+Proof.
+  intros x m Pm Bx.
+  simpl; unfold Zpower_pos; simpl.
+  rewrite Zmult_assoc.
+  rewrite <- Zabs_square.
+  apply Zle_trans with (Zabs x * m).
+    rewrite <- Zmult_assoc.
+    apply Zmult_le_compat_l; zify; omega.
+    
+    rewrite Zmult_comm.
+    apply Zmult_le_compat_l; zify; omega.
+Qed.
+
+Lemma eqm_mult_compat : forall a b m c d n,
+  a ≡ b [m] -> c ≡ d [n] -> a * c ≡ b * d [m * n].
+Proof.
+  intros a b m c d n Mab Ncd.
+  (* seems legit *)
+Admitted.
+
 Lemma foursquare_prime_factor_decreasing :
   forall p, prime p -> forall m, (1 < m /\ m < p)%Z ->
     foursquare (m * p) ->
       sigT (fun n => ((0 < n /\ n < m)%Z * foursquare (n * p))%type).
 Proof.
-  (* Arithmétique modulaire ET avec des majorations. *)
-Admitted.
+  intros p Pp m (LBm, UBm) FSmp.
+  assert (help0 : m <> 0); auto with *.
+  assert (help1 : 0 < m); auto with *.
+  destruct FSmp as (x1, (x2, (x3, (x4, Hx)))).
+  pose (y1 := modsym x1 m).
+  pose (y2 := modsym x2 m).
+  pose (y3 := modsym x3 m).
+  pose (y4 := modsym x4 m).
+  assert (eqm1 : y1 ≡ x1 [m]) by apply modsym_eqm.
+  assert (eqm2 : y2 ≡ x2 [m]) by apply modsym_eqm.
+  assert (eqm3 : y3 ≡ x3 [m]) by apply modsym_eqm.
+  assert (eqm4 : y4 ≡ x4 [m]) by apply modsym_eqm.
+  
+  assert (Dm : (m | y1 * y1 + y2 * y2 + y3 * y3 + y4 * y4)).
+    apply divide_eqm; auto.
+    rewrite eqm1, eqm2, eqm3, eqm4.
+    eapply multiple_eqm; eauto.
+  
+  assert (Dmp : ~ (m | p)).
+    intros D.
+    eapply prime_div_false; eauto.
+  
+  destruct (Zdivide_inf _ _ Dm) as (r, Hr).
+  exists r.
+  split.
+    (* Bounds for the new r *)
+    assert (Pr : 0 <= r).
+      apply Zmult_le_0_reg_r with m; auto with *.
+      rewrite <- Hr.
+      pose proof Zle_0_square y1.
+      pose proof Zle_0_square y2.
+      pose proof Zle_0_square y3.
+      pose proof Zle_0_square y4.
+      omega.
+    
+    assert (Nr : 0 <> r).
+      (* otherwise yi=0  ⇒  m|xi  ⇒  m²|xi²  ⇒  m²|mp  ⇒  m|p  ⇒  baad *)
+      intros Zr; subst.
+      
+      (* yi = 0 *)
+      ring_simplify (0 * m) in Hr.
+      assert (y0 : (y1 = 0 /\ y2 = 0) /\ (y3 = 0 /\ y4 = 0)).
+        pose proof Zle_0_square y1.
+        pose proof Zeq_0_square y1.
+        pose proof Zle_0_square y2.
+        pose proof Zeq_0_square y2.
+        pose proof Zle_0_square y3.
+        pose proof Zeq_0_square y3.
+        pose proof Zle_0_square y4.
+        pose proof Zeq_0_square y4.
+        omega.
+      
+      apply Dmp.
+      apply Zmult_divide_compat_rev_l with m; auto.
+      rewrite Hx.
+      repeat apply Zdivide_plus_r;
+        apply Zdivide_square, divide_eqm; auto.
+          rewrite <- eqm1; apply eq_eqm; tauto.
+          rewrite <- eqm2; apply eq_eqm; tauto.
+          rewrite <- eqm3; apply eq_eqm; tauto.
+          rewrite <- eqm4; apply eq_eqm; tauto.
+    
+    assert (Lrm : r <= m).
+      (* -m≤2*yi<m  ⇒  4yi²≤m²  ⇒  4rm≤4m²  ⇒ r≤m *)
+      apply Zmult_le_reg_r with m; auto with *.
+      rewrite <- Hr.
+      apply Zmult_le_reg_r with 4; auto with *.
+      ring_simplify.
+      clear -help1 LBm.
+      assert (B : forall x, 4 * (modsym x m) ^ 2 <= m ^2).
+        clear -help1; intros x.
+        pose proof modsym_bounds x m help1 as Bms.
+        set (y := modsym x m); fold y in Bms; clearbody y.
+        replace (4 * y ^ 2) with ((2 * y) ^ 2) by ring.
+        apply Zbounding_square; auto.
+        auto with *.
+      
+      pose proof B x1 as Ey1; fold y1 in Ey1.
+      pose proof B x2 as Ey2; fold y2 in Ey2.
+      pose proof B x3 as Ey3; fold y3 in Ey3.
+      pose proof B x4 as Ey4; fold y4 in Ey4.
+      omega.
+    
+    assert (Nmr : r <> m).
+      (* like for 0 <> r but harder : yi=-m/2 → xi≡m²/4 [m²] → m²|m*p*)
+      intros Emr; subst.
+      apply Dmp.
+      apply Zmult_divide_compat_rev_l with m; auto.
+      rewrite Hx.
+      (* apply Zmult_divide_compat_rev_l with 4; [ omega | ]. *)
+      rewrite <- divide_eqm;
+        [ | clear -help0; destruct m; auto; intro H; inversion H ].
+      (*
+      eapply eq_eqm in Dm.
+      assert (y0 : (y1 = -m/2 /\ y2 = -m/2) /\ (y3 = -m/2 /\ y4 = -m/2)).
+        pose proof Zle_0_square y1.
+        pose proof Zle_0_square y2.
+        pose proof Zle_0_square y3.
+        pose proof Zle_0_square y4.
+      *)
+      admit.
+    
+    omega.
+    
+    (* FS(r*p) *)
+    assert (Erpm : (r * p) * (m * m) = (r * m) * (m * p)) by ring.
+    rewrite Hx, <-Hr in Erpm.
+    rewrite euler's_identity in Erpm.
+    rem (y1 * x1 + y2 * x2 + y3 * x3 + y4 * x4) t1 Et1.
+    rem (y1 * x2 - y2 * x1 - y3 * x4 + y4 * x3) t2 Et2.
+    rem (y1 * x3 + y2 * x4 - y3 * x1 - y4 * x2) t3 Et3.
+    rem (y1 * x4 - y2 * x3 + y3 * x2 - y4 * x1) t4 Et4.
+    
+    assert (D1 : (m | t1)).
+      rewrite <- divide_eqm; auto; rewrite Et1.
+      unfold y1, y2, y3, y4; repeat rewrite modsym_eqm.
+      eapply multiple_eqm; eauto.
+    
+    assert (D2 : (m | t2)).
+      rewrite <- divide_eqm; auto; rewrite Et2.
+      unfold y1, y2, y3, y4; repeat rewrite modsym_eqm.
+      try ring (* :-( :-( :-( *).
+      red; f_equal; ring.
+    
+    assert (D3 : (m | t3)).
+      rewrite <- divide_eqm; auto; rewrite Et3.
+      unfold y1, y2, y3, y4; repeat rewrite modsym_eqm.
+      red; f_equal; ring.
+    
+    assert (D4 : (m | t4)).
+      rewrite <- divide_eqm; auto; rewrite Et4.
+      unfold y1, y2, y3, y4; repeat rewrite modsym_eqm.
+      red; f_equal; ring.
+    
+    exists (t1 / m); exists (t2 / m); exists (t3 / m); exists (t4 / m).
+    apply Zmult_reg_r with (m * m).
+      clear -help0; destruct m; auto; intro H; inversion H.
+      rewrite Erpm.
+      ring_simplify.
+      cut (forall a, (m | a) -> (a / m) ^ 2 * m ^ 2 = a ^ 2).
+        intros Q.
+        do 4 (rewrite Q; auto).
+        
+        clear -help0.
+        intros a D.
+        destruct (Zdivide_inf m a D) as (k, E); subst.
+        rewrite Z_div_mult_full; auto.
+        ring.
+Qed.
 
 
 (* Ça devrait être quelque part, mais je n'ai pas trouvé. Peut-être aussi qu'on
@@ -475,14 +803,14 @@ Proof.
         destruct Plm as (NNl, (NNm, [Pl | Pm])).
           specialize (tech2 _ p Pl Bl).
           specialize (tech3 _ p NNm Bm).
-          rewrite <- Zmult_assoc, Ell, Emm, Epp in *.
+          rewrite <- Zmult_assoc, <-Ell, <-Emm, <-Epp in *.
           clear -tech2 tech3 p2_pos.
           ring_simplify.
           omega.
           
           specialize (tech2 _ p Pm Bm).
           specialize (tech3 _ p NNl Bl).
-          rewrite <- Zmult_assoc, Ell, Emm, Epp in *.
+          rewrite <- Zmult_assoc, <-Ell, <-Emm, <-Epp in *.
           clear -tech2 tech3 p2_pos.
           ring_simplify.
           omega.
