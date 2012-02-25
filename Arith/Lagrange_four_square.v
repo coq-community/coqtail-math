@@ -960,9 +960,9 @@ Qed.
 
 (** Trivial application of the previous lemma and euler's identity *)
 
-Theorem lagrange_4_square_theorem : forall n, foursquare n.
+Theorem lagrange_4_square_theorem : forall n, 0 <= n -> foursquare n.
 Proof.
-  intros n; eapply Z_prime_rect.
+  intros n; eapply Z_prime_rect; auto.
     repeat (exists 0); auto.
     
     exists 1; repeat (exists 0); auto.
