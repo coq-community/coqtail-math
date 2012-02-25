@@ -131,15 +131,56 @@ Lemma Z_prime_ind : forall P : Z -> Prop,
   (P 1) ->
   (forall n, prime n -> P n) ->
   (forall a b, P a -> P b -> P (a * b)) ->
-    forall n, P n)%Z.
-Admitted.
+    forall n, 0 <= n -> P n)%Z.
+Proof.
+intros P P0 P1 Pprime Psplit.
+assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
+ intro N ; induction N ; intros n n_lb n_ub.
+  inversion n_ub.
+  destruct (prime_dec n) as [Hprime | Hnprime].
+   apply Pprime ; assumption.
+  destruct (Z_eq_dec n 0) as [Hnull | Hnnull].
+   subst ; apply P0.
+  destruct (Z_eq_dec n 1) as [Hone | Hnone].
+   subst ; apply P1.
+  assert (n_big : 1 < n) by omega.
+  destruct (not_prime_divide _ n_big Hnprime) as [p [[p_lb p_ub] [q Hpq]]].
+   subst ; apply Psplit ; apply IHN.
+   apply Zmult_le_0_reg_r with p ; omega.
+admit.
+ omega.
+admit.
+ intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
+Qed. 
 
 Lemma Z_prime_rect : forall P : Z -> Type,
   ((P 0) ->
   (P 1) ->
   (forall n, prime n -> P n) ->
   (forall a b, P a -> P b -> P (a * b)) ->
-    forall n, P n)%Z.
+  forall n, 0 <= n -> P n)%Z.
+Proof.
+(*
+intros P P0 P1 Pprime Psplit.
+assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
+ intro N ; induction N ; intros n n_lb n_ub.
+  destruct (lt_n_O _ n_ub).
+  destruct (prime_dec n) as [Hprime | Hnprime].
+   apply Pprime ; assumption.
+  destruct (Z_eq_dec n 0) as [Hnull | Hnnull].
+   subst ; apply P0.
+  destruct (Z_eq_dec n 1) as [Hone | Hnone].
+   subst ; apply P1.
+  assert (n_big : 1 < n) by omega.
+  destruct (not_prime_divide _ n_big Hnprime) as [p [[p_lb p_ub] [q Hpq]]].
+   subst ; apply Psplit ; apply IHN.
+   apply Zmult_le_0_reg_r with p ; omega.
+admit.
+ omega.
+admit.
+ intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
+Qed. 
+*)
 Admitted.
 
 Lemma Z_pZ_mult_injective : forall p n, prime p -> Zmod n p <> 0%Z ->
