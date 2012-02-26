@@ -1,47 +1,27 @@
-Require Import ZArith NArith Arith Omega MyNat Div2.
-Require Import Natsets.
+Require Import ZArith Omega Znumtheory.
+Require Import Natsets MyNat Ztools Zeqm Znumfacts.
+
+(** Definition of the predicate : being the sum of four squares *)
 
 Definition foursquare (n : Z) : Type :=
-  sigT (fun a => sigT (fun b => sigT (fun c => sig (fun d =>
-    (n = a * a + b * b + c * c + d * d)%Z)))).
+  {a : _ & { b: _ & { c : _ & { d |
+    n = a * a + b * b + c * c + d * d
+  }}}}.
 
 
-(** Euler's identity, compatibility of the 4-square property wrt. multiplication *)
+(** Euler's identity and compatibility of the 4-square property wrt. multiplication *)
 
 Lemma euler's_identity : forall a b c d w x y z : Z,
-  (let s z := z * z in
+  let s z := z * z in
   (a * a + b * b + c * c + d * d) * (w * w + x * x + y * y + z * z) =
   s (a*w + b*x + c*y + d*z) +
   s (a*x - b*w - c*z + d*y) +
   s (a*y + b*z - c*w - d*x) +
-  s (a*z - b*y + c*x - d*w))%Z.
+  s (a*z - b*y + c*x - d*w).
 Proof.
-  intros.
-  unfold s.
+  intros; unfold s.
   ring.
 Qed.
-
-(*
-Lemma euler's_identity_N : forall a b c d w x y z : N,
-  (let s n := n * n in
-  let Ndiff a b := Zabs_N (Z_of_N a - Z_of_N b) in
-  (s a + s b + s c + s d) * (s w + s x + s y + s z) =
-  s (a*w + b*x + c*y + d*z) +
-  s (Ndiff (a*x + d*y) (b*w + c*z)) +
-  s (Ndiff (a*y + b*z) (c*w + d*x)) +
-  s (Ndiff (a*z + c*x) (b*y + d*w)))%N.
-Proof.
-  intros.
-  apply Z_of_N_eq_rev.
-  unfold s, Ndiff; clear s Ndiff.
-  repeat rewrite Z_of_N_mult, Z_of_N_plus.
-  repeat rewrite Z_of_N_mult.
-  repeat rewrite Z_of_N_abs.
-  repeat rewrite Zabs_square.
-  repeat rewrite Z_of_N_plus.
-  ring.
-Qed.
-*)
 
 Lemma mult_foursquare_compat : forall n m : Z,
   foursquare n -> foursquare m -> foursquare (n * m)%Z.
@@ -51,172 +31,8 @@ Proof.
   repeat eexists.
 Qed.
 
-
-(** Properties on prime numbers *)
-
 (*
-Definition prime (n : N) := Znumtheory.prime (Z_of_N n).
-
-(* TODO : pas vraiment besoin d'un gros résultat de factorisation, 
-sauf s'il est rapide : on a juste besoin de décider si un nombre est premier 
-ou sinon, donner deux nombres premiers *)
-
-Variable prime_ge_2 : forall n, prime n -> (2 <= n)%N.
-
-Fixpoint Nprod n f :=
-  match n with
-  | O => 1%N
-  | S n => (f n * Nprod n f)%N
-  end.
-
-Definition bforall n {X} P (xs : nat -> X) : Type :=
-  forall i, lt i n -> P (xs i).
-
-Variable factorisation : forall x, (x <> 0)%N ->
-  sigT (fun n => sigT (fun ps =>
-    (bforall n prime ps * (Nprod n ps = x))%type)).
-
-Lemma factor_not_zero : forall n ps, bforall n prime ps -> Nprod n ps <> 0%N.
-Proof.
-  intros n; induction n; intros ps Pps; simpl; dumb.
-  remember (ps n) as psn; remember (Nprod n ps) as pps; destruct psn; destruct pps;
-    try (exfalso; simpl; eapply IHn; [ | eauto ]; intros i Hi; solve [eauto]).
-    
-    exfalso.
-    pose proof (prime_ge_2 (ps n) (Pps _ (le_refl _))).
-    rewrite <- Heqpsn in *; compute in H; tauto.
-    
-    simpl; intros I; inversion I.
-Qed.
-
-Lemma prime_ind_l : forall P,
-  ((P 0) ->
-  (P 1) ->
-  (forall p, prime p -> P p) ->
-  (forall p n, prime p -> P n -> P (p * n)) ->
-    forall n, P n)%N.
-Proof.
-  intros P H0 H1 Hp Hpn x.
-  destruct x as [ | x ]; [ auto | ].
-  destruct (factorisation (Npos x)) as (n, (ps, (Pps, Hpsx))); [ dumb | ].
-  generalize x Hpsx; clear Hpsx x.
-  induction n.
-    simpl; intros x Ex1; rewrite <- Ex1; assumption.
-    
-    simpl; intros x Ex; rewrite <- Ex.
-    apply Hpn.
-      apply Pps; auto.
-      remember (Nprod n ps) as psn; destruct psn as [ | psn].
-        eauto.
-        apply IHn.
-          intros i Hi; eauto.
-          auto.
-Qed.
-
-Lemma prime_ind : forall P,
-  ((P 0) ->
-  (P 1) ->
-  (forall n, prime n -> P n) ->
-  (forall a b, P a -> P b -> P (a * b)) ->
-    forall n, P n)%N.
-Proof.
-  intros; apply prime_ind_l; eauto.
-Qed.
-*)
-
-Require Import Znumtheory.
-
-Lemma Z_prime_ind : forall P : Z -> Prop,
-  ((P 0) ->
-  (P 1) ->
-  (forall n, prime n -> P n) ->
-  (forall a b, P a -> P b -> P (a * b)) ->
-    forall n, 0 <= n -> P n)%Z.
-Proof.
-intros P P0 P1 Pprime Psplit.
-assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
- intro N ; induction N ; intros n n_lb n_ub.
-  inversion n_ub.
-  destruct (prime_dec n) as [Hprime | Hnprime].
-   apply Pprime ; assumption.
-  destruct (Z_eq_dec n 0) as [Hnull | Hnnull].
-   subst ; apply P0.
-  destruct (Z_eq_dec n 1) as [Hone | Hnone].
-   subst ; apply P1.
-  assert (n_big : 1 < n) by omega.
-  destruct (not_prime_divide _ n_big Hnprime) as [p [[p_lb p_ub] [q Hpq]]].
-   subst ; apply Psplit ; apply IHN.
-   apply Zmult_le_0_reg_r with p ; omega.
-admit.
- omega.
-admit.
- intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
-Qed. 
-
-Lemma Z_prime_rect : forall P : Z -> Type,
-  ((P 0) ->
-  (P 1) ->
-  (forall n, prime n -> P n) ->
-  (forall a b, P a -> P b -> P (a * b)) ->
-  forall n, 0 <= n -> P n)%Z.
-Proof.
-(*
-intros P P0 P1 Pprime Psplit.
-assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
- intro N ; induction N ; intros n n_lb n_ub.
-  destruct (lt_n_O _ n_ub).
-  destruct (prime_dec n) as [Hprime | Hnprime].
-   apply Pprime ; assumption.
-  destruct (Z_eq_dec n 0) as [Hnull | Hnnull].
-   subst ; apply P0.
-  destruct (Z_eq_dec n 1) as [Hone | Hnone].
-   subst ; apply P1.
-  assert (n_big : 1 < n) by omega.
-  destruct (not_prime_divide _ n_big Hnprime) as [p [[p_lb p_ub] [q Hpq]]].
-   subst ; apply Psplit ; apply IHN.
-   apply Zmult_le_0_reg_r with p ; omega.
-admit.
- omega.
-admit.
- intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
-Qed. 
-*)
-Admitted.
-
-Lemma Z_pZ_mult_injective : forall p n, prime p -> Zmod n p <> 0%Z ->
-  forall x y, Zmod (x * n) p = Zmod (y * n) p -> Zmod x p = Zmod y p.
-Proof.
-  intros p n Pp Nn x y E.
-  cut (Zdivide p (x - y)).
-    intros (k, Hk).
-    rewrite <- (Z_mod_plus_full y k).
-    rewrite <- Hk.
-    f_equal; ring.
-  
-  cut (Zdivide p (n * (x - y))).
-    intros D.
-    destruct (prime_mult _ Pp _ _ D) as [D1|D2]; [ | exact D2 ].
-    apply Zdivide_mod in D1.
-    tauto.
-  
-  apply Zmod_divide.
-    destruct Pp; omega.
-    
-    rewrite Zmult_minus_distr_l, Zminus_mod.
-    rewrite <- (Zmod_0_l p); f_equal.
-    do 2 rewrite (Zmult_comm n); rewrite <- E.
-    ring.
-Qed.
-
-Lemma Z_pZ_inverse : forall p x, prime p -> x mod p <> 0 -> { y | Zmod (x * y) p = 1%Z }.
-Proof.
-  (* preuve : (Zmod x p) et (p) sont copremiers, donc par bézout
-     1 = u * p + v * Zmod x p  et avec y = v ou Zmod v p on est bon. *)
-Admitted.
-
-(* Declare Z/pZ as a field somewhere ? With what operation ? *)
-
-Lemma Zmod_eq_minus : forall p a b, a mod p = b mod p <-> (a - b) mod p = 0.
+Lemma TODO_____Zmod_eq_minus : forall p a b, a mod p = b mod p <-> (a - b) mod p = 0.
 Proof.
   intros p a b; split; intros E.
     rewrite Zminus_mod, E, <- (Zmod_0_l p).
@@ -226,10 +42,11 @@ Proof.
     rewrite Zplus_mod, E, <- (Zmod_mod b).
     f_equal; rewrite Zmod_mod; ring.
 Qed.
+*)
 
-Lemma Zmod_sqrt_eq_compat : forall p i j, Znumtheory.prime p ->
+Lemma Zmod_sqrt_eq_compat : forall p i j, prime p ->
   (0 <= i -> 0 <= j -> 2 * i < p -> 2 * j < p ->
-  (i * i) mod p = (j * j) mod p -> i = j)%Z.
+  i * i ≡ j * j [p] -> i = j)%Z.
 Proof.
   intros p i j Pp Pi Pj Bi Bj ES.
   destruct (Z_eq_dec ((i + j) mod p) 0) as [ E | E ].
@@ -238,30 +55,23 @@ Proof.
     rewrite <- E; symmetry; apply Zmod_small.
     omega.
   
-  destruct (Z_pZ_inverse _ _ Pp E) as (a, Ha).
-  cut (((i - j) * 1) mod p = 0).
-    rewrite Zmult_1_r, Zminus_mod; intros HE.
-    rewrite <- Zmod_eq_minus in HE.
-    do 2 rewrite (Zmod_small i p), (Zmod_small j p) in HE; try omega.
+  destruct (modular_inverse _ _ Pp E) as (a, Ha).
   
+  cut (i ≡ j [p]).
+    intros M; red in M.
+    rewrite (Zmod_small i p), (Zmod_small j p) in M; omega.
+  
+  apply eqm_minus_0.
+  replace (i - j) with ((i - j) * 1) by ring.
   rewrite <- Ha.
-  clear -ES.
-  rewrite Zmod_eq_minus in ES.
-  rewrite Zmult_mod_idemp_r, Zmult_assoc.
-  rewrite Zmult_mod, <- (Zmod_0_l p); f_equal.
-  apply Z_eq_mult.
-  rewrite <- ES; f_equal; ring.
+  apply eqm_minus_0 in ES.
+  replace 0 with (0 * a) by ring.
+  rewrite <- ES.
+  apply eq_eqm; ring.
 Qed.
 
-Lemma Zabs_nat_inj : forall a b, 0 <= a -> 0 <= b -> Zabs_nat a = Zabs_nat b -> a = b.
-Proof.
-  intros a b Pa Pb E.
-  rewrite <- (Zabs_eq a), <- (Zabs_eq b); eauto.
-  do 2 rewrite <- inj_Zabs_nat.
-  auto.
-Qed.
-
-Lemma lt_div_2 : forall a b, 0 <= a -> a < b / 2 -> 2 * a < b.
+(*
+Lemma TODO____lt_div_2 : forall a b, 0 <= a -> a < b / 2 -> 2 * a < b.
 Proof.
   intros a b P L.
   apply Zlt_le_trans with (2 * (b / 2)).
@@ -270,27 +80,11 @@ Proof.
     
   apply Z_mult_div_ge; reflexivity.
 Qed.
+*)
 
-Lemma Z_mult_div_mod : forall a b, b <> 0 -> b * (a / b) = a - a mod b.
+Lemma prime_odd : forall p, 2 <> p -> prime p -> p mod 2 = 1.
 Proof.
-  intros a b N.
-  pose proof Z_div_mod_eq_full a b N; omega.
-Qed.
-
-Lemma Z_mult_div_bounds : forall a b, 0 < b -> a - b < b * (a / b) <= a.
-Proof.
-  intros a b N; split.
-    pose proof Z_mod_lt a b.
-    rewrite Z_mult_div_mod; omega.
-    
-    apply Z_mult_div_ge; omega.
-Qed.
-
-Definition odd p := p mod 2 = 1.
-
-Lemma prime_odd : forall p, 2 <> p -> prime p -> odd p.
-Proof.
-  intros p N2 Pp; unfold odd.
+  intros p N2 Pp.
   rem (p mod 2) r Er.
   pose proof Z_mod_lt p 2 as help_omega.
   cut (r <> 0).
@@ -302,7 +96,7 @@ Proof.
     apply prime_2.
 Qed.
 
-Lemma odd_bound_1 : forall p i, odd p -> i < Zsucc (p / 2) -> 2 * i < p.
+Lemma odd_bound_1 : forall p i, p mod 2 = 1 -> i < Zsucc (p / 2) -> 2 * i < p.
 Proof.
   intros p i Op Bi.
   unfold Zsucc in Bi.
@@ -312,6 +106,9 @@ Proof.
     rewrite Z_mult_div_mod; [ | auto with * ].
     rewrite Op; auto with *.
 Qed.
+
+
+(** [modsym x m] is the unique y congruent to x such that -m/2≤x<m/2 *)
 
 Definition modsym x m := (x + m / 2) mod m - m / 2.
 
@@ -348,128 +145,16 @@ Proof.
   ring.
 Qed.
 
-Notation " a ≡ b [ p ] " := ( eqm p a b ) (at level 70).
-
 Lemma modsym_eqm : forall x m, modsym x m ≡ x [ m ].
 Proof.
   intros x m.
   apply modsym_mod_compat.
 Qed.
 
-Lemma mod0_eqm : forall x m, x ≡ 0 [m] <-> x mod m = 0.
-Proof.
-  intros x m.
-  rewrite <- Zmod_0_l with m.
-  intuition.
-Qed.
-
-Lemma divide_eqm : forall x m, m <> 0 -> (x ≡ 0 [m] <-> (m | x)).
-Proof.
-  intros x m Nm; split; rewrite mod0_eqm; intros H.
-    apply Zmod_divide; auto.
-    apply Zdivide_mod; auto.
-Qed.
-
-Lemma eq_eqm : forall m a b, a = b -> a ≡ b [m].
-Proof.
-  intros; subst; reflexivity.
-Qed.
-
-Lemma eqm_diag : forall m, m ≡ 0 [m].
-Proof.
-  intros; red; rewrite Z_mod_same_full; reflexivity.
-Qed.
-
-
-
-(* TODO virer la tentative de [ring] *)
-Section EqualityModulo.
-  
-  Variable p : Z.
-  
-  Lemma eqm_ring_theory : @ring_theory Z 0 1 Zplus Zmult Zminus Zopp (eqm p).
-  Proof.
-    split; intros; eauto; red; unfold eqm; f_equal; ring.
-  Qed.
-  
-  Add Ring eqm_Ring : eqm_ring_theory.
-  
-End EqualityModulo.
-
-Goal 0 ≡ 0 [2].
-Proof.
-  try ring. (*  :-(  *)
-  reflexivity.
-Qed.
-
-
-
-Lemma multiple_eqm : forall x m k, (x = k * m \/ x = m * k) -> x ≡ 0 [m].
-Proof.
-  intros x m k EE.
-  rewrite Zmult_comm in EE; assert (E : x = m * k) by tauto; clear EE.
-  eapply eq_eqm in E.
-  rewrite (eqm_diag m) in E; rewrite E.
-  ring_simplify (0 * k).
-  reflexivity.
-Qed.
-
-Lemma Zdivide_inf : forall a b, (a | b) -> { q | b = q * a }.
-Proof.
-  intros a b D.
-  exists (b / a).
-  rewrite Zmult_comm.
-  destruct (Z_eq_dec a 0).
-    subst; destruct D; omega.
-    
-    apply Z_div_exact_full_2; auto with *.
-    apply Zdivide_mod; auto.
-Qed.
-
-Lemma Zdivide_square : forall a b, (a | b) -> (a * a | b * b).
-Proof.
-  intros a b (k, Ek).
-  exists (k * k); subst; ring.
-Qed.
-
-Lemma Zdivide_square_rev : forall a b, (a * a | b * b) -> (a | b).
-Proof.
-  intros a b D.
-  destruct (Z_eq_dec a 0).
-    subst; simpl in D.
-    destruct D as (q, Hq); ring_simplify (q * 0) in Hq.
-    destruct b; inversion Hq.
-    exists 0; ring.
-    
-    exists (b / a).
-    rewrite Zmult_comm, Z_mult_div_mod; auto.
-    admit (* TODO déplacer et prouver : inutile ici mais intéressant.
-    un peu intéressant, c'est dur environ comme sqrt(n)∈Q => sqrt(n)∈N *).
-Qed.
-
-Lemma Zle_0_square : forall a, 0 <= a * a.
-Proof.
-  intros []; intuition.
-  simpl; intro H; inversion H.
-Qed.
-
-Lemma Zeq_0_square : forall a, a * a = 0 -> a = 0.
-Proof.
-  intros [] H; intuition simpl; inversion H.
-Qed.
-
 Lemma prime_div_false : forall a p, prime p -> (a | p) -> 1 < a < p -> False.
 Proof.
   intros a p Pp D Bp.
   destruct (prime_divisors p Pp a D) as [|[|[|]]]; omega.
-Qed.
-
-Lemma Zmult_divide_compat_rev_l: forall a b c : Z, c <> 0 -> (c * a | c * b) -> (a | b).
-Proof.
-  intros a b c Nc (k, Hk).
-  exists k.
-  eapply Zmult_reg_l; eauto.
-  rewrite Hk; ring.
 Qed.
 
 Lemma Zbounding_square : forall x m, 0 < m -> -m <= x <= m -> x ^ 2 <= m ^ 2.
@@ -486,74 +171,8 @@ Proof.
     apply Zmult_le_compat_l; zify; omega.
 Qed.
 
-Lemma eqm_Zminus_0 : forall a b m, a ≡ b [m] <-> a - b ≡ 0 [m].
-Proof.
-  intros a b m; split; intros E.
-    rewrite E; red; f_equal; ring.
-    rewrite <- (Zminus_0_r a), <- E; red; f_equal; ring.
-Qed.
 
-Lemma Zmult_neq_0_compat : forall a b, 0 <> a -> 0 <> b -> 0 <> a * b.
-Proof.
-  intros [] [] P Q I; simpl in *; inversion I; tauto.
-Qed.
-
-Lemma Zsquare_pos : forall x, 0 <> x -> 0 < x * x.
-Proof.
-  intros [] E; simpl; reflexivity || tauto.
-Qed.
-
-Ltac notzero :=
-  lazymatch goal with
-  | |- ?a <> 0 => apply not_eq_sym; notzero
-  | |- ?a > 0 => cut (0 < a); [ apply Zcompare_Gt_Lt_antisym | ]; notzero
-  | |- 0 < ?a * ?a => apply Zsquare_pos; notzero
-  | |- 0 < ?a ^ 2 => replace (a ^ 2) with (a * a) by ring; notzero
-  | |- 0 <  ?a * ?b => apply Zmult_lt_0_compat; notzero
-  | |- 0 <> ?a * ?b => apply Zmult_neq_0_compat; notzero
-  | |- 0 < Zpos _ => reflexivity
-  | |- 0 > Zneg _ => reflexivity
-  | |- 0 <> Zpos _ => let I := fresh "I" in intros I; inversion I
-  | |- 0 <> Zneg _ => let I := fresh "I" in intros I; inversion I
-  | |- 0 < _ => auto with *; try omega
-  | |- 0 <> _ => auto with *; try omega
-  | |- _ => idtac
-  end.
-
-Lemma eqm_square_half : forall x m, 0 <> m ->
-  x ≡ m [2 * m] -> x * x ≡ m * m [4 * (m * m)].
-Proof.
-  intros x m Nm D.
-  rewrite eqm_Zminus_0 in D.
-  rewrite divide_eqm in D; notzero.
-  destruct (Zdivide_inf _ _ D) as (k, Ek).
-  replace x with (x - m + m) by ring.
-  rewrite Ek.
-  apply eqm_Zminus_0.
-  ring_simplify.
-  apply divide_eqm; notzero.
-  exists (k + k ^ 2).
-  ring.
-Qed.
-
-(* TODO virer ça *)
-Lemma rewrite_power_2 : forall x, x ^ 2 = x * x.
-Proof.
-  intros; ring.
-Qed.
-
-Lemma eqm_mult_compat_l : forall k a b m, a ≡ b [m] -> k * a ≡ k * b [k * m].
-Proof.
-  intros k a b m E.
-  red.
-  repeat rewrite Zmult_mod_distr_l.
-  rewrite E.
-  auto.
-Qed.
-
-
-
-(** 4-square property on prime numbers *)
+(** All prime numbers divides some [1+l²+m²] (plus convenient conditions on [l,m]) *)
 
 Lemma prime_dividing_sum_of_two_squares_plus_one : forall p,
   prime p -> 3 <= p ->	
@@ -565,7 +184,7 @@ Proof.
   
   pose (np := Zabs_nat p).
   
-  assert (p_odd : odd p) by (apply prime_odd; auto || omega).
+  assert (p_odd : p mod 2 = 1) by (apply prime_odd; auto || omega).
   
   pose (s := fun x : Z => x * x).
   assert (s_pos : forall x, 0 <= s x).
@@ -599,11 +218,10 @@ Proof.
     apply (Zmod_sqrt_eq_compat p (Z_of_nat i) (Z_of_nat j)); auto with *.
     
     apply Zabs_nat_inj in E; eauto.
-    rewrite Zmod_eq_minus in E.
-    symmetry.
-    apply Zmod_eq_minus.
-    rewrite <- E; f_equal.
-    unfold s; ring.
+    symmetry; apply eqm_minus_0.
+    apply eqm_minus_0 in E.
+    rewrite <- E.
+    apply eq_eqm; unfold s; ring.
   
   assert (BFL : bounded (S (Zabs_nat (p / 2))) (Zabs_nat p) FL).
     intros i _.
@@ -645,8 +263,8 @@ Proof.
   subst.
   apply inj_eq in Hm; do 2 rewrite inj_Zabs_nat in Hm.
   do 2 rewrite Zabs_eq in Hm; auto.
-  symmetry in Hm; rewrite Zmod_eq_minus in Hm.
-  apply Zmod_divide in Hm; [ | omega ].
+  symmetry in Hm; apply eqm_minus_0 in Hm.
+  rewrite divide_eqm in Hm; notzero.
   pose proof s_pos (Z_of_nat l).
   pose proof s_pos (Z_of_nat m).
   destruct (Zdivide_inf _ _ Hm) as (k, Hk).
@@ -671,6 +289,71 @@ Proof.
       omega.
 Qed.
 
+
+(** Building bounds to prove things like x1²+x2²+x3²+x4²=m² /\ -m/2≤xi<m/2 => xi=-m/2 *)
+
+Lemma egality_case_sum_of_four : forall a b c d M,
+  a <= M -> b <= M -> c <= M -> d <= M ->
+  a + b + c + d = 4 * M -> ((a = M) /\ (b = M)) /\ ((c = M) /\ (d = M)).
+Proof.
+  intros.
+  omega.
+Qed.
+
+Lemma square_bound_equality_case : forall a M,
+  -M <= a < M -> M * M <= a * a -> a = - M.
+Proof.
+  intros a M Bounds Bsqr.
+  destruct (Z_le_dec 0 M); [ | omega ].
+  cut (Zabs M <= Zabs a).
+    intro; zify; omega.
+    
+    rewrite <- (Zabs_square M), <- (Zabs_square a) in Bsqr.
+    apply sqrt_le_compat; auto with *.
+Qed.
+
+Lemma square_bound : forall x m, -m <= x <= m -> x * x <= m * m.
+Proof.
+  intros x m Bx.
+  assert (Pm : 0 <= m) by omega.
+  rewrite <- Zabs_square.
+  apply Zle_trans with (Zabs x * m).
+    apply Zmult_le_compat_l; auto with *.
+    zify; omega.
+    
+    apply Zmult_le_compat_r; auto with *.
+    zify; omega.
+Qed.
+
+Lemma square_bound_opp : forall x m, m <= x <= -m -> x * x <= m * m.
+Proof.
+  intros x m Bx.
+  rewrite <- (Zmult_opp_opp m m).
+  apply square_bound; auto with *.
+Qed.
+
+Lemma egality_case_sum_of_four_squares : forall a b c d M,
+  -M <= a < M -> -M <= b < M -> -M <= c < M -> -M <= d < M ->
+  a * a + b * b + c * c + d * d = 4 * (M * M) ->
+    ((a = -M) /\ (b = -M)) /\ ((c = -M) /\ (d = -M)).
+Proof.
+  intros a b c d m Ba Bb Bc Bd E.
+  assert (P : forall x, -m <= x < m -> -m <= x <= m) by (intros; omega).
+  pose proof square_bound _ _ (P _ Ba).
+  pose proof square_bound _ _ (P _ Bb).
+  pose proof square_bound _ _ (P _ Bc).
+  pose proof square_bound _ _ (P _ Bd).
+  assert (Pm : 0 < m) by omega.
+  cut ((Zabs a = m /\ Zabs b = m) /\ (Zabs c = m /\ Zabs d = m)).
+    intros; zify; omega.
+    
+    split; split; (rewrite <- (Zabs_eq m); [ | auto with * ]);
+      apply sqrt_eq_compat_abs;
+      omega.
+Qed.
+
+
+(** If [mp] is the sum of four squares, then so is [np] for a smaller [n] *)
 
 Lemma foursquare_prime_factor_decreasing :
   forall p, prime p -> forall m, (1 < m /\ m < p)%Z ->
@@ -765,7 +448,11 @@ Proof.
       intros Emr; subst.
       assert (Eyi : (2 * - y1 = m /\ 2 * - y2 = m) /\ (2 * - y3 = m /\ 2 * - y4 = m)).
         (* -m/2≤yi<m/2 donc |yi|≤m/2 mais Σyi²=m² donc |yi|=m/2 donc yi=-m/2 *)
-        admit.
+        assert (Eyi : (2 * y1 = - m /\ 2 * y2 = - m) /\ (2 * y3 = - m /\ 2 * y4 = - m)).
+          apply egality_case_sum_of_four_squares;
+            try (apply modsym_bounds; notzero).
+          rewrite <- Hr; ring.
+        omega.
         
         destruct Eyi as ((Ey1, Ey2), (Ey3, Ey4)).
         apply Dmp.
@@ -790,7 +477,7 @@ Proof.
             rewrite <- Mxy.
             replace (- y) with (y + 2 * - y) by ring.
             rewrite Ey.
-            rewrite eqm_Zminus_0.
+            rewrite eqm_minus_0.
             apply divide_eqm; notzero.
             exists (- 1); ring.
           
@@ -846,12 +533,15 @@ Proof.
 Qed.
 
 
-(* Ça devrait être quelque part, mais je n'ai pas trouvé. Peut-être aussi qu'on
-   peut utiliser un induction scheme au lieu d'utiliser ce résultat ? *)
+(** Induction scheme to use the previous lemma *)
+(* TODO déplacer ça ? *)
 Definition lt_wf_rect :=
   fun p (P : nat -> Type) F =>
     well_founded_induction_type
       (well_founded_ltof nat (fun m => m)) P F p.
+
+
+(** Using the previous lemma, one can decrease [mp] into [np] to eventually get [p] *)
 
 Lemma foursquare_prime : forall p, prime p -> foursquare p.
 Proof.
@@ -883,7 +573,7 @@ Proof.
           rewrite tech1; ring.
           rewrite Ep; auto.
         
-        (* k<p *)
+        (* Big part, the bound: k<p *)
         rewrite tech1; clear tech1.
         apply Zmult_lt_reg_r with (4 * p); [ auto with * | ].
         replace (p * (4 * p)) with (2 * (p * p) + 2 * (p * p)) by ring.
