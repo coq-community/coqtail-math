@@ -1,0 +1,48 @@
+Ce fichier ne traite pas trop de l'arithmétique sur [nat] de ce 
+dossier Arith. (Enfin si, un petit point : il est probable que 
+l'arithmétique sur [nat] soit inutile et que tout soit regaire
+dans [Z])
+
+*** Lagrange four square theorem
+
+Direction dans laquelle se tourner: se baser sur les entiers et 
+relatifs [Z] semble être la solution la plus simple. Les nats sont 
+trop lents, [N] n'a pas assez de résultats, et c'est notamment 
+parce que des résultats sur [N] nécessitent de passer par [Z].
+
+Noter également que passer par des axiomatisations ça pourrait
+être bien mais je ne vois pas trop l'intérêt par rapport à tout
+ce que ça peut nous coûter.
+
+Donc il faut refaire les choses de la libraire standard de manière
+constructive et dans Type au lieu de Prop, car on a souvent besoin
+de ça. Parfois une alternative existe (genre pour calculer Bezout)
+mais il faut quand même faire des interfaces.
+
+(ça, pour l'instant, c'est juste des patchs qui refont certains
+lemmes comme trouver un diviseur d'un nombre composé en mode 
+cosntructif)
+
+Pour ce qui est des tactiques, si on voudrait que ça rentre dans la
+stdlib il faut juste que ce soit propre, non? Est-ce que les
+heuristiques ont leur places ou il faut vraiment que ce soit quelque
+chose de super précis et par réflexion ?
+
+Anciennes notes:
+
+1) .ml
+  in progress, easy.
+2) Zarith
+  il y a beaucoup trop de redondance entre ZArith, Arith et tout
+  aussi, beaucoup trop de trucs sont dans prop et pas dans Type.
+3) amauryth
+  c'est super long de tout refaire.
+  aussi, c'est impossible de retrouver comment il a fait sans réfléchir.
+  du coup, c'est beaucoup plus long que prévu.
+4) call by need
+  ce serait probablement vachement mieux de ne faire seulement ce qui est 
+  nécessaire pour le 4-square theorem, et aussi pour le premier théorème de
+  Fermat. Plein de lemmes sont inutiles, j'ai l'impression.
+
+
+

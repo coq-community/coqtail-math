@@ -1,5 +1,6 @@
 Require Import ZArith Omega Znumtheory.
 Require Import Natsets MyNat Ztools Zeqm.
+Require Import Ztools.
 
 (** * Number theory : factorisation, computation of Bezout coefficients and modular inverse *)
 
@@ -19,7 +20,117 @@ lagrange)
 *)
 
 
+(** Informative version, derived from the stdlib *)
+
+Definition prime_dec_aux_inf:
+  forall p m,
+    { n | 1 < n < m /\ ~ rel_prime n p } +
+    { forall n, 1 < n < m -> rel_prime n p }.
+Proof.
+  intros p m.
+  case (Z_lt_dec 1 m); intros H1;
+    [ | right; intros; exfalso; omega ].
+  pattern m; apply natlike_rec; auto with zarith;
+    [ right; intros; exfalso; omega | ].
+  intros x Hx IH; destruct IH as [E|F].
+    left; destruct E as (n,((H0,H2),H3));exists n; auto with zarith.
+    
+    destruct (rel_prime_dec x p) as [Y|N].
+      right; intros n [HH1 HH2].
+      case (Zgt_succ_gt_or_eq x n); auto with zarith.
+      intros HH3; subst x; auto.
+      
+      case (Z_lt_dec 1 x); intros HH1.
+        left; exists x; split; auto with zarith.
+        right; intros n [HHH1 HHH2]; contradict HHH1; auto with zarith.
+Defined.
+
+
+(** Informative version, derived from the stdlib *)
+
+Theorem not_prime_divide_inf:
+ forall p, 1 < p -> ~ prime p -> { n | 1 < n < p  /\ (n | p) }.
+Proof.
+  intros p Hp Hp1.
+  case (prime_dec_aux_inf p p); intros H1.
+    case H1; intros n [Hn1 Hn2].
+    generalize (Zgcd_is_pos n p); intros Hpos.
+    case (Z_le_lt_eq_dec 0 (Zgcd n p)); auto with zarith; intros H3.
+      case (Z_le_lt_eq_dec 1 (Zgcd n p)); auto with zarith; intros H4.
+        exists (Zgcd n p); split; auto.
+          split; auto.
+          apply Zle_lt_trans with n; auto with zarith.
+          generalize (Zgcd_is_gcd n p); intros tmp; inversion_clear tmp as [Hr1 Hr2 Hr3].
+          case Hr1; intros q Hq.
+          case (Zle_or_lt q 0); auto with zarith; intros Ht.
+            absurd (n <= 0 * Zgcd n p) ; auto with zarith.
+            pattern n at 1; rewrite Hq; auto with zarith.
+            
+            apply Zle_trans with (1 * Zgcd n p); auto with zarith.
+            pattern n at 2; rewrite Hq; auto with zarith.
+          
+          generalize (Zgcd_is_gcd n p); intros Ht; inversion Ht; auto.
+        
+        case Hn2; red.
+        rewrite H4; apply Zgcd_is_gcd.
+      
+      generalize (Zgcd_is_gcd n p); rewrite <- H3; intros tmp;
+        inversion_clear tmp as [Hr1 Hr2 Hr3].
+      absurd (n = 0); auto with zarith.
+      case Hr1; auto with zarith.
+    
+    elim Hp1; constructor; auto.
+    intros n [Hn1 Hn2].
+    case Zle_lt_or_eq with ( 1 := Hn1 ); auto with zarith.
+    intros H2; subst n; red; apply Zis_gcd_intro; auto with zarith.
+Qed.
+
+
 (** Induction on natural numbers via prime numbers and multiplication *)
+
+Lemma Z_prime_rect : forall P : Z -> Type,
+  ((P 0) ->
+  (P 1) ->
+  (forall n, prime n -> P n) ->
+  (forall a b, P a -> P b -> P (a * b)) ->
+    forall n, 0 <= n -> P n)%Z.
+Proof.
+  intros P P0 P1 Pprime Psplit.
+  assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
+    intro n ; induction n ; intros i ipos imax.
+      (* i = n is the only interesting case *)
+      exfalso; inversion imax.
+      destruct (Z_le_lt_eq_dec i (Z_of_nat n)) as [|E]. zify; omega. apply IHn; zify; omega.
+      rewrite E in *; clear E i ipos imax.
+      
+      (* Case: n is prime *)
+      destruct (prime_dec (Z_of_nat n)) as [Hprime | Hnprime]. apply Pprime ; assumption.
+      
+      (* Case: n <= 1 *)
+      destruct n. subst; apply P0.
+      destruct n. subst; apply P1.
+      
+      (* Case: n = a * b *)
+      set (z := Z_of_nat (S (S n))).
+      assert (n_big : 1 < z) by (unfold z; zify; omega).
+      destruct (not_prime_divide_inf _ n_big Hnprime) as [a [[amin amax] b_eqz]].
+      destruct (Zdivide_inf _ _ b_eqz) as [b eqz]; clear b_eqz; rewrite eqz.
+      
+      (* Bounds on b come from bounds on a *)
+      assert (Bb : 1 < b < z).
+        assert (1 < b) by (apply Zmult_lt_reg_r with a; omega).
+        split; auto.
+        rewrite <- (Zmult_1_r b), eqz.
+        apply Zmult_lt_compat_l; try omega.
+      
+      (* Empêche un bug d'omega (uncaught exception) *)
+      assert (z = Z_of_nat (S (S n))) by auto; clearbody z.
+      
+      (* Main argument *)
+      apply Psplit; apply IHn; zify; omega.
+  
+  intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
+Qed.
 
 Lemma Z_prime_ind : forall P : Z -> Prop,
   ((P 0) ->
@@ -28,55 +139,8 @@ Lemma Z_prime_ind : forall P : Z -> Prop,
   (forall a b, P a -> P b -> P (a * b)) ->
     forall n, 0 <= n -> P n)%Z.
 Proof.
-intros P P0 P1 Pprime Psplit.
-assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
- intro N ; induction N ; intros n n_lb n_ub.
-  inversion n_ub.
-  destruct (prime_dec n) as [Hprime | Hnprime].
-   apply Pprime ; assumption.
-  destruct (Z_eq_dec n 0) as [Hnull | Hnnull].
-   subst ; apply P0.
-  destruct (Z_eq_dec n 1) as [Hone | Hnone].
-   subst ; apply P1.
-  assert (n_big : 1 < n) by omega.
-  destruct (not_prime_divide _ n_big Hnprime) as [p [[p_lb p_ub] [q Hpq]]].
-   subst ; apply Psplit ; apply IHN.
-   apply Zmult_le_0_reg_r with p ; omega.
-admit.
- omega.
-admit.
- intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
-Qed. 
-
-Lemma Z_prime_rect : forall P : Z -> Type,
-  ((P 0) ->
-  (P 1) ->
-  (forall n, prime n -> P n) ->
-  (forall a b, P a -> P b -> P (a * b)) ->
-  forall n, 0 <= n -> P n)%Z.
-Proof.
-(*
-intros P P0 P1 Pprime Psplit.
-assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
- intro N ; induction N ; intros n n_lb n_ub.
-  destruct (lt_n_O _ n_ub).
-  destruct (prime_dec n) as [Hprime | Hnprime].
-   apply Pprime ; assumption.
-  destruct (Z_eq_dec n 0) as [Hnull | Hnnull].
-   subst ; apply P0.
-  destruct (Z_eq_dec n 1) as [Hone | Hnone].
-   subst ; apply P1.
-  assert (n_big : 1 < n) by omega.
-  destruct (not_prime_divide _ n_big Hnprime) as [p [[p_lb p_ub] [q Hpq]]].
-   subst ; apply Psplit ; apply IHN.
-   apply Zmult_le_0_reg_r with p ; omega.
-admit.
- omega.
-admit.
- intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
-Qed. 
-*)
-Admitted.
+  intros; apply Z_prime_rect; auto.
+Qed.
 
 
 (** Bezout coefficients: a lot easier to use than the stdlib *)

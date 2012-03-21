@@ -661,12 +661,3 @@ Proof.
     
     apply mult_foursquare_compat.
 Qed.
-
-(*
-Print Assumptions lagrange_4_square_theorem.
-
-virer ce truc ↓ il m'a fait prouver des trucs inutiles.. Je crois.
-http://planetmath.org/encyclopedia/ProofOfLagrangesFourSquareTheorem.html
-(le site est down le 13 février 2012 à 19h)
-*)
-

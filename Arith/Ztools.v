@@ -11,6 +11,12 @@ Proof.
     inversion I; tauto.
 Qed.
 
+Lemma Zmult_le_1_compat : forall a b, 1 <= a -> 1 <= b -> 1 <= a * b.
+Proof.
+  intros [|[]|[]][|[]|[]] H I; compute in *; eauto.
+Qed.
+
+
 Lemma Zsquare_pos : forall x, 0 <> x -> 0 < x * x.
 Proof.
   intros [] E; simpl; reflexivity || tauto.
