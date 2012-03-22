@@ -29,20 +29,7 @@ Proof.
   intros n m (a, (b, (c, (d, Hn)))) (x, (y, (z, (t, Hm)))); subst.
   rewrite euler's_identity.
   repeat eexists.
-Qed.
-
-(*
-Lemma TODO_____Zmod_eq_minus : forall p a b, a mod p = b mod p <-> (a - b) mod p = 0.
-Proof.
-  intros p a b; split; intros E.
-    rewrite Zminus_mod, E, <- (Zmod_0_l p).
-    f_equal; ring.
-    
-    replace a with (b + (a - b)) by ring.
-    rewrite Zplus_mod, E, <- (Zmod_mod b).
-    f_equal; rewrite Zmod_mod; ring.
-Qed.
-*)
+Defined.
 
 Lemma Zmod_sqrt_eq_compat : forall p i j, prime p ->
   (0 <= i -> 0 <= j -> 2 * i < p -> 2 * j < p ->
@@ -69,18 +56,6 @@ Proof.
   rewrite <- ES.
   apply eq_eqm; ring.
 Qed.
-
-(*
-Lemma TODO____lt_div_2 : forall a b, 0 <= a -> a < b / 2 -> 2 * a < b.
-Proof.
-  intros a b P L.
-  apply Zlt_le_trans with (2 * (b / 2)).
-    apply Zmult_gt_0_lt_compat_l; eauto.
-    reflexivity.
-    
-  apply Z_mult_div_ge; reflexivity.
-Qed.
-*)
 
 Lemma prime_odd : forall p, 2 <> p -> prime p -> p mod 2 = 1.
 Proof.
@@ -176,9 +151,9 @@ Qed.
 
 Lemma prime_dividing_sum_of_two_squares_plus_one : forall p,
   prime p -> 3 <= p ->	
-    sigT (fun l => sigT (fun m => sig (fun k =>
+    {l : _ & {m : _ & { k |
       p * k = 1 + l * l + m * m /\
-      2 * m < p /\  2 * l < p /\ 0 < k /\ 0 <= l /\ 0 <= m /\ (0 < l \/ 0 < m)))).
+      2 * m < p /\  2 * l < p /\ 0 < k /\ 0 <= l /\ 0 <= m /\ (0 < l \/ 0 < m)}}}.
 Proof.
   intros p Pp Op.
   
@@ -287,7 +262,7 @@ Proof.
         intros Hyp [?|?]; [left|right]; apply Hyp; auto.
         clear; intros [] H; tauto || zify; auto with *.
       omega.
-Qed.
+Defined.
 
 
 (** Building bounds to prove things like x1²+x2²+x3²+x4²=m² /\ -m/2≤xi<m/2 => xi=-m/2 *)
@@ -530,7 +505,7 @@ Proof.
         destruct (Zdivide_inf m a D) as (k, E); subst.
         rewrite Z_div_mult_full; auto.
         ring.
-Qed.
+Defined.
 
 
 (** Induction scheme to use the previous lemma *)
@@ -645,7 +620,7 @@ Proof.
           rewrite inj_S, inj_Zabs_nat, Zabs_eq; auto with *; unfold Zsucc.
           replace (n - 1 + 1) with n by ring.
           split; auto; omega.
-Qed.
+Defined.
 
 
 (** Trivial application of the previous lemma and euler's identity *)
@@ -660,4 +635,29 @@ Proof.
     apply foursquare_prime.
     
     apply mult_foursquare_compat.
+Defined.
+
+
+Definition lagrange_fun (n : Z) : (Z * Z) * (Z * Z) :=
+  let (a, ha) := lagrange_4_square_theorem (Zabs n) (Zabs_pos n) in
+  let (b, hb) := ha in
+  let (c, hc) := hb in
+  let (d, _ ) := hc in
+  ((a, b), (c, d)).
+
+Lemma lagrange_fun_spec (n : Z) :
+  (let (ab, cd) := lagrange_fun n in let (a, b) := ab in let (c, d) := cd in
+  Zabs n = a * a + b * b + c * c + d * d).
+Proof.
+  unfold lagrange_fun.
+  destruct (lagrange_4_square_theorem (Zabs n) (Zabs_pos n)) as (a, (b, (c, (d, pr)))).
+  exact pr.
 Qed.
+
+Extraction "Arith/Lagrange_four_square.ml" lagrange_fun.
+
+(*
+Eval compute in lagrange_fun 0.
+
+Print Opaque Dependencies lagrange_4_square_theorem.
+*)

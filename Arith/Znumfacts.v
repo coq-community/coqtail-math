@@ -1,6 +1,5 @@
 Require Import ZArith Omega Znumtheory.
 Require Import Natsets MyNat Ztools Zeqm.
-Require Import Ztools.
 
 (** * Number theory : factorisation, computation of Bezout coefficients and modular inverse *)
 
@@ -83,7 +82,7 @@ Proof.
     intros n [Hn1 Hn2].
     case Zle_lt_or_eq with ( 1 := Hn1 ); auto with zarith.
     intros H2; subst n; red; apply Zis_gcd_intro; auto with zarith.
-Qed.
+Defined.
 
 
 (** Induction on natural numbers via prime numbers and multiplication *)
@@ -130,7 +129,7 @@ Proof.
       apply Psplit; apply IHn; zify; omega.
   
   intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
-Qed.
+Defined.
 
 Lemma Z_prime_ind : forall P : Z -> Prop,
   ((P 0) ->
