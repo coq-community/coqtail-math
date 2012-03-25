@@ -84,6 +84,48 @@ Proof.
     intros H2; subst n; red; apply Zis_gcd_intro; auto with zarith.
 Defined.
 
+Definition Z_le_lt_eq_dec x y : x <= y -> {x < y} + {x = y}.
+Proof.
+  Lemma Zcompare_Eq_eq : forall n m : Z, (n ?= m) = Eq -> n = m.
+  Proof.
+    Lemma Pcompare_notEq_notEq : forall a b,
+      (Pcompare a b Lt <> Eq) /\ (Pcompare a b Gt <> Eq).
+    Proof.
+      intros a; induction a; intros b; destruct b; split; intros E; simpl in E;
+          try solve [
+            inversion E |
+            auto |
+            eapply (proj1 (IHa _)); eauto |
+            eapply (proj2 (IHa _)); eauto
+            ].
+    Qed.
+    Lemma Pcompare_Eq_eq : forall a b, Pcompare a b Eq = Eq -> a = b.
+    Proof.
+      intros a; induction a; intros b; destruct b; intros E; simpl in E;
+        try solve [
+          inversion E |
+          auto |
+          f_equal; apply IHa; eauto
+          ].
+        exfalso; eapply Pcompare_notEq_notEq; eauto.
+        exfalso; eapply (proj1 (Pcompare_notEq_notEq _ _)); eauto.
+    Defined.
+    intros [ | p | p ] [ | q | q] E; simpl in E;
+      reflexivity ||
+      solve [ inversion E ] ||
+      (f_equal; eapply Pcompare_Eq_eq; eauto).
+      destruct ((p ?= q)%positive Eq); auto || inversion E.
+  Defined.
+  pose (Zcompare_Eq_iff_eq := 
+    fun x y => conj (fun E : (x ?= y) = Eq => Zcompare_Eq_eq x y E)
+      (fun E : x = y =>
+        eq_ind_r (fun x0 => (x0 ?= y) = Eq) (Zcompare_refl y) E)).
+  intro H.
+  apply Zcompare_rec with (n := x) (m := y); intros E.
+    right. elim (Zcompare_Eq_iff_eq x y); auto with arith.
+    left. elim (Zcompare_Eq_iff_eq x y); auto with arith.
+    absurd (x > y); auto with arith.
+Defined.
 
 (** Induction on natural numbers via prime numbers and multiplication *)
 
