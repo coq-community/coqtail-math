@@ -1,6 +1,6 @@
 Require Import Reals Rsequence_def.
 Require Import Rfunction_facts.
-Require Import Rinterval Ranalysis_def Ranalysis_facts.
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Rfunction_classes_def Rfunction_classes_facts.
 Require Import Rextensionality.
 

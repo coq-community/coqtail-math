@@ -236,7 +236,7 @@ intros x Hx ; assert (Nx := is_H_unit_hnorm2_1 _ Hx) ; destruct Hx as [y Ixy].
  assert (Ny : hnorm2 y = 1).
   apply Zmult_reg_l with 1 ; [omega |] ; rewrite <- Zpower_2,
    <- hnorm2_IZH, <- Ixy, <- Nx ; symmetry ; apply hnorm2_hmul.
-  
+
   (* Une fois qu'on a ça, c'est pas si facile. Chez les quaternions
   on peut borner |a+bi+cj+dk|>=|a|+|b|+|c|+|d| mais comme le changement
   est dans une base pas trop orthonormée, c'est moins facile, mais c'est

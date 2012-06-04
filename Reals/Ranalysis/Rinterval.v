@@ -1,11 +1,14 @@
 Require Import Rbase Rfunctions Rfunction_def Fourier.
-Require Import MyRIneq MyNeq.
+Require Import MyRIneq MyNeq PSeries_reg.
 Require Import Ass_handling.
 
 (** * The definitions used in this file: [middle], [interval], [Rball]. *)
 
 Definition middle (x:R) (y:R) : R := (x + y) / 2.
 Definition interval_dist lb ub x := Rmin (x - lb) (ub - x).
+Definition interval_size lb ub (pr : lb < ub) : posreal.
+ apply mkposreal with ((ub - lb) / 2), Rlt_mult_inv_pos ; fourier.
+Defined.
 
 Definition interval (lb ub x : R) := lb <= x <= ub.
 Definition open_interval (lb ub x:R) := lb < x < ub.
@@ -37,6 +40,16 @@ Lemma Rball_eq_trans: forall c r r_pos f g h, Rball_eq c r r_pos f g ->
 Proof.
 unfold Rball_eq ; intros ; transitivity (g x) ; auto.
 Qed.
+
+Lemma interval_size_Boule_middle : forall lb ub c (pr : lb < ub),
+  open_interval lb ub c -> Boule (middle lb ub) (interval_size lb ub pr) c.
+Proof.
+intros ; unfold Boule, interval_size, middle ; simpl ; apply Rabs_def1.
+ apply Rlt_minus_sort ; do 2 (field_simplify ; unfold Rdiv) ;
+  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
+ apply Rlt_minus_sort2 ; do 2 (field_simplify ; unfold Rdiv) ;
+  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
+Qed. 
 
 Require Setoid.
 

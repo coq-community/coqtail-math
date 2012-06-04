@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rfunction_classes.
-Require Import Ranalysis_def Rfunction_def Rextensionality.
+Require Import Ranalysis_def Ranalysis_def_simpl Rfunction_def Rextensionality.
 Require Import Rinterval.
 Require Import Nth_derivative_def.
 

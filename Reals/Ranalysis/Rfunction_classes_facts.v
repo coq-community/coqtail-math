@@ -1,6 +1,6 @@
 Require Import Rbase Ranalysis Fourier.
 Require Import Rfunctions Rfunction_facts Rextensionality.
-Require Import Rinterval Ranalysis_def Ranalysis_facts.
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Rfunction_classes_def.
 Require Import Ass_handling.
 Require Import MyR_dist.
@@ -485,8 +485,7 @@ Proof.
   
   apply D_S with (derivable_comp _ _ pr0 pr) ;
   apply D_ext with (fun x => (derive f pr) (g x) * (derive g pr0) x)%R.
-  intro x ; symmetry ; unfold derive ; rewrite derive_pt_eq ;
-  eapply derive_pt_eq_1 ; apply derive_pt_comp.
+  intro x ; symmetry ; unfold derive ; rewrite Rmult_comm ; apply derive_pt_comp.
 
    eapply D_mult.
    fold (comp (derive f pr) g).
@@ -503,8 +502,7 @@ Proof.
   
   apply C_S with (derivable_comp _ _ pr0 pr) ;
   apply C_ext with (fun x => (derive f pr) (g x) * (derive g pr0) x)%R.
-  intro x ; symmetry ; unfold derive ; rewrite derive_pt_eq ;
-  eapply derive_pt_eq_1 ; apply derive_pt_comp.
+  intro x ; symmetry ; unfold derive ; rewrite Rmult_comm ; apply derive_pt_comp.
 
    eapply C_mult.
    fold (comp (derive f pr) g).

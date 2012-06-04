@@ -28,53 +28,13 @@ Require Import RiemannInt.
 Require Import SeqProp.
 Require Import Max.
 Require Import RIneq MyRIneq.
-Require Import Ranalysis_def Ranalysis_facts Rinterval.
+
+Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts Rinterval.
 Require Import RIVT.
 
 Require Import Ass_handling.
 
 Local Open Scope R_scope.
-
-Lemma interval_restriction_compat : forall a b a' b' x,
-  interval a b a' -> interval a b b' ->
-  interval a' b' x -> interval a b x.
-Proof.
-intros a b a' b' x [] [] [] ; split ; fourier.
-Qed.
-
-Lemma open_interval_restriction_compat : forall a b a' b' x,
-  interval a b a' -> interval a b b' ->
-  open_interval a' b' x -> open_interval a b x.
-Proof.
-intros a b a' b' x [] [] [] ; split ; fourier.
-Qed.
-
-Lemma interval_open_restriction_compat : forall a b a' b' x,
-  open_interval a b a' -> open_interval a b b' ->
-  interval a' b' x -> open_interval a b x.
-Proof.
-intros a b a' b' x [] [] [] ; split ; fourier.
-Qed.
-
-Lemma strictly_increasing_interval_restriction_compat :
- forall f a b a' b', interval a b a' -> interval a b b' ->
- strictly_increasing_interval f a b ->
- strictly_increasing_interval f a' b'.
-Proof.
-intros f a b a' b' a'_in b'_in Hf x y x_in y_in ;
- apply Hf ; apply interval_restriction_compat with a' b' ;
- assumption.
-Qed.
-
-Lemma Rlt_minus_sort : forall a b c, a < c + b -> a - c < b.
-Proof.
-intros ; fourier.
-Qed.
-
-Lemma Rlt_minus_sort2 : forall a b c, a - c < b -> - c < b - a.
-Proof.
-intros ; fourier.
-Qed.
 
 (** * Continuity of the reciprocal function *)
 
@@ -151,54 +111,6 @@ intros f g lb ub lb_le_ub f_incr Hfg Hf b b_in.
        apply interval_restriction_compat with xlb xub ; eassumption.
 Qed.
 
-Lemma continuity_open_interval_opp_compat : forall f lb ub,
-  continuity_open_interval f lb ub ->
-  continuity_open_interval (- f)%F lb ub.
-Proof.
-intros f lb ub Hf b b_in ; apply limit_Ropp, Hf ; assumption.
-Qed.
-
-Lemma continuity_open_interval_ext : forall (f g : R -> R) lb ub,
-  (f == g)%F -> continuity_open_interval f lb ub ->
-  continuity_open_interval g lb ub.
-Proof.
-intros f g lb ub Heq Hf b b_in ; eapply limit1_in_ext.
- intros ; apply Heq.
- rewrite <- (Heq b) ; apply Hf ; assumption.
-Qed.
-
-Lemma R_dist_Ropp_compat : forall x y,
-  R_dist (- x) (- y) = R_dist x y.
-Proof.
-intros x y ; unfold R_dist, Rminus ; rewrite <- Ropp_plus_distr ;
- apply Rabs_Ropp.
-Qed.
-
-Lemma continuity_open_interval_Ropp_compat : forall f lb ub,
-  continuity_open_interval f lb ub ->
-  continuity_open_interval (fun x => f (- x)) (- ub) (- lb).
-Proof.
-intros f lb ub Hf b b_in eps eps_pos.
- assert (mb_in : open_interval lb ub (- b)).
-  destruct b_in ; split ; fourier.
- destruct (Hf _ mb_in _ eps_pos) as [alpha [alpha_pos Halpha]] ;
- exists alpha ; split ; [assumption | intros x [x_in x_bd]].
- apply Halpha ; split ; simpl.
-  destruct x_in ; split ; fourier.
-  rewrite R_dist_Ropp_compat ; assumption.
-Qed.
-
-Lemma continuity_open_interval_Ropp_compat_rev : forall f lb ub,
-  continuity_open_interval (fun x => f (- x)) (- ub) (- lb) ->
-  continuity_open_interval f lb ub.
-Proof.
-intros f lb ub Hf ; pose (F := fun x => f (- x)) ;
- apply continuity_open_interval_ext with (fun x => F (- x)).
- intro x ; unfold F ; f_equal ; apply Ropp_involutive.
-  rewrite <- (Ropp_involutive lb), <- (Ropp_involutive ub) ;
-  apply continuity_open_interval_Ropp_compat, Hf.
-Qed.
-
 Lemma continuity_reciprocal_strictly_decreasing_open_interval :
   forall (f g:R->R) (lb ub:R), lb <= ub ->
   strictly_decreasing_interval f lb ub -> 
@@ -230,108 +142,7 @@ intros f g lb ub lb_le_ub f_mono f_eq_g f_cont_interv.
  assumption.
 Qed.
 
-Lemma Rplus_pos_lt : forall x h, 0 < h -> x < x + h.
-Proof.
-intros ; fourier.
-Qed.
 
-Lemma Rminus_pos_lt : forall x h, 0 < h -> x - h < x.
-Proof.
-intros ; fourier.
-Qed.
-
-Lemma Rplus_pos_neq : forall x h, 0 < h -> x <> x + h.
-Proof.
-intros ; apply Rlt_not_eq, Rplus_pos_lt ; assumption.
-Qed.
-
-Lemma R_dist_Rplus_compat: forall x h, R_dist (x + h) x = Rabs h.
-Proof.
-intros ; apply Rabs_eq_compat ; ring.
-Qed.
-
-Lemma R_dist_Rminus_compat: forall x h, R_dist (x - h) x = Rabs h.
-Proof.
-intros ; rewrite <- Rabs_Ropp ; apply Rabs_eq_compat ; ring.
-Qed.
-
-Lemma dense_interval: forall lb ub x, lb < ub ->
-  interval lb ub x -> dense (interval lb ub) x.
-Proof.
-intros lb ub x Hlt [xlb xub] eps eps_pos ; destruct xlb as [xlb | xeq].
- destruct xub as [xub | xeq].
-  pose (h := Rmin (eps / 2) (interval_dist lb ub x)) ;
-  assert (h_pos : 0 < h).
-   apply Rmin_pos_lt, open_interval_dist_pos ;
-   [fourier | split ; assumption].
-  exists (x + h) ; split.
-   split.
-    apply interval_dist_bound ; [split ; left ; assumption |].
-    rewrite Rabs_right ; [apply Rmin_r | left ; assumption].
-    apply Rplus_pos_neq ; assumption.
-   rewrite R_dist_Rplus_compat, Rabs_right ; [| left ; assumption].
-    apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
-  pose (h := Rmin (eps / 2) (ub - lb)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; fourier).
-   exists (x - h) ; split. split. split.
-    transitivity (x - (ub - lb)).
-     right ; subst ; ring.
-     apply Rplus_le_compat_l, Ropp_le_contravar, Rmin_r.
-     left ; subst ; apply Rminus_pos_lt ; assumption.
-     subst ; apply Rgt_not_eq, Rminus_pos_lt ; assumption.
-     rewrite R_dist_Rminus_compat, Rabs_right ; [| left ; assumption].
-     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
-  pose (h := Rmin (eps / 2) (ub - lb)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; fourier).
-   exists (x + h) ; split. split. split.
-    left ; rewrite xeq ; apply Rplus_pos_lt ; assumption.
-    transitivity (x + (ub - lb)) ; [| right ; rewrite xeq ; ring].
-     apply Rplus_le_compat_l, Rmin_r.
-     apply Rlt_not_eq, Rplus_pos_lt ; assumption.
-     rewrite R_dist_Rplus_compat, Rabs_right ; [| left ; assumption].
-     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
-Qed.  
-
-Lemma derivable_pt_lim_interval_uniqueness:
-  forall (f : R -> R) (lb ub x l l' : R),
-  lb < ub -> interval lb ub x ->
-  derivable_pt_lim_in f (interval lb ub) x l ->
-  derivable_pt_lim_in f (interval lb ub) x l' -> l = l'.
-Proof.
-intros ; eapply derivable_pt_lim_in_uniqueness ; try eassumption.
- apply dense_interval ; assumption.
-Qed.
-
-Lemma derivable_pt_lim_derive_pt_interval: forall f lb ub x l
-  (pr : derivable_pt_in f (interval lb ub) x),
-  lb < ub -> interval lb ub x ->
-  derivable_pt_lim_in f (interval lb ub) x l ->
-  derive_pt_in f (interval lb ub) x pr = l.
-Proof.
-intros f lb ub x l [l' Hl'] x_in Hl ;
- eapply derivable_pt_lim_interval_uniqueness ;
- eassumption.
-Qed.
-
-Lemma derivable_pt_lim_derive_pt_open_interval: forall f lb ub x l
-  (pr : derivable_pt_in f (open_interval lb ub) x),
-  open_interval lb ub x ->
-  derivable_pt_lim_in f (open_interval lb ub) x l ->
-  derive_pt_in f (open_interval lb ub) x pr = l.
-Proof.
-intros f lb ub x l [l' Hl'] x_in Hl ;
- eapply derivable_pt_lim_open_interval_uniqueness ;
- eassumption.
-Qed.
-
-Lemma derive_pt_derivable_pt_lim_interval: forall f lb ub x l
-  (pr : derivable_pt_in f (interval lb ub) x),
-  lb < ub -> interval lb ub x ->
-  derive_pt_in f (interval lb ub) x pr = l ->
-  derivable_pt_lim_in f (interval lb ub) x l.
-Proof.
-intros f lb ub x l [l' Hl'] Hlt x_in Hl ; subst ; assumption.
-Qed.
 
 (** * Derivability of the reciprocal function *)
 
@@ -436,22 +247,6 @@ intros ; eexists ; eapply derivable_pt_lim_in_reciprocal_interval ;
  eassumption.
 Qed.
 
-Lemma derivable_pt_lim_in_imp_compat: forall f (D E : R -> Prop) x l,
-  (forall y, E y -> D y) -> derivable_pt_lim_in f D x l->
-  derivable_pt_lim_in f E x l.
-Proof.
-intros ; eapply limit1_imp ; [| eassumption].
- intros z [z_in z_neq] ; split ; [ass_apply |] ; assumption.
-Qed.
-
-Lemma derivable_pt_in_imp_compat: forall f (D E : R -> Prop) x,
-  (forall y, E y -> D y) -> derivable_pt_in f D x ->
-  derivable_pt_in f E x.
-Proof.
-intros f D E x EinD [l Hl] ; exists l ;
- eapply derivable_pt_lim_in_imp_compat ; eassumption.
-Qed.
-
 Lemma derivable_pt_in_reciprocal_interval_rev: forall f g lb ub,
   (forall x : R, interval (f lb) (f ub) x -> interval lb ub (g x)) ->
   forall x, interval (f lb) (f ub) x -> derivable_interval f lb ub ->
@@ -519,8 +314,9 @@ intros f g lb ub x Df Dg x_in_I local_recip Df_neq.
   ((derive_pt g x Dg) * (derive_pt f (g x) Df) * / (derive_pt f (g x) Df))
   by (field ; assumption).
  unfold Rdiv ; apply Rmult_eq_compat_r.
- rewrite Rmult_comm, <- derive_pt_comp.
- erewrite pr_nu_var2_interv ; [eapply derive_pt_id | |] ; eassumption.
+ rewrite <- derive_pt_comp with (pr := derivable_pt_comp _ _ _ Dg Df).
+ erewrite pr_nu_var2_interv with (pr2 := derivable_id _) ;
+ [eapply derive_pt_id | |] ; eassumption.
 Qed.
 
 Lemma derive_pt_recip_interv_prelim1_0 : forall f g lb ub x, lb <= ub ->
@@ -555,28 +351,7 @@ intros ; eapply open_interval_interval, derive_pt_recip_interv_prelim1_0 ;
  eassumption.
 Qed.
 
-Definition interval_size lb ub (pr : lb < ub) : posreal.
- apply mkposreal with ((ub - lb) / 2), Rlt_mult_inv_pos ; fourier.
-Defined.
-
-Lemma interval_size_Boule_middle : forall lb ub c (pr : lb < ub),
-  open_interval lb ub c -> Boule (middle lb ub) (interval_size lb ub pr) c.
-Proof.
-intros ; unfold Boule, interval_size, middle ; simpl ; apply Rabs_def1.
- apply Rlt_minus_sort ; do 2 (field_simplify ; unfold Rdiv) ;
-  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
- apply Rlt_minus_sort2 ; do 2 (field_simplify ; unfold Rdiv) ;
-  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
-Qed. 
-
 Require Import Rsequence_def.
-
-Lemma Rneq_lt_gt_dec : forall a b, a <> b -> { a < b } + { b < a }.
-Proof.
-intros a b ab_neq ; destruct (Rlt_le_dec a b).
- left ; assumption.
- right ; apply Rle_neq_lt ; [| symmetry] ; assumption.
-Qed.
 
 Lemma Dfn_CVU_implies_Df_exists :
   forall (fn fn' : nat -> R -> R) f g x lb ub (pr : lb < ub),

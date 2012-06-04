@@ -22,7 +22,7 @@ Require Import Reals.
 Require Import Rpser_def Rpser_def_simpl.
 
 Require Import Rinterval.
-Require Import Rsequence_def Rsequence_base_facts Rsequence_rewrite_facts.
+Require Import Rsequence_def Rsequence_base_facts Rsequence_subsequence Rsequence_rewrite_facts.
 Require Import Rsequence_cv_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
@@ -229,6 +229,19 @@ destruct n.
  simpl ; rewrite Rmult_1_r ; reflexivity.
  rewrite pow_i ; [| omega] ; rewrite Rmult_0_r, Rabs_R0 ;
  apply Rabs_pos.
+Qed.
+
+Lemma Cv_radius_weak_subseq_compat :
+  forall An Bn r, 1 <= Rabs r -> subsequence Bn An ->
+  Cv_radius_weak An r -> Cv_radius_weak Bn r.
+Proof.
+intros An Bn r Hr [[phi Hphi] HAB] [ub Hub].
+ exists ub ; intros B [i Hi] ; subst ; transitivity (gt_abs_pser An r (phi i)).
+  unfold gt_abs_pser, Rseq_abs, gt_pser, Rseq_mult ; do 2 rewrite Rabs_mult.
+  apply Rmult_le_compat ; try (apply Rabs_pos).
+  right ; apply Rabs_eq_compat, HAB.
+  do 2 rewrite <- RPow_abs ; apply Rle_pow, Rsubseq_n_le_extractor_n ; assumption.
+  apply Hub ; exists (phi i) ; reflexivity.
 Qed.
 
 (** Compatibility of the Cv_radius_weak concept with common operations. *)
@@ -468,6 +481,7 @@ Qed.
 
 (** Compatibility of the finite_cv_radius concept with various operations. *)
 
+
 Lemma finite_cv_radius_scal_compat : forall (An : Rseq) (lam r : R), lam <> 0 ->
   (finite_cv_radius An r <-> finite_cv_radius (lam * An)%Rseq r).
 Proof.
@@ -520,6 +534,19 @@ intro An ; split ; intros rAn r ;
  [ rewrite Cv_radius_weak_shift_compat
  | rewrite <- Cv_radius_weak_shift_compat ] ;
  trivial.
+Qed.
+
+Lemma infinite_cv_radius_subseq_compat : forall An Bn,
+  subsequence Bn An -> infinite_cv_radius An -> infinite_cv_radius Bn.
+Proof.
+intros An Bn HAB HAn r ; pose (r' := Rmax (Rabs r) 1) ;
+ assert (r'_pos : 0 <= r') by (apply Rmax_pos_l, Rabs_pos).
+ apply Cv_radius_weak_le_compat with r'.
+  rewrite (Rabs_right r') ; [apply Rmax_l | apply Rle_ge ; assumption].
+  eapply Cv_radius_weak_subseq_compat.
+  rewrite (Rabs_right r') ; [apply Rmax_r | apply Rle_ge ; assumption].
+  eassumption.
+ apply HAn.
 Qed.
 
 Lemma infinite_cv_radius_expand_compat : forall An l,

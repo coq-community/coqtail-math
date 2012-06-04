@@ -1,5 +1,6 @@
 Require Import Reals Rpow_facts.
-Require Import Rfunction_def Rinterval Rextensionality Ranalysis_def Ranalysis_facts.
+Require Import Rfunction_def Rinterval Rextensionality.
+Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Fourier MyRIneq.
 
 Require Import Rsequence_facts Rsequence_sums_facts RFsequence RFsequence_facts.

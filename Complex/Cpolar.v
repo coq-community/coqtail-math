@@ -22,7 +22,7 @@ USA.
 Require Import Rbase.
 Require Import AltSeries.
 Require Import Rseries_def.
-Require Import Ratan.
+Require Import Rtrigo_facts Ratan.
 Require Import Cpow_plus.
 Require Export Complex.
 Require Import Fourier MyRIneq.

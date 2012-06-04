@@ -20,13 +20,13 @@ USA.
 *)
 
 Require Import MyReals.
-Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts.
-Require Import Rsequence_base_facts Rsequence_usual_facts.
+Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts Rsequence_sums_facts.
+Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_facts.
 
 Require Import Max.
 Require Import Fourier.
 
-Require Import Rpser_def Rpser_base_facts Rpser_cv_facts.
+Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts.
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
 Require Import Rfunction_def Functions.
@@ -87,7 +87,6 @@ intros r x.
 intros eps eps_pos ; exists O ; intros n n_lb ; rewrite Hrew, R_dist_eq ;
  assumption.
 Qed.
-
 
 Definition constant (r : R) := sum _ (constant_infinite_cv_radius r).
 
@@ -348,4 +347,112 @@ Lemma derive_pt_cosine_sine : forall (x : R) (pr : derivable_pt cosine x),
   derive_pt cosine x pr = - sine x.
 Proof.
 intros x pr ; rewrite derive_pt_eq ; apply derivable_pt_lim_cosine.
+Qed.
+
+(* Link with the standard's library definitions. *)
+
+Lemma sin_seq_even : forall n x, gt_pser sin_seq x (2 * n)%nat = 0.
+Proof.
+intros n x ; unfold gt_pser, sin_seq, Rseq_mult ;
+ case (n_modulo_2 (2 * n)) ; intros [p Hp].
+ ring.
+ apply False_ind ; omega.
+Qed.
+
+Lemma cos_seq_odd : forall n x, gt_pser cos_seq x (S (2 * n))%nat = 0.
+Proof.
+intros n x ; unfold gt_pser, cos_seq, Rseq_mult ;
+ case (n_modulo_2 (S (2 * n))) ; intros [p Hp].
+ apply False_ind ; omega.
+ ring.
+Qed.
+
+Lemma partial_sine_drop_even : forall x n,
+  Rseq_sum (gt_pser sin_seq x) (2 * S n) = Rseq_sum (gt_pser sin_seq x) (S (2 * n)).
+Proof.
+intros x n ; replace (2 * S n)%nat with (S (S (2 * n))) by ring.
+ rewrite Rseq_sum_simpl ; replace (S (S (2 * n)))%nat with (2 * S n)%nat by ring ;
+ rewrite sin_seq_even ; ring.
+Qed.
+
+Lemma partial_cosine_drop_odd : forall x n,
+  Rseq_sum (gt_pser cos_seq x) (S (2 * n)) = Rseq_sum (gt_pser cos_seq x) (2 * n).
+Proof.
+intros x n ; rewrite Rseq_sum_simpl, cos_seq_odd ; ring.
+Qed.
+
+Lemma partial_sin_sine_ext : forall x n,
+  x * sum_f_R0 (fun i => sin_n i * x ² ^ i) n = Rseq_sum (gt_pser sin_seq x) (S (2 * n)).
+Proof.
+intros x n ; induction n.
+ simpl ; unfold sin_n, sin_seq, gt_pser, Rseq_mult.
+  case (n_modulo_2 0) ; intros [p Hp].
+   case (n_modulo_2 1) ; intros [q Hq].
+    apply False_ind ; omega.
+    assert (Hqq : q = O) by omega ; subst ; assert (Hpp : p = O) by omega ; subst.
+    simpl ; ring.
+   apply False_ind ; omega.
+  replace (2 * S n)%nat with (S (S (2 * n))) by ring.
+   do 3 rewrite Rseq_sum_simpl ; rewrite <- IHn.
+ replace (S (S (2 * n))) with (2 * (S n))%nat by ring ; rewrite sin_seq_even.
+ rewrite Rmult_plus_distr_l, Rplus_assoc ; apply Rplus_eq_compat_l.
+  unfold sin_n, gt_pser, sin_seq, Rseq_mult.
+   case (n_modulo_2 (S (2 * S n))) ; intros [p Hp].
+    apply False_ind ; omega.
+    rewrite <- (tech_pow_Rmult x), pow_Rsqr, <- (tech_pow_Rmult x²) ;
+    replace (S n) with p by omega ; replace (2 * p + 1)%nat with (S (2 * p)) by omega.
+    ring.
+Qed.
+
+Lemma partial_cos_cosine_ext : forall x n,
+  sum_f_R0 (fun i => cos_n i * x ² ^ i) n = Rseq_sum (gt_pser cos_seq x) (2 * n).
+Proof.
+intros x n ; induction n.
+ simpl ; unfold cos_n, cos_seq, gt_pser, Rseq_mult.
+  case (n_modulo_2 0) ; intros [p Hp].
+   case (n_modulo_2 1) ; intros [q Hq].
+    apply False_ind ; omega.
+    assert (Hqq : q = O) by omega ; subst ; assert (Hpp : p = O) by omega ; subst.
+    simpl ; ring.
+  apply False_ind ; omega.
+ replace (2 * S n)%nat with (S (S (2 * n))) by ring ; do 3 rewrite Rseq_sum_simpl.
+ rewrite <- IHn, Rplus_assoc, cos_seq_odd ; apply Rplus_eq_compat_l.
+ unfold cos_n, gt_pser, cos_seq, Rseq_mult.
+  case (n_modulo_2 (S (S (2 * n)))) ; intros [p Hp].
+  replace (S (S (2 * n))) with (2 * S n)%nat by omega ; rewrite pow_Rsqr ;
+  replace (S n) with p by omega ; ring.
+  apply False_ind ; omega.
+Qed.
+
+Lemma sin_sine : sin == sine.
+Proof.
+intro x ; unfold sin, sine ; destruct (exist_sin x²) as [l Hl] ;
+ unfold sin_in, infinite_sum in Hl.
+ apply Rseq_cv_unique with (Rseq_sum (gt_pser sin_seq x)).
+ cut (Rseq_cv (fun n => Rseq_sum (gt_pser sin_seq x) (S (2 * n))) (x * l)).
+  intro H ; apply Rseq_cv_even_odd_compat.
+   eapply Rseq_cv_shift_compat, Rseq_cv_eq_compat ; [| eapply H].
+    intro n ; unfold Rseq_shift ; apply partial_sine_drop_even ; apply H.
+   apply H.
+ apply Rseq_cv_eq_compat with (fun n => x * sum_f_R0 (fun i => sin_n i * x ² ^ i) n).
+  intro n ; symmetry ; apply partial_sin_sine_ext.
+  apply Rseq_cv_mult_compat ; [apply Rseq_constant_cv |].
+   intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ; exists N ; apply HN.
+ apply sum_sums.
+Qed.
+
+Lemma cos_cosine : cos == cosine.
+Proof.
+intro x ; unfold cos, cosine ; destruct (exist_cos x²) as [l Hl] ;
+ unfold cos_in, infinite_sum in Hl.
+ apply Rseq_cv_unique with (Rseq_sum (gt_pser cos_seq x)).
+ cut (Rseq_cv (fun n => Rseq_sum (gt_pser cos_seq x) (2 * n)) l).
+  intro H ; apply Rseq_cv_even_odd_compat.
+   apply H.
+   eapply Rseq_cv_eq_compat ; [| eapply H].
+    intro n ; unfold Rseq_shift ; apply partial_cosine_drop_odd ; apply H.
+ apply Rseq_cv_eq_compat with (fun n => sum_f_R0 (fun i => cos_n i * x ² ^ i) n).
+  intro n ; symmetry ; apply partial_cos_cosine_ext.
+ intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ; exists N ; apply HN.
+ apply sum_sums.
 Qed.

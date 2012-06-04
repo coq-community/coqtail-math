@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import RIneq.
+Require Import RIneq MyNeq.
 Require Import Rfunctions.
 
 Require Import Fourier.
@@ -36,6 +36,116 @@ transitivity proved by Rle_trans as Rle.
 
 Add Parametric Relation : R Rlt
 transitivity proved by Rlt_trans as Rlt.
+
+Lemma Rplus_pos_lt : forall x h, 0 < h -> x < x + h.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_pos_lt : forall x h, 0 < h -> x - h < x.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rplus_pos_neq : forall x h, 0 < h -> x <> x + h.
+Proof.
+intros ; apply Rlt_not_eq, Rplus_pos_lt ; assumption.
+Qed.
+
+
+Lemma Rlt_minus_sort : forall a b c, a < c + b -> a - c < b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rlt_minus_sort2 : forall a b c, a - c < b -> - c < b - a.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_lt_compat_l : forall a b c, a < b + c -> a - b < c.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_lt_compat_r : forall a b c, a + c < b -> a < b - c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_lt_compat_l_rev : forall a b c, a - b < c -> a < b + c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_le_compat_l : forall a b c, a <= b + c -> a - b <= c.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_le_compat_r : forall a b c, a + c <= b -> a <= b - c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_le_compat_l_rev : forall a b c, a - b <= c -> a <= b + c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rinv_lt_contravar_rev : forall x y, 0 < x -> 0 < y -> /x < /y -> y < x.
+Proof.
+intros x y x_pos y_pos Hxy ; rewrite <- (Rinv_involutive x), <- (Rinv_involutive y) ;
+ try (apply Rgt_not_eq ; assumption).
+ apply Rinv_lt_contravar ; [| assumption] ; apply Rmult_lt_0_compat ;
+ apply Rinv_0_lt_compat ; assumption.
+Qed.
+
+Lemma Ropp_Rdiv_compat_l : forall a b, b <> 0 -> - a / b = - (a / b).
+Proof.
+intros ; field ; assumption.
+Qed.
+
+Lemma Rle_Rminus : forall a b, a <= b -> 0 <= b - a.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rle_Rminus_rev : forall a b, 0 <= b - a -> a <= b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rlt_Rminus_rev : forall a b, 0 < b - a -> a < b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_r : forall a b c, 0 < a -> a * b < c -> b < c * / a.
+Proof.
+intros a b c a_pos Habc ; apply Rle_lt_trans with (a * b * / a).
+ right ; field ; apply Rgt_not_eq ; assumption.
+ apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_r_rev : forall a b c, 0 < a -> b < c * / a -> a * b < c.
+Proof.
+intros a b c a_pos Habc ; apply Rlt_le_trans with (a * (c * / a)).
+ apply Rmult_lt_compat_l ; assumption.
+ right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_l : forall a b c, 0 < c -> a < b * c -> a * / c < b.
+Proof.
+intros a b c a_pos Habc ; apply Rlt_le_trans with (b * c * / c).
+ apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
+ right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rmult_Rinv_lt_compat_l_rev : forall a b c, 0 < c -> a * / c < b -> a < b * c.
+Proof.
+intros a b c a_pos Habc ; apply Rle_lt_trans with (a * / c * c).
+ right ; field ; apply Rgt_not_eq ; assumption.
+ apply Rmult_lt_compat_r ; assumption.
+Qed.
 
 Lemma Rlt_minus_swap: forall x y z, x - y < z -> x - z < y.
 Proof.
@@ -314,4 +424,11 @@ Lemma Rmult_minus_distr_r: forall x y z,
   (x - y) * z = x * z - y * z.
 Proof.
 intros ; ring.
+Qed.
+
+Lemma Rneq_lt_gt_dec : forall a b, a <> b -> { a < b } + { b < a }.
+Proof.
+intros a b ab_neq ; destruct (Rlt_le_dec a b).
+ left ; assumption.
+ right ; apply Rle_neq_lt ; [| symmetry] ; assumption.
 Qed.
