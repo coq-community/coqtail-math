@@ -37,6 +37,21 @@ transitivity proved by Rle_trans as Rle.
 Add Parametric Relation : R Rlt
 transitivity proved by Rlt_trans as Rlt.
 
+Lemma Rdiv_eq_0_inv : forall a b, a / b = 0 -> b <> 0 -> a = 0.
+Proof.
+intros a b Hab Hb ; destruct (Rmult_integral _ _ Hab) as [Ha | Hb'].
+ apply Ha.
+ assert (Hb'' : / b <> 0) by (apply Rinv_neq_0_compat ; assumption).
+ apply False_ind, Hb'', Hb'.
+Qed.
+
+Lemma Rabs_Rdiv : forall a b, b <> 0 -> Rabs a / Rabs b = Rabs (a / b).
+Proof.
+intros a b b_neq ; unfold Rdiv ; rewrite Rabs_mult, Rabs_Rinv.
+ reflexivity.
+ assumption.
+Qed.
+
 Lemma Rplus_pos_lt : forall x h, 0 < h -> x < x + h.
 Proof.
 intros ; fourier.
@@ -322,6 +337,11 @@ Qed.
 
 Lemma Rmult_eq_compat : forall r1 r2 r3 r4, r1 = r3 -> r2 = r4 ->
   r1 * r2 = r3 * r4.
+Proof.
+intros ; subst ; reflexivity.
+Qed.
+
+Lemma Rpow_eq_compat : forall a b d, a = b -> a ^ d = b ^ d.
 Proof.
 intros ; subst ; reflexivity.
 Qed.

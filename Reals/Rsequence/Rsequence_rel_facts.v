@@ -646,8 +646,6 @@ apply Rmult_le_compat_l; [apply Rabs_pos|].
 apply HN; assumption.
 Qed.
 
-(** Multiplicative compatibility. *)
-
 (**********)
 Lemma Rseq_equiv_opp_compat : Un ~ Vn -> (- Un) ~ (- Vn).
 Proof.
@@ -659,6 +657,8 @@ unfold Rminus; rewrite <- Ropp_plus_distr.
 repeat rewrite Rabs_Ropp.
 apply HN; assumption.
 Qed.
+
+(** Multiplicative compatibility. *)
 
 (**********)
 Lemma Rseq_equiv_mult_compat : Un ~ Wn -> Vn ~ Xn -> (Un * Vn) ~ (Wn * Xn).

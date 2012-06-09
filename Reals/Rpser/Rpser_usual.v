@@ -26,7 +26,7 @@ Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_fact
 Require Import Max.
 Require Import Fourier.
 
-Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts.
+Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
 Require Import Rfunction_def Functions.
@@ -455,4 +455,96 @@ intro x ; unfold cos, cosine ; destruct (exist_cos x²) as [l Hl] ;
   intro n ; symmetry ; apply partial_cos_cosine_ext.
  intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ; exists N ; apply HN.
  apply sum_sums.
+Qed.
+
+(** * Definition of arctan *)
+
+Definition arctan_seq : Rseq.
+Proof.
+intro n ; case (n_modulo_2 n) ; intros [p Hp].
+ exact 0.
+ exact ((- 1) ^ p / INR n).
+Defined.
+
+Lemma arctan_seq_even : forall n x, gt_pser arctan_seq x (2 * n)%nat = 0.
+Proof.
+intros n x ; unfold gt_pser, arctan_seq, Rseq_mult ;
+ case (n_modulo_2 (2 * n)) ; intros [p Hp].
+ rewrite Rmult_0_l ; reflexivity.
+ apply False_ind ; omega.
+Qed.
+
+Lemma arctan_seq_1_simpl : forall n,
+  gt_pser arctan_seq 1 (S (2 * n)) = tg_alt PI_tg n.
+Proof.
+intro n ; unfold gt_pser, arctan_seq, tg_alt, PI_tg, Rseq_mult, Rdiv ;
+ rewrite pow1 ; replace (2 * n + 1)%nat with (S (2 * n)) by omega.
+ case (n_modulo_2 (S (2 * n))) ; intros [p Hp].
+  apply False_ind ; omega.
+  assert (Hpn : p = n) by omega ; subst ; ring.
+Qed.
+
+Lemma partial_arctan_drop_even : forall n x,
+  Rseq_sum (gt_pser arctan_seq x) (2 * S n) = Rseq_sum (gt_pser arctan_seq x) (S (2 * n)).
+Proof.
+intros n x ; replace (2 * S n)%nat with (S (S (2 * n))) by ring.
+ rewrite Rseq_sum_simpl ; replace (S (S (2 * n)))%nat with (2 * S n)%nat by ring ;
+ rewrite arctan_seq_even ; ring.
+Qed.
+
+Lemma partial_PI_arctan1_ext : forall n,
+  sum_f_R0 (tg_alt PI_tg) n = Rseq_sum (gt_pser arctan_seq 1) (S (2 * n)).
+Proof.
+intros n ; induction n.
+ simpl ; unfold tg_alt, PI_tg, arctan_seq, gt_pser, Rseq_mult, Rdiv.
+  case (n_modulo_2 0) ; intros [p Hp].
+   case (n_modulo_2 1) ; intros [q Hq].
+    apply False_ind ; omega.
+    assert (Hp' : p = O) by omega ; assert (Hq' : q = O) by omega ; subst ; simpl ; ring.
+   apply False_ind ; omega.
+ replace (2 * S n)%nat with (S (S (2 * n))) by ring.
+ do 3 rewrite Rseq_sum_simpl ; rewrite <- IHn, Rplus_assoc ; apply Rplus_eq_compat_l.
+ replace (S (S (2 * n))) with (2 * S n)%nat by ring ; rewrite arctan_seq_even.
+ unfold tg_alt, PI_tg, arctan_seq, gt_pser, Rseq_mult, Rdiv ; rewrite pow1.
+ case (n_modulo_2 (S (2 * S n))) ; intros [p Hp].
+  apply False_ind ; omega.
+  assert (Hp' : S n = p) by omega ; rewrite Hp' ;
+  replace (2 * p + 1)%nat with (S (2 * p)) by ring ; ring.
+Qed.
+
+Lemma arctan1_PI4 : Rpser arctan_seq 1 (PI / 4).
+Proof.
+assert (H : Rseq_cv (fun n => Rseq_sum (gt_pser arctan_seq 1) (S (2 * n))) (PI / 4)).
+ apply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
+  intro n ; symmetry ; apply partial_PI_arctan1_ext.
+ unfold PI ; destruct exist_PI as [pi Hpi] ;
+ replace (4 * pi / 4) with pi by field ; apply Hpi.
+apply Rseq_cv_even_odd_compat.
+ eapply Rseq_cv_shift_compat, Rseq_cv_eq_compat ; [| eapply H].
+  intro n ; unfold Rseq_shift ; apply partial_arctan_drop_even.
+ apply H.
+Qed.
+
+Lemma arctan_cv_radius : finite_cv_radius arctan_seq 1.
+Proof.
+rewrite <- Rabs_R1 ; apply Rpser_finite_cv_radius_caracterization with (PI / 4).
+ apply arctan1_PI4.
+ intros l Hl ; eapply Rseq_cv_Rseq_cv_pos_infty_incompat ; [eassumption |].
+ eapply Rseq_cv_pos_infty_criteria.
+(* TODO: prove that arctan's can be used to build chunks bigger than 1/something *)
+Admitted.
+
+Definition arctan := sum_r _ _ arctan_cv_radius.
+
+Lemma arctan_0 : arctan 0 = 0.
+Proof.
+assert (Hsum1 : Rpser arctan_seq 0 0).
+ apply Rseq_cv_eq_compat with (fun _ => 0).
+  intro n ; induction n.
+   unfold Rseq_pps ; simpl ; rewrite <- (arctan_seq_even 0 0), mult_0_r ; reflexivity.
+   rewrite Rseq_pps_simpl, IHn, pow_i ; [ring | intuition].
+ apply Rseq_constant_cv.
+assert (O_in : Rabs 0 < 1) by (rewrite Rabs_R0 ; fourier) ;
+assert (Hsum2 := sum_r_sums _ _ arctan_cv_radius _ O_in).
+eapply Rpser_unique ; eassumption.
 Qed.

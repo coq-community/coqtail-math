@@ -21,7 +21,7 @@ USA.
 
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
-Require Import Max Rinterval Ranalysis_def Fourier.
+Require Import Max Rinterval MyRIneq Ranalysis_def Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -145,6 +145,15 @@ pattern 1 at 2; rewrite <- (Rinv_l (Rmax 1 (Rabs lv))).
     left; apply Rinv_0_lt_compat; assumption.
     apply RmaxLess2.
 apply Rgt_not_eq; assumption.
+Qed.
+
+(**********)
+Lemma Rseq_cv_pow_compat : forall An d l,
+  Rseq_cv An l -> Rseq_cv (fun n => An n ^ d) (l ^ d).
+Proof.
+intros An d ; revert An ; induction d ; intros An l HAn.
+ simpl ; apply Rseq_constant_cv.
+ simpl ; apply Rseq_cv_mult_compat ; [| apply IHd] ; assumption.
 Qed.
 
 (**********)
@@ -1167,6 +1176,30 @@ assert (H: forall eps, eps > 0 -> Rabs (lu1 - lu2) <= eps).
 apply Rle_antisym; apply le_epsilon;
 intros eps Heps; apply H in Heps;
 unfold Rabs in Heps; destruct Rcase_abs; fourier.
+Qed.
+
+Lemma Rseq_cv_Rseq_cv_pos_infty_incompat : forall An l,
+  Rseq_cv An l -> Rseq_cv_pos_infty An -> False.
+Proof.
+intros An l Hl Hinfty ; destruct (Hl _ Rlt_0_1) as [M HM] ;
+ destruct (Hinfty (Rabs l + 1)%R) as [N HN] ;
+ apply (Rlt_irrefl (An (max M N))) ; transitivity (Rabs l + 1)%R.
+ rewrite <- (Rabs_right (An _)).
+ apply Rminus_lt_compat_l_rev, Rle_lt_trans with (R_dist (An (max M N)) l).
+  apply Rabs_triang_inv.
+  apply HM, le_max_l.
+  apply Rle_ge ; transitivity (Rabs l + 1)%R.
+   apply Rplus_le_le_0_compat ; [apply Rabs_pos | fourier].
+   left ; apply HN, le_max_r.
+  apply HN, le_max_r.
+Qed.
+
+Lemma Rseq_cv_Rseq_cv_neg_infty_incompat : forall An l,
+  Rseq_cv An l -> Rseq_cv_neg_infty An -> False.
+Proof.
+intros ; eapply Rseq_cv_Rseq_cv_pos_infty_incompat.
+ eapply Rseq_cv_opp_compat ; eassumption.
+ eapply Rseq_cv_neg_infty_opp_compat ; eassumption.
 Qed.
 
 (** * Sandwich theorem. *)

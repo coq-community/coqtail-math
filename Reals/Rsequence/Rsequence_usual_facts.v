@@ -24,9 +24,47 @@ Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_rel_facts.
-Require Import Fourier.
+Require Import MyRIneq MyReals Fourier.
 (** printing ~	~ *)
 (** * Convergence of usual sequences. *)
+
+(* Convergence of INR *)
+
+Lemma Rseq_cv_pos_infty_INR : Rseq_cv_pos_infty INR.
+Proof.
+intros M ; pose (n := up (Rabs M)) ; assert (n_pos : (0 <= n)%Z).
+ apply le_0_IZR ; transitivity (Rabs M).
+  apply Rabs_pos.
+  left ; destruct (archimed (Rabs M)) ; assumption.
+ destruct (IZN _ n_pos) as [N HN] ; exists N.
+ intros m m_lb ; apply Rlt_le_trans with (INR N).
+ apply Rle_lt_trans with (Rabs M) ; [apply Rle_abs |].
+ rewrite INR_IZR_INZ, <- HN ; destruct (archimed (Rabs M)) ; assumption.
+ apply le_INR ; assumption.
+Qed.
+
+Lemma Rseq_poly_shift_equiv : forall d, (Rseq_poly d) ~ (Rseq_shift (Rseq_poly d)).
+Proof.
+intros d eps eps_pos.
+ assert (lemma : Rseq_cv (fun n => 1 - (1 + 1 / INR n) ^ d)%R 0).
+  rewrite <- (Rplus_opp_r 1) ; apply Rseq_cv_minus_compat.
+   apply Rseq_constant_cv.
+   rewrite <- (pow1 d) ; apply Rseq_cv_pow_compat ; rewrite pow1.
+   rewrite <- (Rplus_0_r 1) ; apply Rseq_cv_plus_compat ; rewrite Rplus_0_r.
+   apply Rseq_constant_cv.
+   apply Rseq_cv_eq_compat with (fun n => / INR n)%R.
+    intro n ; apply Rmult_1_l.
+   apply Rseq_cv_pos_infty_inv_compat, Rseq_cv_pos_infty_INR.
+ destruct (lemma _ eps_pos) as [N HN] ; exists (S N) ; intros n n_lb.
+  transitivity (Rabs (1 - (1 + 1 / INR n) ^ d) * Rabs (Rseq_poly d n)).
+   right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
+   unfold Rseq_poly, Rseq_minus, Rseq_shift ; ring_simplify.
+   rewrite Rplus_comm, Ropp_mult_distr_l_reverse, <- Rpow_mult_distr.
+   apply Rplus_eq_compat_l, Ropp_eq_compat, Rpow_eq_compat.
+   rewrite S_INR ; field ; apply not_0_INR ; omega.
+  apply Rmult_le_compat_r ; [apply Rabs_pos |].
+  rewrite <- (Rminus_0_r (1 - _)) ; left ; apply HN ; omega.
+Qed.
 
 (** Convergence of polynomials. *)
 

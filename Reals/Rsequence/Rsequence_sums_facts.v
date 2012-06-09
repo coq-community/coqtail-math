@@ -19,9 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Rsequence_def Rsequence_base_facts.
+Require Import Rsequence_def Rsequence_base_facts Rsequence_cv_facts Rsequence_rewrite_facts.
 Require Import Rpser_def Rpser_def_simpl.
-Require Import MyRIneq.
+Require Import MyRIneq Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -130,6 +130,13 @@ intros Un k n ; induction n.
   simpl ; rewrite <- (plus_n_Sm k n) ; simpl ; ring.
 Qed.
 
+Lemma Rseq_sum_split_compat : forall Un k n, (k < n)%nat ->
+  (Rseq_sum Un n = Rseq_sum Un k + Rseq_sum (Rseq_shifts Un (S k)) (n - S k))%R.
+Proof.
+intros Un k n kltn ; rewrite Rseq_sum_shifts_compat ; ring_simplify.
+ unfold Rseq_shifts ; rewrite le_plus_minus_r ; [reflexivity | omega].
+Qed.
+
 Lemma Rseq_sum_reindex_compat : forall Un n,
   Rseq_sum Un n = Rseq_sum (fun i => Un (n - i)%nat) n.
 Proof.
@@ -143,7 +150,7 @@ intros Un n ; revert Un ; induction n ; intro Un.
  reflexivity.
 Qed.
 
-Lemma Rseq_prod_comm: forall An Bn, An # Bn == Bn # An.
+Lemma Rseq_prod_comm: forall An Bn, (An # Bn == Bn # An)%Rseq.
 Proof.
 intros An Bn n ; unfold Rseq_prod, Rseq_mult ;
  rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ;
@@ -174,7 +181,6 @@ intros An Bn n ; induction n.
  rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ; intros p p_ub ;
  replace (S n - (S n - p))%nat with p by omega ; apply Rmult_comm.
 Qed.
-
 
 (** Compatibility with the orders *)
 
@@ -238,6 +244,64 @@ intros An n ; induction n.
  [assumption | reflexivity].
 Qed.
 
+(** Convergence to infinity *)
+
+Lemma Rseq_cv_pos_infty_criteria : forall An d, 0 < d ->
+  (forall n, 0 <= An n) ->
+  (forall M, exists N, (N >= M)%nat /\ d <= Rseq_sum (Rseq_shifts An M) (N - M)) ->
+  Rseq_cv_pos_infty (Rseq_sum An).
+Proof.
+intros An d d_pos An_pos HAn.
+ assert (HAn' : forall M, exists N, forall n, (N < n)%nat -> INR M * d <= Rseq_sum An n).
+  intro M ; induction M.
+   destruct (HAn O) as [N [_ HN]] ; exists N.
+   intros n n_lb ; simpl ; rewrite Rmult_0_l.
+    rewrite (Rseq_sum_split_compat _ _ _ n_lb) ; apply Rplus_le_le_0_compat.
+     transitivity d.
+      left ; assumption.
+      rewrite (minus_n_O N) ;  erewrite Rseq_sum_ext ;
+       [| symmetry ; eapply Rseq_shifts_0 ] ; assumption.
+     apply Rseq_sum_pos ; intros ; apply An_pos.
+    destruct IHM as [N HN] ; destruct (HAn (S (S N))) as [N' [N'_lb HN']] ; exists N' ;
+     assert (N'_lb' : (S N < N')%nat) by omega.
+    intros n n_lb ; rewrite S_INR, Rmult_plus_distr_r, Rmult_1_l,
+     (Rseq_sum_split_compat _ _ _ n_lb), (Rseq_sum_split_compat _ _ _ N'_lb'),
+     Rplus_assoc.
+    apply Rplus_le_compat.
+     apply HN ; auto.
+     rewrite <- (Rplus_0_r d) ; apply Rplus_le_compat.
+      apply HN'.
+      apply Rseq_sum_pos ; intros ; apply An_pos.
+ intro B ; pose (M := up (Rabs B / d)) ; destruct (archimed (Rabs B / d)) as [HB _].
+  assert (M_pos : (0 <= M)%Z).
+   apply le_IZR ; simpl ; eapply Rle_trans ; [| left ; eassumption].
+   apply Rle_mult_inv_pos ; [apply Rabs_pos | assumption].
+  destruct (IZN _ M_pos) as [M' HM'] ; destruct (HAn' M') as [N HN] ; exists (S N) ; intros n n_lb.
+   apply Rlt_le_trans with (INR M' * d)%R ; [| apply HN ; omega].
+   apply Rle_lt_trans with (Rabs B) ; [apply Rle_abs |].
+   rewrite <- (Rmult_1_r (Rabs B)), <- (Rinv_l d), <- Rmult_assoc, INR_IZR_INZ, <- HM'.
+   apply Rmult_lt_compat_r ; [assumption | apply HB].
+   apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rseq_cv_neg_infty_criteria : forall An d, d < 0 ->
+  (forall n, An n <= 0) ->
+  (forall M, exists N, (N >= M)%nat /\ Rseq_sum (Rseq_shifts An M) (N - M) <= d) ->
+  Rseq_cv_neg_infty (Rseq_sum An).
+Proof.
+intros An d d_neg An_neg HAn ; apply Rseq_cv_neg_infty_eq_compat with (- Rseq_sum (- An)).
+ intro n ; unfold Rseq_opp at 1 ; rewrite Rseq_sum_opp_compat ; unfold Rseq_opp ;
+ apply Ropp_involutive.
+ apply Rseq_cv_pos_infty_opp_compat, Rseq_cv_pos_infty_criteria with (- d)%R.
+  fourier.
+  intro n ; unfold Rseq_opp ; pose (An_neg n) ; fourier.
+  intro M ; destruct (HAn M) as [N [N_lb HN]] ; exists N ; split.
+   assumption.
+   rewrite Rseq_sum_ext with (Vn := - Rseq_shifts An M).
+    rewrite Rseq_sum_opp_compat ; apply Ropp_le_contravar, HN.
+    apply Rseq_shifts_opp_compat.
+Qed.
+
 (** Partition *)
 
 Lemma Rseq_sum_even_odd_split : forall (An : Rseq) n,
@@ -289,8 +353,8 @@ intros An x ; unfold Rseq_pps ; apply gt_pser_0.
 Qed.
 
 Lemma Rseq_pps_ext : forall An Bn x,
-  An == Bn ->
-  Rseq_pps An x == Rseq_pps Bn x.
+  (An == Bn)%Rseq ->
+  (Rseq_pps An x == Rseq_pps Bn x)%Rseq.
 Proof.
 intros An Bn x Hext ; apply Rseq_sum_ext ;
  intro n ; unfold gt_pser, Rseq_mult ; rewrite Hext ;
@@ -298,27 +362,27 @@ intros An Bn x Hext ; apply Rseq_sum_ext ;
 Qed.
 
 Lemma Rseq_pps_scal_compat_l : forall (l : R) An x,
-  Rseq_pps (l * An) x == l * Rseq_pps An x.
+  (Rseq_pps (l * An) x == l * Rseq_pps An x)%Rseq.
 Proof.
 intros l An x n ; unfold Rseq_pps ;
- rewrite Rseq_sum_ext with _ (l * (An * (pow x))) _.
+ rewrite Rseq_sum_ext with _ (l * (An * (pow x)))%Rseq _.
  apply Rseq_sum_scal_compat_l.
  clear ; intro n ; unfold gt_pser, Rseq_mult, Rseq_constant ;
   ring.
 Qed.
 
 Lemma Rseq_pps_scal_compat_r : forall (l : R) An x,
-  Rseq_pps (An * l) x == Rseq_pps An x * l.
+  (Rseq_pps (An * l) x == Rseq_pps An x * l)%Rseq.
 Proof.
 intros l An x n ; unfold Rseq_pps ;
- rewrite Rseq_sum_ext with _ ((An * (pow x)) * l) _.
+ rewrite Rseq_sum_ext with _ ((An * (pow x)) * l)%Rseq _.
  apply Rseq_sum_scal_compat_r.
  clear ; intro n ; unfold gt_pser, Rseq_mult, Rseq_constant ;
   ring.
 Qed.
 
 Lemma Rseq_pps_opp_compat : forall An x,
-  Rseq_pps (- An) x == - Rseq_pps An x.
+  (Rseq_pps (- An) x == - Rseq_pps An x)%Rseq.
 Proof.
 intros An x n ; unfold Rseq_pps ;
  rewrite Rseq_sum_ext with _ (- (An * (pow x))) _.

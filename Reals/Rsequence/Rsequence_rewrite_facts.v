@@ -49,6 +49,44 @@ intros Un k ; unfold Rseq_shifts ; rewrite plus_0_r ;
 reflexivity.
 Qed.
 
+(** Shifts and common operations *)
+
+Lemma Rseq_shifts_opp_compat : forall An k,
+  Rseq_shifts (- An) k == - Rseq_shifts An k.
+Proof.
+intros ; unfold Rseq_shifts ; intro n ; reflexivity.
+Qed.
+
+Lemma Rseq_shifts_plus_compat : forall An Bn k,
+  Rseq_shifts (An + Bn) k == Rseq_shifts An k + Rseq_shifts Bn k.
+Proof.
+intros ; unfold Rseq_shifts ; intro n ; reflexivity.
+Qed.
+
+Lemma Rseq_shifts_mult_compat : forall An Bn k,
+  Rseq_shifts (An * Bn) k == Rseq_shifts An k * Rseq_shifts Bn k.
+Proof.
+intros ; unfold Rseq_shifts ; intro n ; reflexivity.
+Qed.
+
+Lemma Rseq_shifts_div_compat : forall An Bn k,
+  Rseq_shifts (An / Bn) k == Rseq_shifts An k / Rseq_shifts Bn k.
+Proof.
+intros ; unfold Rseq_shifts ; intro n ; reflexivity.
+Qed.
+
+Lemma Rseq_shifts_inv_compat : forall An k,
+  Rseq_shifts (/ An) k == / Rseq_shifts An k.
+Proof.
+intros ; unfold Rseq_shifts ; intro n ; reflexivity.
+Qed.
+
+Lemma Rseq_shifts_scal_compat : forall (c : R) An k,
+  Rseq_shifts (c * An) k == c * Rseq_shifts An k.
+Proof.
+intros ; unfold Rseq_shifts ; intro n ; reflexivity.
+Qed.
+
 Lemma Rseq_cv_Un_cv_equiv : forall Un l,
   Rseq_cv Un l <-> Un_cv Un l.
 Proof.
