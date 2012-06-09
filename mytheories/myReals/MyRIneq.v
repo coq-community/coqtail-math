@@ -37,6 +37,11 @@ transitivity proved by Rle_trans as Rle.
 Add Parametric Relation : R Rlt
 transitivity proved by Rlt_trans as Rlt.
 
+Lemma Rabs_opp1 : forall p, Rabs ((- 1) ^ p) = 1.
+Proof.
+intros ; rewrite <- RPow_abs, Rabs_Ropp, Rabs_R1 ; apply pow1.
+Qed.
+
 Lemma Rdiv_eq_0_inv : forall a b, a / b = 0 -> b <> 0 -> a = 0.
 Proof.
 intros a b Hab Hb ; destruct (Rmult_integral _ _ Hab) as [Ha | Hb'].

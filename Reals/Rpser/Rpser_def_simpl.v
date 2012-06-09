@@ -21,6 +21,16 @@ intros ; unfold gt_abs_pser, Rseq_abs ;
 rewrite gt_pser_0 ; reflexivity.
 Qed.
 
+Lemma gt_pser_1 : forall An n, gt_pser An 1 n = An n.
+Proof.
+intros An n ; unfold gt_pser, Rseq_mult ; rewrite pow1 ; ring.
+Qed.
+
+Lemma gt_abs_pser_1 : forall An n, gt_abs_pser An 1 n = Rabs (An n).
+Proof.
+intros An n ; unfold gt_abs_pser, Rseq_abs ; f_equal ; apply gt_pser_1.
+Qed.
+
 Lemma gt_abs_pser_S : forall An r n,
   gt_abs_pser An r (S n) = gt_abs_pser (Rseq_shift An) r n * Rabs r.
 Proof.

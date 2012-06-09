@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import MyReals.
+Require Import MyReals MyINR.
 Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts Rsequence_sums_facts.
 Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_facts.
 
@@ -492,6 +492,59 @@ intros n x ; replace (2 * S n)%nat with (S (S (2 * n))) by ring.
  rewrite arctan_seq_even ; ring.
 Qed.
 
+Lemma Rseq_sum_0 : forall An, Rseq_sum An 0 = An O.
+Proof.
+reflexivity.
+Qed.
+
+Lemma partial_arctan_drop_evens : forall n x f,
+  Rseq_sum (fun i => gt_pser arctan_seq x (2 * f i)) n = 0.
+Proof.
+intros n x f ; induction n.
+ rewrite Rseq_sum_0 ; apply arctan_seq_even.
+ rewrite Rseq_sum_simpl, IHn, arctan_seq_even ; ring.
+Qed.
+
+Lemma partial_arctan_lower_bound : forall M, (0 < M)%nat ->
+  / 7 <= Rseq_sum (Rseq_shifts (gt_abs_pser arctan_seq 1) (2 * M)) (2 * M).
+Proof.
+intros M M_lub ; transitivity (INR M * / (6 * INR M + 1)).
+ transitivity (/ (6 + / INR M)).
+  apply Rle_Rinv.
+   apply Rplus_lt_0_compat ; [fourier | apply Rinv_0_lt_compat, lt_0_INR, M_lub].
+   fourier.
+   replace 7 with (6 + / 1) by (rewrite Rinv_1 ; ring) ; apply Rplus_le_compat_l.
+   apply Rle_Rinv ; [fourier | apply lt_0_INR ; assumption |].
+   rewrite <- INR_1 ; apply le_INR ; omega.
+  right ; field ; split ; apply Rgt_not_eq.
+   apply Rplus_lt_0_compat.
+    apply Rmult_lt_0_compat ; [| apply lt_0_INR ; assumption] ; fourier.
+    fourier.
+    apply lt_0_INR ; assumption.
+ destruct M as [| M] ; [inversion M_lub |] ; rewrite <- Rseq_sum_even_odd_split'.
+  unfold Rseq_shifts.
+  rewrite Rseq_sum_ext with (Vn := fun i : nat => gt_pser arctan_seq 1 (2 * (S M +  i))).
+  rewrite partial_arctan_drop_evens, Rplus_0_l.
+  apply Rseq_sum_lower_bound.
+   intros m m_ub ; unfold gt_abs_pser, gt_pser, arctan_seq, Rseq_abs, Rseq_mult ;
+   rewrite pow1, Rmult_1_r.
+    case (n_modulo_2 (2 * S M + S (2 * m))) ; intros [p Hp].
+     apply False_ind ; omega.
+     unfold Rdiv ; rewrite Rabs_mult, Rabs_opp1, Rmult_1_l, Rabs_right.
+     apply Rle_Rinv.
+      apply lt_0_INR ; omega.
+      apply Rplus_lt_0_compat ; [apply Rmult_lt_0_compat, lt_0_INR ; try assumption |] ; fourier.
+      transitivity (INR (S (6 * S M))).
+      apply le_INR ; omega.
+      rewrite S_INR, mult_INR ; replace 6 with (INR 6) by (simpl ; ring) ; reflexivity.
+      left ; apply Rinv_0_lt_compat, lt_0_INR ; omega.
+  intro n ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, arctan_seq.
+   replace (2 * S M + 2 * n)%nat with (2 * (S M + n))%nat by ring.
+   case (n_modulo_2 (2 * (S M + n))) ; intros [p Hp].
+    rewrite Rmult_0_l ; apply Rabs_R0.
+    apply False_ind ; omega.
+Qed.
+
 Lemma partial_PI_arctan1_ext : forall n,
   sum_f_R0 (tg_alt PI_tg) n = Rseq_sum (gt_pser arctan_seq 1) (S (2 * n)).
 Proof.
@@ -525,14 +578,52 @@ apply Rseq_cv_even_odd_compat.
  apply H.
 Qed.
 
+Lemma gt_pser_1 : forall An n, gt_pser An 1 n = An n.
+Proof.
+intros An n ; unfold gt_pser, Rseq_mult ; rewrite pow1 ; ring.
+Qed.
+
+Lemma Rseq_shifts_fusion : forall An k m,
+  (Rseq_shifts (Rseq_shifts An k) m == Rseq_shifts An (k + m))%Rseq.
+Proof.
+intros ; unfold Rseq_shifts ; intro ; rewrite plus_assoc ; reflexivity.
+Qed.
+
 Lemma arctan_cv_radius : finite_cv_radius arctan_seq 1.
 Proof.
 rewrite <- Rabs_R1 ; apply Rpser_finite_cv_radius_caracterization with (PI / 4).
  apply arctan1_PI4.
  intros l Hl ; eapply Rseq_cv_Rseq_cv_pos_infty_incompat ; [eassumption |].
- eapply Rseq_cv_pos_infty_criteria.
-(* TODO: prove that arctan's can be used to build chunks bigger than 1/something *)
-Admitted.
+ apply Rseq_cv_pos_infty_criteria with (/ 7).
+  fourier.
+  intro ; apply gt_abs_pser_pos.
+  intro M ; destruct M as [| M].
+   exists 1%nat ; split.
+    omega.
+    simpl ; unfold Rseq_shifts, gt_abs_pser, Rseq_abs ; simpl ;
+    replace O with (2 * 0)%nat by reflexivity ;
+    rewrite arctan_seq_even, Rabs_R0, Rplus_0_l, gt_pser_1.
+    simpl ; unfold arctan_seq ; case (n_modulo_2 1) ; intros [p Hp].
+     apply False_ind ; omega.
+     unfold Rdiv ; rewrite Rabs_mult, Rabs_opp1, Rabs_Rinv.
+      simpl ; rewrite Rabs_R1, Rinv_1 ; fourier.
+      apply not_0_INR ; omega.
+  case (n_modulo_2 (S M)) ; intros [P HP].
+   exists (4 * P)%nat ; split.
+    omega.
+    rewrite HP ; replace (4 * P - 2 * P)%nat with (2 * P)%nat by omega.
+    apply partial_arctan_lower_bound ; omega.
+   exists (4 * S P)%nat ; split.
+    omega.
+    replace (4 * S P - S M)%nat with (S (2 * S P)) by (rewrite HP ; omega).
+    rewrite Rseq_sum_split_compat with (k := O) ; [| omega].
+    replace (/ 7) with (0 + / 7) by (apply Rplus_0_l) ; apply Rplus_le_compat.
+    unfold Rseq_shifts ; simpl ; apply gt_abs_pser_pos.
+    replace (S (2 * S P) - 1)%nat with (2 * S P)%nat by omega.
+    rewrite Rseq_sum_ext with (Vn := Rseq_shifts (gt_abs_pser arctan_seq 1) (2 * S P)%nat).
+    apply partial_arctan_lower_bound ; omega.
+    intro n ; rewrite Rseq_shifts_fusion, HP ; f_equal ; ring.
+Qed.
 
 Definition arctan := sum_r _ _ arctan_cv_radius.
 

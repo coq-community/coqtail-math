@@ -21,7 +21,7 @@ USA.
 
 Require Import Rsequence_def Rsequence_base_facts Rsequence_cv_facts Rsequence_rewrite_facts.
 Require Import Rpser_def Rpser_def_simpl.
-Require Import MyRIneq Fourier.
+Require Import MyRIneq MyNat Fourier.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -242,6 +242,28 @@ intros An n ; induction n.
  do 2 rewrite Rseq_sum_simpl ; eapply Rle_trans ;
  [eapply Rabs_triang |] ; apply Rplus_le_compat ;
  [assumption | reflexivity].
+Qed.
+
+Lemma Rseq_sum_lower_bound : forall An n lb,
+  (forall m, (m <= n)%nat -> lb <= An m) ->
+  INR (S n) * lb <= Rseq_sum An n.
+Proof.
+intros An n lb HAn ; induction n.
+ simpl ; rewrite Rmult_1_l ; apply HAn ; reflexivity.
+ rewrite S_INR, Rmult_plus_distr_r, Rmult_1_l, Rseq_sum_simpl ;
+  apply Rplus_le_compat ; [apply IHn | apply HAn ; reflexivity].
+  intros m m_lb ; apply HAn ; omega.
+Qed.
+
+Lemma Rseq_sum_upper_bound : forall An n ub,
+  (forall m, (m <= n)%nat -> An m <= ub) ->
+  Rseq_sum An n <= INR (S n) * ub.
+Proof.
+intros An n ub HAn ; induction n.
+ simpl ; rewrite Rmult_1_l ; apply HAn ; reflexivity.
+ rewrite S_INR, Rmult_plus_distr_r, Rmult_1_l, Rseq_sum_simpl ;
+  apply Rplus_le_compat ; [apply IHn | apply HAn ; reflexivity].
+  intros m m_lb ; apply HAn ; omega.
 Qed.
 
 (** Convergence to infinity *)
