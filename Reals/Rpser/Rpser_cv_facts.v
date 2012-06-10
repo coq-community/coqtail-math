@@ -143,10 +143,7 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
   rewrite H ; rewrite Rmult_0_l ; rewrite Rabs_R0 ; rewrite pow_i ; intuition.
   replace 1 with (1 ^ S (max m n - S (min m n))).
   apply pow_lt_compat.
-  apply Rabs_pos_lt.
-  apply Rmult_integral_contrapositive_currified ; [assumption |].
-  apply Rgt_not_eq ; apply Rinv_0_lt_compat ; apply Rle_lt_trans with (Rabs x) ;
-  [apply Rabs_pos | assumption].
+  apply Rabs_pos.
   unfold Rdiv in Rabsx_r_lt_1 ; rewrite Hrew_abs ; assumption.
   intuition.
   apply pow1.

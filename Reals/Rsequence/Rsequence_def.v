@@ -65,6 +65,21 @@ Infix "/" := Rseq_div : Rseq_scope.
 Definition Rseq_shift Un n := Un (S n).
 Definition Rseq_shifts Un N n := Un (N + n)%nat.
 
+(* TODO : Caser ça où ça doit aller *)
+
+Lemma n_modulo_2 : forall n:nat, {p | (n = 2 * p)%nat} + {p | n = S (2 * p)}.
+Proof.
+intro n ; induction n.
+ left ; exists O ; intuition.
+ case IHn ; intro H ; destruct H as (p,Hp) ;
+ [right ; exists p | left ; exists (S p)] ; intuition.
+Qed.
+
+Definition Rseq_zip Un Vn n := match n_modulo_2 n with
+| inl (exist p _) => Un p
+| inr (exist p _) => Vn p
+end.
+
 (** * Extensionnal equality. *)
 
 Definition Rseq_eq (Un Vn : Rseq) := forall n, Un n = Vn n.

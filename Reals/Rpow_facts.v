@@ -3,7 +3,7 @@ Require Import Rsequence_usual_facts.
 
 Open Local Scope R_scope.
 
-Lemma pow_lt_compat : forall x y, 0 < x -> x < y ->
+Lemma pow_lt_compat : forall x y, 0 <= x -> x < y ->
   forall n, (1 <= n)%nat -> x ^ n < y ^ n.
 Proof.
 intros x y x_pos x_lt_y n n_lb.
@@ -13,8 +13,12 @@ intros x y x_pos x_lt_y n n_lb.
  simpl ; repeat (rewrite Rmult_1_r) ; assumption.
  assert (Hrew : forall a n, a ^ S (S n) = a * a ^ S n).
   intros a m ; simpl ; reflexivity.
- repeat (rewrite Hrew) ; apply Rmult_gt_0_lt_compat ; [apply pow_lt | | | apply IHn] ; intuition.
- apply Rlt_trans with x ; assumption.
+ destruct x_pos as [x_pos | x_null].
+ do 2 rewrite Hrew.
+  repeat (rewrite Hrew) ; apply Rmult_gt_0_lt_compat ; [apply pow_lt | | | apply IHn] ; intuition.
+  apply Rlt_gt ; transitivity x ; assumption.
+ rewrite Hrew, <- x_null, Rmult_0_l ; apply pow_lt ;
+  apply Rle_lt_trans with x ; [right |] ; auto.
 Qed.
 
 Lemma pow_le_compat : forall x y, 0 <= x -> x <= y ->
@@ -24,6 +28,46 @@ intros x y x_pos x_lt_y n.
 induction n.
 simpl ; apply Req_le ; reflexivity.
 simpl ; apply Rmult_le_compat ; [| apply pow_le | |] ; assumption.
+Qed.
+
+
+Lemma pow2_sqr : forall r, r² = r ^ 2.
+Proof.
+intros ; rewrite <- (mult_1_r 2), pow_Rsqr, pow_1 ; reflexivity.
+Qed.
+
+Lemma pow2_pos : forall r, 0 <= r ^ 2.
+Proof.
+intro r ; rewrite <- pow2_sqr ; apply Rle_0_sqr.
+Qed.
+
+Lemma Rsqrt_sqr : forall x (y : nonnegreal),
+  0 <= x -> (x ^ 2 = y)%R -> Rsqrt y = x.
+Proof.
+intros x y x_pos Heq ; unfold Rsqrt.
+ destruct (Rsqrt_exists y (cond_nonneg y)) as [z [z_pos Hz]].
+ apply Rsqr_inj ; try assumption.
+ symmetry ; rewrite pow2_sqr, Heq ; apply Hz.
+Qed.
+
+Lemma Rsqr_Rsqrt : forall x, Rsqrt x ^ 2 = x.
+Proof.
+intro ; simpl ; rewrite <- Rmult_assoc, Rsqrt_Rsqrt ; apply Rmult_1_r.
+Qed.
+
+Lemma Rsqrt_mult_distr : forall (x y z : nonnegreal), x * y = z ->
+  Rsqrt z = Rsqrt x * Rsqrt y.
+Proof.
+intros x y z Heq ; apply Rsqr_inj.
+ apply Rsqrt_positivity.
+ apply Rmult_le_pos ; apply Rsqrt_positivity.
+ rewrite Rsqr_mult.
+ unfold Rsqr ; do 3 rewrite Rsqrt_Rsqrt ; auto.
+Qed.
+
+Lemma Rsqrt_pow_even : forall r n, Rsqrt r ^ (2 * n) = r ^ n.
+Proof.
+intros r n ; rewrite pow_sqr, Rsqrt_Rsqrt ; reflexivity.
 Qed.
 
 Lemma sum_pow : forall (q : R) (m k : nat),

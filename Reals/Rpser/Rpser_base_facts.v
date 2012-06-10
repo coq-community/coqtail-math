@@ -26,7 +26,7 @@ Require Import Rsequence_def Rsequence_base_facts Rsequence_subsequence Rsequenc
 Require Import Rsequence_cv_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
-Require Import Fourier MyRIneq MyNat.
+Require Import Fourier MyRIneq MyNat MyNNR.
 
 Open Local Scope R_scope.
 
@@ -426,6 +426,68 @@ unfold Rseq_prod ; apply Rseq_sum_pos_strong ; intros p p_bd.
  unfold Rseq_mult ; apply Rmult_le_pos ; apply gt_abs_pser_pos.
 Qed.
 
+(** Cv_radius_weak is compatible with zip *)
+
+Lemma Cv_radius_weak_zip_l : forall An Bn (r : nonnegreal),
+  Cv_radius_weak An r -> Cv_radius_weak Bn r -> Cv_radius_weak (Rseq_zip An Bn) (Rsqrt r).
+Proof.
+intros An Bn r [BAn HAn] [BBn HBn] ; exists (Rmax BAn (BBn * Rabs (Rsqrt r))) ;
+ intros x [i Hi] ; subst.
+ unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_zip, Rseq_mult.
+  case (n_modulo_2 i) ; intros [p Hp] ; rewrite Hp.
+   rewrite Rsqrt_pow_even ; transitivity BAn ;
+   [apply HAn ; exists p ; reflexivity | apply RmaxLess1].
+   rewrite <- tech_pow_Rmult, Rsqrt_pow_even ; transitivity (Rabs (Bn p * r ^ p) * Rabs (Rsqrt r)).
+    right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ; ring.
+    transitivity (BBn * Rabs (Rsqrt r)).
+     apply Rmult_le_compat_r ; [apply Rabs_pos | apply HBn ; exists p ; reflexivity].
+     apply RmaxLess2.
+Qed.
+
+Lemma Cv_radius_weak_zip_r1 : forall An Bn r,
+  Cv_radius_weak (Rseq_zip An Bn) r -> Cv_radius_weak An (r ^ 2).
+Proof.
+intros An Bn r [B HB] ; exists B ; intros x [i Hi] ; subst.
+ transitivity (gt_abs_pser (Rseq_zip An Bn) r (2 * i)).
+ right ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, Rseq_zip.
+  case (n_modulo_2 (2 * i)) ; intros [p Hp].
+   assert (Hip : i = p) by omega ; rewrite Hip, pow_mult ; reflexivity.
+   apply False_ind ; omega.
+ apply HB ; exists (2 * i)%nat ; reflexivity.
+Qed.
+
+Lemma Rabs_null_rev : forall r, Rabs r = 0 -> r = 0.
+Proof.
+intros r Hr ; destruct (Req_dec r 0) as [r_eq | r_neq].
+ assumption.
+ destruct (Rabs_no_R0 _ r_neq Hr).
+Qed.
+
+Lemma Rabs_neq_rev : forall r, Rabs r <> 0 -> r <> 0.
+Proof.
+intros r Hr Hf ; rewrite Hf, Rabs_R0 in Hr ; apply Hr ; reflexivity.
+Qed.
+
+Lemma Cv_radius_weak_zip_r2 : forall An Bn r,
+  Cv_radius_weak (Rseq_zip An Bn) r -> Cv_radius_weak Bn (r ^ 2).
+Proof.
+intros An Bn r [B HB] ; destruct (Req_dec (Rabs r) 0) as [r_eq | r_neq].
+ rewrite (Rabs_null_rev _ r_eq) ; simpl ; rewrite Rmult_0_l ; apply Cv_radius_weak_0.
+ exists (B / Rabs r) ; intros x [i Hi] ; subst.
+ transitivity (gt_abs_pser (Rseq_zip An Bn) r (S (2 * i)) / Rabs r).
+ right ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, Rseq_zip.
+  case (n_modulo_2 (S (2 * i))) ; intros [p Hp].
+   apply False_ind ; omega.
+   assert (Hip : i = p) by omega ; rewrite Hip , <- pow_mult, <- tech_pow_Rmult.
+   replace (Bn p * (r * r ^ (2 * p))) with (Bn p * r ^ (2 * p) * r) by ring.
+   unfold Rdiv ; rewrite (Rabs_mult _ r), Rmult_assoc, Rinv_r, Rmult_1_r.
+    reflexivity.
+    assumption.
+ apply Rmult_le_compat_r.
+  left ; apply Rinv_0_lt_compat, Rabs_pos_lt, Rabs_neq_rev ; assumption.
+  apply HB ; exists (S (2 * i))%nat ; reflexivity.
+Qed.
+
 (** The finite_cv_radius is exactly the upper bound. We choose our definitions
 because it gives more information (the convexity of the radius for example). *)
 
@@ -518,6 +580,52 @@ intros An r [H_sup _] x Hx ;
  [apply Rabs_pos | assumption].
 Qed.
 
+Lemma finite_cv_radius_zip_compat_l : forall (An Bn : Rseq) (r : nonnegreal),
+  finite_cv_radius An r ->
+  (forall x, Rabs x < r -> Cv_radius_weak Bn x) ->
+  finite_cv_radius (Rseq_zip An Bn) (Rsqrt r).
+Proof.
+intros An Bn r HAn HBn ; split.
+ intros r' [r'_lb r'_ub] ; rewrite <- (Rsqrt_sqr r' (nnr_sqr r')).
+  assert (r'2_encad : 0 <= nnr_sqr r' < r).
+   split ; [apply cond_nonneg |].
+    simpl ; fold (r' ^ 2) ; rewrite <- Rsqr_Rsqrt ; apply pow_lt_compat ; auto.
+  apply Cv_radius_weak_zip_l.
+   apply HAn ; assumption.
+   apply HBn ; rewrite Rabs_right ; try apply Rle_ge ; apply r'2_encad.
+   assumption.
+   reflexivity.
+  intros r' r'_lb Hf ; apply (proj2 HAn (r' ^ 2)), Cv_radius_weak_zip_r1 with Bn.
+   rewrite <- Rsqr_Rsqrt ; apply pow_lt_compat.
+    apply Rsqrt_positivity.
+    assumption.
+    auto.
+   assumption.
+Qed.
+
+Lemma finite_cv_radius_zip_compat_r : forall (An Bn : Rseq) (r : nonnegreal),
+  (forall x, Rabs x < r -> Cv_radius_weak An x) ->
+  finite_cv_radius Bn r ->
+  finite_cv_radius (Rseq_zip An Bn) (Rsqrt r).
+Proof.
+intros An Bn r HAn HBn ; split.
+ intros r' [r'_lb r'_ub] ; rewrite <- (Rsqrt_sqr r' (nnr_sqr r')).
+  assert (r'2_encad : 0 <= nnr_sqr r' < r).
+   split ; [apply cond_nonneg |].
+    simpl ; fold (r' ^ 2) ; rewrite <- Rsqr_Rsqrt ; apply pow_lt_compat ; auto.
+  apply Cv_radius_weak_zip_l.
+   apply HAn ; rewrite Rabs_right ; try apply Rle_ge ; apply r'2_encad.
+   apply HBn ; assumption.
+   assumption.
+   reflexivity.
+  intros r' r'_lb Hf ; apply (proj2 HBn (r' ^ 2)), Cv_radius_weak_zip_r2 with An.
+   rewrite <- Rsqr_Rsqrt ; apply pow_lt_compat.
+    apply Rsqrt_positivity.
+    assumption.
+    auto.
+   assumption.
+Qed.
+
 (** Compatibility of the infinite_cv_radius concept with various operations. *)
 
 Lemma infinite_cv_radius_zero : infinite_cv_radius 0.
@@ -596,7 +704,33 @@ intro r ; rewrite <- Cv_radius_weak_Rabs, <- Rmin_diag ;
  apply Cv_radius_weak_minus ; [apply rAn | apply rBn].
 Qed.
 
+Lemma infinite_cv_radius_zip_compat_l : infinite_cv_radius (Rseq_zip An Bn).
+Proof.
+intro r ; apply Cv_radius_weak_Rabs ; rewrite <- Rsqrt_sqr with (y := nnr_sqr (Rabs r)).
+ apply Cv_radius_weak_zip_l ; [apply rAn | apply rBn].
+ apply Rabs_pos.
+ reflexivity.
+Qed.
+
 End icvr_properties.
+
+Lemma infinite_cv_radius_zip_compat_r1 : forall An Bn,
+ infinite_cv_radius (Rseq_zip An Bn) -> infinite_cv_radius An.
+Proof.
+intros An Bn rAnBn r ; apply Cv_radius_weak_Rabs ;
+ replace (Rabs r) with (nonneg (nnr_abs r)) by reflexivity ; 
+ rewrite <- Rsqr_Rsqrt with (nnr_abs r).
+ eapply Cv_radius_weak_zip_r1, rAnBn.
+Qed.
+
+Lemma infinite_cv_radius_zip_compat_r2 : forall An Bn,
+ infinite_cv_radius (Rseq_zip An Bn) -> infinite_cv_radius Bn.
+Proof.
+intros An Bn rAnBn r ; apply Cv_radius_weak_Rabs ;
+ replace (Rabs r) with (nonneg (nnr_abs r)) by reflexivity ; 
+ rewrite <- Rsqr_Rsqrt with (nnr_abs r).
+ eapply Cv_radius_weak_zip_r2, rAnBn.
+Qed.
 
 (** Pser and Un_cv are linked. See "tech12" for the reciprocal lemma *)
 

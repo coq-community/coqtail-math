@@ -114,6 +114,48 @@ Qed.
 
 Definition identity := sum _ identity_infinite_cv_radius.
 
+(** * Definition of the sum of x^k *)
+
+Definition sum_pow_seq : Rseq := 1.
+
+Lemma sum_pow_cv_radius : finite_cv_radius sum_pow_seq 1.
+Proof.
+rewrite <- Rinv_1 ; apply Rpser_alembert_finite.
+ apply Rgt_not_eq, Rlt_0_1.
+ intro ; apply Rgt_not_eq, Rlt_0_1.
+ eapply Rseq_cv_eq_compat, Rseq_constant_cv.
+  intro ; unfold sum_pow_seq, Rseq_constant, Rdiv ;
+    rewrite Rinv_1, Rmult_1_r ; apply Rabs_R1.
+Qed.
+
+Definition sum_pow := sum_r _ _ sum_pow_cv_radius.
+
+Lemma partial_sum_pow_explicit : forall x n,
+  (1 - x) * Rseq_pps sum_pow_seq x n = 1 - x ^ S n.
+Proof.
+intros x n ; induction n.
+ unfold Rseq_pps, sum_pow_seq, Rseq_constant ; simpl ;
+  rewrite gt_pser_0 ; ring.
+ unfold Rseq_pps in * ; rewrite Rseq_sum_simpl, <- tech_pow_Rmult,
+  Rmult_plus_distr_l, IHn ; unfold gt_pser, sum_pow_seq, Rseq_constant, Rseq_mult.
+  ring.
+Qed.
+
+Lemma sum_pow_explicit : forall x, Rabs x < 1 ->
+  sum_pow x = / (1 - x).
+Proof.
+intros x x_in ; eapply Rpser_unique.
+ eapply sum_r_sums ; assumption.
+ apply Rseq_cv_eq_compat with (Vn := fun n => (1 - Rseq_shift (Rseq_pow x) n) / (1 - x)).
+  intro n ; unfold Rseq_shift, Rseq_pow ; rewrite <- partial_sum_pow_explicit ; field.
+   apply Rminus_eq_contra ; intro Hf ; apply (Rlt_irrefl 1) ;
+   rewrite <- Hf, Rabs_R1 in x_in ; assumption.
+ rewrite <- Rmult_1_l ; apply Rseq_cv_mult_compat, Rseq_constant_cv.
+ rewrite <- Rminus_0_r ; apply Rseq_cv_minus_compat.
+  apply Rseq_constant_cv.
+  apply Rseq_cv_shift_compat_reciprocal, Rseq_pow_lt_1_cv_strong ; assumption.
+Qed.
+
 (** * Definition of exp, cosine and sine *)
 
 (** Sequences *)

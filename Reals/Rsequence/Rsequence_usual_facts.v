@@ -121,6 +121,20 @@ rewrite Rminus_0_r.
 apply H; assumption.
 Qed.
 
+Lemma Rseq_pow_abs_compat : forall r, Rseq_pow (Rabs r) == Rseq_abs (Rseq_pow r).
+Proof.
+intros r n ; unfold Rseq_pow, Rseq_abs ; apply RPow_abs.
+Qed.
+
+Lemma Rseq_pow_lt_1_cv_strong : forall r, Rabs r < 1 -> Rseq_cv (Rseq_pow r) 0.
+intros r H eps eps_pos ;
+ assert (Hx : 0 <= Rabs r < 1) by (split ; [apply Rabs_pos | assumption]) ;
+ destruct (Rseq_pow_lt_1_cv _ Hx _ eps_pos) as [N HN] ; exists N ; intros n n_lb.
+ eapply Rle_lt_trans ; [| eapply HN ; eassumption].
+  right ; unfold R_dist, Rseq_pow ; do 2 rewrite Rminus_0_r, <- RPow_abs ;
+  rewrite Rabs_Rabsolu ; reflexivity.
+Qed.
+
 (**********)
 Lemma Rseq_pow_gt_1_cv : forall r, r > 1 -> Rseq_cv_pos_infty (Rseq_pow r).
 Proof.

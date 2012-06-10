@@ -191,11 +191,23 @@ unfold Rseq_iter_S.
 apply plus_lt_compat_l; constructor.
 Qed.
 
-Lemma extractor_mult_2 : is_extractor (mult 2).
+Lemma is_extractor_mult_2 : is_extractor (mult 2).
 Proof.
 intros n; omega.
 Qed.
 
+Definition extractor_mult_2 := existT _ (mult 2) is_extractor_mult_2.
+
+(** Rseq_zip can be inversed thanks to extractors *)
+
+Lemma Rseq_zip_extract_evens : forall Un Vn,
+  Rseq_zip Un Vn ⋅ extractor_mult_2 == Un.
+Proof.
+intros Un Vn n ; unfold Rseq_zip, extracted, extractor_mult_2 ;
+ simpl ; case (n_modulo_2 (n + (n + 0))) ; intros [p Hp].
+  f_equal ; omega.
+  apply False_ind ; omega.
+Qed.
 
 (** Convergence of subsequence implies convergence of the growing sequence *)
 Open Scope R_scope.
