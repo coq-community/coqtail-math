@@ -23,7 +23,7 @@ Require Import Rpser_def Rpser_def_simpl.
 
 Require Import Rinterval.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_subsequence Rsequence_rewrite_facts.
-Require Import Rsequence_cv_facts Rsequence_bound_facts Rsequence_sums_facts.
+Require Import Rsequence_cv_facts Rsequence_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
 Require Import Fourier MyRIneq MyNat MyNNR.
@@ -790,6 +790,19 @@ Lemma Rpser_minus_compat : forall An Bn x la lb,
 Proof.
 intros ; unfold Rseq_minus, Rminus ; apply Rpser_add_compat ;
  [| apply Rpser_opp_compat] ; assumption.
+Qed.
+
+Lemma Rpser_zip_compat : forall An Bn x la lb,
+  Rpser An (x ^ 2) la -> Rpser Bn (x ^ 2) lb ->
+  Rpser (Rseq_zip An Bn) x (la + x * lb).
+Proof.
+intros An Bn x la lb Hla Hlb ; unfold Rpser ; apply Rseq_cv_even_odd_compat.
+ apply Rseq_cv_shift_compat ; rewrite Rseq_cv_eq_compat ;
+  [| intro n ; apply Rseq_pps_zip_compat_even].
+  apply Rseq_cv_plus_compat, Rseq_cv_mult_compat ; [| apply Rseq_constant_cv | apply Hlb].
+  apply Rseq_cv_shift_compat_reciprocal, Hla.
+ rewrite Rseq_cv_eq_compat ; [| intro n ; apply Rseq_pps_zip_compat_odd].
+ apply Rseq_cv_plus_compat, Rseq_cv_mult_compat ; (assumption || apply Rseq_constant_cv).
 Qed.
 
 Lemma Rpser_expand_compat : forall An l x la,

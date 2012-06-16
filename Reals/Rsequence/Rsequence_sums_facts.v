@@ -182,6 +182,37 @@ intros An Bn n ; induction n.
  replace (S n - (S n - p))%nat with p by omega ; apply Rmult_comm.
 Qed.
 
+Lemma two_Sn : forall n, (2 * S n = S (S (2 * n)))%nat.
+Proof.
+intro n ; ring.
+Qed.
+
+Lemma Rseq_sum_zip_compat_odd : forall An Bn n,
+  (Rseq_sum (Rseq_zip An Bn) (S (2 * n)) = Rseq_sum An n + Rseq_sum Bn n)%R.
+Proof.
+intros An Bn ; induction n.
+ unfold Rseq_zip ; simpl.
+  case (n_modulo_2 0) ; intros [p Hp] ; [| apply False_ind ; omega].
+  case (n_modulo_2 1) ; intros [q Hq] ; [apply False_ind ; omega |].
+  assert (Hp' : p = O) by omega ; assert (Hq' : q = O) by omega ; subst ; reflexivity.
+ rewrite two_Sn ; do 2 rewrite Rseq_sum_simpl ; rewrite IHn ; do 2 rewrite Rseq_sum_simpl.
+  repeat rewrite Rplus_assoc ; apply Rplus_eq_compat_l.
+  rewrite (Rplus_comm (An (S n))), Rplus_assoc ; apply Rplus_eq_compat_l.
+  rewrite Rplus_comm, <- two_Sn ; apply Rplus_eq_compat ; unfold Rseq_zip ;
+   [ case (n_modulo_2 (S (2 * S n))) ; intros [p Hp] ; [apply False_ind ; omega |] |
+     case (n_modulo_2 (2 * S n)) ; intros [p Hp] ; [| apply False_ind ; omega] ] ;
+   assert (Hp' : p = S n) by omega ; subst ; reflexivity.
+Qed.
+
+Lemma Rseq_sum_zip_compat_even : forall An Bn n,
+  (Rseq_sum (Rseq_zip An Bn) (2 * S n) = Rseq_sum An (S n) + Rseq_sum Bn n)%R.
+Proof.
+intros An Bn n ; rewrite two_Sn, Rseq_sum_simpl, Rseq_sum_zip_compat_odd,
+ Rseq_sum_simpl, <- two_Sn ; unfold Rseq_zip.
+ case (n_modulo_2 (2 * S n)) ; intros [p Hp] ; [| apply False_ind ; omega].
+ assert (Hp' : p = S n) by omega ; subst ; ring.
+Qed.
+
 (** Compatibility with the orders *)
 
 Lemma Rseq_sum_pos_strong : forall An n,
@@ -441,6 +472,22 @@ intros An Bn x n ; induction n.
  unfold gt_pser, Rseq_mult, Rseq_constant.
  replace (S n) with (p + (S n - p))%nat by omega ; rewrite pow_add ;
  replace (p + (S n - p) -p)%nat with (S n - p)%nat by omega ; ring.
+Qed.
+
+Lemma Rseq_pps_zip_compat_odd : forall An Bn x n,
+  (Rseq_pps (Rseq_zip An Bn) x (S (2 * n)) =
+  Rseq_pps An (x ^ 2) n + x * Rseq_pps Bn (x ^ 2) n)%R.
+Proof.
+intros An Bn x n ; unfold Rseq_pps ; erewrite Rseq_sum_ext ; [| eapply gt_pser_zip_compat] ;
+ rewrite Rseq_sum_zip_compat_odd, Rseq_sum_scal_compat_l ; reflexivity.
+Qed.
+
+Lemma Rseq_pps_zip_compat_even : forall An Bn x n,
+  (Rseq_pps (Rseq_zip An Bn) x (2 * S n) =
+  Rseq_pps An (x ^ 2) (S n) + x * Rseq_pps Bn (x ^ 2) n)%R.
+Proof.
+intros An Bn x n ; unfold Rseq_pps ; erewrite Rseq_sum_ext ; [| eapply gt_pser_zip_compat] ;
+ rewrite Rseq_sum_zip_compat_even, Rseq_sum_scal_compat_l ; reflexivity.
 Qed.
 
 (** * Rpser_abs, Rpser *)

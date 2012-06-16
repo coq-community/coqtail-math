@@ -22,6 +22,7 @@ USA.
 Require Import MyReals MyINR.
 Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts Rsequence_sums_facts.
 Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_facts.
+Require Import Rsequence_subsequence.
 
 Require Import Max.
 Require Import Fourier.
@@ -29,7 +30,7 @@ Require Import Fourier.
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
-Require Import Rfunction_def Functions.
+Require Import Rfunction_def Functions Rpow_facts.
 
 Open Scope R_scope.
 
@@ -44,13 +45,14 @@ intro r ; exists 0 ; intros x [n Hn] ; subst ;
  rewrite Rmult_0_l, Rabs_R0 ; reflexivity.
 Qed.
 
-Lemma Pser_zero_seq : forall (x : R), Pser (zero_seq) x 0.
+Lemma Rpser_zero_seq : forall (x : R), Rpser (zero_seq) x 0.
 Proof.
 intros x eps eps_pos ; exists O ; intros n _ ; unfold R_dist ;
  apply Rle_lt_trans with (Rabs 0) ; [right ; apply Rabs_eq_compat |
  rewrite Rabs_R0 ; assumption].
  unfold Rminus ; rewrite Ropp_0, Rplus_0_r ; induction n ; simpl ;
- [| rewrite IHn] ; unfold zero_seq, Rseq_constant ; ring.
+ [| rewrite Rseq_pps_simpl, IHn] ; unfold Rseq_pps, zero_seq, Rseq_constant, gt_pser, Rseq_mult ;
+ simpl ; ring.
 Qed.
 
 Definition zero := sum _ zero_infinite_cv_radius.
@@ -59,8 +61,26 @@ Lemma zero_is_zero : forall x, zero x = 0.
 Proof.
 intro x ;
  assert (Hl := sum_sums _ zero_infinite_cv_radius x) ;
- assert (Hr := Pser_zero_seq x) ;
+ assert (Hr := Rpser_zero_seq x) ;
  apply (Rpser_unique _ _ _ _ Hl Hr).
+Qed.
+
+(** * Simplification when zipping with 0 *)
+
+Lemma Rpser_zip_compat_0_l : forall An x la,
+  Rpser An (x ^ 2) la ->
+  Rpser (Rseq_zip An 0) x la.
+Proof.
+intros An x la Hla ; replace la with (la + x * 0) by ring ;
+ apply Rpser_zip_compat, Rpser_zero_seq ; assumption.
+Qed.
+
+Lemma Rpser_zip_compat_0_r : forall An x la,
+  Rpser An (x ^ 2) la ->
+  Rpser (Rseq_zip 0 An) x (x * la).
+Proof.
+intros An x la Hla ; replace (x * la) with (0 + x * la) by ring ;
+ apply Rpser_zip_compat ; [apply Rpser_zero_seq | assumption].
 Qed.
 
 (** * Definition of the constant power series. *)
@@ -124,7 +144,7 @@ rewrite <- Rinv_1 ; apply Rpser_alembert_finite.
  apply Rgt_not_eq, Rlt_0_1.
  intro ; apply Rgt_not_eq, Rlt_0_1.
  eapply Rseq_cv_eq_compat, Rseq_constant_cv.
-  intro ; unfold sum_pow_seq, Rseq_constant, Rdiv ;
+  intro ; unfold sum_pow_seq, Rseq_abs, Rseq_div, Rseq_shift, Rseq_constant, Rdiv.
     rewrite Rinv_1, Rmult_1_r ; apply Rabs_R1.
 Qed.
 
@@ -162,18 +182,18 @@ Qed.
 
 Definition exp_seq (n : nat) := / INR (fact n).
 
-Definition cos_seq : nat -> R.
+Definition cos_seq : Rseq.
 Proof.
-intro n ; case (n_modulo_2 n) ; intros [p Hp].
- apply ((-1) ^ p / INR (fact n)).
- apply 0.
+unfold Rseq ; apply Rseq_zip.
+ intro n ; exact ((-1) ^ n / INR (fact (2 * n))).
+ exact zero_seq.
 Defined.
 
-Definition sin_seq : nat -> R.
+Definition sin_seq : Rseq.
 Proof.
-intro n ; case (n_modulo_2 n) ; intros [p Hp].
- apply 0.
- apply ((-1) ^ p / INR (fact n)).
+unfold Rseq ; apply Rseq_zip.
+ exact zero_seq.
+ intro n ; exact ((-1) ^ n / INR (fact (S (2 * n)))).
 Defined.
 
 (** Infinite cv radius *)
@@ -221,20 +241,20 @@ Qed.
 Lemma cos_infinite_cv_radius : infinite_cv_radius cos_seq.
 Proof.
 intros r ; apply Rle_Cv_radius_weak_compat with (| exp_seq |).
- intro n ; unfold cos_seq, exp_seq ; destruct (n_modulo_2 n) as [[p Hp] | [p Hp]].
- unfold Rdiv, Rseq_abs ; rewrite Rabs_Rabsolu, Rabs_mult, pow_1_abs, Rmult_1_l ;
+ intro n ; unfold cos_seq, exp_seq, Rseq_zip ; destruct (n_modulo_2 n) as [[p Hp] | [p Hp]].
+ unfold Rdiv, Rseq_abs ; rewrite Rabs_Rabsolu, Rabs_mult, pow_1_abs, Rmult_1_l ; subst ;
  right ; reflexivity.
- rewrite Rabs_R0 ; apply Rabs_pos.
+ unfold zero_seq, Rseq_constant ; rewrite Rabs_R0 ; apply Rabs_pos.
  rewrite <- Cv_radius_weak_abs ; apply exp_infinite_cv_radius.
 Qed.
 
 Lemma sin_infinite_cv_radius : infinite_cv_radius sin_seq.
 Proof.
 intros r ; apply Rle_Cv_radius_weak_compat with (| exp_seq |)%R.
- intro n ; unfold sin_seq, exp_seq ; case (n_modulo_2 n) ; intros [p Hp].
- rewrite Rabs_R0 ; apply Rabs_pos.
+ intro n ; unfold sin_seq, exp_seq, Rseq_zip ; case (n_modulo_2 n) ; intros [p Hp].
+ unfold zero_seq, Rseq_constant ; rewrite Rabs_R0 ; apply Rabs_pos.
  unfold Rdiv, Rseq_abs ; rewrite Rabs_Rabsolu, Rabs_mult, pow_1_abs, Rmult_1_l ;
- right ; reflexivity.
+ subst ; right ; reflexivity.
  rewrite <- Cv_radius_weak_abs ; apply exp_infinite_cv_radius.
 Qed.
 
@@ -261,12 +281,12 @@ Qed.
 
 Lemma Deriv_cos_seq_simpl : (An_deriv cos_seq == - sin_seq)%Rseq.
 Proof.
-intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult, Rseq_opp ;
- case (n_modulo_2 n) ; intros [p Hp] ;
- case (n_modulo_2 (S n)) ; intros [p' Hp'].
- apply False_ind ; omega.
- ring.
- replace p' with (S p) by omega.
+intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult,
+ Rseq_opp, Rseq_zip, zero_seq, Rseq_constant ;
+ case (n_modulo_2 n) ; intros [p Hp] ; case (n_modulo_2 (S n)) ; intros [q Hq].
+  apply False_ind ; omega.
+  ring.
+ replace q with (S p) by omega ; rewrite Hp, two_Sn, <- Hp.
  rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc.
  replace (/ INR (fact (S n)) * INR (S n)) with (/ INR (fact n)).
  simpl ; ring.
@@ -275,11 +295,12 @@ intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult, Rseq_opp ;
 Qed.
 
 Lemma Deriv_sin_seq_simpl : (An_deriv sin_seq == cos_seq)%Rseq.
-intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult ;
- case (n_modulo_2 n) ; intros [p Hp] ;
- case (n_modulo_2 (S n)) ; intros [p' Hp'].
+Proof.
+intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult, Rseq_zip,
+ zero_seq, Rseq_constant ;
+ case (n_modulo_2 n) ; intros [p Hp] ; case (n_modulo_2 (S n)) ; intros [q Hq].
  apply False_ind ; omega.
- replace p' with p by omega.
+ rewrite <- Hq ; replace q with p by omega ; rewrite <- Hp.
  rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc.
  replace (/ INR (fact (S n)) * INR (S n)) with (/ INR (fact n)).
  simpl ; ring.
@@ -393,291 +414,104 @@ Qed.
 
 (* Link with the standard's library definitions. *)
 
-Lemma sin_seq_even : forall n x, gt_pser sin_seq x (2 * n)%nat = 0.
+Lemma unfold_plus1 : forall n, (n + 1 = S n)%nat.
 Proof.
-intros n x ; unfold gt_pser, sin_seq, Rseq_mult ;
- case (n_modulo_2 (2 * n)) ; intros [p Hp].
- ring.
- apply False_ind ; omega.
-Qed.
-
-Lemma cos_seq_odd : forall n x, gt_pser cos_seq x (S (2 * n))%nat = 0.
-Proof.
-intros n x ; unfold gt_pser, cos_seq, Rseq_mult ;
- case (n_modulo_2 (S (2 * n))) ; intros [p Hp].
- apply False_ind ; omega.
- ring.
-Qed.
-
-Lemma partial_sine_drop_even : forall x n,
-  Rseq_sum (gt_pser sin_seq x) (2 * S n) = Rseq_sum (gt_pser sin_seq x) (S (2 * n)).
-Proof.
-intros x n ; replace (2 * S n)%nat with (S (S (2 * n))) by ring.
- rewrite Rseq_sum_simpl ; replace (S (S (2 * n)))%nat with (2 * S n)%nat by ring ;
- rewrite sin_seq_even ; ring.
-Qed.
-
-Lemma partial_cosine_drop_odd : forall x n,
-  Rseq_sum (gt_pser cos_seq x) (S (2 * n)) = Rseq_sum (gt_pser cos_seq x) (2 * n).
-Proof.
-intros x n ; rewrite Rseq_sum_simpl, cos_seq_odd ; ring.
-Qed.
-
-Lemma partial_sin_sine_ext : forall x n,
-  x * sum_f_R0 (fun i => sin_n i * x ² ^ i) n = Rseq_sum (gt_pser sin_seq x) (S (2 * n)).
-Proof.
-intros x n ; induction n.
- simpl ; unfold sin_n, sin_seq, gt_pser, Rseq_mult.
-  case (n_modulo_2 0) ; intros [p Hp].
-   case (n_modulo_2 1) ; intros [q Hq].
-    apply False_ind ; omega.
-    assert (Hqq : q = O) by omega ; subst ; assert (Hpp : p = O) by omega ; subst.
-    simpl ; ring.
-   apply False_ind ; omega.
-  replace (2 * S n)%nat with (S (S (2 * n))) by ring.
-   do 3 rewrite Rseq_sum_simpl ; rewrite <- IHn.
- replace (S (S (2 * n))) with (2 * (S n))%nat by ring ; rewrite sin_seq_even.
- rewrite Rmult_plus_distr_l, Rplus_assoc ; apply Rplus_eq_compat_l.
-  unfold sin_n, gt_pser, sin_seq, Rseq_mult.
-   case (n_modulo_2 (S (2 * S n))) ; intros [p Hp].
-    apply False_ind ; omega.
-    rewrite <- (tech_pow_Rmult x), pow_Rsqr, <- (tech_pow_Rmult x²) ;
-    replace (S n) with p by omega ; replace (2 * p + 1)%nat with (S (2 * p)) by omega.
-    ring.
-Qed.
-
-Lemma partial_cos_cosine_ext : forall x n,
-  sum_f_R0 (fun i => cos_n i * x ² ^ i) n = Rseq_sum (gt_pser cos_seq x) (2 * n).
-Proof.
-intros x n ; induction n.
- simpl ; unfold cos_n, cos_seq, gt_pser, Rseq_mult.
-  case (n_modulo_2 0) ; intros [p Hp].
-   case (n_modulo_2 1) ; intros [q Hq].
-    apply False_ind ; omega.
-    assert (Hqq : q = O) by omega ; subst ; assert (Hpp : p = O) by omega ; subst.
-    simpl ; ring.
-  apply False_ind ; omega.
- replace (2 * S n)%nat with (S (S (2 * n))) by ring ; do 3 rewrite Rseq_sum_simpl.
- rewrite <- IHn, Rplus_assoc, cos_seq_odd ; apply Rplus_eq_compat_l.
- unfold cos_n, gt_pser, cos_seq, Rseq_mult.
-  case (n_modulo_2 (S (S (2 * n)))) ; intros [p Hp].
-  replace (S (S (2 * n))) with (2 * S n)%nat by omega ; rewrite pow_Rsqr ;
-  replace (S n) with p by omega ; ring.
-  apply False_ind ; omega.
+intros n ; ring.
 Qed.
 
 Lemma sin_sine : sin == sine.
 Proof.
-intro x ; unfold sin, sine ; destruct (exist_sin x²) as [l Hl] ;
- unfold sin_in, infinite_sum in Hl.
- apply Rseq_cv_unique with (Rseq_sum (gt_pser sin_seq x)).
- cut (Rseq_cv (fun n => Rseq_sum (gt_pser sin_seq x) (S (2 * n))) (x * l)).
-  intro H ; apply Rseq_cv_even_odd_compat.
-   eapply Rseq_cv_shift_compat, Rseq_cv_eq_compat ; [| eapply H].
-    intro n ; unfold Rseq_shift ; apply partial_sine_drop_even ; apply H.
-   apply H.
- apply Rseq_cv_eq_compat with (fun n => x * sum_f_R0 (fun i => sin_n i * x ² ^ i) n).
-  intro n ; symmetry ; apply partial_sin_sine_ext.
-  apply Rseq_cv_mult_compat ; [apply Rseq_constant_cv |].
-   intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ; exists N ; apply HN.
- apply sum_sums.
+intro x ; eapply Rpser_unique, sum_sums.
+ unfold sin ; destruct (exist_sin (x²)) as [la Hla].
+ apply Rpser_zip_compat_0_r.
+ unfold Rpser ; rewrite Rseq_cv_eq_compat.
+  apply Hla.
+  apply Rseq_sum_ext ; intro n ; unfold gt_pser, Rseq_mult, sin_n.
+  rewrite <- pow_Rsqr, pow_mult, unfold_plus1 ; reflexivity.
 Qed.
 
 Lemma cos_cosine : cos == cosine.
 Proof.
-intro x ; unfold cos, cosine ; destruct (exist_cos x²) as [l Hl] ;
- unfold cos_in, infinite_sum in Hl.
- apply Rseq_cv_unique with (Rseq_sum (gt_pser cos_seq x)).
- cut (Rseq_cv (fun n => Rseq_sum (gt_pser cos_seq x) (2 * n)) l).
-  intro H ; apply Rseq_cv_even_odd_compat.
-   apply H.
-   eapply Rseq_cv_eq_compat ; [| eapply H].
-    intro n ; unfold Rseq_shift ; apply partial_cosine_drop_odd ; apply H.
- apply Rseq_cv_eq_compat with (fun n => sum_f_R0 (fun i => cos_n i * x ² ^ i) n).
-  intro n ; symmetry ; apply partial_cos_cosine_ext.
- intros eps eps_pos ; destruct (Hl _ eps_pos) as [N HN] ; exists N ; apply HN.
- apply sum_sums.
+intro x ; eapply Rpser_unique, sum_sums.
+ unfold cos ; destruct (exist_cos (x²)) as [la Hla].
+ apply Rpser_zip_compat_0_l.
+ unfold Rpser ; rewrite Rseq_cv_eq_compat.
+  apply Hla.
+  apply Rseq_sum_ext ; intro n ; unfold gt_pser, Rseq_mult, cos_n.
+  rewrite <- pow_Rsqr, pow_mult ; reflexivity.
 Qed.
 
 (** * Definition of arctan *)
 
 Definition arctan_seq : Rseq.
 Proof.
-intro n ; case (n_modulo_2 n) ; intros [p Hp].
- exact 0.
- exact ((- 1) ^ p / INR n).
+unfold Rseq ; apply Rseq_zip.
+ exact zero_seq.
+ intro n ; exact ((- 1) ^ n / INR (S (2 * n))).
 Defined.
 
-Lemma arctan_seq_even : forall n x, gt_pser arctan_seq x (2 * n)%nat = 0.
-Proof.
-intros n x ; unfold gt_pser, arctan_seq, Rseq_mult ;
- case (n_modulo_2 (2 * n)) ; intros [p Hp].
- rewrite Rmult_0_l ; reflexivity.
- apply False_ind ; omega.
-Qed.
+Require Import MyNNR.
 
-Lemma arctan_seq_1_simpl : forall n,
-  gt_pser arctan_seq 1 (S (2 * n)) = tg_alt PI_tg n.
+Lemma Rseq_shifts_poly_neq : forall d n k, (0 < k)%nat ->
+  Rseq_shifts (Rseq_poly d) k n <> 0.
 Proof.
-intro n ; unfold gt_pser, arctan_seq, tg_alt, PI_tg, Rseq_mult, Rdiv ;
- rewrite pow1 ; replace (2 * n + 1)%nat with (S (2 * n)) by omega.
- case (n_modulo_2 (S (2 * n))) ; intros [p Hp].
-  apply False_ind ; omega.
-  assert (Hpn : p = n) by omega ; subst ; ring.
-Qed.
-
-Lemma partial_arctan_drop_even : forall n x,
-  Rseq_sum (gt_pser arctan_seq x) (2 * S n) = Rseq_sum (gt_pser arctan_seq x) (S (2 * n)).
-Proof.
-intros n x ; replace (2 * S n)%nat with (S (S (2 * n))) by ring.
- rewrite Rseq_sum_simpl ; replace (S (S (2 * n)))%nat with (2 * S n)%nat by ring ;
- rewrite arctan_seq_even ; ring.
-Qed.
-
-Lemma Rseq_sum_0 : forall An, Rseq_sum An 0 = An O.
-Proof.
-reflexivity.
-Qed.
-
-Lemma partial_arctan_drop_evens : forall n x f,
-  Rseq_sum (fun i => gt_pser arctan_seq x (2 * f i)) n = 0.
-Proof.
-intros n x f ; induction n.
- rewrite Rseq_sum_0 ; apply arctan_seq_even.
- rewrite Rseq_sum_simpl, IHn, arctan_seq_even ; ring.
-Qed.
-
-Lemma partial_arctan_lower_bound : forall M, (0 < M)%nat ->
-  / 7 <= Rseq_sum (Rseq_shifts (gt_abs_pser arctan_seq 1) (2 * M)) (2 * M).
-Proof.
-intros M M_lub ; transitivity (INR M * / (6 * INR M + 1)).
- transitivity (/ (6 + / INR M)).
-  apply Rle_Rinv.
-   apply Rplus_lt_0_compat ; [fourier | apply Rinv_0_lt_compat, lt_0_INR, M_lub].
-   fourier.
-   replace 7 with (6 + / 1) by (rewrite Rinv_1 ; ring) ; apply Rplus_le_compat_l.
-   apply Rle_Rinv ; [fourier | apply lt_0_INR ; assumption |].
-   rewrite <- INR_1 ; apply le_INR ; omega.
-  right ; field ; split ; apply Rgt_not_eq.
-   apply Rplus_lt_0_compat.
-    apply Rmult_lt_0_compat ; [| apply lt_0_INR ; assumption] ; fourier.
-    fourier.
-    apply lt_0_INR ; assumption.
- destruct M as [| M] ; [inversion M_lub |] ; rewrite <- Rseq_sum_even_odd_split'.
-  unfold Rseq_shifts.
-  rewrite Rseq_sum_ext with (Vn := fun i : nat => gt_pser arctan_seq 1 (2 * (S M +  i))).
-  rewrite partial_arctan_drop_evens, Rplus_0_l.
-  apply Rseq_sum_lower_bound.
-   intros m m_ub ; unfold gt_abs_pser, gt_pser, arctan_seq, Rseq_abs, Rseq_mult ;
-   rewrite pow1, Rmult_1_r.
-    case (n_modulo_2 (2 * S M + S (2 * m))) ; intros [p Hp].
-     apply False_ind ; omega.
-     unfold Rdiv ; rewrite Rabs_mult, Rabs_opp1, Rmult_1_l, Rabs_right.
-     apply Rle_Rinv.
-      apply lt_0_INR ; omega.
-      apply Rplus_lt_0_compat ; [apply Rmult_lt_0_compat, lt_0_INR ; try assumption |] ; fourier.
-      transitivity (INR (S (6 * S M))).
-      apply le_INR ; omega.
-      rewrite S_INR, mult_INR ; replace 6 with (INR 6) by (simpl ; ring) ; reflexivity.
-      left ; apply Rinv_0_lt_compat, lt_0_INR ; omega.
-  intro n ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, arctan_seq.
-   replace (2 * S M + 2 * n)%nat with (2 * (S M + n))%nat by ring.
-   case (n_modulo_2 (2 * (S M + n))) ; intros [p Hp].
-    rewrite Rmult_0_l ; apply Rabs_R0.
-    apply False_ind ; omega.
-Qed.
-
-Lemma partial_PI_arctan1_ext : forall n,
-  sum_f_R0 (tg_alt PI_tg) n = Rseq_sum (gt_pser arctan_seq 1) (S (2 * n)).
-Proof.
-intros n ; induction n.
- simpl ; unfold tg_alt, PI_tg, arctan_seq, gt_pser, Rseq_mult, Rdiv.
-  case (n_modulo_2 0) ; intros [p Hp].
-   case (n_modulo_2 1) ; intros [q Hq].
-    apply False_ind ; omega.
-    assert (Hp' : p = O) by omega ; assert (Hq' : q = O) by omega ; subst ; simpl ; ring.
-   apply False_ind ; omega.
- replace (2 * S n)%nat with (S (S (2 * n))) by ring.
- do 3 rewrite Rseq_sum_simpl ; rewrite <- IHn, Rplus_assoc ; apply Rplus_eq_compat_l.
- replace (S (S (2 * n))) with (2 * S n)%nat by ring ; rewrite arctan_seq_even.
- unfold tg_alt, PI_tg, arctan_seq, gt_pser, Rseq_mult, Rdiv ; rewrite pow1.
- case (n_modulo_2 (S (2 * S n))) ; intros [p Hp].
-  apply False_ind ; omega.
-  assert (Hp' : S n = p) by omega ; rewrite Hp' ;
-  replace (2 * p + 1)%nat with (S (2 * p)) by ring ; ring.
-Qed.
-
-Lemma arctan1_PI4 : Rpser arctan_seq 1 (PI / 4).
-Proof.
-assert (H : Rseq_cv (fun n => Rseq_sum (gt_pser arctan_seq 1) (S (2 * n))) (PI / 4)).
- apply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
-  intro n ; symmetry ; apply partial_PI_arctan1_ext.
- unfold PI ; destruct exist_PI as [pi Hpi] ;
- replace (4 * pi / 4) with pi by field ; apply Hpi.
-apply Rseq_cv_even_odd_compat.
- eapply Rseq_cv_shift_compat, Rseq_cv_eq_compat ; [| eapply H].
-  intro n ; unfold Rseq_shift ; apply partial_arctan_drop_even.
- apply H.
-Qed.
-
-Lemma gt_pser_1 : forall An n, gt_pser An 1 n = An n.
-Proof.
-intros An n ; unfold gt_pser, Rseq_mult ; rewrite pow1 ; ring.
-Qed.
-
-Lemma Rseq_shifts_fusion : forall An k m,
-  (Rseq_shifts (Rseq_shifts An k) m == Rseq_shifts An (k + m))%Rseq.
-Proof.
-intros ; unfold Rseq_shifts ; intro ; rewrite plus_assoc ; reflexivity.
+intros d k n Hk ; unfold Rseq_shift, Rseq_poly ;
+ apply pow_nonzero, not_0_INR ; omega.
 Qed.
 
 Lemma arctan_cv_radius : finite_cv_radius arctan_seq 1.
 Proof.
-rewrite <- Rabs_R1 ; apply Rpser_finite_cv_radius_caracterization with (PI / 4).
- apply arctan1_PI4.
- intros l Hl ; eapply Rseq_cv_Rseq_cv_pos_infty_incompat ; [eassumption |].
- apply Rseq_cv_pos_infty_criteria with (/ 7).
-  fourier.
-  intro ; apply gt_abs_pser_pos.
-  intro M ; destruct M as [| M].
-   exists 1%nat ; split.
-    omega.
-    simpl ; unfold Rseq_shifts, gt_abs_pser, Rseq_abs ; simpl ;
-    replace O with (2 * 0)%nat by reflexivity ;
-    rewrite arctan_seq_even, Rabs_R0, Rplus_0_l, gt_pser_1.
-    simpl ; unfold arctan_seq ; case (n_modulo_2 1) ; intros [p Hp].
-     apply False_ind ; omega.
-     unfold Rdiv ; rewrite Rabs_mult, Rabs_opp1, Rabs_Rinv.
-      simpl ; rewrite Rabs_R1, Rinv_1 ; fourier.
-      apply not_0_INR ; omega.
-  case (n_modulo_2 (S M)) ; intros [P HP].
-   exists (4 * P)%nat ; split.
-    omega.
-    rewrite HP ; replace (4 * P - 2 * P)%nat with (2 * P)%nat by omega.
-    apply partial_arctan_lower_bound ; omega.
-   exists (4 * S P)%nat ; split.
-    omega.
-    replace (4 * S P - S M)%nat with (S (2 * S P)) by (rewrite HP ; omega).
-    rewrite Rseq_sum_split_compat with (k := O) ; [| omega].
-    replace (/ 7) with (0 + / 7) by (apply Rplus_0_l) ; apply Rplus_le_compat.
-    unfold Rseq_shifts ; simpl ; apply gt_abs_pser_pos.
-    replace (S (2 * S P) - 1)%nat with (2 * S P)%nat by omega.
-    rewrite Rseq_sum_ext with (Vn := Rseq_shifts (gt_abs_pser arctan_seq 1) (2 * S P)%nat).
-    apply partial_arctan_lower_bound ; omega.
-    intro n ; rewrite Rseq_shifts_fusion, HP ; f_equal ; ring.
+rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| fourier | simpl ; ring].
+ apply finite_cv_radius_zip_compat_r.
+  intros ; apply zero_infinite_cv_radius.
+  replace (nonneg (nnr_sqr 1)) with (/ 1) by (rewrite Rinv_1 ; simpl ; ring).
+ apply Rpser_alembert_finite.
+  apply Rgt_not_eq ; fourier.
+  intro n ; apply Rmult_integral_contrapositive_currified.
+   apply pow_nonzero, Rlt_not_eq ; fourier.
+   apply Rinv_neq_0_compat, not_0_INR ; omega.
+ assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; omega) ;
+  pose (phi := existT _ _ Hf) ; rewrite Rseq_cv_eq_compat with
+  (Vn := (Rseq_poly 1 ⋅ phi / (Rseq_shifts (Rseq_poly 1) 2 ⋅ phi))%Rseq).
+ apply Rseq_equiv_cv_div.
+  eapply Rseq_equiv_subseq_compat.
+   eapply Rseq_poly_shifts_equiv.
+  intro ; apply Rseq_shifts_poly_neq ; omega.
+ intro n ; unfold Rseq_shift, Rseq_shifts, Rseq_abs, Rseq_div, Rseq_poly, extracted.
+ repeat rewrite <- Rabs_Rdiv.
+ unfold Rdiv ; do 2 rewrite Rabs_opp1, Rmult_1_l ; rewrite Rinv_involutive.
+ rewrite Rabs_right, pow_1. rewrite Rabs_right, pow_1.
+ simpl proj1_sig ; simpl mult ; simpl plus ; rewrite <- plus_n_Sm ; apply Rmult_comm.
+  apply Rle_ge, pos_INR.
+  apply Rle_ge, pos_INR.
+  apply Rabs_no_R0, not_0_INR ; omega.
+  apply not_0_INR ; omega.
+  apply not_0_INR ; omega.
+  apply Rmult_integral_contrapositive_currified.
+   apply pow_nonzero, Rlt_not_eq ; fourier.
+   apply Rinv_neq_0_compat, not_0_INR ; omega.
+Qed.
+
+Lemma arctan1_PI4 : Rpser arctan_seq 1 (PI / 4).
+Proof.
+rewrite <- Rmult_1_l ; apply Rpser_zip_compat_0_r ;
+ unfold PI ; destruct exist_PI as [v Hv].
+ rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc, Rinv_r, Rmult_1_r.
+ eapply Rseq_cv_eq_compat, Hv.
+ unfold Rseq_pps ; intro n ; apply Rseq_sum_ext ; clear n.
+ intro n ; unfold gt_pser, tg_alt, PI_tg, Rseq_mult.
+ do 2 rewrite pow1 ; rewrite unfold_plus1, Rmult_1_r ; reflexivity.
+ apply Rgt_not_eq ; fourier.
 Qed.
 
 Definition arctan := sum_r _ _ arctan_cv_radius.
 
 Lemma arctan_0 : arctan 0 = 0.
 Proof.
-assert (Hsum1 : Rpser arctan_seq 0 0).
+eapply Rpser_unique ; [eapply sum_r_sums |].
+ rewrite Rabs_R0 ; apply Rlt_0_1.
  apply Rseq_cv_eq_compat with (fun _ => 0).
-  intro n ; induction n.
-   unfold Rseq_pps ; simpl ; rewrite <- (arctan_seq_even 0 0), mult_0_r ; reflexivity.
-   rewrite Rseq_pps_simpl, IHn, pow_i ; [ring | intuition].
- apply Rseq_constant_cv.
-assert (O_in : Rabs 0 < 1) by (rewrite Rabs_R0 ; fourier) ;
-assert (Hsum2 := sum_r_sums _ _ arctan_cv_radius _ O_in).
-eapply Rpser_unique ; eassumption.
+  intro ; rewrite Rseq_pps_0_simpl ; unfold arctan_seq, Rseq_zip.
+   case (n_modulo_2 0) ; intros [p Hp] ; [reflexivity | apply False_ind ; omega ].
+  apply Rseq_constant_cv.
 Qed.

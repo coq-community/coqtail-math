@@ -15,6 +15,12 @@ Proof.
 intros Un n k ; reflexivity.
 Qed.
 
+Lemma Rseq_shifts_fusion : forall An k m,
+  (Rseq_shifts (Rseq_shifts An k) m == Rseq_shifts An (k + m))%Rseq.
+Proof.
+intros ; unfold Rseq_shifts ; intro ; rewrite plus_assoc ; reflexivity.
+Qed.
+
 Lemma Rseq_minus_simpl : forall Un Vn,
   Un - Vn == Un + - Vn.
 Proof.

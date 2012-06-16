@@ -98,4 +98,16 @@ intros rAnBn x ; destruct (Rpser_abs_infinite_cv_radius _ rAn x) as [l Ha'].
  eapply Rpser_unique ; eassumption.
 Qed.
 
+Lemma sum_zip_compat : forall rAnBn x,
+  sum (Rseq_zip An Bn) rAnBn x =
+  sum An rAn (x ^ 2) + x * sum Bn rBn (x ^ 2).
+Proof.
+intros rAnBn x ;
+ assert (Ha := sum_sums An rAn (x ^ 2)) ;
+ assert (Hb := sum_sums Bn rBn (x ^ 2)) ;
+ assert (Hab := sum_sums _ rAnBn x) ;
+ assert (Hab' := Rpser_zip_compat _ _ _ _ _ Ha Hb).
+ eapply Rpser_unique ; eassumption.
+Qed.
+
 End sum_compatibilities.

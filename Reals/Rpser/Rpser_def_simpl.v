@@ -62,6 +62,15 @@ intros An r n ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult ;
  rewrite RPow_abs ; apply Rabs_mult.
 Qed.
 
+Lemma gt_pser_zip_compat : forall An Bn r,
+  gt_pser (Rseq_zip An Bn) r == Rseq_zip (gt_pser An (r ^ 2)) (r * gt_pser Bn (r ^ 2)).
+Proof.
+intros An Bn r n ; unfold gt_pser, Rseq_zip, Rseq_mult, Rseq_constant ;
+ case (n_modulo_2 n) ; intros [p Hp].
+ rewrite <- pow_mult, <- Hp ; reflexivity.
+ rewrite <- pow_mult, Hp, <- tech_pow_Rmult ; ring.
+Qed.
+
 (** Extenstionality of the concepts *)
 
 Lemma gt_pser_ext : forall An Bn x, An == Bn ->

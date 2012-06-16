@@ -24,6 +24,7 @@ Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_rel_facts.
+Require Import Rsequence_rewrite_facts.
 Require Import MyRIneq MyReals Fourier.
 (** printing ~	~ *)
 (** * Convergence of usual sequences. *)
@@ -43,27 +44,37 @@ intros M ; pose (n := up (Rabs M)) ; assert (n_pos : (0 <= n)%Z).
  apply le_INR ; assumption.
 Qed.
 
-Lemma Rseq_poly_shift_equiv : forall d, (Rseq_poly d) ~ (Rseq_shift (Rseq_poly d)).
+Lemma Rseq_poly_shifts_equiv : forall d k, (Rseq_poly d) ~ (Rseq_shifts (Rseq_poly d) k).
 Proof.
-intros d eps eps_pos.
- assert (lemma : Rseq_cv (fun n => 1 - (1 + 1 / INR n) ^ d)%R 0).
+intros d k eps eps_pos.
+ assert (lemma : Rseq_cv (fun n => 1 - (1 + INR k / INR n) ^ d)%R 0).
   rewrite <- (Rplus_opp_r 1) ; apply Rseq_cv_minus_compat.
    apply Rseq_constant_cv.
    rewrite <- (pow1 d) ; apply Rseq_cv_pow_compat ; rewrite pow1.
-   rewrite <- (Rplus_0_r 1) ; apply Rseq_cv_plus_compat ; rewrite Rplus_0_r.
-   apply Rseq_constant_cv.
-   apply Rseq_cv_eq_compat with (fun n => / INR n)%R.
-    intro n ; apply Rmult_1_l.
+   rewrite <- (Rplus_0_r 1) ; apply Rseq_cv_plus_compat.
+    rewrite Rplus_0_r ; apply Rseq_constant_cv.
+   rewrite <- (Rmult_0_r (INR k)) ; apply Rseq_cv_mult_compat.
+    apply Rseq_constant_cv.
    apply Rseq_cv_pos_infty_inv_compat, Rseq_cv_pos_infty_INR.
  destruct (lemma _ eps_pos) as [N HN] ; exists (S N) ; intros n n_lb.
-  transitivity (Rabs (1 - (1 + 1 / INR n) ^ d) * Rabs (Rseq_poly d n)).
+  transitivity (Rabs (1 - (1 + INR k / INR n) ^ d) * Rabs (Rseq_poly d n)).
    right ; rewrite <- Rabs_mult ; apply Rabs_eq_compat ;
    unfold Rseq_poly, Rseq_minus, Rseq_shift ; ring_simplify.
    rewrite Rplus_comm, Ropp_mult_distr_l_reverse, <- Rpow_mult_distr.
    apply Rplus_eq_compat_l, Ropp_eq_compat, Rpow_eq_compat.
-   rewrite S_INR ; field ; apply not_0_INR ; omega.
+   rewrite plus_INR ; field ; apply not_0_INR ; omega.
   apply Rmult_le_compat_r ; [apply Rabs_pos |].
   rewrite <- (Rminus_0_r (1 - _)) ; left ; apply HN ; omega.
+Qed.
+
+Lemma Rseq_poly_shift_equiv : forall d,
+  (Rseq_poly d) ~ (Rseq_shift (Rseq_poly d)).
+Proof.
+intros d ; eapply Rseq_equiv_eq_compat, Rseq_poly_shifts_equiv.
+ reflexivity.
+ eapply Rseq_eq_trans.
+  apply Rseq_shifts_shift.
+  apply Rseq_shifts_0.
 Qed.
 
 (** Convergence of polynomials. *)

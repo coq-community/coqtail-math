@@ -428,7 +428,7 @@ Qed.
 
 Lemma Rpser_alembert_finite : forall (An : Rseq) (lambda : R),
   lambda <> 0 -> (forall n, An n <> 0) ->
-  Rseq_cv (fun n => Rabs (An (S n) / An n)) lambda ->
+  Rseq_cv (| (Rseq_shift An / An) |) lambda ->
   finite_cv_radius An (/ lambda).
 Proof.
 intros An lam lam_neq An_neq An_l.
