@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import MyReals MyINR.
+Require Import MyReals MyINR MyNNR.
 Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts Rsequence_sums_facts.
 Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_facts.
 Require Import Rsequence_subsequence.
@@ -30,7 +30,7 @@ Require Import Fourier.
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
-Require Import Rfunction_def Functions Rpow_facts.
+Require Import Rfunction_def Functions Rextensionality Rpow_facts.
 
 Open Scope R_scope.
 
@@ -258,7 +258,7 @@ intros r ; apply Rle_Cv_radius_weak_compat with (| exp_seq |)%R.
  rewrite <- Cv_radius_weak_abs ; apply exp_infinite_cv_radius.
 Qed.
 
-(** Defintion of the sums *)
+(** Definition of the sums *)
 
 Definition Rexp (x : R) := sum  _ exp_infinite_cv_radius x.
 
@@ -414,6 +414,8 @@ Qed.
 
 (* Link with the standard's library definitions. *)
 
+
+(* TODO: move this *)
 Lemma unfold_plus1 : forall n, (n + 1 = S n)%nat.
 Proof.
 intros n ; ring.
@@ -443,14 +445,7 @@ Qed.
 
 (** * Definition of arctan *)
 
-Definition arctan_seq : Rseq.
-Proof.
-unfold Rseq ; apply Rseq_zip.
- exact zero_seq.
- intro n ; exact ((- 1) ^ n / INR (S (2 * n))).
-Defined.
-
-Require Import MyNNR.
+(* TODO: move this *)
 
 Lemma Rseq_shifts_poly_neq : forall d n k, (0 < k)%nat ->
   Rseq_shifts (Rseq_poly d) k n <> 0.
@@ -459,59 +454,84 @@ intros d k n Hk ; unfold Rseq_shift, Rseq_poly ;
  apply pow_nonzero, not_0_INR ; omega.
 Qed.
 
+(** Preliminary definition: the part of arctan that computes! *)
+
+Definition arct_seq : Rseq := fun n => / INR (S (2 * n)).
+
+Lemma arct_cv_radius : finite_cv_radius arct_seq 1.
+Proof.
+rewrite <- Rinv_1 ; apply Rpser_alembert_finite.
+ apply Rgt_not_eq ; fourier.
+ intro n ; apply Rinv_neq_0_compat, not_0_INR ; omega.
+ assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; omega) ;
+  pose (phi := existT _ _ Hf) ; rewrite Rseq_cv_eq_compat with
+  (Vn := (Rseq_poly 1 ⋅ phi / (Rseq_shifts (Rseq_poly 1) 2 ⋅ phi))%Rseq).
+ apply Rseq_equiv_cv_div.
+  eapply Rseq_equiv_subseq_compat, Rseq_poly_shifts_equiv.
+  intro ; apply Rseq_shifts_poly_neq ; omega.
+ intro n ; unfold Rseq_shift, Rseq_shifts, Rseq_abs, Rseq_div, Rseq_poly,
+  extracted, arct_seq, Rdiv ; do 2 rewrite pow_1 ;
+  rewrite Rinv_involutive, Rabs_right.
+  simpl proj1_sig ; simpl mult ; simpl plus ; rewrite <- plus_n_Sm ; apply Rmult_comm.
+  rewrite Rmult_comm ; apply Rle_ge, Rle_mult_inv_pos.
+   apply pos_INR.
+   apply lt_0_INR ; omega.
+  apply not_0_INR ; omega.
+Qed.
+
+Definition arctan_seq : Rseq.
+Proof.
+unfold Rseq ; apply Rseq_zip.
+ exact zero_seq.
+ exact (Rseq_alt arct_seq).
+Defined.
+
 Lemma arctan_cv_radius : finite_cv_radius arctan_seq 1.
 Proof.
 rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| fourier | simpl ; ring].
  apply finite_cv_radius_zip_compat_r.
   intros ; apply zero_infinite_cv_radius.
-  replace (nonneg (nnr_sqr 1)) with (/ 1) by (rewrite Rinv_1 ; simpl ; ring).
- apply Rpser_alembert_finite.
+  simpl nonneg ; do 2 rewrite Rmult_1_r ;
+   rewrite <- finite_cv_radius_alt_compat ; apply arct_cv_radius.
+Qed.
+
+Definition arctan (x : R) : R.
+Proof.
+destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
+ exact (PI / 4).
+ exact (sum_r _ _ arctan_cv_radius x).
+Defined.
+
+Lemma arctan_sums : forall x, - 1 < x <= 1 -> Rpser arctan_seq x (arctan x).
+Proof.
+intros x [x_lb x_ub] ; unfold arctan ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
+ subst ; rewrite <- Rmult_1_l ; apply Rpser_zip_compat_0_r.
+  unfold PI ; destruct exist_PI as [v Hv].
+  rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc, Rinv_r, Rmult_1_r.
+  eapply Rseq_cv_eq_compat, Hv.
+  unfold Rseq_pps ; intro n ; apply Rseq_sum_ext ; clear n.
+  intro n ; unfold gt_pser, tg_alt, PI_tg, Rseq_mult.
+  do 2 rewrite pow1 ; rewrite unfold_plus1, Rmult_1_r ; reflexivity.
   apply Rgt_not_eq ; fourier.
-  intro n ; apply Rmult_integral_contrapositive_currified.
-   apply pow_nonzero, Rlt_not_eq ; fourier.
-   apply Rinv_neq_0_compat, not_0_INR ; omega.
- assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; omega) ;
-  pose (phi := existT _ _ Hf) ; rewrite Rseq_cv_eq_compat with
-  (Vn := (Rseq_poly 1 ⋅ phi / (Rseq_shifts (Rseq_poly 1) 2 ⋅ phi))%Rseq).
- apply Rseq_equiv_cv_div.
-  eapply Rseq_equiv_subseq_compat.
-   eapply Rseq_poly_shifts_equiv.
-  intro ; apply Rseq_shifts_poly_neq ; omega.
- intro n ; unfold Rseq_shift, Rseq_shifts, Rseq_abs, Rseq_div, Rseq_poly, extracted.
- repeat rewrite <- Rabs_Rdiv.
- unfold Rdiv ; do 2 rewrite Rabs_opp1, Rmult_1_l ; rewrite Rinv_involutive.
- rewrite Rabs_right, pow_1. rewrite Rabs_right, pow_1.
- simpl proj1_sig ; simpl mult ; simpl plus ; rewrite <- plus_n_Sm ; apply Rmult_comm.
-  apply Rle_ge, pos_INR.
-  apply Rle_ge, pos_INR.
-  apply Rabs_no_R0, not_0_INR ; omega.
-  apply not_0_INR ; omega.
-  apply not_0_INR ; omega.
-  apply Rmult_integral_contrapositive_currified.
-   apply pow_nonzero, Rlt_not_eq ; fourier.
-   apply Rinv_neq_0_compat, not_0_INR ; omega.
+ apply sum_r_sums, Rabs_def1.
+  apply Rneq_le_lt ; assumption.
+  assumption.
 Qed.
 
-Lemma arctan1_PI4 : Rpser arctan_seq 1 (PI / 4).
-Proof.
-rewrite <- Rmult_1_l ; apply Rpser_zip_compat_0_r ;
- unfold PI ; destruct exist_PI as [v Hv].
- rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc, Rinv_r, Rmult_1_r.
- eapply Rseq_cv_eq_compat, Hv.
- unfold Rseq_pps ; intro n ; apply Rseq_sum_ext ; clear n.
- intro n ; unfold gt_pser, tg_alt, PI_tg, Rseq_mult.
- do 2 rewrite pow1 ; rewrite unfold_plus1, Rmult_1_r ; reflexivity.
- apply Rgt_not_eq ; fourier.
-Qed.
+(** Specific values of arctan *)
 
-Definition arctan := sum_r _ _ arctan_cv_radius.
-
-Lemma arctan_0 : arctan 0 = 0.
+Lemma arctan0_0 : arctan 0 = 0.
 Proof.
-eapply Rpser_unique ; [eapply sum_r_sums |].
- rewrite Rabs_R0 ; apply Rlt_0_1.
+eapply Rpser_unique ; [eapply arctan_sums |].
+ split ; fourier.
  apply Rseq_cv_eq_compat with (fun _ => 0).
-  intro ; rewrite Rseq_pps_0_simpl ; unfold arctan_seq, Rseq_zip.
-   case (n_modulo_2 0) ; intros [p Hp] ; [reflexivity | apply False_ind ; omega ].
-  apply Rseq_constant_cv.
+ intro ; rewrite Rseq_pps_0_simpl ; unfold arctan_seq, Rseq_zip.
+  case (n_modulo_2 0) ; intros [p Hp] ; [reflexivity | apply False_ind ; omega ].
+ apply Rseq_constant_cv.
+Qed.
+
+Lemma arctan1_PI4 : arctan 1 = PI / 4.
+Proof.
+unfold arctan ; destruct (MyRIneq.Req_dec 1 1) as [Heq | Hf] ;
+ [| destruct Hf] ; reflexivity.
 Qed.

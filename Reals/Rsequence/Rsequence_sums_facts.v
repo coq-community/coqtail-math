@@ -30,12 +30,6 @@ Open Scope Rseq_scope.
 
 (** Basic properties *)
 
-Lemma Rseq_sum_simpl : forall Un n,
-  (Rseq_sum Un (S n) = Rseq_sum Un n + Un (S n))%R.
-Proof.
-intros ; reflexivity.
-Qed.
-
 Lemma Rseq_sum_ext_strong : forall Un Vn n,
   (forall p, (p <= n)%nat -> Un p = Vn p) ->
   Rseq_sum Un n = Rseq_sum Vn n.
@@ -488,6 +482,22 @@ Lemma Rseq_pps_zip_compat_even : forall An Bn x n,
 Proof.
 intros An Bn x n ; unfold Rseq_pps ; erewrite Rseq_sum_ext ; [| eapply gt_pser_zip_compat] ;
  rewrite Rseq_sum_zip_compat_even, Rseq_sum_scal_compat_l ; reflexivity.
+Qed.
+
+Lemma unfold_Ropp : forall x, (- x = - 1 * x)%R.
+Proof.
+intros ; ring.
+Qed.
+
+Lemma Rseq_pps_alt_compat : forall An x,
+  Rseq_pps (Rseq_alt An) x == Rseq_pps An (- x).
+Proof.
+intros An x n ; induction n.
+ do 2 rewrite Rseq_pps_O_simpl ; unfold Rseq_alt, Rseq_mult, Rseq_pow ;
+  apply Rmult_1_l.
+ do 2 rewrite Rseq_pps_simpl ; rewrite IHn ; apply Rplus_eq_compat_l.
+  unfold Rseq_alt, Rseq_mult, Rseq_pow ;
+  rewrite (unfold_Ropp x), Rpow_mult_distr ; ring.
 Qed.
 
 (** * Rpser_abs, Rpser *)

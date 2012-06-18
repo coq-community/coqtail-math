@@ -47,7 +47,7 @@ intros An r Pr [a a_pos] r'_ub.
  apply Rseq_cv_eq_compat with (Rseq_sum (gt_abs_pser An (middle a r))).
  intro n ; fold (Rseq_abs (gt_abs_pser An (middle a r))) ;
  apply Rseq_sum_ext with (Vn := gt_abs_pser An (middle a r)) ;
- apply Rseq_abs_proj.
+ apply Rseq_abs_idempotent.
  assert (tmp := Rseq_sum_ext _ _ (gt_abs_pser_unfold An (middle a r))) ;
  symmetry in tmp ; apply (Rseq_cv_eq_compat  _ _ _ tmp) ; clear tmp.
  apply weaksum_r_sums ; rewrite Rabs_Rabsolu ; assumption.

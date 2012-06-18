@@ -218,6 +218,36 @@ intros An Bn n ; unfold An_deriv, Rseq_shift,
 Rseq_mult, Rseq_minus ; apply Rmult_minus_distr_l.
 Qed.
 
+Lemma An_deriv_abs_compat : forall An,
+  An_deriv (| An |) == | An_deriv An |.
+Proof.
+intros An n ; unfold An_deriv, Rseq_shift, Rseq_mult, Rseq_abs ;
+ rewrite Rabs_mult ; apply Rmult_eq_compat.
+ symmetry ; apply Rabs_right, Rle_ge, pos_INR.
+ reflexivity.
+Qed.
+
+Lemma An_deriv_alt_compat : forall An,
+  An_deriv (Rseq_alt An) == - Rseq_alt (An_deriv An).
+Proof.
+intros An n ; unfold An_deriv, Rseq_shift, Rseq_alt, Rseq_mult, Rseq_opp ;
+ simpl Rseq_pow ; ring.
+Qed.
+
+Lemma An_deriv_mult_compat_l : forall An Bn,
+  An_deriv (An * Bn) == An_deriv An * Rseq_shift Bn.
+Proof.
+intros An Bn n ; unfold An_deriv, Rseq_mult, Rseq_shift ;
+ ring.
+Qed.
+
+Lemma An_deriv_mult_compat_r : forall An Bn,
+  An_deriv (An * Bn) == Rseq_shift An * An_deriv Bn.
+Proof.
+intros An Bn n ; unfold An_deriv, Rseq_mult, Rseq_shift ;
+ ring.
+Qed.
+
 (** * Cv_radius_weak *)
 (** There exists always a Cv_radius_weak. *)
 
@@ -389,6 +419,18 @@ intros An Bn r1 r2 RhoA RhoB.
  unfold Rminus ; apply Cv_radius_weak_plus ; assumption.
 Qed.
 
+Lemma Cv_radius_weak_alt : forall An r,
+  Cv_radius_weak An r <-> Cv_radius_weak (Rseq_alt An) r.
+Proof.
+intros An r ; split ; intro rAn.
+ eapply Cv_radius_weak_abs, Cv_radius_weak_ext.
+  apply Rseq_abs_alt.
+  rewrite <- Cv_radius_weak_abs ; assumption.
+ rewrite Cv_radius_weak_abs, Cv_radius_weak_ext with (Bn := Rseq_abs (Rseq_alt An)).
+  rewrite <- Cv_radius_weak_abs ; assumption.
+  symmetry ; apply Rseq_abs_alt.
+Qed.
+
 (** This lemma will, together with the one about An_deriv, give us Cv_radius_weak_prod. *)
 
 Lemma Cv_radius_weak_prod_prelim : forall An Bn r1 r2,
@@ -554,7 +596,7 @@ intros An lam r lam_neq ; split ; intros [H_inf H_sup].
   [apply H_inf | | apply H_sup |] ; assumption.
 Qed.
 
-Lemma finite_cv_radius_abs_comapt : forall (An : Rseq) (r : R),
+Lemma finite_cv_radius_abs_compat : forall (An : Rseq) (r : R),
   finite_cv_radius An r <-> finite_cv_radius (| An |) r.
 Proof.
 intros An r ; split ; intros [H_inf H_sup].
@@ -563,6 +605,16 @@ intros An r ; split ; intros [H_inf H_sup].
  split ; intros r' ; rewrite Cv_radius_weak_abs ;
   [apply H_inf | apply H_sup] ; assumption.
 Qed.
+
+Lemma finite_cv_radius_alt_compat : forall (An : Rseq) (r : R),
+  finite_cv_radius An r <-> finite_cv_radius (Rseq_alt An) r.
+Proof.
+intros An r ; split ; intros [r_ub r_lub] ; split.
+ intros ; rewrite <- Cv_radius_weak_alt ; apply r_ub ; assumption.
+ intros ; rewrite <- Cv_radius_weak_alt ; apply r_lub ; assumption.
+ intros ; apply Cv_radius_weak_alt, r_ub ; assumption.
+ intros ; rewrite Cv_radius_weak_alt ; apply r_lub ; assumption.
+Qed. 
 
 Lemma finite_cv_radius_pos : forall (An : Rseq) (r : R),
   finite_cv_radius An r -> 0 <= r.
@@ -671,12 +723,20 @@ intros An lam lam_neq ; split ; intros rho r ;
  auto.
 Qed.
 
-Lemma infinite_cv_radius_abs_comapt : forall (An : Rseq),
+Lemma infinite_cv_radius_abs_compat : forall (An : Rseq),
   infinite_cv_radius An <-> infinite_cv_radius (| An |).
 Proof.
 intros An ; split ; intros rho r ;
  [rewrite <- Cv_radius_weak_abs | rewrite Cv_radius_weak_abs] ;
  apply rho.
+Qed.
+
+Lemma infinite_cv_radius_alt_compat : forall An,
+  infinite_cv_radius An <-> infinite_cv_radius (Rseq_alt An).
+Proof.
+intro An ; split ; intros rAn r ;
+ [rewrite <- Cv_radius_weak_alt | rewrite Cv_radius_weak_alt] ;
+ apply rAn.
 Qed.
 
 Lemma infinite_cv_radius_opp_compat : forall (An : Rseq),
@@ -803,6 +863,14 @@ intros An Bn x la lb Hla Hlb ; unfold Rpser ; apply Rseq_cv_even_odd_compat.
   apply Rseq_cv_shift_compat_reciprocal, Hla.
  rewrite Rseq_cv_eq_compat ; [| intro n ; apply Rseq_pps_zip_compat_odd].
  apply Rseq_cv_plus_compat, Rseq_cv_mult_compat ; (assumption || apply Rseq_constant_cv).
+Qed.
+
+Lemma Rpser_alt_compat : forall An x la,
+  Rpser An (- x) la -> Rpser (Rseq_alt An) x la.
+Proof.
+intros An x la Hla ; eapply Rseq_cv_eq_compat.
+ apply Rseq_pps_alt_compat.
+ assumption.
 Qed.
 
 Lemma Rpser_expand_compat : forall An l x la,

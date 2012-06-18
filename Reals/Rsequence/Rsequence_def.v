@@ -153,6 +153,7 @@ end.
 
 Definition Rseq_pow r n := r ^ n.
 
+Definition Rseq_alt := Rseq_mult (Rseq_pow (- 1)).
 Definition Rseq_fact n := INR (fact n).
 
 Create HintDb Rseq.
