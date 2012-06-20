@@ -20,11 +20,8 @@ USA.
 *)
 
 Require Import Rbase Rtactic.
-Require Import PSeries_reg.
 Require Import Fourier.
-Require Import Ranalysis.
-Require Import Rfunctions.
-Require Import AltSeries Rtrigo_facts.
+Require Import Ranalysis Rfunctions Rtrigo_facts.
 Require Import Rseries_def.
 Require Import SeqProp.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts Ranalysis5.
@@ -36,6 +33,8 @@ Require Import MyRIneq.
 Require Import Ass_handling.
 
 Open Scope R_scope.
+
+(** TODO: move this! *)
 
 Lemma Zero_in : open_interval (- PI / 2) (PI / 2) 0.
 Proof.
@@ -61,6 +60,8 @@ Lemma _PI2_Rlt_PI2 : - PI / 2 < PI / 2.
 replace (- PI / 2) with (- (PI / 2)) by field ;
  transitivity 0 ; [apply _PI2_RLT_0 | apply PI2_RGT_0].
 Qed.
+
+(** * Definition of arctan as the reciprocal of tan *)
 
 Lemma tan_reciprocal_image_open_interval : forall lb ub y,
   open_interval (- PI / 2) (PI / 2) lb ->
@@ -172,6 +173,8 @@ intro y ;
 Qed.
 
 Definition atan (y : R) : R := let (x, _) := exists_atan y in x.
+
+(** Proof that these really are reciprocal *)
 
 Lemma reciprocal_tan_atan : reciprocal tan atan.
 Proof.
@@ -350,18 +353,26 @@ intros x x_pos ; replace 0 with (/ (1 + x ^ 2) - / (1 + x ^ 2)) by ring.
     [apply Rgt_not_eq ; apply One_plus_sqr_pos_lt | assumption].
 Qed.
 
+(* TODO: move this! *)
+
+Lemma x_modulo_B : forall B (B_pos : 0 < B) x,
+ { k : Z | 0 < IZR k * B - x <= B }.
+Proof.
+intros B B_pos x ; pose (k := up (x / B)) ; exists k.
+ destruct (archimed (x / B)) as [x_lb x_ub] ; fold k in x_lb, x_ub.
+  split.
+  apply Rlt_Rminus, Rmult_Rinv_lt_compat_l_rev, x_lb ; assumption.
+  apply Rminus_le_compat_l, Rminus_le_compat_l_rev.
+  apply Rmult_le_reg_r with (/ B).
+   apply Rinv_0_lt_compat ; assumption.
+   transitivity (IZR k - x / B).
+    right ; field ; apply Rgt_not_eq ; assumption.
+    rewrite Rinv_r ; [assumption | apply Rgt_not_eq, B_pos].
+Qed.
+
 Lemma x_modulo_PI : forall x, { k : Z | 0 < IZR k * PI - x <= PI }.
 Proof.
-intro x ; pose (k := up (x / PI)) ; exists k.
- destruct (archimed (x / PI)) as [x_lb x_ub] ; fold k in x_lb, x_ub.
-  split.
-  apply Rlt_Rminus, Rmult_Rinv_lt_compat_l_rev, x_lb ; exact PI_RGT_0.
-  apply Rminus_le_compat_l, Rminus_le_compat_l_rev.
-  apply Rmult_le_reg_r with (/ PI).
-   apply Rinv_0_lt_compat, PI_RGT_0.
-   transitivity (IZR k - x / PI).
-    right ; field ; apply Rgt_not_eq, PI_RGT_0.
-    rewrite Rinv_r ; [assumption | apply Rgt_not_eq, PI_RGT_0].
+apply x_modulo_B ; apply PI_RGT_0.
 Qed.
 
 Lemma tan_period : forall x, cos x <> 0 -> tan x = tan (x + PI).
@@ -374,4 +385,202 @@ do 2 rewrite Rmult_0_r. unfold Rminus. rewrite Ropp_0.
 do 2 rewrite Rplus_0_r. unfold Rdiv.
 rewrite Rinv_mult_distr. rewrite <- Ropp_inv_permute.
 field. apply H. discrR. apply H. discrR.
+Qed.
+
+(* TODO: move this! *)
+
+Lemma Ropp_eq_compat_rev : forall a b, - a = - b -> a = b.
+Proof.
+intros a b Heq ; rewrite <- Ropp_involutive, <- Heq, Ropp_involutive ;
+ reflexivity.
+Qed.
+
+Lemma Rplus_eq_compat_l_rev_strong :
+  forall a b c d, a + c = b + d -> a = b -> c = d.
+Proof.
+intros a b c d Heq Hab ;
+ replace c with (a + c - a) by ring ;
+ replace d with (b + d - b) by ring ;
+ subst ; apply Rplus_eq_compat_r ; assumption.
+Qed.
+
+Lemma Rminus_eq_compat_rev_strong :
+  forall a b c d, a - c = b - d -> c = d -> a = b.
+Proof.
+intros a b c d Heq Hcd ;
+ replace a with (a - c + c) by ring ;
+ replace b with (b - d + d) by ring ;
+ subst ; apply Rplus_eq_compat_r ; assumption.
+Qed.
+
+Lemma Rmult_eq_compat_r_rev_strong :
+  forall a b c d, a * c = b * d -> c = d -> d <> 0 -> a = b.
+Proof.
+intros a b c d Heq Hcd c_neq.
+ replace a with (a * c * / c).
+ replace b with (b * d * / d).
+ subst ; apply Rmult_eq_compat_r ; assumption.
+ field ; subst ; assumption.
+ field ; subst ; assumption.
+Qed.
+
+Lemma Rmin_le_Rmax : forall a b, Rmin a b <= Rmax a b.
+Proof.
+intros a b ; unfold Rmin, Rmax ; destruct (Rle_dec a b).
+ assumption.
+ left ; apply Rnot_le_lt ; assumption.
+Qed.
+
+Lemma Rmin_lt_Rmax : forall a b, a <> b -> Rmin a b < Rmax a b.
+Proof.
+intros a b Hneq ; unfold Rmin, Rmax ; destruct (Rle_dec a b).
+ apply Rneq_le_lt ; assumption.
+ apply Rnot_le_lt ; assumption.
+Qed.
+
+(** * Definition of arctan as the sum of a power series. *)
+
+(** *)
+Definition arctan_pos (x : R) : R.
+Proof.
+destruct (Rlt_le_dec x 0).
+ exact 0.
+ destruct (Rle_lt_dec x 1).
+  exact (arctan_sum x).
+  exact (2 * arctan_sum 1 - arctan_sum (/ x)).
+Defined.
+
+Definition arctan (x : R) : R.
+Proof.
+destruct (Rlt_le_dec x 0).
+ exact (- arctan_pos (- x)).
+ exact (arctan_pos x).
+Defined.
+
+Lemma arctan_explicit_Rball : Rball_eq 0 1 arctan arctan_sum.
+Proof.
+intros x x_in ; unfold arctan, arctan_pos, arctan_sum.
+ destruct (Rlt_le_dec x 0).
+  destruct (Rlt_le_dec (- x) 0).
+   apply False_ind ; fourier.
+   destruct (Rle_lt_dec (- x) 1).
+    destruct (Req_dec (- x) 1).
+     destruct (Req_dec x 1).
+      apply False_ind ; fourier.
+      apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; fourier.
+     destruct (Req_dec x 1).
+      apply False_ind ; fourier.
+      symmetry ; apply sum_r_arctan_odd ; assumption.
+     apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; fourier.
+    destruct (Rle_lt_dec x 1).
+     reflexivity.
+     apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; fourier.
+Qed.
+
+Lemma arctan_explicit_pos : forall x, 1 <= x ->
+  arctan x = 2 * arctan 1 - arctan_sum (/ x).
+Proof.
+intros x x_lb ; unfold arctan, arctan_sum, arctan_pos.
+ destruct (Rlt_le_dec x 0).
+  apply False_ind ; fourier.
+  destruct (Rle_lt_dec x 1).
+   destruct (Rlt_le_dec 1 0).
+    apply False_ind ; fourier.
+    destruct (Rle_lt_dec 1 1).
+     destruct (Req_dec (/ x) 1) as [Heq | Hneq].
+      assert (Hx : x = 1).
+       rewrite <- (Rmult_1_r x), <- Heq, Rinv_r.
+        symmetry ; assumption.
+        apply Rgt_not_eq ; fourier.
+      rewrite Hx, arctan_sum_1_PI4 ; ring.
+     assert (Hx : x = 1) by (apply Rle_antisym ; assumption).
+      apply False_ind, Hneq ; rewrite Hx, Rinv_1 ; reflexivity.
+    apply False_ind ; fourier.
+   destruct (Rlt_le_dec 1 0).
+    apply False_ind ; fourier.
+    destruct (Rle_lt_dec 1 1).
+     unfold arctan_sum ; destruct (Req_dec (/ x) 1) as [Heq | Hneq].
+      assert (Hx : x = 1).
+       rewrite <- (Rmult_1_r x), <- Heq, Rinv_r.
+        symmetry ; assumption.
+        apply Rgt_not_eq ; fourier.
+      apply False_ind ; fourier.
+     reflexivity.
+    apply False_ind ; fourier.
+Qed.
+
+Lemma derivable_arctan_pos : forall lb ub x,
+  1 <= lb -> open_interval lb ub x ->
+  derivable_pt_lim_in (open_interval lb ub) arctan x (/ (1 + x ^ 2)).
+Proof.
+intros lb ub x lb_lb x_in.
+ assert (x_pos : 0 < x) by (transitivity 1 ; [fourier | apply Rle_lt_trans with lb ; ass_apply]).
+ assert (Rinvx_in : Rball 0 1 (/ x)).
+  rewrite Rball_0_simpl, Rabs_Rinv_pos, <- Rinv_1 ; [| assumption].
+  apply Rinv_1_lt_contravar ; [reflexivity | apply Rle_lt_trans with lb ; ass_apply].
+ eapply derivable_pt_lim_in_ext_strong.
+  assumption.
+  intros y y_in ; symmetry ; apply arctan_explicit_pos ; transitivity lb ; [| left] ; ass_apply.
+  replace (/ (1 + x ^ 2)) with (0 - ((- 1 / (x ^ 2)) * / (1 + (/ x) ^ 2))).
+  apply derivable_pt_lim_in_minus.
+   apply derivable_pt_lim_in_const.
+   eapply derivable_pt_lim_in_contravariant ; [eapply included_open_interval_Rball |].
+   apply derivable_pt_lim_Rball_comp with 0 1.
+    apply included_open_interval_Rball ; assumption.
+    assumption.
+    apply derivable_pt_lim_in_inv.
+     apply included_open_interval_Rball ; assumption.
+     apply Rgt_not_eq ; assumption.
+    apply derivable_pt_lim_in_id.
+    apply derivable_pt_lim_Rball_arctan_sum ; assumption.
+ field ; split.
+  apply Rgt_not_eq, One_plus_sqr_pos_lt.
+  apply Rgt_not_eq ; assumption.
+Qed.
+
+(** *)
+
+Lemma Rball_eq_atan_arctan_sum : Rball_eq 0 1 atan arctan_sum.
+Proof.
+intros x x_in ; destruct (Req_dec x 0) as [x_eq | x_neq].
+ subst ; rewrite atan_0, arctan_sum_0_0 ; reflexivity.
+ pose (lb := Rmin 0 x) ; pose (ub := Rmax 0 x) ;
+ assert (Hbs : lb < ub).
+  apply Rmin_lt_Rmax ; symmetry ; assumption.
+ assert (lb_lb : - 1 < lb).
+  apply Rmin_glb_lt ; [| destruct (Rabs_def2 _ _ x_in)] ; fourier.
+ assert (ub_ub : ub < 1).
+  apply Rmax_lub_lt ; [| destruct (Rabs_def2 _ _ x_in)] ; fourier.
+ assert (atan_der : forall c, lb < c < ub -> derivable_pt atan c).
+  intros ; apply derivable_atan.
+ assert (arctan_der1 : forall c, lb <= c <= ub -> derivable_pt arctan_sum c).
+  intros ; eapply derivable_Rball_derivable_pt.
+   eapply derivable_Rball_arctan_sum.
+   rewrite Rball_0_simpl ; apply Rabs_def1.
+    apply Rle_lt_trans with ub ; ass_apply.
+    apply Rlt_le_trans with lb ; ass_apply.
+ assert (arctan_der : forall  c, lb < c < ub -> derivable_pt arctan_sum c).
+  intros ; apply arctan_der1 ; split ; left ; ass_apply.
+ destruct (MVT arctan_sum atan lb ub) with arctan_der atan_der as [c [c_bd Hc]].
+  assumption.
+  intros c c_in ; eapply derivable_continuous_pt, arctan_der1 ; assumption.
+  intros ; apply continuity_atan.
+ assert (c_in : Rball 0 1 c).
+  rewrite Rball_0_simpl ; apply Rabs_def1.
+   transitivity ub ; ass_apply.
+   transitivity lb ; ass_apply.
+ assert (eq_in_0 : atan 0 = arctan_sum 0) by (rewrite atan_0, arctan_sum_0_0 ; reflexivity).
+ assert (eq_in_c : derive_pt arctan_sum c (arctan_der c c_bd) = derive_pt atan c (atan_der c c_bd)).
+  rewrite derive_pt_atan ; apply derive_pt_eq_0, derivable_pt_lim_Rball_pt_lim with 0 1.
+  assumption.
+  apply derivable_pt_lim_Rball_arctan_sum ; assumption.
+ assert (der_neq : derive_pt atan c (atan_der c c_bd) <> 0).
+  rewrite derive_pt_atan ; apply Rinv_neq_0_compat, Rgt_not_eq, One_plus_sqr_pos_lt.
+ unfold ub, lb, Rmin, Rmax in Hc ; destruct (Rle_dec 0 x) as [x_pos | x_neg].
+  eapply Rminus_eq_compat_rev_strong, eq_in_0.
+   eapply Rmult_eq_compat_r_rev_strong, der_neq ; try eapply eq_in_c.
+   exact Hc.
+  eapply Ropp_eq_compat_rev, Rplus_eq_compat_l_rev_strong, eq_in_0.
+   eapply Rmult_eq_compat_r_rev_strong, der_neq ; try eapply eq_in_c.
+   exact Hc.
 Qed.

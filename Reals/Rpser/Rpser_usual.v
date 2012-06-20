@@ -31,6 +31,7 @@ Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_r
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
 Require Import Rfunction_def Functions Rextensionality Rpow_facts.
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 
 Open Scope R_scope.
@@ -518,16 +519,16 @@ rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| fourier | simpl ; ring].
    rewrite <- finite_cv_radius_alt_compat ; apply arct_cv_radius.
 Qed.
 
-Definition arctan (x : R) : R.
+Definition arctan_sum (x : R) : R.
 Proof.
 destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
  exact (PI / 4).
  exact (sum_r _ _ arctan_cv_radius x).
 Defined.
 
-Lemma arctan_sums : forall x, - 1 < x <= 1 -> Rpser arctan_seq x (arctan x).
+Lemma arctan_sum_sums : forall x, - 1 < x <= 1 -> Rpser arctan_seq x (arctan_sum x).
 Proof.
-intros x [x_lb x_ub] ; unfold arctan ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
+intros x [x_lb x_ub] ; unfold arctan_sum ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
  subst ; rewrite <- Rmult_1_l ; apply Rpser_zip_compat_0_r.
   unfold PI ; destruct exist_PI as [v Hv].
   rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc, Rinv_r, Rmult_1_r.
@@ -558,25 +559,71 @@ intros r n r_pos r_lt ; rewrite <- (pow1 (S n)) ;
  apply pow_lt_compat ; auto ; omega.
 Qed.
 
-Lemma arctan_explicit : forall x, open_interval (- 1) 1 x ->
-  arctan x = x * sum_r _ _ arct_cv_radius (- x ^ 2).
+Lemma sum_r_arctan_explicit : forall x, Rball 0 1 x ->
+  sum_r _ _ arctan_cv_radius x = x * sum_r _ _ arct_cv_radius (- x ^ 2).
 Proof.
-intros x x_in.
- assert (x_bd : Rabs x < 1) by (apply Rabs_def1 ; apply x_in).
+intros x x_in ;
+ assert (x_bd : Rabs x < 1) by (rewrite <- Rball_0_simpl ; apply x_in).
  assert (x2_bd : Rabs (x ^ 2) < 1).
   rewrite <- RPow_abs ; apply Rpow_lt_1_compat ; [apply Rabs_pos | assumption].
- unfold arctan ; destruct (MyRIneq.Req_dec x 1).
- subst ; destruct (Rlt_irrefl 1) ; apply x_in.
  eapply eq_trans ; [apply sum_r_zip_compat_0_r with
   (rAn := proj1 (finite_cv_radius_alt_compat _ _) arct_cv_radius) ; assumption |].
  apply Rmult_eq_compat_l, sum_r_alt_compat ; assumption.
 Qed.
 
+Lemma arctan_sum_explicit : forall x, Rball 0 1 x ->
+  arctan_sum x = x * sum_r _ _ arct_cv_radius (- x ^ 2).
+Proof.
+intros x x_in ; unfold arctan_sum ; destruct (MyRIneq.Req_dec x 1).
+ subst ; destruct (Rlt_irrefl 1) ; rewrite Rball_0_simpl, Rabs_R1 in x_in ; apply x_in.
+ apply sum_r_arctan_explicit ; assumption.
+Qed.
+
+(* TODO: move this! *)
+
+Lemma Ropp_sqr : forall x, (- x) ^ 2 = x ^ 2.
+Proof.
+intro x ; rewrite unfold_Ropp, Rpow_mult_distr.
+ replace 2%nat with (2 * 1)%nat by reflexivity ; rewrite pow_1_even ; ring.
+Qed.
+
+Lemma Rball_0_opp_compat : forall x r, Rball 0 r x -> Rball 0 r (- x).
+Proof.
+unfold Rball ; intros x r ; do 2 rewrite Rminus_0_r ; rewrite Rabs_Ropp ; trivial.
+Qed.
+
+Lemma Rball_0_opp_compat_rev : forall x r, Rball 0 r (- x) -> Rball 0 r x.
+Proof.
+intros ; rewrite <- Ropp_involutive ; apply Rball_0_opp_compat ; assumption.
+Qed.
+
+Lemma sum_r_arctan_odd : forall x, Rball 0 1 x ->
+  sum_r _ _ arctan_cv_radius x = - (sum_r _ _ arctan_cv_radius (- x)).
+Proof.
+intros x x_in.
+ rewrite sum_r_arctan_explicit.
+ rewrite sum_r_arctan_explicit.
+ rewrite Ropp_sqr ; ring.
+ apply Rball_0_opp_compat ; assumption.
+ assumption.
+Qed.
+
+Lemma arctan_sum_odd : forall x, Rball 0 1 x ->
+  arctan_sum x = - arctan_sum (- x).
+Proof.
+intros x x_in.
+ rewrite arctan_sum_explicit.
+ rewrite arctan_sum_explicit.
+ rewrite Ropp_sqr ; ring.
+ apply Rball_0_opp_compat ; assumption.
+ assumption.
+Qed.
+
 (** Specific values of arctan *)
 
-Lemma arctan0_0 : arctan 0 = 0.
+Lemma arctan_sum_0_0 : arctan_sum 0 = 0.
 Proof.
-eapply Rpser_unique ; [eapply arctan_sums |].
+eapply Rpser_unique ; [eapply arctan_sum_sums |].
  split ; fourier.
  apply Rseq_cv_eq_compat with (fun _ => 0).
  intro ; rewrite Rseq_pps_0_simpl ; unfold arctan_seq, Rseq_zip.
@@ -584,33 +631,60 @@ eapply Rpser_unique ; [eapply arctan_sums |].
  apply Rseq_constant_cv.
 Qed.
 
-Lemma arctan1_PI4 : arctan 1 = PI / 4.
+Lemma arctan_sum_1_PI4 : arctan_sum 1 = PI / 4.
 Proof.
-unfold arctan ; destruct (MyRIneq.Req_dec 1 1) as [Heq | Hf] ;
+unfold arctan_sum ; destruct (MyRIneq.Req_dec 1 1) as [Heq | Hf] ;
  [| destruct Hf] ; reflexivity.
 Qed.
 
-Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
+(** arctan_sum's derivative *)
 
-Lemma derivable_Rball_arctan : derivable_Rball 0 1 arctan.
+Lemma An_deriv_arctan_seq_explicit :
+  (An_deriv arctan_seq == Rseq_zip (Rseq_alt sum_pow_seq) 0)%Rseq.
 Proof.
-intro pr ; eapply derivable_in_ext_strong with (f := sum_r _ _ arctan_cv_radius).
- intros x x_in ; unfold arctan ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
-  destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with (Rabs (1 - 0)).
-   right ; rewrite Rminus_0_r, Rabs_R1 ; reflexivity.
-   subst ; apply x_in.
-  reflexivity.
- apply derivable_Rball_sum_r.
+intro n ; unfold An_deriv, arctan_seq, Rseq_zip, Rseq_shift, Rseq_mult.
+ case (n_modulo_2 n) ; intros [p Hp] ; case (n_modulo_2 (S n)) ; intros [q Hq].
+  apply False_ind ; omega.
+  assert (Hpq : (p = q)%nat) by omega ; rewrite Hq, Hpq.
+   fold (((fun q => INR (S (2 * q))) * Rseq_alt arct_seq)%Rseq q) ; rewrite <- Rseq_alt_mult_r.
+   apply Rmult_eq_compat_l, Rinv_r, not_0_INR ; omega.
+  unfold zero_seq, Rseq_constant ; ring.
+  apply False_ind ; omega.
 Qed.
 
-Require Import Ranalysis_facts.
-
-(*
-Lemma derivative_arctan_explicit :
-  forall pr (dAn: derivable_Rball arctan 0 1 pr) x (x_in : Rabs x < 1),
-  derive_Rball arctan _ _ _ dAn x = / (1 - x ^ 2).
+Lemma derivable_pt_lim_Rball_arctan_sum : forall x, Rball 0 1 x ->
+  derivable_pt_lim_in (Rball 0 1) arctan_sum x (/ (1 +  x ^ 2)).
 Proof.
-intros pr dAn x x_in.
+intros x x_in.
+ assert (x_bd : Rabs x < 1) by (rewrite <- Rball_0_simpl ; assumption).
+ assert (x2_bd : Rabs (x ^ 2) < 1).
+  rewrite <- RPow_abs ; apply Rpow_lt_1_compat ; [apply Rabs_pos | assumption].
+ eapply derivable_pt_lim_in_ext_strong.
+ assumption.
+ intros y y_in ; eapply Rpser_unique, arctan_sum_sums.
+  apply sum_r_sums with (Pr := arctan_cv_radius).
+   rewrite <- Rball_0_simpl ; assumption.
+   split ; [| left] ; destruct (Rabs_def2 _ _ y_in) ; fourier.
+  replace (/ (1 + x ^ 2)) with (sum_r_derive arctan_seq 1 arctan_cv_radius x).
+  apply derivable_pt_lim_in_sum_r ; assumption.
+  transitivity (sum_pow (- x ^ 2)).
+  assert (rho1 : finite_cv_radius (Rseq_alt sum_pow_seq) 1).
+   rewrite <- finite_cv_radius_alt_compat ; apply sum_pow_cv_radius.
+  assert (rho2 : finite_cv_radius (Rseq_zip (Rseq_alt sum_pow_seq) 0) 1).
+   rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| fourier | simpl ; ring] ;
+   apply finite_cv_radius_zip_compat_l.
+    simpl nonneg ; repeat rewrite Rmult_1_l ; apply rho1.
+    intros ; apply zero_infinite_cv_radius.     
+  unfold sum_r_derive ; rewrite sum_r_ext with (rBn := rho2) ;
+   [| eapply An_deriv_arctan_seq_explicit].
+  rewrite sum_r_zip_compat_0_l with (rAn := rho1) ; try assumption.
+  apply sum_r_alt_compat ; assumption.
+  transitivity (/ (1 - (- x ^ 2))).
+   apply sum_pow_explicit ; rewrite Rabs_Ropp ; assumption.
+   unfold Rminus ; rewrite Ropp_involutive ; reflexivity.
+Qed.
 
-
-*)
+Lemma derivable_Rball_arctan_sum : derivable_Rball 0 1 arctan_sum.
+Proof.
+intros x x_in ; eexists ; eapply derivable_pt_lim_Rball_arctan_sum ; eassumption.
+Qed.
