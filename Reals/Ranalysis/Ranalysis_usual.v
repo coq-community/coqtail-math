@@ -9,7 +9,7 @@ Local Open Scope R_scope.
 (** * Identity *)
 
 Lemma derivable_pt_lim_in_id: forall D x,
-  derivable_pt_lim_in id D x 1.
+  derivable_pt_lim_in D id x 1.
 Proof.
 intros D x eps eps_pos ; exists eps ; intros ; split.
  assumption.
@@ -20,13 +20,13 @@ intros D x eps eps_pos ; exists eps ; intros ; split.
 Qed.
 
 Lemma derivable_pt_in_id: forall (D : R -> Prop) (x : R),
-  derivable_pt_in id D x.
+  derivable_pt_in D id x.
 Proof.
 intros ; eexists ; eapply derivable_pt_lim_in_id.
 Qed.
 
 Lemma derivable_in_id: forall (D : R -> Prop),
-  derivable_in id D.
+  derivable_in D id.
 Proof.
 intros D x x_in ; eapply derivable_pt_in_id.
 Qed.

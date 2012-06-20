@@ -15,21 +15,21 @@ Definition D n f := DClass f n.
 
 (** Restriction to a specific Rball. *)
 
-Inductive DClass_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) : nat -> Type :=
-  | Db_0 : DClass_Rball f c r r_pos 0
-  | Db_S : forall n (pr : derivable_Rball f c r r_pos),
-           DClass_Rball (derive_Rball f c r r_pos pr) c r r_pos n ->
-           DClass_Rball f c r r_pos (S n).
+Inductive DClass_Rball (c r : R) (f : R -> R) : nat -> Type :=
+  | Db_0 : DClass_Rball c r f 0
+  | Db_S : forall n (pr : derivable_Rball c r f),
+           DClass_Rball c r (derive_Rball c r f pr) n ->
+           DClass_Rball c r f (S n).
 
-Definition D_Rball c r r_pos n f := DClass_Rball f c r r_pos n.
+Definition D_Rball c r n f := DClass_Rball c r f n.
 
 (** Being D_infty *)
 
 Definition D_infty (f : R -> R) := forall n, D n f.
-Definition D_Rball_infty c r r_pos f := forall n, D_Rball c r r_pos n f.
+Definition D_Rball_infty c r f := forall n, D_Rball c r n f.
 
 Definition Dn (n : nat) := sigT (D n).
-Definition Dn_Rball c r r_pos n := sigT (D_Rball c r r_pos n).
+Definition Dn_Rball c r n := sigT (D_Rball c r n).
 
 Definition Dinfty := sigT D_infty.
 
@@ -43,20 +43,20 @@ Definition C n f := (CClass f n).
 
 (** Restriction to a specific Rball. *)
 
-Inductive CClass_Rball (f : R -> R) (c r : R) (r_pos : 0 <= r) : nat -> Type :=
-  | Cb_0 : continuity_Rball f c r r_pos -> CClass_Rball f c r r_pos 0
-  | Cb_S : forall n (pr : derivable_Rball f c r r_pos),
-           CClass_Rball (derive_Rball f c r r_pos pr) c r r_pos n ->
-           CClass_Rball f c r r_pos (S n).
+Inductive CClass_Rball (c r : R) (f : R -> R) : nat -> Type :=
+  | Cb_0 : continuity_Rball c r f -> CClass_Rball c r f 0
+  | Cb_S : forall n (pr : derivable_Rball c r f),
+           CClass_Rball c r (derive_Rball c r f pr) n ->
+           CClass_Rball c r f (S n).
 
-Definition C_Rball c r r_pos n f := CClass_Rball f c r r_pos n.
+Definition C_Rball c r n f := CClass_Rball c r f n.
 
 (** Being C_infty *)
 
 Definition C_infty (f : R -> R) := forall n, C n f.
-Definition C_Rball_infty c r r_pos f := forall n, C_Rball c r r_pos n f.
+Definition C_Rball_infty c r f := forall n, C_Rball c r n f.
 
 Definition Cn (n : nat) : Type := sigT (C n).
-Definition Cn_Rball c r r_pos n := sigT (C_Rball c r r_pos n).
+Definition Cn_Rball c r n := sigT (C_Rball c r n).
 
 Definition Cinfty : Type := sigT C_infty.

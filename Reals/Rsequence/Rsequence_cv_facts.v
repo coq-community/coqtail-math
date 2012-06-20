@@ -252,7 +252,7 @@ Qed.
 (**********)
 Lemma Rseq_cv_continuity_interval_compat : forall Un lu f a b,
   interval a b lu -> (forall n, interval a b (Un n)) ->
-  Rseq_cv Un lu -> continuity_interval f a b ->
+  Rseq_cv Un lu -> continuity_interval a b f ->
   Rseq_cv (fun n => f (Un n)) (f lu).
 Proof.
 intros Un lu f a b lu_in Un_in Hu Hf eps eps_pos.

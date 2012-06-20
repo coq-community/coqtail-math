@@ -29,6 +29,7 @@ Require Import RiemannInt.
 Require Import SeqProp.
 Require Import MyRIneq.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
+Require Import Ranalysis_continuity.
 Require Import Ass_handling.
 
 Local Open Scope R_scope.
@@ -98,7 +99,7 @@ intros x y z [xz zy] x_neq y_neq ; split ;
 Qed.
 
 Lemma IVT_open_interval_prelim : forall (f : R -> R) (x y : R),
-  continuity_interval f x y -> x < y -> open_interval (f x) (f y) 0 ->
+  continuity_interval x y f -> x < y -> open_interval (f x) (f y) 0 ->
   {z : R | open_interval x y z /\ f z = 0}.
 Proof.
 intros f x y Hf xlty O_in ; assert (xley := Rlt_le _ _ xlty) ;
@@ -134,12 +135,12 @@ intros f x y Hf xlty O_in ; assert (xley := Rlt_le _ _ xlty) ;
 Qed.
 
 Lemma IVT_open_interval : forall (f : R -> R) (x y : R) l,
-  continuity_interval f x y -> x < y -> open_interval (f x) (f y) l ->
+  continuity_interval x y f -> x < y -> open_interval (f x) (f y) l ->
   { z : R | open_interval x y z /\ f z = l }.
 Proof.
 intros f x y l Hf Hxy Hl ;
  destruct IVT_open_interval_prelim with (f - (fun _ => l))%F x y as [z [z_in Hz]].
-  apply continuity_interval_minus_compat, continuity_interval_const ; assumption.
+  apply continuity_in_minus, continuity_in_const ; assumption.
   assumption.
   clear - Hl; destruct Hl ; split ; unfold minus_fct ; fourier.
  exists z ; split ; [assumption |].
@@ -147,7 +148,7 @@ intros f x y l Hf Hxy Hl ;
 Qed. 
 
 Lemma IVT_interval : forall (f : R -> R) (x y : R) l,
-  continuity_interval f x y -> x <= y -> interval (f x) (f y) l ->
+  continuity_interval x y f -> x <= y -> interval (f x) (f y) l ->
   {z : R | interval x y z /\ f z = l}.
 Proof.
 intros f x y l Hf xley [fxlel llefy] ;

@@ -1,6 +1,7 @@
 Require Import Reals.
 Require Import Rfunction_classes.
 Require Import Ranalysis_def Ranalysis_def_simpl Rfunction_def Rextensionality.
+Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 Require Import Rinterval.
 Require Import Nth_derivative_def.
 
@@ -16,8 +17,8 @@ Proof.
 intros ; reflexivity.
 Qed.
 
-Lemma nth_derive_Rball_0: forall c r r_pos f (pr : D_Rball c r r_pos O f),
-  nth_derive_Rball c r r_pos f pr == f.
+Lemma nth_derive_Rball_0: forall c r f (pr : D_Rball c r O f),
+  nth_derive_Rball c r f pr == f.
 Proof.
 intros ; reflexivity.
 Qed.
@@ -28,10 +29,10 @@ Proof.
 intros f pr pr' x ; apply derive_ext ; reflexivity.
 Qed.
 
-Lemma nth_derive_Rball_1: forall c r r_pos f (pr : D_Rball c r r_pos 1 f) pr',
-  nth_derive_Rball c r r_pos f pr == derive_Rball f c r r_pos pr'.
+Lemma nth_derive_Rball_1: forall c r f (pr : D_Rball c r 1 f) pr',
+  nth_derive_Rball c r f pr == derive_Rball c r f pr'.
 Proof.
-intros ; eapply (derive_Rball_ext _ _ _ _ _ _ r_pos) ; reflexivity.
+intros ; eapply derive_Rball_ext ; reflexivity.
 Qed.
 
 (** Extensionality of nth_derive (and equality with nth_derive' as a corrolary). *)
@@ -44,22 +45,22 @@ intro n ; induction n ; intros ; simpl ;
  [| apply IHn ; apply derive_ext] ; assumption.
 Qed.
 
-Lemma nth_derive_Rball_ext : forall c r rp1 rp2 rp3 (n : nat) (f g : R -> R)
-  (pr1 : D_Rball c r rp1 n f) (pr2 : D_Rball c r rp2 n g), Rball_eq c r rp3 f g ->
-  Rball_eq c r rp3 (nth_derive_Rball c r rp1 f pr1) (nth_derive_Rball c r rp2 g pr2).
+Lemma nth_derive_Rball_ext : forall c r (n : nat) (f g : R -> R)
+  (pr1 : D_Rball c r n f) (pr2 : D_Rball c r n g), Rball_eq c r f g ->
+  Rball_eq c r (nth_derive_Rball c r f pr1) (nth_derive_Rball c r g pr2).
 Proof.
-intros c r rp1 rp2 rp3 n ; induction n ; intros f g pr1 pr2 Heq.
+intros c r n ; induction n ; intros f g pr1 pr2 Heq.
  apply Heq.
- apply IHn ; intros x x_in ; eapply derive_Rball_ext ; eassumption.
+ apply IHn ; intros x x_in ; eapply derive_Rball_ext_strong ; eassumption.
 Qed.
 
-Lemma nth_derive_Rball_ext_weak: forall c r rp1 rp2 n f g
-  (pr1 : D_Rball c r rp1 n f) (pr2 : D_Rball c r rp2 n g), f == g ->
-  nth_derive_Rball c r rp1 f pr1 == nth_derive_Rball c r rp2 g pr2.
+Lemma nth_derive_Rball_ext_weak: forall c r n f g
+  (pr1 : D_Rball c r n f) (pr2 : D_Rball c r n g), f == g ->
+  nth_derive_Rball c r f pr1 == nth_derive_Rball c r g pr2.
 Proof.
-intros c r rp1 rp2 n ; induction n ; intros f g pr1 pr2 Heq.
+intros c r n ; induction n ; intros f g pr1 pr2 Heq.
  apply Heq.
- apply IHn, derive_Rball_ext with (rp3 := rp1), Req_Rball_eq ; assumption.
+ apply IHn, derive_Rball_ext_strong, Req_Rball_eq ; assumption.
 Qed.
 
 Lemma nth_derive_nth_derive': forall m n f g (pr : D n f)
@@ -69,10 +70,10 @@ Proof.
 intros ; apply nth_derive_ext ; assumption.
 Qed.
 
-Lemma nth_derive_Rball_nth_derive_Rball': forall c r rp m n f g
-  (pr : D_Rball c r rp n f) (pr' : D_Rball c r rp m g) (le: (n <= m)%nat),
-  Rball_eq c r rp f g ->
-  Rball_eq c r rp (nth_derive_Rball c r rp f pr) (nth_derive_Rball' c r rp n g pr' le).
+Lemma nth_derive_Rball_nth_derive_Rball': forall c r m n f g
+  (pr : D_Rball c r n f) (pr' : D_Rball c r m g) (le: (n <= m)%nat),
+  Rball_eq c r f g ->
+  Rball_eq c r (nth_derive_Rball c r f pr) (nth_derive_Rball' c r n g pr' le).
 Proof.
 intro_all ; eapply nth_derive_Rball_ext ; eassumption.
 Qed.
@@ -93,9 +94,9 @@ Proof.
 intros ; apply nth_derive_ext ; reflexivity.
 Qed.
 
-Lemma nth_derive_Rball_PI: forall c r rp1 rp2 rp3 n f
-  (pr1: D_Rball c r rp1 n f) (pr2: D_Rball c r rp2 n f),
-  Rball_eq c r rp3 (nth_derive_Rball c r rp1 f pr1) (nth_derive_Rball c r rp2 f pr2).
+Lemma nth_derive_Rball_PI: forall c r n f
+  (pr1: D_Rball c r n f) (pr2: D_Rball c r n f),
+  Rball_eq c r (nth_derive_Rball c r f pr1) (nth_derive_Rball c r f pr2).
 Proof.
 intros ; apply nth_derive_Rball_ext ; reflexivity.
 Qed.
@@ -107,10 +108,10 @@ Proof.
 intros ; apply nth_derive'_ext ; reflexivity.
 Qed.
 
-Lemma nth_derive_Rball'_PI: forall c r rp1 rp2 rp3 m n f
-  (pr1: D_Rball c r rp1 m f) (pr2: D_Rball c r rp2 m f) (le1 le2: (n <= m)%nat),
-  Rball_eq c r rp3 (nth_derive_Rball' c r rp1 n f pr1 le1)
-  (nth_derive_Rball' c r rp2 n f pr2 le2).
+Lemma nth_derive_Rball'_PI: forall c r m n f
+  (pr1: D_Rball c r m f) (pr2: D_Rball c r m f) (le1 le2: (n <= m)%nat),
+  Rball_eq c r (nth_derive_Rball' c r n f pr1 le1)
+  (nth_derive_Rball' c r n f pr2 le2).
 Proof.
 intros ; apply nth_derive_Rball_ext ; reflexivity.
 Qed.
@@ -128,18 +129,16 @@ intros n f pr pr1 pr2 l x Hl.
   intro ; unfold derive ; apply pr_nu_var ; reflexivity.
 Qed.
 
-Lemma derivable_nth_derive_Rball : forall c r rp n f (pr : derivable_Rball f c r rp)
-  (pr1 : D_Rball c r rp (S n) f) (pr2 : D_Rball c r rp n (derive_Rball f c r rp pr)) l x,
-  Rball c r rp x ->
-  nth_derive_Rball c r rp (derive_Rball f c r rp pr) pr2 x = l ->
-  nth_derive_Rball c r rp f pr1 x = l.
+Lemma derivable_nth_derive_Rball : forall c r n f (pr : derivable_Rball c r f)
+  (pr1 : D_Rball c r (S n) f) (pr2 : D_Rball c r n (derive_Rball c r f pr)) l x,
+  Rball c r x ->
+  nth_derive_Rball c r (derive_Rball c r f pr) pr2 x = l ->
+  nth_derive_Rball c r f pr1 x = l.
 Proof.
-intros c r rp n f pr pr1 pr2 l x Hl x_in.
+intros c r n f pr pr1 pr2 l x Hl x_in.
  simpl.
-  rewrite nth_derive_Rball_ext with (g := derive_Rball f c r rp pr) (pr2 := pr2) (rp3 := rp).
+  rewrite nth_derive_Rball_ext with (g := derive_Rball c r f pr) (pr2 := pr2).
   assumption.
-
-
-  apply Req_Rball_eq, derive_Rball_ext with (rp3 := rp) ; reflexivity.
+  apply Req_Rball_eq, derive_Rball_ext_strong ; reflexivity.
   assumption.
 Qed.

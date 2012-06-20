@@ -69,7 +69,7 @@ Lemma tan_reciprocal_image_open_interval : forall lb ub y,
   { x | open_interval lb ub x /\ tan x = y }.
 Proof.
 intros lb ub y lb_in ub_in y_in ; apply IVT_open_interval.
- eapply continuity_open_interval_continuity_interval ; try eassumption.
+ eapply continuity_in_contravariant ; try (eapply interval_open_restriction ; eassumption).
  apply continuity_open_interval_tan.
  eapply strictly_increasing_open_interval_order ; try eassumption.
   apply strictly_increasing_open_interval_tan.
@@ -103,7 +103,7 @@ intros y y_pos ; destruct (cos_cv_0_left (/ (2 * y)) (PI / 6)) as [x [x_in Hx]].
  apply Rinv_0_lt_compat ; fourier.
  apply PI6_in.
  assert (x_bd : open_interval (- PI / 2) (PI / 2) x).
-  eapply open_interval_restriction_compat.
+  eapply open_interval_restriction.
    eapply open_interval_interval, PI6_in.
    eapply interval_r ; left ; exact _PI2_Rlt_PI2.
    assumption.
@@ -166,7 +166,7 @@ intro y ;
  assert (y_in : open_interval (tan lb) (tan ub) y) by (split ; assumption) ;
  destruct (tan_reciprocal_image_open_interval _ _ _ lb_in ub_in y_in) as [x [x_in Hx]] ;
  exists x ; split.
-  eapply open_interval_restriction_compat ; try eassumption ;
+  eapply open_interval_restriction ; try eassumption ;
    eapply open_interval_interval ; assumption.
   assumption.
 Qed.
@@ -175,14 +175,13 @@ Definition atan (y : R) : R := let (x, _) := exists_atan y in x.
 
 Lemma reciprocal_tan_atan : reciprocal tan atan.
 Proof.
-intro y ; unfold comp, id, atan ; destruct (exists_atan y) ; ass_apply.
+intros y _ ; unfold atan ; destruct (exists_atan y) ; ass_apply.
 Qed.
 
 Lemma reciprocal_open_interval_atan_tan :
-  reciprocal_open_interval atan tan (- PI / 2) (PI / 2).
+  reciprocal_open_interval (- PI / 2) (PI / 2) atan tan.
 Proof.
-intros x x_in ; unfold comp, id, atan ;
- destruct (exists_atan (tan x)) as [x' [x'_in Hx']] ;
+intros x x_in ; unfold atan ; destruct (exists_atan (tan x)) as [x' [x'_in Hx']] ;
  apply injective_open_interval_tan ; assumption.
 Qed.
 
@@ -197,38 +196,34 @@ end.
 
 Lemma strictly_increasing_atan : strictly_increasing atan.
 Proof.
-intros x y Hxy ; apply strictly_increasing_open_interval_atan ;
- try apply atan_in ; repeat fold_comp ;
- do 2 rewrite reciprocal_tan_atan ; ass_apply.
+intros x y _ _ Hxy ; apply strictly_increasing_open_interval_atan ;
+ try apply atan_in ; do 2 (rewrite reciprocal_tan_atan ; [| apply I]) ;
+ assumption.
 Qed.
 
 Lemma increasing_atan : increasing atan.
 Proof.
-apply strictly_increasing_increasing, strictly_increasing_atan.
+apply strictly_increasing_in_increasing_in, strictly_increasing_atan.
 Qed.
 
 Lemma injective_atan : injective atan.
 Proof.
-unfold atan ; intros x y Hxy ;
- destruct (exists_atan x) as [z1 [_ Hz1]] ;
- destruct (exists_atan y) as [z2 [_ Hz2]] ;
- subst ; reflexivity.
+apply strictly_increasing_in_injective_in, strictly_increasing_atan.
 Qed.
 
 Lemma continuity_atan : continuity atan.
 Proof.
 intro y ; apply continuity_open_interval_continuity ; intros lb ub x x_in.
- replace lb with (id lb) by reflexivity ; replace ub with (id ub) by reflexivity ;
- do 2 rewrite <- (reciprocal_tan_atan) ; unfold comp.
+ rewrite <- (reciprocal_tan_atan lb), <- (reciprocal_tan_atan ub) ; try (exact I).
  apply continuity_reciprocal_strictly_increasing_open_interval.
-  apply increasing_atan ; left ; eapply open_interval_inhabited ; eassumption.
-  eapply strictly_increasing_open_interval_restriction_compat ;
-   (eapply atan_in || exact strictly_increasing_open_interval_tan).
-  eapply reciprocal_open_interval_restriction_compat ;
-   (eapply atan_in || exact reciprocal_open_interval_atan_tan).
-  eapply continuity_open_interval_continuity_interval ;
-   (eapply atan_in || apply continuity_open_interval_tan).
-  do 2 (fold_comp ; rewrite reciprocal_tan_atan) ; apply x_in.
+  apply increasing_atan ; (exact I || left) ; eapply open_interval_inhabited ; eassumption.
+  eapply strictly_increasing_in_contravariant, strictly_increasing_open_interval_tan.
+   apply interval_open_restriction ; apply atan_in.
+  eapply reciprocal_in_contravariant, reciprocal_open_interval_atan_tan.
+   apply interval_open_restriction ; apply atan_in.
+  eapply continuity_in_contravariant, continuity_open_interval_tan.
+   apply interval_open_restriction ; apply atan_in.
+  do 2 (rewrite reciprocal_tan_atan ; [| exact I]) ; apply x_in.
 Qed.
 
 Lemma derivable_pt_lim_atan : forall x, derivable_pt_lim atan x (/ (1 + x ^ 2)).
@@ -247,31 +242,31 @@ intro x ; pose (d := interval_dist (- PI / 2) (PI / 2) (atan x)) ;
   apply Rlt_le_trans with (tan (atan x)).
    apply strictly_increasing_open_interval_tan ;
     [assumption | apply atan_in | unfold lb ; fourier].
-   right ; apply reciprocal_tan_atan.
+   right ; apply reciprocal_tan_atan ; exact I.
   apply Rle_lt_trans with (tan (atan x)).
-   right ; symmetry ; apply reciprocal_tan_atan.
+   right ; symmetry ; apply reciprocal_tan_atan ; exact I.
    apply strictly_increasing_open_interval_tan ;
     [apply atan_in | assumption | unfold ub ; fourier].
- apply derivable_pt_lim_open_interval_derivable_pt_lim with (tan lb) (tan ub).
+ apply derivable_pt_lim_open_interval_pt_lim with (tan lb) (tan ub).
   assumption.
-  replace (x ^ 2) with (tan (atan x) ^ 2) by (f_equal ; apply reciprocal_tan_atan).
-  assert (pr : derivable_open_interval tan (atan (tan lb)) (atan (tan ub))).
-   eapply derivable_open_interval_restriction_compat', derivable_open_interval_tan ;
-    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+  replace (x ^ 2) with (tan (atan x) ^ 2) by (f_equal ; apply reciprocal_tan_atan ; exact I).
+  assert (pr : derivable_open_interval (atan (tan lb)) (atan (tan ub)) tan).
+   eapply derivable_in_contravariant, derivable_open_interval_tan.
+    apply open_interval_restriction ; apply open_interval_interval, atan_in.
   rewrite <- derive_open_interval_tan_strong with (atan (tan lb)) (atan (tan ub)) (atan x) pr.
    eapply derivable_pt_lim_in_reciprocal_open_interval.
-   apply reciprocal_reciprocal_interval, reciprocal_tan_atan.
-   split ; apply strictly_increasing_atan ; apply x_in.
-   apply continuity_pt_continue_in, continuity_atan.
+   eapply reciprocal_in_contravariant, reciprocal_tan_atan ; intros a b ; exact I.
+   split ; apply strictly_increasing_atan ; (exact I || apply x_in).
+   apply continuity_pt_continuity_pt_in, continuity_atan.
    assumption.
    rewrite derive_open_interval_tan_strong.
     apply Rgt_not_eq, One_plus_sqr_pos_lt.
-    split ; apply strictly_increasing_atan ; apply x_in.
-    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
-    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
-    split ; apply strictly_increasing_atan ; apply x_in.
-    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
-    fold_comp ; rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    split ; apply strictly_increasing_atan ; (exact I || apply x_in).
+    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    split ; apply strictly_increasing_atan ; (exact I || apply x_in).
+    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
 Qed.
 
 Lemma derivable_atan : derivable atan.
@@ -303,8 +298,7 @@ Lemma cos_atan : forall x, cos (atan x) = 1/ (sqrt (1 + x ^ 2)).
 Proof.
 intro x ; destruct (exists_atan x) as [a [a_in Ha]] ;
  assert (cosa_pos : 0 < cos a) by (apply cos_pos ; assumption).
- rewrite <- Ha ; fold (comp atan tan a) ;
-  rewrite reciprocal_open_interval_atan_tan ; [| assumption].
+ rewrite <- Ha ; rewrite reciprocal_open_interval_atan_tan ; [| assumption].
  unfold tan ; field_simplify (1 + (sin a / cos a) ^ 2).
 replace ((sin a) ^ 2 + (cos a) ^2) with (Rsqr (sin a) + Rsqr (cos a)) by
 (unfold Rsqr ; simpl ; ring).
@@ -324,7 +318,7 @@ Lemma sin_atan : forall x, sin (atan x) = x / (sqrt (1 + x ^ 2)).
 Proof.
 intro x ; destruct (exists_atan x) as [a [a_in Ha]] ;
  assert (cosa_pos : 0 < cos a) by (apply cos_pos ; assumption).
- rewrite <- Ha ; fold (comp atan tan a) ; rewrite reciprocal_open_interval_atan_tan ;
+ rewrite <- Ha ; rewrite reciprocal_open_interval_atan_tan ;
  [| assumption].
  unfold tan ; field_simplify (1 + (sin a / cos a) ^ 2) ; [| apply Rgt_not_eq ; assumption].
  replace ((sin a) ^ 2 + (cos a) ^2) with (Rsqr (sin a) + Rsqr (cos a))
@@ -345,10 +339,10 @@ intros x x_pos ; replace 0 with (/ (1 + x ^ 2) - / (1 + x ^ 2)) by ring.
   apply derivable_pt_lim_atan.
   replace (- / (1 + x ^ 2)) with (/ (1 + (/ id)%F x ^ 2) * (- 1 / (id x ^ 2))).
   apply derivable_pt_lim_comp.
-   apply derivable_pt_lim_open_interval_derivable_pt_lim with (x - 1) (x + 1).
-    apply x_in_Rball1.
-    apply derivable_pt_lim_in_inv_compat.
-     apply x_in_Rball1.
+   apply derivable_pt_lim_open_interval_pt_lim with (x - 1) (x + 1).
+    apply center_in_open_interval, Rlt_0_1.
+    apply derivable_pt_lim_in_inv.
+    apply center_in_open_interval, Rlt_0_1.
      assumption.
      apply derivable_pt_lim_in_id.
      apply derivable_pt_lim_atan.

@@ -1,4 +1,4 @@
-Require Import Rbase Rfunctions Rfunction_def Fourier.
+Require Import Rbase Rfunctions Rfunction_def Rtopology Fourier.
 Require Import MyRIneq MyNeq PSeries_reg.
 Require Import Ass_handling.
 
@@ -6,57 +6,75 @@ Require Import Ass_handling.
 
 Definition middle (x:R) (y:R) : R := (x + y) / 2.
 Definition interval_dist lb ub x := Rmin (x - lb) (ub - x).
-Definition interval_size lb ub (pr : lb < ub) : posreal.
- apply mkposreal with ((ub - lb) / 2), Rlt_mult_inv_pos ; fourier.
-Defined.
+Definition interval_size lb ub : R := (ub - lb) / 2.
 
+Lemma interval_size_pos : forall lb ub, lb < ub -> 0 < interval_size lb ub.
+Proof.
+intros ; apply Rlt_mult_inv_pos ; fourier.
+Qed.
+
+Definition whole_R := fun (_ : R) => True.
 Definition interval (lb ub x : R) := lb <= x <= ub.
 Definition open_interval (lb ub x:R) := lb < x < ub.
 
-Definition Rball c r (r_pos: 0 <= r) x := Rabs (x - c) < r.
+Definition Rball c r x := Rabs (x - c) < r.
 Definition Rball_dist c r := interval_dist (c - r) (c + r).
 
-Definition Rball_eq c r r_pos (f g : R -> R) := forall x,
-  Rball c r r_pos x -> f x = g x.
+Definition Rball_eq c r (f g : R -> R) := forall x,
+  Rball c r x -> f x = g x.
 
-Lemma Req_Rball_eq: forall f g c r r_pos,
-  f == g -> Rball_eq c r r_pos f g.
+Lemma Req_Rball_eq: forall f g c r,
+  f == g -> Rball_eq c r f g.
 Proof.
-intros f g c r r_pos Heq x x_in ; apply Heq.
+intros f g c r Heq x x_in ; apply Heq.
 Qed.
 
-Lemma Rball_eq_refl: forall c r r_pos f, Rball_eq c r r_pos f f.
+Lemma Rball_eq_refl: forall c r f, Rball_eq c r f f.
 Proof.
 unfold Rball_eq ; trivial.
 Qed.
 
-Lemma Rball_eq_sym: forall c r r_pos f g, Rball_eq c r r_pos f g -> Rball_eq c r r_pos g f.
+Lemma Rball_eq_sym: forall c r f g, Rball_eq c r f g -> Rball_eq c r g f.
 Proof.
 unfold Rball_eq ; intros ; symmetry ; auto.
 Qed.
 
-Lemma Rball_eq_trans: forall c r r_pos f g h, Rball_eq c r r_pos f g ->
-  Rball_eq c r r_pos g h -> Rball_eq c r r_pos f h.
+Lemma Rball_eq_trans: forall c r f g h, Rball_eq c r f g ->
+  Rball_eq c r g h -> Rball_eq c r f h.
 Proof.
 unfold Rball_eq ; intros ; transitivity (g x) ; auto.
 Qed.
 
-Lemma interval_size_Boule_middle : forall lb ub c (pr : lb < ub),
-  open_interval lb ub c -> Boule (middle lb ub) (interval_size lb ub pr) c.
+Lemma Rball_radius_pos : forall c r x,
+  Rball c r x -> 0 < r.
 Proof.
-intros ; unfold Boule, interval_size, middle ; simpl ; apply Rabs_def1.
- apply Rlt_minus_sort ; do 2 (field_simplify ; unfold Rdiv) ;
-  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
- apply Rlt_minus_sort2 ; do 2 (field_simplify ; unfold Rdiv) ;
-  rewrite Rinv_1 ; do 2 rewrite Rmult_1_r ; ass_apply.
-Qed. 
+unfold Rball ; intros c r x Hx ; eapply Rle_lt_trans ;
+ [apply Rabs_pos | eassumption].
+Qed.
 
 Require Setoid.
 
-Add Parametric Relation (c r: R) (r_pos: 0 <= r): (R -> R) (Rball_eq c r r_pos)
-reflexivity proved by (Rball_eq_refl c r r_pos)
-symmetry proved by (Rball_eq_sym c r r_pos)
-transitivity proved by (Rball_eq_trans c r r_pos) as Rball_eq'.
+Add Parametric Relation (c r: R) : (R -> R) (Rball_eq c r)
+reflexivity proved by (Rball_eq_refl c r)
+symmetry proved by (Rball_eq_sym c r)
+transitivity proved by (Rball_eq_trans c r) as Rball_eq'.
+
+(** The center of the (interval / ball) is in the interval *)
+
+Lemma center_in_Rball : forall c r, 0 < r -> Rball c r c.
+Proof.
+intros ; apply Rabs_def1 ; fourier.
+Qed.
+
+Lemma center_in_interval : forall c r, 0 <= r -> interval (c - r) (c + r) c.
+Proof.
+intros ; split ; fourier.
+Qed.
+
+Lemma center_in_open_interval : forall c r, 0 < r -> open_interval (c - r) (c + r) c.
+Proof.
+intros ; split ; fourier.
+Qed.
 
 (** * [middle]'s properties. *)
 
@@ -171,6 +189,33 @@ Qed.
 Lemma interval_r : forall lb ub, lb <= ub -> interval lb ub ub.
 Proof.
 intros ; split ; [| right] ; trivial.
+Qed.
+
+Lemma interval_restriction : forall lb ub a b,
+  interval lb ub a -> interval lb ub b ->
+  included (interval a b) (interval lb ub).
+Proof.
+intros lb ub a b a_in b_in x x_in ; split.
+ transitivity a ; [apply a_in | apply x_in].
+ transitivity b ; [apply x_in | apply b_in].
+Qed.
+
+Lemma open_interval_restriction : forall lb ub a b,
+  interval lb ub a -> interval lb ub b ->
+  included (open_interval a b) (open_interval lb ub).
+Proof.
+intros lb ub a b a_in b_in x x_in ; split.
+ eapply Rle_lt_trans ; [eapply a_in | eapply x_in].
+ eapply Rlt_le_trans ; [eapply x_in | eapply b_in].
+Qed.
+
+Lemma interval_open_restriction : forall lb ub a b,
+  open_interval lb ub a -> open_interval lb ub b ->
+  included (interval a b) (open_interval lb ub).
+Proof.
+intros lb ub a b a_in b_in x x_in ; split.
+ eapply Rlt_le_trans ; [eapply a_in | eapply x_in].
+ eapply Rle_lt_trans ; [eapply x_in | eapply b_in].
 Qed.
 
 Lemma open_interval_interval : forall lb ub x,
@@ -328,94 +373,105 @@ intros lb1 lb2 ub1 ub2 Hord Hext.
   intuition.
 Qed.
 
-
-(** * [Rabll]'s properties. *)
-
-Lemma Rball_PI: forall c r (r_pos1 r_pos2: 0 <= r) x,
-  Rball c r r_pos1 x <-> Rball c r r_pos2 x.
-Proof.
-intros ; split ; trivial.
-Qed.
-
 (** [Rball] describes intervals. *)
 
-Lemma Rball_interval: forall c r r_pos x,
-  Rball c r r_pos x -> open_interval (c - r) (c + r) x.
+Lemma included_Rball_open_interval : forall c r,
+  included (Rball c r) (open_interval (c - r) (c + r)).
 Proof.
-intros c r r_pos x H ; assert (H' := Rabs_def2 _ _ H) ;
+intros c r x H ; assert (H' := Rabs_def2 _ _ H) ;
  destruct H' ; split ; fourier.
 Qed.
 
-Lemma interval_Rball: forall c r r_pos x,
-  open_interval (c - r) (c + r) x -> Rball c r r_pos x.
+Lemma included_Rball_open_interval2 : forall lb ub,
+  included (Rball (middle lb ub) (interval_size lb ub)) (open_interval lb ub).
 Proof.
-intros c r r_pos x [H1 H2] ;
- apply Rabs_def1 ; fourier.
+intros lb ub x x_in ; destruct (Rabs_def2 _ _ x_in) as [x_lb x_ub] ; split.
+ apply Rle_lt_trans with (middle lb ub - interval_size lb ub).
+  right ; unfold middle, interval_size ; field.
+  fourier.
+ apply Rlt_le_trans with (middle lb ub + interval_size lb ub).
+  fourier.
+  right ; unfold middle, interval_size ; field.
 Qed.
 
-Lemma Rball_rewrite: forall c r r_pos x,
-  Rball c r r_pos x <-> open_interval (c - r) (c + r) x.
+Lemma included_open_interval_Rball : forall lb ub,
+  included (open_interval lb ub) (Rball (middle lb ub) (interval_size lb ub)).
 Proof.
-intros ; split ; [apply Rball_interval | apply interval_Rball].
+intros lb ub x x_in ; apply Rabs_def1.
+ apply Rlt_minus_sort, Rlt_le_trans with ub.
+  apply x_in.
+  unfold middle, interval_size ; right ; field.
+ apply Rlt_minus_sort2, Rle_lt_trans with lb.
+  unfold middle, interval_size ; right ; field.
+  apply x_in.
+Qed.
+
+Lemma included_open_interval_Rball2 : forall c r,
+  included (open_interval (c - r) (c + r)) (Rball c r).
+Proof.
+intros c r x [x_lb x_ub] ; apply Rabs_def1 ; fourier.
+Qed.
+
+Lemma Rball_rewrite: forall c r x,
+  Rball c r x <-> open_interval (c - r) (c + r) x.
+Proof.
+intros ; split ; [apply included_Rball_open_interval | apply included_open_interval_Rball2].
+Qed.
+
+Lemma Rball_rewrite2: forall lb ub x,
+  Rball (middle lb ub) (interval_size lb ub) x <-> open_interval lb ub x.
+Proof.
+intros ; split ; [apply included_Rball_open_interval2 | apply included_open_interval_Rball].
 Qed.
 
 (** Inclusion of [Rball]s. *)
 
-Lemma Rball_included: forall c r1 r2 r1_pos r2_pos x,
-  r1 <= r2 -> Rball c r1 r1_pos x -> Rball c r2 r2_pos x.
+Lemma Rball_included: forall c r1 r2 x,
+  r1 <= r2 -> Rball c r1 x -> Rball c r2 x.
 Proof.
 unfold Rball ; intros ; fourier.
 Qed.
 
-Lemma Rball_from_middle: forall lb ub x, lb < x < ub ->
-  { pr | Rball (middle lb ub) (ub - lb) pr x}.
-Proof.
-intros lb ub x [x_lb x_ub] ;
- assert (lbub: lb < ub) by (transitivity x ; assumption).
- assert (pr: 0 <= ub - lb) by fourier ; exists pr.
- apply Rabs_def1 ; destruct (middle_is_in_the_middle _ _ lbub) ;
- fourier.
-Qed.
-
 (** The specific case where the center of the ball is 0. *)
 
-Lemma Rball_0_simpl: forall r r_pos x,
-  Rball 0 r r_pos x <-> Rabs x < r.
+Lemma Rball_0_simpl: forall r x,
+  Rball 0 r x <-> Rabs x < r.
 Proof.
 intros ; unfold Rball ; rewrite Rminus_0_r ; split ; trivial.
 Qed.
 
-Lemma Rball_c_0_empty: forall c (pr : 0 <= 0) x,
-  ~ Rball c 0 pr x.
+Lemma Rball_c_0_empty: forall c r x, r <= 0 ->
+  ~ Rball c r x.
 Proof.
-intros c pr x Hf ; eapply Rlt_irrefl, Rle_lt_trans ;
- [eapply Rabs_pos | eassumption].
+intros c r x Hr Hf ; eapply (Rlt_irrefl 0).
+ eapply Rle_lt_trans ; [eapply Rabs_pos |].
+ eapply Rlt_le_trans ; [eapply Hf | eassumption].
 Qed.
 
 (** Decidability result. *)
 
-Lemma in_Rball_dec: forall c r r_pos x,
-  { Rball c r r_pos x } + { ~ Rball c r r_pos x }.
+Lemma in_Rball_dec: forall c r x,
+  { Rball c r x } + { ~ Rball c r x }.
 Proof.
-intros c r r_pos x ;
+intros c r x ;
  destruct (in_open_interval_dec (c - r) (c + r) x) as [Ht | Hf].
-  left ; apply interval_Rball ; assumption.
-  right ; intro ; eapply Hf, Rball_interval ; eassumption.
+  left ; rewrite Rball_rewrite ; assumption.
+  right ; intro ; eapply Hf ; rewrite <- Rball_rewrite ; eassumption.
 Qed.
 
 (** Extensional equality implies equality. *)
 
-Lemma Rball_ext_eq: forall c1 c2 r1 r2 r1_pos r2_pos, 0 < r1 ->
-  (forall x, Rball c1 r1 r1_pos x <-> Rball c2 r2 r2_pos x) ->
+Lemma Rball_ext_eq: forall c1 c2 r1 r2, r1 > 0 ->
+  (forall x, Rball c1 r1 x <-> Rball c2 r2 x) ->
   c1 = c2 /\ r1 = r2.
 Proof.
-intros c1 c2 r1 r2 r1_pos r2_pos r1_pos_lt Hext.
+intros c1 c2 r1 r2 r1_pos Hext.
  assert (Hord: c1 - r1 < c1 + r1) by fourier.
  assert (Heq: c1 - r1 = c2 - r2 /\ c1 + r1 = c2 + r2).
   apply open_interval_ext_eq.
    assumption.
-   intro x ; split ; intro H ; eapply Rball_interval,
-   Hext, interval_Rball ; assumption.
+   intro x ; split ; intro H ; eapply included_Rball_open_interval,
+   Hext, included_open_interval_Rball2 ; assumption.
  split.
   replace c1 with ((c1 - r1 + (c1 + r1)) / 2) by field ;
   replace c2 with ((c2 - r2 + (c2 + r2)) / 2) by field ;
@@ -460,6 +516,8 @@ intros lb ub x x_in h h_bd ;
   split ; clear -H1 H2 ; fourier.
 Qed.
 
+(* TODO : move *)
+
 Lemma Ropp_eq_compat_l : forall x y, - x = y -> x = - y.
 Proof.
 intros x y [] ; symmetry ; apply Ropp_involutive.
@@ -489,20 +547,18 @@ intros lb ub x x_in h [h_bd | heq].
     apply Rplus_le_compat_l, Rmin_r.
 Qed.
 
-Lemma Rball_dist_pos: forall c r r_pos x,
-  Rball c r r_pos x ->
-  0 < Rball_dist c r x.
+Lemma Rball_dist_pos: forall c r x,
+  Rball c r x -> 0 < Rball_dist c r x.
 Proof.
-intros ; eapply open_interval_dist_pos, Rball_interval ;
+intros ; eapply open_interval_dist_pos, included_Rball_open_interval ;
  eassumption.
 Qed.
 
-Lemma Rball_dist_bound: forall c r r_pos x,
-  Rball c r r_pos x ->
-  forall h, Rabs h < Rball_dist c r x ->
-  Rball c r r_pos (x + h).
+Lemma Rball_dist_bound: forall c r x,
+  Rball c r x -> forall h, Rabs h < Rball_dist c r x ->
+  Rball c r (x + h).
 Proof.
-intros ; apply interval_Rball, open_interval_dist_bound.
- eapply open_interval_interval, Rball_interval ; eassumption.
+intros ; apply included_open_interval_Rball2, open_interval_dist_bound.
+ eapply open_interval_interval, included_Rball_open_interval ; eassumption.
  assumption.
 Qed.

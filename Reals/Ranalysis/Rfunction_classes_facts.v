@@ -1,6 +1,7 @@
 Require Import Rbase Ranalysis Fourier.
 Require Import Rfunctions Rfunction_facts Rextensionality.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
+Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 Require Import Rfunction_classes_def.
 Require Import Ass_handling.
 Require Import MyR_dist.
@@ -21,17 +22,15 @@ intro n ; induction n ; intros f g f_eq_g Dnf.
  assumption.
 Qed.
 
-Lemma D_Rball_ext: forall c r r_pos n f g,
-  Rball_eq c r r_pos f g ->
-  D_Rball c r r_pos n f ->
-  D_Rball c r r_pos n g.
+Lemma D_Rball_ext: forall c r n f g,
+  Rball_eq c r f g -> D_Rball c r n f -> D_Rball c r n g.
 Proof.
-intros c r r_pos n ; induction n ; intros f g Heq Hf.
+intros c r n ; induction n ; intros f g Heq Hf.
  constructor.
  inversion_clear Hf.
- assert (g_deriv: derivable_Rball g c r r_pos) by (eapply derivable_Rball_ext ; eassumption).
- apply (Db_S _ _ _ _ _ g_deriv), IHn with (derive_Rball _ _ _ _ pr).
- intros x x_in ; eapply derive_Rball_ext ; eassumption.
+ assert (g_deriv: derivable_Rball c r g) by (eapply derivable_in_ext_strong ; eassumption).
+ apply (Db_S _ _ _ _ g_deriv), IHn with (derive_Rball _ _ _ pr).
+ intros x x_in ; eapply derive_Rball_ext_strong ; eassumption.
  assumption.
 Qed.
 
@@ -48,16 +47,14 @@ intro n ; induction n ; intros f g f_eq_g Cnf.
  assumption.
 Qed.
 
-Lemma C_Rball_ext: forall c r r_pos n f g,
-  Rball_eq c r r_pos f g ->
-  C_Rball c r r_pos n f ->
-  C_Rball c r r_pos n g.
+Lemma C_Rball_ext: forall c r n f g,
+  Rball_eq c r f g -> C_Rball c r n f -> C_Rball c r n g.
 Proof.
-intros c r r_pos n ; induction n ; intros f g Heq Hf ; inversion_clear Hf.
- constructor ; eapply continuity_Rball_ext ; eassumption.
- assert (g_deriv: derivable_Rball g c r r_pos) by (eapply derivable_Rball_ext ; eassumption).
- apply (Cb_S _ _ _ _ _ g_deriv), IHn with (derive_Rball _ _ _ _ pr).
- intros x x_in ; eapply derive_Rball_ext ; eassumption.
+intros c r n ; induction n ; intros f g Heq Hf ; inversion_clear Hf.
+ constructor ; eapply continuity_in_ext_strong ; eassumption.
+ assert (g_deriv: derivable_Rball c r g) by (eapply derivable_in_ext_strong ; eassumption).
+ apply (Cb_S _ _ _ _ g_deriv), IHn with (derive_Rball _ _ _ pr).
+ intros x x_in ; eapply derive_Rball_ext_strong ; eassumption.
  assumption.
 Qed.
 
@@ -91,36 +88,35 @@ Qed.
 
 (** Corresponding lemmas for the restrictions. *)
 
-Lemma C_Rball_implies_D_Rball : forall n f c r r_pos,
-  C_Rball c r r_pos n f -> D_Rball c r r_pos n f.
+Lemma C_Rball_implies_D_Rball : forall n f c r,
+  C_Rball c r n f -> D_Rball c r n f.
 Proof.
-intro n ; induction n ; intros f c r r_pos H.
+intro n ; induction n ; intros f c r H.
  constructor.
  inversion H ; eapply Db_S with pr ; apply IHn ; assumption.
 Qed.
 
-Lemma D_Rball_S_implies_C_Rball : forall c r r_pos n f,
-  D_Rball c r r_pos (S n) f -> C_Rball c r r_pos n f.
+Lemma D_Rball_S_implies_C_Rball : forall c r n f,
+  D_Rball c r (S n) f -> C_Rball c r n f.
 Proof.
-intros c r r_pos n ; induction n ; intros f Hf ; inversion Hf.
- constructor ; apply derivable_Rball_continuity_Rball ; assumption.
+intros c r n ; induction n ; intros f Hf ; inversion Hf.
+ constructor ; apply derivable_in_continuity_in ; assumption.
  apply Cb_S with pr ; apply IHn ; assumption.
 Qed.
 
-Lemma C_Rball_infty_implies_D_Rball_infty : forall c r r_pos f,
-  C_Rball_infty c r r_pos f -> D_Rball_infty c r r_pos f.
+Lemma C_Rball_infty_implies_D_Rball_infty : forall c r f,
+  C_Rball_infty c r f -> D_Rball_infty c r f.
 Proof.
 intros ; intro ; apply C_Rball_implies_D_Rball ; trivial.
 Qed.
 
 (** Links between the full classes and the restrictions. *)
 
-Lemma C_C_Rball: forall c r r_pos n f,
-  C n f -> C_Rball c r r_pos n f.
+Lemma C_C_Rball: forall c r n f, C n f -> C_Rball c r n f.
 Proof.
-intros c r r_pos n ; induction n ; intros f Cnf ; inversion_clear Cnf.
- constructor ; apply continuity_continuity_Rball ; assumption.
- apply Cb_S with (derivable_derivable_in f (Rball c r r_pos) pr).
+intros c r n ; induction n ; intros f Cnf ; inversion_clear Cnf.
+ constructor ; apply continuity_continuity_in ; assumption.
+ apply Cb_S with (derivable_derivable_in f (Rball c r) pr).
  eapply C_Rball_ext ; [| eapply IHn ; eassumption].
  apply derive_derive_Rball.
 Qed.
@@ -132,8 +128,8 @@ Proof.
 intros ; apply C_implies_D, D_S_implies_C ; assumption.
 Qed.
 
-Lemma D_Rball_pred: forall c r r_pos n f,
-  D_Rball c r r_pos (S n) f -> D_Rball c r r_pos n f.
+Lemma D_Rball_pred: forall c r n f,
+  D_Rball c r (S n) f -> D_Rball c r n f.
 Proof.
 intros ; apply C_Rball_implies_D_Rball,
  D_Rball_S_implies_C_Rball ; assumption.
@@ -144,8 +140,8 @@ Proof.
  intros ; apply D_S_implies_C, C_implies_D ; assumption.
 Qed.
 
-Lemma C_Rball_pred : forall c r r_pos n f,
-  C_Rball c r r_pos (S n) f -> C_Rball c r r_pos n f.
+Lemma C_Rball_pred : forall c r n f,
+  C_Rball c r (S n) f -> C_Rball c r n f.
 Proof.
  intros ; apply D_Rball_S_implies_C_Rball, C_Rball_implies_D_Rball ; assumption.
 Qed.
@@ -159,10 +155,10 @@ intro m ; induction m ; intros n f Hnm Dmf.
   apply IHm ; [| apply D_pred] ; intuition.
 Qed.
 
-Lemma D_Rball_le: forall c r r_pos m n f, (n <= m)%nat ->
-  D_Rball c r r_pos m f -> D_Rball c r r_pos n f.
+Lemma D_Rball_le: forall c r m n f, (n <= m)%nat ->
+  D_Rball c r m f -> D_Rball c r n f.
 Proof.
-intros c r r_pos m ; induction m ; intros n f Hnm Dmf.
+intros c r m ; induction m ; intros n f Hnm Dmf.
  destruct n ; [apply Dmf | elim (le_Sn_O _ Hnm)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
@@ -178,10 +174,10 @@ intro m ; induction m ; intros n f H Cmf.
   apply IHm ; [| apply C_pred] ; intuition.
 Qed.
 
-Lemma C_Rball_le : forall c r r_pos m n f, (n <= m)%nat ->
-  C_Rball c r r_pos m f -> C_Rball c r r_pos n f.
+Lemma C_Rball_le : forall c r m n f, (n <= m)%nat ->
+  C_Rball c r m f -> C_Rball c r n f.
 Proof.
-intros c r r_pos m ; induction m ; intros n f H Cmf.
+intros c r m ; induction m ; intros n f H Cmf.
  destruct n ; [apply Cmf | elim (le_Sn_O _ H)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
@@ -201,14 +197,14 @@ intro n ; induction n ; intros f Dnf.
   apply IHn ; assumption.
 Qed.
 
-Lemma D_Rball_opp: forall c r r_pos n f,
-  D_Rball c r r_pos n f -> D_Rball c r r_pos n (- f)%F.
+Lemma D_Rball_opp: forall c r n f,
+  D_Rball c r n f -> D_Rball c r n (- f)%F.
 Proof.
-intros c r r_pos n ; induction n ; intros f Hf ; inversion_clear Hf.
+intros c r n ; induction n ; intros f Hf ; inversion_clear Hf.
  constructor.
- apply Db_S with (derivable_in_opp_compat _ _ pr) ;
- apply D_Rball_ext with (- derive_Rball f c r r_pos pr)%F.
- symmetry ; apply Req_Rball_eq ; intro ; apply derive_Rball_opp_compat.
+ apply Db_S with (derivable_in_opp _ _ pr) ;
+ apply D_Rball_ext with (- derive_Rball c r f pr)%F.
+ symmetry ; apply Req_Rball_eq ; intro ; apply derive_Rball_opp.
  apply IHn ; assumption.
 Qed.
 
@@ -223,14 +219,14 @@ intro n ; induction n ; intros f Cnf.
   apply IHn ; assumption.
 Qed.
 
-Lemma C_Rball_opp: forall c r r_pos n f,
-  C_Rball c r r_pos n f -> C_Rball c r r_pos n (- f)%F.
+Lemma C_Rball_opp: forall c r n f,
+  C_Rball c r n f -> C_Rball c r n (- f)%F.
 Proof.
-intros c r r_pos n ; induction n ; intros f Hf ; inversion_clear Hf.
+intros c r n ; induction n ; intros f Hf ; inversion_clear Hf.
  constructor ; intros x Dx ; apply limit_Ropp ; ass_apply ; assumption.
- apply Cb_S with (derivable_in_opp_compat _ _ pr) ;
- apply C_Rball_ext with (- derive_Rball f c r r_pos pr)%F.
- symmetry ; apply Req_Rball_eq ; intro ; apply derive_Rball_opp_compat.
+ apply Cb_S with (derivable_in_opp _ _ pr) ;
+ apply C_Rball_ext with (- derive_Rball c r f pr)%F.
+ symmetry ; apply Req_Rball_eq ; intro ; apply derive_Rball_opp.
  apply IHn ; assumption.
 Qed.
 
@@ -252,18 +248,18 @@ intro n ; induction n ; intros f g Dnf Dng ;
  apply IHn ; assumption.
 Qed.
 
-Lemma D_Rball_plus:  forall c r r_pos n f g,
-  D_Rball c r r_pos n f -> D_Rball c r r_pos n g ->
-  D_Rball c r r_pos n (f + g)%F.
+Lemma D_Rball_plus:  forall c r n f g,
+  D_Rball c r n f -> D_Rball c r n g ->
+  D_Rball c r n (f + g)%F.
 Proof.
-intros c r r_pos n ; induction n ; intros f g Dnf Dng ;
+intros c r n ; induction n ; intros f g Dnf Dng ;
  inversion_clear Dnf ; inversion_clear Dng.
 
  constructor.
  
- apply Db_S with (derivable_in_plus_compat _ _ _ pr pr0) ;
- apply D_Rball_ext with (derive_Rball f c r r_pos pr + derive_Rball g c r r_pos pr0)%F.
- intros x x_in ; symmetry ; apply derive_Rball_plus_compat ; assumption.
+ apply Db_S with (derivable_in_plus _ _ _ pr pr0) ;
+ apply D_Rball_ext with (derive_Rball c r f pr + derive_Rball c r g pr0)%F.
+ intros x x_in ; symmetry ; apply derive_Rball_plus ; assumption.
  apply IHn ; assumption.
 Qed.
 
@@ -285,19 +281,19 @@ intro n ; induction n ; intros f g Cnf Cng ;
  apply IHn ; assumption.
 Qed.
 
-Lemma C_Rball_plus:  forall c r r_pos n f g,
-  C_Rball c r r_pos n f -> C_Rball c r r_pos n g ->
-  C_Rball c r r_pos n (f + g)%F.
+Lemma C_Rball_plus:  forall c r n f g,
+  C_Rball c r n f -> C_Rball c r n g ->
+  C_Rball c r n (f + g)%F.
 Proof.
-intros c r r_pos n ; induction n ; intros f g Cnf Cng ;
+intros c r n ; induction n ; intros f g Cnf Cng ;
  inversion_clear Cnf ; inversion_clear Cng.
 
  constructor ; intros x x_in ; apply limit_plus ;
   ass_apply ; assumption.
  
- apply Cb_S with (derivable_in_plus_compat _ _ _ pr pr0) ;
- apply C_Rball_ext with (derive_Rball f c r r_pos pr + derive_Rball g c r r_pos pr0)%F.
- intros x x_in ; symmetry ; apply derive_Rball_plus_compat ; assumption.
+ apply Cb_S with (derivable_in_plus _ _ _ pr pr0) ;
+ apply C_Rball_ext with (derive_Rball c r f pr + derive_Rball c r g pr0)%F.
+ intros x x_in ; symmetry ; apply derive_Rball_plus ; assumption.
  apply IHn ; assumption.
 Qed.
 
@@ -308,9 +304,9 @@ intros ; unfold minus_fct, Rminus ; apply D_plus ;
  [| apply D_opp] ; assumption.
 Qed.
 
-Lemma D_Rball_minus:  forall c r r_pos n f g,
-  D_Rball c r r_pos n f -> D_Rball c r r_pos n g ->
-  D_Rball c r r_pos n (f - g)%F.
+Lemma D_Rball_minus:  forall c r n f g,
+  D_Rball c r n f -> D_Rball c r n g ->
+  D_Rball c r n (f - g)%F.
 Proof.
 intros ; unfold minus_fct, Rminus ; apply D_Rball_plus ;
  [| apply D_Rball_opp] ; assumption.
@@ -323,9 +319,9 @@ intros ; unfold minus_fct, Rminus ; apply C_plus ;
  [| apply C_opp] ; assumption.
 Qed.
 
-Lemma C_Rball_minus:  forall c r r_pos n f g,
-  C_Rball c r r_pos n f -> C_Rball c r r_pos n g ->
-  C_Rball c r r_pos n (f - g)%F.
+Lemma C_Rball_minus:  forall c r n f g,
+  C_Rball c r n f -> C_Rball c r n g ->
+  C_Rball c r n (f - g)%F.
 Proof.
 intros ; unfold minus_fct, Rminus ; apply C_Rball_plus ;
  [| apply C_Rball_opp] ; assumption.
@@ -345,14 +341,14 @@ intro n ; induction n ; intros f a Dnf ; inversion_clear Dnf.
  apply IHn ; assumption.
 Qed.
 
-Lemma D_Rball_scal : forall c r r_pos n f a,
-  D_Rball c r r_pos n f -> D_Rball c r r_pos n (mult_real_fct a f).
+Lemma D_Rball_scal : forall c r n f a,
+  D_Rball c r n f -> D_Rball c r n (mult_real_fct a f).
 Proof.
-intros c r r_pos n ; induction n ; intros f a Dnf ; inversion_clear Dnf.
+intros c r n ; induction n ; intros f a Dnf ; inversion_clear Dnf.
  constructor.
 
  apply Db_S with (derivable_in_scal _ _ _ pr) ;
- apply D_Rball_ext with  (mult_real_fct a (derive_Rball f c r r_pos pr)).
+ apply D_Rball_ext with  (mult_real_fct a (derive_Rball c r f pr)).
  intros x x_in ; symmetry ; apply derive_Rball_scal.
 
  apply IHn ; assumption.
@@ -393,14 +389,14 @@ intros a f D x l Hf eps eps_pos ; destruct (Req_dec a 0).
   right ; unfold eps' ; field ; apply Rabs_no_R0 ; assumption.
 Qed.
 
-Lemma C_Rball_scal : forall c r r_pos n f a,
-  C_Rball c r r_pos n f -> C_Rball c r r_pos n (mult_real_fct a f).
+Lemma C_Rball_scal : forall c r n f a,
+  C_Rball c r n f -> C_Rball c r n (mult_real_fct a f).
 Proof.
-intros c r r_pos n ; induction n ; intros f a Cnf ; inversion_clear Cnf.
+intros c r n ; induction n ; intros f a Cnf ; inversion_clear Cnf.
  constructor ; intros x x_in ; eapply limit_scal ; do 2 ass_apply.
 
  apply Cb_S with (derivable_in_scal _ _ _ pr) ;
- apply C_Rball_ext with  (mult_real_fct a (derive_Rball f c r r_pos pr)).
+ apply C_Rball_ext with  (mult_real_fct a (derive_Rball c r f pr)).
  intros x x_in ; symmetry ; apply derive_Rball_scal.
 
  apply IHn ; assumption.
@@ -424,19 +420,19 @@ intro n ; induction n ; intros f g Dnf Dng ;
   assumption.
 Qed.
 
-Lemma D_Rball_mult : forall c r r_pos n f g,
-  D_Rball c r r_pos n f -> D_Rball c r r_pos n g -> D_Rball c r r_pos n (f * g)%F.
+Lemma D_Rball_mult : forall c r n f g,
+  D_Rball c r n f -> D_Rball c r n g -> D_Rball c r n (f * g)%F.
 Proof.
-intros c r r_pos n ; induction n ; intros f g Dnf Dng ;
+intros c r n ; induction n ; intros f g Dnf Dng ;
  inversion Dnf ; inversion Dng ; subst.
   constructor.
 
-  assert (pr1 : derivable_in (f * g)%F (Rball c r r_pos))
-   by (apply derivable_in_mult_compat ; assumption).
+  assert (pr1 : derivable_in (Rball c r) (f * g)%F)
+   by (apply derivable_in_mult ; assumption).
   apply Db_S with pr1 ;
-  apply D_Rball_ext with (fun x => (derive_Rball f c r r_pos pr) x * g x
-  + f x * (derive_Rball g c r r_pos pr0) x)%R.
-  apply Req_Rball_eq ; intro ; symmetry ; apply derive_Rball_mult_compat.
+  apply D_Rball_ext with (fun x => (derive_Rball c r f pr) x * g x
+  + f x * (derive_Rball c r g pr0) x)%R.
+  apply Req_Rball_eq ; intro ; symmetry ; apply derive_Rball_mult.
   apply D_Rball_plus ; apply IHn ; [| apply D_Rball_pred | apply D_Rball_pred |] ;
   assumption.
 Qed.
@@ -459,19 +455,19 @@ intro n ; induction n ; intros f g Cnf Cng ;
   assumption.
 Qed.
 
-Lemma C_Rball_mult : forall c r r_pos n f g,
-  C_Rball c r r_pos n f -> C_Rball c r r_pos n g -> C_Rball c r r_pos n (f * g)%F.
+Lemma C_Rball_mult : forall c r n f g,
+  C_Rball c r n f -> C_Rball c r n g -> C_Rball c r n (f * g)%F.
 Proof.
-intros c r r_pos n ; induction n ; intros f g Cnf Cng ;
+intros c r n ; induction n ; intros f g Cnf Cng ;
  inversion Cnf ; inversion Cng ; subst.
   constructor ; intros x x_in ; apply limit_mul ; ass_apply ; assumption.
 
-  assert (pr1 : derivable_in (f * g)%F (Rball c r r_pos))
-   by (apply derivable_in_mult_compat ; assumption).
+  assert (pr1 : derivable_in (Rball c r) (f * g)%F)
+   by (apply derivable_in_mult ; assumption).
   apply Cb_S with pr1 ;
-  apply C_Rball_ext with (fun x => (derive_Rball f c r r_pos pr) x * g x
-  + f x * (derive_Rball g c r r_pos pr0) x)%R.
-  apply Req_Rball_eq ; intro ; symmetry ; apply derive_Rball_mult_compat.
+  apply C_Rball_ext with (fun x => (derive_Rball c r f pr) x * g x
+  + f x * (derive_Rball c r g pr0) x)%R.
+  apply Req_Rball_eq ; intro ; symmetry ; apply derive_Rball_mult.
   apply C_Rball_plus ; apply IHn ; [| apply C_Rball_pred | apply C_Rball_pred |] ;
   assumption.
 Qed.
@@ -532,13 +528,13 @@ intros n f pr Dnf ; inversion_clear Dnf ; eapply D_ext ;
  [| eassumption] ; intro ; eapply pr_nu.
 Qed.
 
-Lemma D_Rball_derive: forall c r r_pos n f pr,
-  D_Rball c r r_pos (S n) f ->
-  D_Rball c r r_pos n (derive_Rball f c r r_pos pr).
+Lemma D_Rball_derive: forall c r n f pr,
+  D_Rball c r (S n) f ->
+  D_Rball c r n (derive_Rball c r f pr).
 Proof.
-intros c r r_pos n f pr Dnf ; inversion_clear Dnf ;
+intros c r n f pr Dnf ; inversion_clear Dnf ;
  eapply D_Rball_ext ; [| eassumption] ;
- eapply Req_Rball_eq, (derive_Rball_ext _ _ _ _ _ _ r_pos) ; reflexivity.
+ eapply Req_Rball_eq, derive_Rball_ext ; reflexivity.
 Qed.
 
 Lemma C_derive : forall n f (pr : derivable f),
@@ -548,13 +544,13 @@ intros n f pr Cnf ; inversion_clear Cnf ; eapply C_ext ;
  [| eassumption] ; intro ; eapply pr_nu.
 Qed.
 
-Lemma C_Rball_derive: forall c r r_pos n f pr,
-  C_Rball c r r_pos (S n) f ->
-  C_Rball c r r_pos n (derive_Rball f c r r_pos pr).
+Lemma C_Rball_derive: forall c r n f pr,
+  C_Rball c r (S n) f ->
+  C_Rball c r n (derive_Rball c r f pr).
 Proof.
-intros c r r_pos n f pr Cnf ; inversion_clear Cnf ;
+intros c r n f pr Cnf ; inversion_clear Cnf ;
  eapply C_Rball_ext ; [| eassumption] ;
- eapply Req_Rball_eq, (derive_Rball_ext _ _ _ _ _ _ r_pos) ; reflexivity.
+ eapply Req_Rball_eq, derive_Rball_ext ; reflexivity.
 Qed.
 
 (** Compatibility of C_infty, D_infty with common operators *)
@@ -566,9 +562,9 @@ Qed.
 
 Ltac intro_all := try (intro ; intro_all).
 
-Lemma D_Rball_infty_opp: forall c r r_pos f,
-  D_Rball_infty c r r_pos f ->
-  D_Rball_infty c r r_pos (- f)%F.
+Lemma D_Rball_infty_opp: forall c r f,
+  D_Rball_infty c r f ->
+  D_Rball_infty c r (- f)%F.
 Proof.
 intro_all ; apply D_Rball_opp ; ass_apply.
 Qed.
@@ -578,9 +574,9 @@ Proof.
 intros f Cf n ; apply C_opp ; trivial.
 Qed.
 
-Lemma C_Rball_infty_opp: forall c r r_pos f,
-  C_Rball_infty c r r_pos f ->
-  C_Rball_infty c r r_pos (- f)%F.
+Lemma C_Rball_infty_opp: forall c r f,
+  C_Rball_infty c r f ->
+  C_Rball_infty c r (- f)%F.
 Proof.
 intro_all ; apply C_Rball_opp ; ass_apply.
 Qed.
@@ -591,10 +587,10 @@ Proof.
  intros f g Df Dg n ; apply D_plus ; trivial.
 Qed.
 
-Lemma D_Rball_infty_plus : forall c r r_pos f g,
-  D_Rball_infty c r r_pos f ->
-  D_Rball_infty c r r_pos g ->
-  D_Rball_infty c r r_pos (f + g)%F.
+Lemma D_Rball_infty_plus : forall c r f g,
+  D_Rball_infty c r f ->
+  D_Rball_infty c r g ->
+  D_Rball_infty c r (f + g)%F.
 Proof.
  intro_all ; apply D_Rball_plus ; ass_apply.
 Qed.
@@ -605,10 +601,10 @@ Proof.
  intros f g Cf Cg n ; apply C_plus ; trivial.
 Qed.
 
-Lemma C_Rball_infty_plus : forall c r r_pos f g,
-  C_Rball_infty c r r_pos f ->
-  C_Rball_infty c r r_pos g ->
-  C_Rball_infty c r r_pos (f + g)%F.
+Lemma C_Rball_infty_plus : forall c r f g,
+  C_Rball_infty c r f ->
+  C_Rball_infty c r g ->
+  C_Rball_infty c r (f + g)%F.
 Proof.
  intro_all ; apply C_Rball_plus ; ass_apply.
 Qed.
@@ -619,10 +615,10 @@ Proof.
  intros f g Df Dg n ; apply D_minus ; trivial.
 Qed.
 
-Lemma D_Rball_infty_minus : forall c r r_pos f g,
-  D_Rball_infty c r r_pos f ->
-  D_Rball_infty c r r_pos g ->
-  D_Rball_infty c r r_pos (f - g)%F.
+Lemma D_Rball_infty_minus : forall c r f g,
+  D_Rball_infty c r f ->
+  D_Rball_infty c r g ->
+  D_Rball_infty c r (f - g)%F.
 Proof.
  intro_all ; apply D_Rball_minus ; ass_apply.
 Qed.
@@ -633,10 +629,10 @@ Proof.
  intros f g Cf Cg n ; apply C_minus ; trivial.
 Qed.
 
-Lemma C_Rball_infty_minus : forall c r r_pos f g,
-  C_Rball_infty c r r_pos f ->
-  C_Rball_infty c r r_pos g ->
-  C_Rball_infty c r r_pos (f - g)%F.
+Lemma C_Rball_infty_minus : forall c r f g,
+  C_Rball_infty c r f ->
+  C_Rball_infty c r g ->
+  C_Rball_infty c r (f - g)%F.
 Proof.
  intro_all ; apply C_Rball_minus ; ass_apply.
 Qed.
@@ -647,9 +643,9 @@ Proof.
  intros f a Df n ; apply D_scal ; trivial.
 Qed.
 
-Lemma D_Rball_infty_scal : forall c r r_pos f a,
-  D_Rball_infty c r r_pos f ->
-  D_Rball_infty c r r_pos (mult_real_fct a f).
+Lemma D_Rball_infty_scal : forall c r f a,
+  D_Rball_infty c r f ->
+  D_Rball_infty c r (mult_real_fct a f).
 Proof.
  intro_all ; apply D_Rball_scal ; ass_apply.
 Qed.
@@ -660,9 +656,9 @@ Proof.
  intros f a Cf n ; apply C_scal ; trivial.
 Qed.
 
-Lemma C_Rball_infty_scal : forall c r r_pos f a,
-  C_Rball_infty c r r_pos f ->
-  C_Rball_infty c r r_pos (mult_real_fct a f).
+Lemma C_Rball_infty_scal : forall c r f a,
+  C_Rball_infty c r f ->
+  C_Rball_infty c r (mult_real_fct a f).
 Proof.
  intro_all ; apply C_Rball_scal ; ass_apply.
 Qed.
@@ -673,10 +669,10 @@ Proof.
  intros f g Df Dg n ; apply D_mult ; trivial.
 Qed.
 
-Lemma D_Rball_infty_mult : forall c r r_pos f g,
-  D_Rball_infty c r r_pos f ->
-  D_Rball_infty c r r_pos g ->
-  D_Rball_infty c r r_pos (f * g)%F.
+Lemma D_Rball_infty_mult : forall c r f g,
+  D_Rball_infty c r f ->
+  D_Rball_infty c r g ->
+  D_Rball_infty c r (f * g)%F.
 Proof.
  intro_all ; apply D_Rball_mult ; ass_apply.
 Qed.
@@ -687,10 +683,10 @@ Proof.
  intros f g Cf Cg n ; apply C_mult ; trivial.
 Qed.
 
-Lemma C_Rball_infty_mult : forall c r r_pos f g,
-  C_Rball_infty c r r_pos f ->
-  C_Rball_infty c r r_pos g ->
-  C_Rball_infty c r r_pos (f * g)%F.
+Lemma C_Rball_infty_mult : forall c r f g,
+  C_Rball_infty c r f ->
+  C_Rball_infty c r g ->
+  C_Rball_infty c r (f * g)%F.
 Proof.
  intro_all ; apply C_Rball_mult ; ass_apply.
 Qed.

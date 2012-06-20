@@ -31,6 +31,7 @@ Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_r
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 
 Require Import Rfunction_def Functions Rextensionality Rpow_facts.
+Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 
 Open Scope R_scope.
 
@@ -81,6 +82,28 @@ Lemma Rpser_zip_compat_0_r : forall An x la,
 Proof.
 intros An x la Hla ; replace (x * la) with (0 + x * la) by ring ;
  apply Rpser_zip_compat ; [apply Rpser_zero_seq | assumption].
+Qed.
+
+Lemma sum_r_zip_compat_0_l : forall An r rAn rAn0 x,
+  Rabs x < r -> Rabs (x ^ 2) < r ->
+  sum_r (Rseq_zip An 0) r rAn0 x = sum_r An r rAn (x ^ 2).
+Proof.
+intros An r rAn rAn0 x x_bd x2_bd ;
+ assert (Ha := sum_r_sums An r rAn (x ^ 2) x2_bd) ;
+ assert (Hab := sum_r_sums _ r rAn0 x x_bd) ;
+ assert (Hab' := Rpser_zip_compat_0_l _ _ _ Ha) ;
+ eapply Rpser_unique ; eassumption.
+Qed.
+
+Lemma sum_r_zip_compat_0_r : forall An r rAn rAn0 x,
+  Rabs x < r -> Rabs (x ^ 2) < r ->
+  sum_r (Rseq_zip 0 An) r rAn0 x = x * sum_r An r rAn (x ^ 2).
+Proof.
+intros An r rAn rAn0 x x_bd x2_bd ;
+ assert (Ha := sum_r_sums An r rAn (x ^ 2) x2_bd) ;
+ assert (Hab := sum_r_sums _ r rAn0 x x_bd) ;
+ assert (Hab' := Rpser_zip_compat_0_r _ _ _ Ha) ;
+ eapply Rpser_unique ; eassumption.
 Qed.
 
 (** * Definition of the constant power series. *)
@@ -518,6 +541,37 @@ intros x [x_lb x_ub] ; unfold arctan ; destruct (MyRIneq.Req_dec x 1) as [Heq | 
   assumption.
 Qed.
 
+Require Import Rpser_sums_facts.
+
+(* TODO : move *)
+
+Lemma Rmult_lt_compat : forall a b c d, 0 < a -> 0 < b -> a < c -> b < d -> a * b < c * d.
+Proof.
+intros a b c d a_pos b_pos Hac Hdb ; transitivity (a * d).
+ apply Rmult_lt_compat_l ; assumption.
+ apply Rmult_lt_compat_r ; [transitivity b |] ; assumption.
+Qed.
+
+Lemma Rpow_lt_1_compat : forall r n, 0 <= r -> r < 1 -> r ^ S n < 1.
+Proof.
+intros r n r_pos r_lt ; rewrite <- (pow1 (S n)) ;
+ apply pow_lt_compat ; auto ; omega.
+Qed.
+
+Lemma arctan_explicit : forall x, open_interval (- 1) 1 x ->
+  arctan x = x * sum_r _ _ arct_cv_radius (- x ^ 2).
+Proof.
+intros x x_in.
+ assert (x_bd : Rabs x < 1) by (apply Rabs_def1 ; apply x_in).
+ assert (x2_bd : Rabs (x ^ 2) < 1).
+  rewrite <- RPow_abs ; apply Rpow_lt_1_compat ; [apply Rabs_pos | assumption].
+ unfold arctan ; destruct (MyRIneq.Req_dec x 1).
+ subst ; destruct (Rlt_irrefl 1) ; apply x_in.
+ eapply eq_trans ; [apply sum_r_zip_compat_0_r with
+  (rAn := proj1 (finite_cv_radius_alt_compat _ _) arct_cv_radius) ; assumption |].
+ apply Rmult_eq_compat_l, sum_r_alt_compat ; assumption.
+Qed.
+
 (** Specific values of arctan *)
 
 Lemma arctan0_0 : arctan 0 = 0.
@@ -535,3 +589,28 @@ Proof.
 unfold arctan ; destruct (MyRIneq.Req_dec 1 1) as [Heq | Hf] ;
  [| destruct Hf] ; reflexivity.
 Qed.
+
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
+
+Lemma derivable_Rball_arctan : derivable_Rball 0 1 arctan.
+Proof.
+intro pr ; eapply derivable_in_ext_strong with (f := sum_r _ _ arctan_cv_radius).
+ intros x x_in ; unfold arctan ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
+  destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with (Rabs (1 - 0)).
+   right ; rewrite Rminus_0_r, Rabs_R1 ; reflexivity.
+   subst ; apply x_in.
+  reflexivity.
+ apply derivable_Rball_sum_r.
+Qed.
+
+Require Import Ranalysis_facts.
+
+(*
+Lemma derivative_arctan_explicit :
+  forall pr (dAn: derivable_Rball arctan 0 1 pr) x (x_in : Rabs x < 1),
+  derive_Rball arctan _ _ _ dAn x = / (1 - x ^ 2).
+Proof.
+intros pr dAn x x_in.
+
+
+*)

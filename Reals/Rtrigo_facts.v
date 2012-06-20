@@ -48,15 +48,15 @@ intros x [xlb xub] ; apply cos_gt_0 ; unfold Rdiv ;
  ring_simplify ; assumption.
 Qed.
 
-Lemma derivable_open_interval_tan : derivable_open_interval tan (- PI / 2) (PI / 2).
+Lemma derivable_open_interval_tan : derivable_open_interval (- PI / 2) (PI / 2) tan.
 Proof.
 intros x x_in ; apply derivable_pt_derivable_pt_in, derivable_pt_div ;
  try reg ; apply Rgt_not_eq, cos_pos ; assumption.
 Qed.
 
-Lemma continuity_open_interval_tan : continuity_open_interval tan (- PI / 2) (PI / 2).
+Lemma continuity_open_interval_tan : continuity_open_interval (- PI / 2) (PI / 2) tan.
 Proof.
-intros ; apply derivable_continuous_open_interval, derivable_open_interval_tan.
+intros ; apply derivable_in_continuity_in, derivable_open_interval_tan.
 Qed.
 
 Lemma derive_pt_tan : forall x (cosx_neq: cos x <> 0) (pr: derivable_pt tan x),
@@ -66,34 +66,34 @@ intros ; unfold tan ; reg ; unfold Rsqr ; simpl ; field ; assumption.
 Qed.
 
 Lemma derive_open_interval_tan : forall x (x_in : open_interval (- PI / 2) (PI / 2) x)
- (pr : derivable_open_interval tan (- PI / 2) (PI / 2)),
- derive_open_interval tan (- PI / 2) (PI / 2) pr x = 1 + (tan x) ^ 2.
+ (pr : derivable_open_interval (- PI / 2) (PI / 2) tan),
+ derive_open_interval (- PI / 2) (PI / 2) tan pr x = 1 + (tan x) ^ 2.
 Proof.
 intros x x_in pr.
  assert (cos_neq : cos x <> 0) by (apply Rgt_not_eq, cos_pos ; assumption).
  assert (pr' : derivable_pt tan x) by (apply derivable_pt_div ; (reg || assumption)).
- rewrite <- (derive_pt_tan _ cos_neq pr') ; apply derive_pt_derive_open_interval ;
+ rewrite <- (derive_pt_tan _ cos_neq pr') ; apply derive_open_interval_derive_pt ;
  assumption.
 Qed.
 
 Lemma derive_open_interval_tan_strong :
  forall lb ub x (x_in : open_interval lb ub x)
- (pr : derivable_open_interval tan lb ub),
+ (pr : derivable_open_interval lb ub tan),
  open_interval (- PI / 2) (PI / 2) lb ->
  open_interval (- PI / 2) (PI / 2) ub ->
- derive_open_interval tan lb ub pr x = 1 + (tan x) ^ 2.
+ derive_open_interval lb ub tan pr x = 1 + (tan x) ^ 2.
 Proof.
 intros lb ub x x_in pr lb_in ub_in.
  assert (cos_neq : cos x <> 0).
-  apply Rgt_not_eq, cos_pos ; eapply open_interval_restriction_compat ;
+  apply Rgt_not_eq, cos_pos ; eapply open_interval_restriction ;
    try eassumption ; apply open_interval_interval ; assumption.
  assert (pr' : derivable_pt tan x) by (apply derivable_pt_div ; (reg || assumption)).
- rewrite <- (derive_pt_tan _ cos_neq pr') ; apply derive_pt_derive_open_interval ;
+ rewrite <- (derive_pt_tan _ cos_neq pr') ; apply derive_open_interval_derive_pt ;
  assumption.
 Qed.
 
 Lemma strictly_increasing_open_interval_tan :
-  strictly_increasing_open_interval tan (- PI / 2) (PI / 2).
+  strictly_increasing_open_interval (- PI / 2) (PI / 2) tan.
 Proof.
 apply derive_open_interval_pos_strictly_increasing_open_interval
  with (derivable_open_interval_tan).
@@ -101,22 +101,21 @@ intros x x_in ; rewrite derive_open_interval_tan ;
  [apply One_plus_sqr_pos_lt | assumption].
 Qed.
 
-Lemma injective_open_interval_tan : injective_open_interval tan (- PI / 2) (PI / 2).
+Lemma injective_open_interval_tan : injective_open_interval (- PI / 2) (PI / 2) tan.
 Proof.
-apply strictly_increasing_injective_open_interval ;
-apply strictly_increasing_open_interval_tan.
+apply strictly_increasing_in_injective_in, strictly_increasing_open_interval_tan.
 Qed.
 
 Lemma strictly_increasing_interval_sin :
-  strictly_increasing_interval sin (- PI / 2) (PI / 2).
+  strictly_increasing_interval (- PI / 2) (PI / 2) sin.
 Proof.
  replace (- PI / 2) with (- (PI / 2)) by field.
  do 5 intro ; apply sin_increasing_1 ; ass_apply.
 Qed.
 
-Lemma injective_interval_sin : injective_interval sin (- PI / 2) (PI / 2).
+Lemma injective_interval_sin : injective_interval (- PI / 2) (PI / 2) sin.
 Proof.
-apply strictly_increasing_injective_interval, strictly_increasing_interval_sin.
+apply strictly_increasing_in_injective_in, strictly_increasing_interval_sin.
 Qed.
 
 Lemma sqr_lt_switch : forall x y, x < y -> y <= 0 -> y² < x².
