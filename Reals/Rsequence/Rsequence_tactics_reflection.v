@@ -5,11 +5,14 @@ Require Import List.
 Require Import Option.
 Require Import Ass_handling.
 
+(* Reifications of sequences, limits and being the limit of a
+   particular sequence. *)
+
 Inductive rseq :=
-  | rseq_cst : forall (r : R), rseq
-  | rseq_var : forall (n : nat), rseq
-  | rseq_opp : forall (r : rseq), rseq
-  | rseq_plus : forall (rl rr : rseq), rseq
+  | rseq_cst   : forall (r : R), rseq
+  | rseq_var   : forall (n : nat), rseq
+  | rseq_opp   : forall (r : rseq), rseq
+  | rseq_plus  : forall (rl rr : rseq), rseq
   | rseq_minus : forall (rl rr : rseq), rseq.
 
 Inductive rseq_limit :=
@@ -22,6 +25,8 @@ Definition is_limit r l := match l with
   | finite l => Rseq_cv r l
   | plus_inf => Rseq_cv_pos_infty r
 end.
+
+(* Two extensionally equal sequences have the same limit. *)
 
 Lemma is_limit_ext : forall r s k l,
   is_limit r k ->
@@ -177,3 +182,63 @@ unfold rseq_precondition ; intros r env un l ;
   [ eapply comp_rseq_limit_compat | |] ;
   symmetry ; eassumption.
 Qed.
+
+
+
+(*
+
+Section Test.
+
+Ltac add_var v l :=
+  let rec aux v l n := match l with
+    | nil       => constr: (n , v :: nil)
+    | v  :: _   => constr: (n , l)
+    | ?a :: ?tl => match aux v tl (S n) with | (?m , ?tl') => constr: (m , cons a tl') end
+    end in
+  aux v l O.
+
+Ltac known_limit An := match goal with
+  | [ H: is_limit An ?a |- _ ] => constr: (Some (An , a , H))
+  | _                          => constr: (None  )
+end.
+
+Ltac reify_rseq_aux f l := match f with
+  | Rseq_constant ?v  => constr: (rseq_cst v , l)
+  | Rseq_opp  ?un     =>
+        match reify_rseq_aux un l  with | (?UN , ?l1) => constr: (rseq_opp UN , l1) end
+  | Rseq_plus ?un ?vn =>
+        match reify_rseq_aux un l  with | (?UN , ?l1) =>
+        match reify_rseq_aux vn l1 with | (?VN , ?l2) => constr: (rseq_plus UN VN , l2) end end
+  | Rseq_minus ?un ?vn =>
+        match reify_rseq_aux un l  with | (?UN , ?l1) =>
+        match reify_rseq_aux vn l1 with | (?VN , ?l2) => constr: (rseq_minus UN VN , l2) end end
+  | ?An =>
+        match known_limit An with | None => fail | Some ?a =>
+        match add_var a l with | (?A , ?l1) => constr: (rseq_var A , l1) end end
+end.
+
+Check tactic_correctness.
+
+Ltac reify_rseq := match goal with
+  | |- Rseq_cv ?f ?l =>
+        match reify_rseq_aux f (@nil Rseq_with_limit) with | (?r , ?env) =>
+        change (is_limit f (finite l)) end end.
+
+
+Variable Un Vn : Rseq.
+Variable u  v  : R.
+
+Hypothesis Un_cv : Rseq_cv Un u.
+Hypothesis Vn_cv : Rseq_cv Vn v.
+
+
+Goal Rseq_cv Un u.
+Proof.
+fold (is_limit Un (finite u)) in *.
+fold (is_limit Vn (finite v)) in *.
+reify_rseq.
+  apply (tactic_correctness (rseq_var 0) (Un :: nil) Un (finite u)).
+
+  with (r := r) (env := env) 
+ eapply tactic_correctness.
+*)
