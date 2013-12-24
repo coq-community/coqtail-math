@@ -29,7 +29,7 @@ Lemma Rser_pos_bound_cv : forall Un M,
 Proof.
 intros Un M Un_pos Hb ; destruct ub_to_lub with (Rseq_sum Un) as [l Hl].
 eapply Rseq_bound_max_has_ub ; eassumption.
-exists l ; apply tech10 ; [apply Rser_pos_growing |] ; assumption.
+exists l ; try apply tech10; apply Un_cv_crit_lub ; [apply Rser_pos_growing |] ; assumption.
 Qed.
 
 (** Properties using classical logic *)

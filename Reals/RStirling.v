@@ -202,7 +202,7 @@ field; assumption.
 unfold Sn, Rn; field; assumption.
 apply Rseq_eq_refl.
 repeat apply Rseq_big_O_plus_compat_l.
-  eapply Rseq_big_O_eq_compat with (Vn := fun n => INR (1 + n) * Qn 3 (1 + n)).
+  eapply Rseq_big_O_eq_compat with (Vn := fun n => INR (1 + n) * Qn 3 (1 + n)) (Un := fun n => (INR (1 + n) + / 2) * Sn (1 + n)).
     reflexivity.
     intros n; unfold Rseq_shifts ; repeat (rewrite Qn_S; [|omega]).
     rewrite <- tech_pow_Rmult.

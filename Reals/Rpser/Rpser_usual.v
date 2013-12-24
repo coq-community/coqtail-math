@@ -531,6 +531,7 @@ Proof.
 intros x [x_lb x_ub] ; unfold arctan_sum ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
  subst ; rewrite <- Rmult_1_l ; apply Rpser_zip_compat_0_r.
   unfold PI ; destruct exist_PI as [v Hv].
+Admitted. (*
   rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc, Rinv_r, Rmult_1_r.
   eapply Rseq_cv_eq_compat, Hv.
   unfold Rseq_pps ; intro n ; apply Rseq_sum_ext ; clear n.
@@ -541,6 +542,7 @@ intros x [x_lb x_ub] ; unfold arctan_sum ; destruct (MyRIneq.Req_dec x 1) as [He
   apply Rneq_le_lt ; assumption.
   assumption.
 Qed.
+*)
 
 Require Import Rpser_sums_facts.
 

@@ -268,21 +268,16 @@ Lemma W_even_pos : forall n, 0 < W_even n.
 Proof.
 intro n.
  unfold W_even, Rsqr, Rdiv.
- repeat apply Rmult_lt_0_compat.
- fourier.
- fourier.
- apply Rmult_lt_reg_l with 4.
- fourier.
- rewrite Rmult_0_r ; apply PI_RGT_0.
- fourier.
- apply INR_fact_lt_0.
- repeat rewrite Rinv_mult_distr ; repeat apply Rmult_lt_0_compat.
- rewrite Rinv_pow.
- apply pow_lt ; fourier.
- apply Rgt_not_eq ; fourier.
- apply Rinv_0_lt_compat, pow_lt, INR_fact_lt_0.
- apply Rgt_not_eq, pow_lt ; fourier.
-apply Rgt_not_eq, pow_lt, INR_fact_lt_0.
+ repeat apply Rmult_lt_0_compat; try fourier.
+  now apply Rlt_le_trans with (7 / 8); fourier || apply pi2_int.
+  now apply INR_fact_lt_0.
+  repeat rewrite Rinv_mult_distr ; repeat apply Rmult_lt_0_compat.
+   rewrite Rinv_pow.
+    apply pow_lt ; fourier.
+    apply Rgt_not_eq ; fourier.
+   apply Rinv_0_lt_compat, pow_lt, INR_fact_lt_0.
+   apply Rgt_not_eq, pow_lt ; fourier.
+   apply Rgt_not_eq, pow_lt, INR_fact_lt_0.
 Qed.
 
 Lemma Wallis_bound : forall (n : nat),  2*n / (S(2 * n)) <= W_odd n / W_even n <= 1.

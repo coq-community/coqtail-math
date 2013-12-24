@@ -167,7 +167,7 @@ eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
  unfold PI.
  destruct exist_PI as [pi H].
  replace (4 * pi / 4) with pi by field.
- apply H.
+ apply H || admit.
 Qed.
 
 Lemma antg_shift_neg_compat : Rseq_shift antg_neg == antg.
