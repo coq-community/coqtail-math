@@ -200,16 +200,16 @@ Proof.
   intros [ | a | a ] [ | b | b ]; simpl; try ring.
     apply IPR_add.
     
-    remember ((a ?= b)%positive Eq) as Cab.
+    rewrite Z.pos_sub_spec; remember (a ?= b)%positive as Cab.
     destruct Cab; simpl.
       erewrite (Pcompare_Eq_eq a b); [ ring | ]; auto.
-      rewrite IPR_sub; [ ring | ]; apply ZC2; auto.
+      rewrite IPR_sub; [ ring | ]; apply ZC2; symmetry; assumption.
       rewrite IPR_sub; [ ring | ]; auto.
     
-    remember ((a ?= b)%positive Eq) as Cab.
+    rewrite Z.pos_sub_spec; remember (b ?= a)%positive as Cab.
     destruct Cab; simpl.
-      erewrite (Pcompare_Eq_eq a b); [ ring | ]; auto.
-      rewrite IPR_sub; [ ring | ]; apply ZC2; auto.
+      erewrite (Pcompare_Eq_eq b a); [ ring | ]; auto.
+      rewrite IPR_sub; [ ring | ]; apply ZC2; symmetry; assumption.
       rewrite IPR_sub; [ ring | ]; auto.
     
     rewrite IPR_add; ring.
