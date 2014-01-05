@@ -29,7 +29,7 @@ Axiom Rlt_trans : forall r1 r2 r3:R, r1 < r2 -> r2 < r3 -> r1 < r3.
 Axiom Rplus_lt_compat_l : forall r r1 r2:R, r1 < r2 -> r + r1 < r + r2.
 Axiom Rmult_lt_compat_l : forall r r1 r2:R, R0 < r -> r1 < r2 -> r * r1 < r * r2.
 
-Boxed Fixpoint INR (n:nat) : R :=
+Fixpoint INR (n:nat) : R :=
   match n with
   | O => R0
   | S O => R1
