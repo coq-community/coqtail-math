@@ -588,7 +588,7 @@ Proof.
      
      now destruct H; split; fourier.
   
-  apply limit_comp with (-b).
+  apply (limit_comp (fun x => - x) (fun x : R => f (- x) / g (- x)) _ _ (-b)).
    unfold limit1_in, limit_in. intros. exists eps. split.
     now assumption.
     
@@ -1179,7 +1179,7 @@ Proof.
      
      now destruct H; split; fourier.
   
-  apply limit_comp with (-b).
+  apply (limit_comp (fun x => - x) (fun x : R => f (- x) / g (- x)) _ _ (-b)).
    unfold limit1_in, limit_in. intros. exists eps. split.
     now assumption.
     
@@ -1531,7 +1531,7 @@ intros f g a b L Hab Df Dg Cf Cg Hdiv_neg g'_not_0 Hlimder.
      
      now destruct H; split; fourier.
   
-  apply limit_comp with (-b).
+  apply (limit_comp (fun x => - x) (fun x : R => f (- x) / g (- x)) _ _ (-b)).
    unfold limit1_in, limit_in. intros. exists eps. split.
     now assumption.
     
@@ -1775,7 +1775,7 @@ apply limit_div_pos_comp_Ropp.
      apply limit1_ext with (comp f (fun x => -x)). intros. reflexivity.
      apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
      intros. split. apply H. destruct H; split; fourier.
-     apply limit_comp with b. unfold limit1_in, limit_in.
+     apply (limit_comp _ f _ _ b). unfold limit1_in, limit_in.
      intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
      ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
      apply H0. apply Zf.
@@ -1783,7 +1783,7 @@ apply limit_div_pos_comp_Ropp.
      apply limit1_ext with (comp g (fun x => -x)). intros. reflexivity.
      apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
      intros. split. apply H. destruct H; split; fourier.
-     apply limit_comp with b. unfold limit1_in, limit_in.
+     apply (limit_comp _ g _ _ b). unfold limit1_in, limit_in.
      intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
      ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
      apply H0. apply Zg.
@@ -1998,7 +1998,7 @@ apply limit_div_neg_comp_Ropp.
      apply limit1_ext with (comp f (fun x => -x)). intros. reflexivity.
      apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
      intros. split. apply H. destruct H; split; fourier.
-     apply limit_comp with b. unfold limit1_in, limit_in.
+     apply (limit_comp _ f _ _ b). unfold limit1_in, limit_in.
      intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
      ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
      apply H0. apply Zf.
@@ -2006,7 +2006,7 @@ apply limit_div_neg_comp_Ropp.
      apply limit1_ext with (comp g (fun x => -x)). intros. reflexivity.
      apply limit1_imp with  (Dgf (open_interval (-b) (-a)) (open_interval a b) (fun x => - x)).
      intros. split. apply H. destruct H; split; fourier.
-     apply limit_comp with b. unfold limit1_in, limit_in.
+     apply (limit_comp _ g _ _ b). unfold limit1_in, limit_in.
      intros. exists eps. split. intuition. intros. simpl in *. unfold R_dist in *.
      ring_simplify (x -- b) in H0. replace (- x - b) with (- (x + b)) by ring. rewrite Rabs_Ropp.
      apply H0. apply Zg.
