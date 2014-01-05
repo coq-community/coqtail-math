@@ -769,67 +769,16 @@ Theorem Ndiv_mod_algo_complete : forall n m r, n > 0 -> Ndiv_mod_algo n m = r ->
 (n | m - r).
 Proof.
 destruct n.
-intros. inversion H.
-intro m. pattern m. apply nat_strong_ind.
-intros.
-compute in H0.
-rewrite <- H0.
-simpl.
-apply Ndiv_0.
-intros.
-simpl in H1.
-case (lt_eq_lt_dec (S n) n0).
-intros.
-destruct s.
-Focus 2.
-rewrite <- e in H1.
-replace (Ndiv_mod_algo (S n) (S n)) with (Ndiv_mod_algo (S n) (0+S n)) in H1.
-rewrite Ndiv_mod_l1 in H1.
-simpl in H1.
-destruct n.
-simpl in H1.
-rewrite <- H1.
-rewrite <- e.
-simpl.
-exists 2. ring.
-simpl in H1.
-rewrite <- H1.
-rewrite e.
-simpl.
-rewrite <- minus_n_O.
-apply Ndiv_n_n.
-auto with arith.
-simpl. auto.
-Focus 2.
-intro.
-replace (Ndiv_mod_algo (S n) n0) with n0 in H1.
-apply le_le_S_eq in l.
-destruct l.
-assert (n<>n0).
-intro. rewrite H3 in H2. apply lt_irrefl in H2. auto.
-apply eq_nat_correct in H3.
-rewrite <- H3 in H1.
-rewrite <- H1.
-rewrite <- minus_diag_reverse.
-apply Ndiv_0.
-apply eq_add_S in H2.
-rewrite H2 in H1.
-rewrite <- beq_nat_refl in H1.
-rewrite <- H1.
-rewrite <- minus_n_O.
-rewrite H2.
-apply Ndiv_n_n.
-symmetry.
-apply Ndiv_mod_l0.
-auto.
++ intros; inversion H.
++ intro m; pattern m; apply nat_strong_ind.
+  - intros; compute in H0; rewrite <- H0.
+    simpl; apply Ndiv_0.
+  - intros; simpl in H1; case (lt_eq_lt_dec (S n) n0).
+    intros; destruct s.
 
-assert (exists d, n0=S n+d).
-apply Nle_plus.
-auto with arith.
-destruct H2.
-rewrite H2 in H1.
-assert (Ndiv_mod_algo (S n) (S n+x)=Ndiv_mod_algo (S n) (x+S n)).
-rewrite plus_comm. auto.
+{ assert (exists d, n0=S n+d) by (apply Nle_plus; auto with arith).
+  destruct H2; rewrite H2 in H1.
+  assert (Ndiv_mod_algo (S n) (S n+x)=Ndiv_mod_algo (S n) (x+S n)) by (rewrite plus_comm; auto).
 rewrite H3 in H1.
 clear H3.
 rewrite Ndiv_mod_l1 in H1.
@@ -843,8 +792,7 @@ apply plus_minus.
 replace (r+(S n+(S x-r))) with (S n+r+(S x-r)).
 Focus 2.
 rewrite plus_assoc.
-auto with arith.
-Focus 2.
+now auto with arith.
 assert (S x=r+(S x-r)).
 symmetry.
 apply le_plus_minus_r.
@@ -871,7 +819,42 @@ rewrite <- H2.
 auto with arith.
 auto with arith.
 auto.
-auto with arith.
+auto with arith. }
+
+
+    {
+    rewrite <- e in H1.
+    replace (Ndiv_mod_algo (S n) (S n)) with (Ndiv_mod_algo (S n) (0+S n)) in H1.
+    rewrite Ndiv_mod_l1 in H1.
+    simpl in H1; destruct n.
+    { simpl in H1; rewrite <- H1; rewrite <- e; simpl; exists 2; ring. }
+    { simpl in H1; rewrite <- H1; rewrite e; simpl; rewrite <- minus_n_O; apply Ndiv_n_n. }
+    { auto with arith. }
+    { simpl. auto. }
+    }
+
+    {
+    intro;
+    replace (Ndiv_mod_algo (S n) n0) with n0 in H1.
+    apply le_le_S_eq in l.
+    destruct l.
+    assert (n<>n0).
+    intro. rewrite H3 in H2. apply lt_irrefl in H2. auto.
+    apply eq_nat_correct in H3.
+    rewrite <- H3 in H1.
+    rewrite <- H1.
+    rewrite <- minus_diag_reverse.
+    apply Ndiv_0.
+    apply eq_add_S in H2.
+    rewrite H2 in H1.
+    rewrite <- beq_nat_refl in H1.
+    rewrite <- H1.
+    rewrite <- minus_n_O.
+    rewrite H2.
+    apply Ndiv_n_n.
+    symmetry.
+    apply Ndiv_mod_l0.
+    auto. }
 Qed.
 
 (** Completeness of the divisibility algorith *)
