@@ -73,7 +73,7 @@ intros [a b] ; destruct (total_order_T a R0) as [[a_neg | a_eq] | a_pos].
    left ; apply Rplus_lt_le_0_compat ; [apply sqr_pos_lt, Rlt_not_eq ; assumption |
     apply sqr_pos].
    apply sqr_pos_lt, Rgt_not_eq ; fourier.
- exists (- Cnorm (a +i b))%R ; exists (atan (Cim (a +i b) / Cre (a +i b))) ;
+ exists (- Cnorm (a +i b))%R ; exists (Ratan.atan (Cim (a +i b) / Cre (a +i b))) ;
  CusingR_simpl.
  rewrite cos_atan ; unfold Cnorm, Cnorm_sqr ;
   rewrite Hrew ; simpl ; rewrite sqrt_square.
@@ -98,7 +98,7 @@ intros [a b] ; destruct (total_order_T a R0) as [[a_neg | a_eq] | a_pos].
    left ; apply Rplus_lt_le_0_compat ; [apply sqr_pos_lt, Rgt_not_eq ; assumption |
     apply sqr_pos].
    apply sqr_pos_lt, Rgt_not_eq ; fourier.
- exists (Cnorm (a +i b))%R ; exists (atan (Cim (a +i b) / Cre (a +i b))) ;
+ exists (Cnorm (a +i b))%R ; exists (Ratan.atan (Cim (a +i b) / Cre (a +i b))) ;
  CusingR_simpl.
  rewrite cos_atan ; unfold Cnorm, Cnorm_sqr ;
   rewrite Hrew ; simpl ; rewrite sqrt_square.
