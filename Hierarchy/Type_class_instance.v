@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import RelationClasses.
 Require Import Type_class_definition.
 Require Import Omega.
 
@@ -152,8 +153,8 @@ Qed.
 
 Lemma mod_eq_trans : Transitive mod_eq.
 Proof.
-repeat intro; destruct H; destruct H0; exists (q+q0).
-rewrite Zmult_plus_distr_l; rewrite <- H; rewrite <- H0; ring.
+intros q1 q2 q3 Hl Hr. destruct Hl as [q4 Hl], Hr as [q5 Hr]; exists (q4 + q5).
+rewrite Zmult_plus_distr_l; rewrite <- Hl; rewrite <- Hr; ring.
 Qed.
 
 (* begin hide *)
@@ -206,22 +207,20 @@ Qed.
 
 Lemma Zmod_mult_compat_l : forall x y z : Z, y%=z -> (x*y) %= (x*z).
 Proof.
-intros; unfold mod_eq in H; unfold mod_eq.
-inversion H.
+intros x y z [q H]; unfold mod_eq in *.
 apply Zdivide_intro with (x*q).
 rewrite <- Zmult_minus_distr_l with z y x.
-rewrite H0.
+rewrite H.
 rewrite Zmult_assoc.
 reflexivity.
 Qed.
 
 Lemma Zmod_mult_compat_r : forall x y z : Z, x%=y -> (x*z) %= (y*z).
 Proof.
-intros; unfold mod_eq in H; unfold mod_eq.
-inversion H.
+intros x y z [q H]; unfold mod_eq in H; unfold mod_eq.
 apply Zdivide_intro with (z*q).
 rewrite <- Zmult_minus_distr_r with y x z.
-rewrite H0.
+rewrite H.
 rewrite Zmult_comm.
 rewrite Zmult_assoc.
 reflexivity.
@@ -409,10 +408,10 @@ Lemma Zmult_compat_l: forall x y z : Z, (y) %= (z) -> (x * y) %= (x * z).
 Proof.
 intros.
 unfold rel; unfold mod_eq; unfold rel in H; unfold mod_eq in H.
-inversion H.
+destruct H as [q H].
 apply Zdivide_intro with (x*q).
 rewrite <- Zmult_minus_distr_l.
-rewrite H0.
+rewrite H.
 rewrite Zmult_assoc.
 reflexivity.
 Qed.
@@ -421,10 +420,10 @@ Lemma Zmult_compat_r: forall x y z : Z, (x) %= (y) -> (x * z) %= (y * z).
 Proof.
 intros.
 unfold rel; unfold mod_eq; unfold rel in H; unfold mod_eq in H.
-inversion H.
+destruct H as [q H].
 apply Zdivide_intro with (z*q).
 rewrite <- Zmult_minus_distr_r.
-rewrite H0.
+rewrite H.
 rewrite Zmult_comm.
 rewrite Zmult_assoc.
 reflexivity.
