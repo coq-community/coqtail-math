@@ -82,7 +82,7 @@ Definition Qmax (p q : Q) : Q :=
 Lemma Qmax_comm : forall p q, (Qmax p q == Qmax q p)%Q.
   intros p q.
   unfold Qmax; destruct (Qlt_le_dec p q); destruct (Qlt_le_dec q p); 
-  auto with qartih.
+  auto with qarith.
 Qed.
 Lemma le_Qmax : forall p q r:Q, (p <= q)%Q -> (p <= Qmax q r)%Q.
 Proof.
@@ -122,7 +122,7 @@ Lemma Qdiv_pos :
   forall n, forall x :Q, 0 < x -> 0 < x * (1 # n).
 intros; apply Qmult_pos_compat.
 assumption.
-auto with qartih.
+auto with qarith.
 Qed.
 
 Lemma Qplus_le_lt_compat : 
