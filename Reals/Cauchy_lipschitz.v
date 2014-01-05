@@ -37,7 +37,7 @@ Proof.
   intros ; apply continuity_RiemannInt_1.
   intros ; inversion H ; auto.
  assert (pr : C 1 (fun t => V0 * exp (@RiemannInt a t0 t (X t0 t)))).
-  apply C_scal ; apply C_comp ; [apply C_infty_exp |
+  apply C_scal; apply (C_comp 1 exp); [apply C_infty_exp |
   apply derivable_pt_continuity_Riemann_implies_C1] ; reg.
 
  exists (fun t => V0 * exp (@RiemannInt a t0 t (X t0 t))) ; exists (C_implies_D _ _ pr).
