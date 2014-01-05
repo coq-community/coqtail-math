@@ -60,12 +60,9 @@ Instance defaut_relation_Req : DefaultRelation Req.
 Program Instance R_partial_setoid : PartialSetoid R := {
   pequiv := Req
 }.
-Next Obligation.
- intuition; auto.
-Qed. 
 
-Open Local Scope R_scope.
 Delimit Scope R_scope with R.
+Local Open Scope R_scope.
 
 Definition R0 : R := fun _ => 0%Q.
 Definition R1 : R := fun _ => 1%Q.
@@ -91,6 +88,7 @@ Ltac max_solve trm := match constr:trm with
  | S ?p => 
        eassumption 
     || (eapply Max.le_max_l; max_solve p)
+    || (eapply Max.le_max_r; max_solve p)
     || eauto with zarith
     || (eapply le_lt_trans; max_solve p)
     || (rewrite Max.max_comm; max_solve p)
@@ -114,7 +112,7 @@ apply Qabs_triangle.
 setoid_replace ε with (ε * (1#2) + ε*(1#2))%Q; [|field].
 apply Qplus_lt_morphism.
 apply H₁; max_solve.
-apply H₂; max_solve.
+apply H₂; eapply le_lt_trans; try eapply Max.le_max_r; eauto with arith.
 Qed.
 
 Fixpoint bounded_abs_max u n := match n with 
@@ -141,7 +139,7 @@ Lemma bounded :
   forall u v:R, u =~= u -> exists M, forall n:nat, (Qabs (u n) <= M)%Q.
 intros.
 destruct (H 1%Q) as [N HN].
-auto with qarith qartih.
+auto with qarith.
 exists (Qmax (bounded_abs_max u (S N)) (Qabs (u (S N)) + 1))%Q.
 intros n. 
 elim (le_lt_dec n N); intros Hdec.
@@ -178,7 +176,7 @@ exists (A₁ + 1)%Q.
 intros n; eapply Qle_lt_trans.
 eapply HA₁.
 setoid_replace A₁ with (A₁ + 0)%Q at 1; [|ring].
-apply Qplus_le_lt_compat; auto with qarith qartih.
+apply Qplus_le_lt_compat; auto with qarith.
 destruct EA₁ as [A₁ HA₁]. 
 assert (EA₂ :(exists A₂, forall n, Qabs (u₂ n) < A₂)%Q).
 destruct (bounded u₂ u₂) as [A₂ HA₂].
@@ -187,7 +185,7 @@ exists (A₂ + 1)%Q.
 intros n; eapply Qle_lt_trans.
 eapply HA₂.
 setoid_replace A₂ with (A₂ + 0)%Q at 1; [|ring].
-apply Qplus_le_lt_compat; auto with qarith qartih.
+apply Qplus_le_lt_compat; auto with qarith.
 destruct EA₂ as [A₂ HA₂]. 
 
 assert (EB₁ :(exists B₁, forall n, Qabs (v₁ n) < B₁)%Q).
@@ -197,7 +195,7 @@ exists (B₁ + 1)%Q.
 intros n; eapply Qle_lt_trans.
 eapply HB₁.
 setoid_replace B₁ with (B₁ + 0)%Q at 1; [|ring].
-apply Qplus_le_lt_compat; auto with qarith qartih.
+apply Qplus_le_lt_compat; auto with qarith.
 destruct EB₁ as [B₁ HB₁]. 
 assert (EB₂ :(exists B₂, forall n, Qabs (v₂ n) < B₂)%Q).
 destruct (bounded v₂ v₂) as [B₂ HB₂].
@@ -206,7 +204,7 @@ exists (B₂ + 1)%Q.
 intros n; eapply Qle_lt_trans.
 eapply HB₂.
 setoid_replace B₂ with (B₂ + 0)%Q at 1; [|ring].
-apply Qplus_le_lt_compat; auto with qarith qartih.
+apply Qplus_le_lt_compat; auto with qarith.
 destruct EB₂ as [B₂ HB₂]. 
 exists (Qmax (Qmax A₁ A₂) (Qmax B₁ B₂)).
 intros n.
@@ -241,7 +239,7 @@ apply Qle_lt_trans with
     ((C * (ε * / C * (1 # 3))+ (C * (ε * / C * (1 # 3)))))%Q.
 apply Qplus_le_morphism; (apply Qmult_pos_le_compat; (split; [ apply Qabs_nonneg | ])).
 elim (HC n); intuition.
-apply Qlt_le_weak; apply H₂; max_solve.
+apply Qlt_le_weak; apply H₂; eapply le_lt_trans; try eapply Max.le_max_r; eauto with arith.
 elim (HC m); intuition.
 apply Qlt_le_weak; apply H₁; max_solve.
 setoid_replace (C * (ε * / C * (1 # 3)) + C * (ε * / C * (1 # 3)))%Q
@@ -249,7 +247,7 @@ setoid_replace (C * (ε * / C * (1 # 3)) + C * (ε * / C * (1 # 3)))%Q
 setoid_replace ε with (1*ε)%Q at 2.
 apply Qmult_lt_compat_r.
 assumption.
-auto with qarith qartih.
+auto with qarith.
 field.
 field.
 intro Abs; rewrite Abs in Hpos_C.
@@ -274,7 +272,7 @@ Defined.
 (* It's complicated. Ok. But no body has to understand it. 
    The important thing is that the following morphism just say 
    what we want it to say. *)
-Instance Rinv_comp : Morphism sign_rinv Rinv.
+Instance Rinv_comp : Proper sign_rinv Rinv.
 intros u v Huv π₁ π₂ _.
 intros ε Hpos.
 
