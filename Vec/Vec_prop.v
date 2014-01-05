@@ -30,44 +30,65 @@ intros A B n f v ; induction v ; intros p pltn.
  f_equal ; apply lt_PI.
 Qed.
 
+Definition Vec_rect2 : forall A (P : forall n, Vec A n -> Vec A n -> Type),
+  P 0 Vnil Vnil -> (forall n h1 h2 (v1 v2 : Vec A n), P n v1 v2 -> P (S n) (Vcon h1 v1) (Vcon h2 v2)) ->
+  forall n v1 v2, P n v1 v2 :=
+fun A P H0 HS => fix F (n : nat) {struct n} :=
+match n return forall (v1 v2 : Vec A n), P n v1 v2 with
+| 0 => fun v1 =>
+  match v1 in Vec _ m return
+    match m with
+    | 0 => forall v2 : Vec A m, P m v1 v2
+    | S _ => False -> False
+    end
+  with
+  | Vnil => fun v2 =>
+    match v2 in Vec _ m return
+      match m return forall v2 : Vec A m, Type with
+      | 0 => fun v2 => P 0 Vnil v2 
+      | S _ => fun v2 => False -> False
+      end v2
+    with
+    | Vnil => H0
+    | Vcon _ _ _ => False_rect _
+    end
+  | Vcon _ _ _ => False_rect _
+  end
+| S n =>
+  let F := F n in
+  fun v1 => match v1 in Vec _ m return
+    match m with
+    | 0 => False -> False
+    | S m' => (forall v1 v2, P m' v1 v2) -> forall v2 : Vec A m, P m v1 v2 
+    end
+  with
+  | Vnil => False_rect _
+  | Vcon _ h1 v1 => fun F v2 =>
+    match v2 in Vec _ m return
+      match m return forall v2 : Vec A m, Type with
+      | 0 => fun v2 => False -> False
+      | S m => fun v2 => forall v1 : Vec A m, (forall v2, P _ v1 v2) -> P (S m) (Vcon h1 v1) v2
+      end v2
+    with
+    | Vnil => False_rect _
+    | Vcon _ h2 v2 => fun v1 F => HS _ h1 h2 v1 v2 (F v2)
+    end v1 (F v1)
+  end F
+end.
+
 Lemma Vec_ext_eq : forall (A : Type) (n : nat) (v1 v2 : Vec A n)
   (Hext : forall (p : nat) (pr : p < n), Vget v1 p pr = Vget v2 p pr),
   v1 = v2.
 Proof.
-refine (fix F A n (v1 : Vec A n) {struct v1} :=
-match v1 in Vec _ n return forall v2 : Vec A n, Vec_ext v1 v2 -> v1 = v2 with
-| Vnil =>
-  fun v2 => match v2 in Vec _ n return
-    match n return Vec A n -> Type with
-    | 0 => fun v2 => Vec_ext Vnil v2 -> Vnil = v2
-    | S _ => fun _ => True
-    end v2
-  with
-  | Vnil => fun _ => eq_refl _
-  | _ => I
-  end
-| Vcon n x v1 => _
-end
-).
-
-refine (
-  (fun v2 => match v2 in Vec _ n return
-    match n return Vec A n -> Type with
-    | 0 => fun _ => True
-    | S n => fun v2 => forall v0 : Vec A n, _ -> _ -> (Vcon x v0) = v2
-    end v2
-  with
-  | Vnil => I
-  | Vcon n y v2 => _
-  end v0 (F _ _ v0))
-).
-intros; clear F; f_equal.
-change (Vget (Vcon x v4) 0 (lt_0_Sn _) = Vget (Vcon y v3) 0 (lt_0_Sn _)); intuition.
-apply H; intros p Hp.
-assert (Hlt : S p < S n1) by auto with arith.
-replace (Vget v4 p Hp) with (Vget (Vcon x v4) (S p) Hlt) by (simpl; apply Vget_PI).
-replace (Vget v3 p Hp) with (Vget (Vcon y v3) (S p) Hlt) by (simpl; apply Vget_PI).
-intuition.
+intros A n v1 v2; pattern n, v1, v2; apply Vec_rect2; clear.
++ reflexivity.
++ intros n h1 h2 v1 v2 IH H; f_equal.
+  - assert (pr : 0 < S n) by auto with arith.
+    now apply (H 0 pr).
+  - apply IH; intros p pr.
+    assert (prS : S p < S n) by auto with arith.
+    specialize (H _ prS); simpl in H.
+    erewrite (Vget_PI v1), (Vget_PI v2); eassumption.
 Qed.
 
 Lemma genVec_pr_get : forall (n p : nat) (pr : p < n),
