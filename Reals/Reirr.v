@@ -355,12 +355,12 @@ assert (He : (infinite_sum (fun i : nat => / INR (fact i)) x)).
 pose (Un := fun n : nat => / INR (fact (n))).
 pose (UUn := fun n : nat => Un (S b + n)%nat).
 assert (Hluu : Rser_cv UUn (x - sum_f_R0 Un b)). 
- apply Rser_cv_shifts. assumption.
+ apply (Rser_cv_shifts b Un). assumption.
 
 assert (Hlu : Rser_cv Un x). apply He.
 
 assert (HRser : Rser_cv (fun k => Un (S b+ k)%nat) (Rser_rem Un x Hlu b)).
- apply Rser_rem_cv.
+ apply (Rser_rem_cv Un).
 
 assert (Rser_cv Un (Rser_rem Un x Hlu b + sum_f_R0 Un b)).
  apply Rser_cv_shifts_rev. assumption.
