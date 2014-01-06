@@ -5,6 +5,8 @@ Require Import MyNat Ztools.
 
 Notation " a ≡ b [ p ] " := ( eqm p a b ) (at level 70).
 
+Existing Instances eqm_setoid Zplus_eqm Zminus_eqm Zmult_eqm.
+
 Lemma mod0_eqm : forall x m, x ≡ 0 [m] <-> x mod m = 0.
 Proof.
   intros x m.
