@@ -114,7 +114,7 @@ Proof.
       reflexivity ||
       solve [ inversion E ] ||
       (f_equal; eapply Pcompare_Eq_eq; eauto).
-      destruct ((p ?= q)%positive Eq); auto || inversion E.
+      fold (p ?= q)%positive; destruct ((p ?= q)%positive); auto || inversion E.
   Defined.
   pose (Zcompare_Eq_iff_eq := 
     fun x y => conj (fun E : (x ?= y) = Eq => Zcompare_Eq_eq x y E)
