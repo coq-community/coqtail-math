@@ -49,11 +49,12 @@ then
 	echo '</title>\n</head>\n<body>\n<h1>Documentation' >> list
 	echo $rev >> list
 	echo '</h1><div id="main">' >> list
-	for i in `ls *.html | sed 's/\..*//' | uniq`
+	for i in `ls *.html | sed 's/^Coqtail.//' | grep -v ^toc.html$| sed 's/\..*//' | uniq`
 	do
 		echo "<h2 class=\"doc\">$i</h2>" >> list
+		echo $i
 		echo "<ul>" >> list
-		ls $i*.html | sed 's/^\(.*\)\.\(.*\).html$/<li><a href="\1.\2.html">\2<\/a><\/li>/' >> list
+		ls Coqtail.$i*.html | sed 's/^\(.*\)\.\(.*\).html$/<li><a href="\1.\2.html">\2<\/a><\/li>/' >> list
 		echo "</ul>" >> list
 	done
 	echo '\n</div>\n</body>\n</html>' >> list
