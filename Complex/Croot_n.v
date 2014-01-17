@@ -21,7 +21,8 @@ USA.
 
 Require Export Complex.
 Require Import Cpow_plus.
-
+(* Require Import Cpolar.
+Open Scope C_scope. *)
 
 Lemma Rdiv_1 : forall r : R, (r/1)%R = r.
 Proof.
@@ -633,19 +634,22 @@ Qed.
 
 (** ** Every complex has a n root *) 
 
+Require Import Cpolar. (* requiring it earlier implies scope problems *)
+Open Scope C_scope.
+
 Lemma exist_root_n : forall n z, (n > 0)%nat -> {root | root ^ n = z}.
 Proof.
 intros n z Hn.
-destruct (polar z) as [r [theta Hrt]].
+destruct (exists_principal_polar_form z) as [r [theta Hrt]].
 destruct Hrt as [Hrpos [Htheta Hpol]].
 rewrite Cmult_IRC_compat_l in Hpol.
 rewrite <- Cexp_trigo_compat in Hpol.
-destruct (exist_root_n_pos r n Hrpos) as (root_real, Hreal).
+destruct (exist_root_n_pos r n) as (root_real, Hreal); [ auto with * | | ].
 apply Hn.
-exists ( root_real * Cexp ((0 +i theta ) / INC n)).
+exists ( root_real * Cexp ((0 +i theta ) / INC n))%C.
 rewrite Cpow_mul_distr_l.
 rewrite IRC_pow_compat. rewrite Hreal. rewrite <- Cexp_mult.
-field_simplify (INC n * ((0 +i  theta) / INC n)).
+field_simplify (INC n * ((0 +i  theta) / INC n))%C.
 unfold Cdiv. rewrite Cinv_1. rewrite Cmult_1_r.
 apply Hpol. 
 apply not_0_INC. intuition.
