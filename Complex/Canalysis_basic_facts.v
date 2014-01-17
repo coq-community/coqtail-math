@@ -30,6 +30,19 @@ Require Import Canalysis_deriv.
 
 Open Scope C_scope.
 
+
+Lemma growth_rate_Cre : forall (f : C -> C) lb ub f',
+  (lb <> ub)%R ->
+  Rabs (Ranalysis_def.growth_rate (fun z => Cre (f z)) lb ub - Cre f')%R <= Cnorm (growth_rate f lb ub - f')%C.
+Proof.
+intros f lb ub f' ublb_neq ;
+ unfold Ranalysis_def.growth_rate ; rewrite Cre_minus_compat, <- Cre_div_compat, Cre_minus_compat.
+ + etransitivity.
+  - eapply Cre_le_Cnorm.
+  - rewrite <- IRC_minus_compat ; reflexivity.
+ + apply Rminus_eq_contra ; symmetry ; assumption.
+Qed.
+
 (****************************)
 (** * derivable_pt_lim *)
 (****************************)

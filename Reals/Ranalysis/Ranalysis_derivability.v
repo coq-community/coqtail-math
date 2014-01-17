@@ -1,3 +1,24 @@
+(*
+(C) Copyright 2010--2014, COQTAIL team
+
+Project Info: http://sourceforge.net/projects/coqtail/
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or
+(at your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+USA.
+*)
+
 Require Import Rbase Ranalysis.
 Require Import Rinterval Rfunctions Rfunction_def Rfunction_facts.
 Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_continuity.
@@ -170,6 +191,16 @@ Proof.
 intros f lb ub H x Dx ; destruct (H x Dx) as [l Hl] ;
  exists l ; eapply derivable_pt_lim_open_interval_pt_lim ;
  eassumption.
+Qed.
+
+Lemma derive_open_interval_unfold : forall a b f f_deriv c (c_in : open_interval a b c),
+  derive_open_interval a b f f_deriv c =
+  derive_pt_in (open_interval a b) f c (f_deriv c c_in).
+Proof.
+intros a b f f_deriv c c_in ; unfold derive_open_interval ;
+ destruct (in_open_interval_dec a b c) as [c_in' | hf].
+ + apply derive_pt_in_open_interval_uniqueness ; assumption.
+ + contradiction.
 Qed.
 
 Lemma derive_open_interval_pt : forall f lb ub x pr pr',

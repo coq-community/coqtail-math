@@ -373,6 +373,14 @@ intros lb1 lb2 ub1 ub2 Hord Hext.
   intuition.
 Qed.
 
+(** open interval are included into interval *)
+
+Lemma included_open_interval_interval : forall a b,
+  included (open_interval a b) (interval a b).
+Proof.
+intros a b x [x_l x_r] ; split ; left ; assumption.
+Qed.
+
 (** [Rball] describes intervals. *)
 
 Lemma included_Rball_open_interval : forall c r,

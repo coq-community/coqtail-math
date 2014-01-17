@@ -29,3 +29,13 @@ Lemma R_dist_Rminus_compat: forall x h, R_dist (x - h) x = Rabs h.
 Proof.
 intros ; rewrite <- Rabs_Ropp ; apply Rabs_eq_compat ; ring.
 Qed.
+
+Lemma Rlt_le_Rdist_compat : forall a b c, a < b -> b <= c -> R_dist c b < R_dist c a.
+Proof.
+intros a b c aleb alec ; unfold R_dist ; do 3 (rewrite Rabs_right || fourier).
+Qed.
+
+Lemma Rle_lt_Rdist_compat : forall a b c, a <= b -> b < c -> R_dist b a < R_dist c a.
+Proof.
+intros a b c aleb alec ; unfold R_dist ; do 3 (rewrite Rabs_right || fourier).
+Qed.

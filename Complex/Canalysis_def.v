@@ -85,6 +85,8 @@ Arguments Scope continuity [Cfun_scope C_scope C_scope].
 Arguments Scope continuity [Cfun_scope].
 
 
+Definition growth_rate f x := (fun y => (f y - f x) / (y - x)).
+
 (*****************************************************)
 (** * Derivative's definition using Landau's kernel  *)
 (*****************************************************)

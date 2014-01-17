@@ -1,6 +1,6 @@
 Require Import Rbase Ranalysis Rfunctions Rfunction_def.
 Require Import MyRIneq.
-Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 
 Local Open Scope R_scope.
 
@@ -29,6 +29,14 @@ Lemma derivable_in_id: forall (D : R -> Prop),
   derivable_in D id.
 Proof.
 intros D x x_in ; eapply derivable_pt_in_id.
+Qed.
+
+Lemma derive_pt_open_interval_id : forall a b x pr,
+  open_interval a b x ->
+ (derive_pt_in (open_interval a b) id x pr = 1)%R.
+intros a b x pr x_in ; rewrite derive_open_interval_pt with (pr' := derivable_pt_id x).
+ apply derive_pt_id.
+ assumption.
 Qed.
 
 (** Powers *)

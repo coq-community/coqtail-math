@@ -457,3 +457,34 @@ intros a b ab_neq ; destruct (Rlt_le_dec a b).
  left ; assumption.
  right ; apply Rle_neq_lt ; [| symmetry] ; assumption.
 Qed.
+
+Lemma Rminus_lt_compat_r_rev : forall a b c : R, a - c < b -> a < b + c.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_lt_compat : forall a b c, a < b -> a - c < b - c.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rminus_lt_compat_rev : forall a b c, a - c < b - c -> a < b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma Rmult_Rdiv_lt_compat_l_rev: forall a b c : R, 0 < c -> a < b / c -> c * a < b.
+Proof.
+intros ; apply Rlt_le_trans with (c * (b / c))%R.
+ apply Rmult_lt_compat_l ; assumption.
+ right ; field ; apply Rgt_not_eq ; assumption.
+Qed.
+
+Lemma Rlt_minus_sort3: forall a b c : R, a - b < - c -> a + c < b.
+Proof.
+intros ; fourier.
+Qed.
+
+Lemma dist_2_pos : forall lb ub, lb < ub -> (0 < (ub - lb) / 2)%R.
+Proof.
+intros lb ub lt ; apply Rlt_mult_inv_pos ; fourier.
+Qed.

@@ -500,6 +500,11 @@ Qed.
 
 (** * Injection from [R] to [C]*)
 
+Lemma IRC_minus_compat : forall lb ub, IRC lb - IRC ub = IRC (lb - ub).
+Proof.
+intros ; CusingR.
+Qed.
+
 Lemma IRC_neq_compat : forall r s, r <> s -> IRC r <> IRC s.
 Proof.
 intros r s r_neq_s Hf.
@@ -960,6 +965,19 @@ intros.
 CusingR_f ; assumption.
 Qed.
 Hint Resolve Cinv_IRC_Rinv : complex.
+
+Lemma Cre_div_compat : forall (z : C) (r : R), r <> R0 -> Cre (z / r) = (Cre z / r)%R.
+Proof.
+intros z r r_neq ; unfold Rdiv, Cdiv ; rewrite <- Cinv_IRC_Rinv ;
+ [apply Cre_mult_compat_r | assumption].
+Qed.
+
+Lemma Cim_div_compat : forall (z : C) (r : R), r <> R0 -> Cim (z / r) = (Cim z / r)%R.
+Proof.
+intros z r r_neq ; unfold Rdiv, Cdiv ; rewrite <- Cinv_IRC_Rinv ;
+ [apply Cim_mult_compat_r | assumption].
+Qed.
+
 (** * Compatibility of Cconj with Cnorm_sqr*)
 
 Lemma Cmod_conj_compat : forall z, Cre (z * Cconj z) = ((Cnorm z) ^ 2)%R
