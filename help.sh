@@ -3,11 +3,7 @@
 # checking for files 
 
 is_tracked () { git ls-files "$1" --error-unmatch >> /dev/null 2>&1; }
-# in_make_not_here () { diff <(find * -name "*.v" | sort) <(cat Make | grep "\.v" | sort) | grep '^>' | sed 's/^> /- /' ; }
-# here_not_in_make () { diff <(find * -name "*.v" | sort) <(cat Make | grep "\.v" | sort) | grep '^<' | sed 's/^< /- /' ; }
-
-# is_tracked a.v && echo NOPE || echo OK
-# is_tracked Reals/Rzeta2.v && echo OK || echo NOPE
+# is_tracked FILE && echo TRACKED || echo UNTRACKED
 
 # echo "Diffing 'Make' and actual .v files..."
 (diff <(find * -name "*.v" | sort) <(cat Make | grep "\.v" | sort) \

@@ -7,7 +7,7 @@ Require Import Rinterval Rfunction_def Rextensionality.
 
 Open Local Scope R_scope.
 
-(** * Compatibility of Rpser with Rseq_prod *)
+(** * Compatibility of Rpser with Rseq_prod (Mertens' theorem) *)
 
 Lemma Rpser_prod_compat: forall An Bn x la la' lb,
   Rpser An x la -> Rpser_abs An x la' -> Rpser Bn x lb ->
