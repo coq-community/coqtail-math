@@ -16,7 +16,8 @@ Lemmas to prove:
 Maintenance:
 - Check for commented lemmas (and admits)
 - Remove useless "Require"s
-- Check for admits (run todos.sh).
+- Check for admits (run "./todos.sh").
+- Check for commented code (run "./todos.sh comments")
 
 # Loadpath problems
 

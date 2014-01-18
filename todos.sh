@@ -6,8 +6,10 @@
 # 
 # And for each of them, displays the concerned lines,
 # highlighting the matched strings.
+#
+# If you run "todos.sh comments" it will also look for commented code
 
-discard="\(\.svn\|\.v\.d$\|\.vo$\|\.glob\|\.crashcoqide\|#$\)"
+discard="\(^\.\/html\|\.git\|\.svn\|\.v\.d$\|\.vo$\|\.glob\|\.crashcoqide\|#$\)"
 query='\(Admitted\)\|\(admit\)\|\(TODO\)'
 opt="-i"
 
@@ -24,3 +26,18 @@ find | grep -v "$discard" |
       fi
     fi
   done
+
+if [ "$1" = "comments" ]; then
+    # This script looks for commented code, which is usually not desirable."
+    find * | grep '\.v$' | while read f
+    do
+	(cat "$f" \
+	    | awk '{printf("%s ", $0)}' \
+	    | grep -o -P '\(\*([^\*]|((\*)(?!\))))*\*\)' \
+	    | grep --color -P 'Definition.*:=|Lemma|Theorem|Proposition') \
+	    && ( \
+	    echo ; \
+	    echo "    The above suspect pattern was found in $f." | grep --color "[^ ]*\.v" ; \
+	    echo ; echo)
+    done
+fi
