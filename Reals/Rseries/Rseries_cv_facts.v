@@ -3,7 +3,7 @@ Require Import Rseries_def Rseries_base_facts Rseries_pos_facts.
 Require Import MyNat MyRIneq.
 
 Require Import Max.
-Require Import Fourier.
+Require Import Fourier Rtactic.
 
 Local Open Scope R_scope.
 
@@ -191,4 +191,73 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  field_simplify ; unfold Rdiv ; apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; fourier.
  unfold Rseq_prod ; apply Rseq_sum_ext ; intro p ; unfold Rseq_mult, Rseq_minus,
   Rseq_constant, Rseq_plus ; ring.
+Qed.
+
+
+(** * Extensionnal equality compatibility *)
+
+Lemma Rsum_eq_compat : forall Un Vn, Un == Vn -> sum_f_R0 Un == sum_f_R0 Vn.
+Proof.
+intros Un Vn H n.
+induction n; simpl; rewrite (H _); [|rewrite IHn]; reflexivity.
+Qed.
+
+Lemma Rser_cv_eq_compat : forall Un Vn l, Un == Vn -> Rser_cv Un l -> Rser_cv Vn l.
+Proof.
+intros Un Vn l H n.
+apply Rseq_cv_eq_compat with (sum_f_R0 Un); [apply Rsum_eq_compat ; symmetry | ] ; assumption.
+Qed.
+
+Lemma Rsum_shift : forall Un, sum_f_R0 (Rseq_shift Un) == ((Rseq_shift (sum_f_R0 Un)) - (Un O))%Rseq.
+Proof.
+intros Un n.
+assert (REW : forall a b c, c + a = b -> a = b - c) by (intros; subst; field).
+apply REW.
+induction n.
+ compute; field.
+ 
+ unfold Rseq_shift in *.
+ do 2 rewrite tech5.
+ rewrite <- IHn.
+ unfold Rseq_constant.
+ field.
+Qed.
+
+
+Lemma Rser_cv_shift_reciprocal : forall Un l, Rser_cv (Rseq_shift Un) (l - (Un O)) -> Rser_cv Un l.
+Proof.
+intros Un l H.
+assert (EC : forall (a:Rseq) (b x:R), Rseq_cv (a - b)%Rseq (x - b) -> Rseq_cv a x).
+ intros; apply Rseq_cv_eq_compat with (a - b + b)%Rseq.
+  intro; compute; field.
+  replace x with (x - b + b) by field.
+  apply Rseq_cv_plus_compat.
+   assumption.
+   apply Rseq_constant_cv.
+ 
+ eapply EC with (Un O).
+ apply Rseq_cv_shift_compat.
+ apply Rseq_cv_eq_compat with (sum_f_R0 (Rseq_shift Un)).
+ symmetry ; apply Rsum_shift.
+ apply H.
+Qed.
+
+Lemma Rser_cv_sig_shift_reciprocal_compat : forall Un, {l | Rser_cv (Rseq_shift Un) l} -> {l | Rser_cv Un l}.
+Proof.
+intros Un [l H].
+exists (l + (Un O)).
+apply Rser_cv_shift_reciprocal.
+replace (l + Un 0%nat - Un 0%nat) with l by ring; assumption.
+Qed.
+
+Lemma Rser_pos_maj_cv_shift : forall Un Vn : nat -> R,
+  (forall n, 0 <= Un (S n) <= Vn n) -> {lv : R | Rser_cv Vn lv} -> {lu : R | Rser_cv Un lu}.
+Proof.
+intros Un Vn uposmaj Vncv.
+apply Rser_cv_sig_shift_reciprocal_compat.
+eapply Rser_pos_maj_cv.
+ intro; unfold Rseq_shift; apply (uposmaj n).
+ intro; eapply Rle_trans; apply (uposmaj n).
+ intro; apply (uposmaj n).
+ assumption.
 Qed.

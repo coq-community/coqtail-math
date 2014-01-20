@@ -1,7 +1,7 @@
 Require Import Rsequence.
 Require Import Rseries_def Rseries_base_facts Rseries_pos_facts Rseries_cv_facts.
 
-Require Import Fourier.
+Require Import Fourier Rtactic.
 
 Local Open Scope R_scope.
 Local Open Scope Rseq_scope.
@@ -33,4 +33,29 @@ apply Rser_pos_maj_cv with (/ (Rseq_shift INR * Rseq_shifts INR 2)).
   intro p ; unfold Rseq_shifts, Rseq_poly, Rseq_plus, Rseq_constant, pow ;
    rewrite plus_INR ; simpl ; ring.
   apply lt_O_Sn.
+Qed.
+
+Lemma Rser_cv_inv_poly : forall d, (2 <= d)%nat -> {l | Rser_abs_cv (Rseq_inv_poly d) l}.
+Proof.
+intros d Hd.
+unfold Rser_abs_cv.
+cut ({l | Rser_cv (Rseq_inv_poly d) l}).
+ intros [l Hl]; exists l.
+ eapply Rser_cv_eq_compat; [|apply Hl]; intro i.
+ destruct i; unfold Rseq_abs; symmetry; apply Rabs_right.
+  apply Rle_refl.
+  
+  unfold Rseq_inv_poly.
+  apply Rle_ge; apply pow_le.
+  apply Rlt_le; apply Rinv_0_lt_compat; INR_solve.
+
+apply Rser_pos_maj_cv_shift with (fun (i : nat) => (/ (INR (S i) ^ 2))%R).
+ unfold Rseq_inv_poly; intro n; rewrite <- Rinv_pow; [|INR_solve].
+ split.
+  apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
+  apply Rle_Rinv.
+   unfold pow; INR_solve; simpl mult; apply lt_O_Sn.
+   apply pow_lt; INR_solve.
+  apply Rle_pow; auto; INR_solve.
+apply Rser_cv_square_inv.
 Qed.
