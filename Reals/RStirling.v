@@ -261,12 +261,10 @@ repeat apply Rseq_big_O_plus_compat_l.
   assert (H := pos_INR n); fourier.
 Qed.
 
-(*
 Lemma Rser_cv_Riemann : {l | Rser_abs_cv (Qn 2) l}.
 Proof.
 apply Rser_cv_inv_poly; omega.
 Qed.
-
 
 Lemma Rser_cv_Vn : {l | Rser_cv Vn l}.
 Proof.
@@ -274,7 +272,7 @@ apply Rser_abs_cv_cv.
 eapply Rser_big_O_cv; [apply Vn_maj|].
 apply Rser_cv_Riemann.
 Qed.
-*)
+
 
 Lemma Vn_ser_eq : forall n, sum_f_R0 Vn n = ln (Un (S n)) - ln (Un 1).
 Proof.
@@ -289,7 +287,6 @@ induction n.
   apply Rinv_0_lt_compat; apply Un_pos; omega.
 Qed.
 
-(*
 Lemma Un_cv : {l | Rseq_cv Un l & 0 < l}.
 Proof.
 assert (Hcv : {l | Rseq_cv (fun n => ln (Un n)) l}).
@@ -300,7 +297,7 @@ assert (Hcv : {l | Rseq_cv (fun n => ln (Un n)) l}).
   exists 1%nat; intros eps Heps.
   destruct (Hl eps Heps) as [N HN].
   exists N; intros n Hn.
-  unfold R_dist.
+  unfold R_dist, Rseq_shifts.
   replace (1 + n)%nat with (S n) by omega.
   replace (ln (Un (S n)) - (l + (ln (Un 1))))
     with (ln (Un (S n)) - ln (Un 1) - l) by ring.
@@ -357,7 +354,7 @@ field; split.
   apply not_0_INR; apply fact_neq_0.
 apply Rinv_0_lt_compat; assumption.
 Qed.
-*)
+
 End De_Moivre.
 (* begin hide *)
 
@@ -382,7 +379,7 @@ Qed.
 Section Stirling.
 
 Local Coercion INR : nat >-> R.
-(*
+
 Lemma Stirling_equiv : Rseq_fact ~ (fun n => sqrt (2 * PI) * (INR n) ^ n * exp (- (INR n)) * sqrt (INR n)).
 Proof.
 destruct De_Moivre_equiv as [l Hl].
@@ -417,5 +414,5 @@ replace (l*l) with ((l^2 / (2*PI))* (2*PI)).
 rewrite Heq; ring.
 unfold Rdiv, Rsqr; field; auto with *.
 Qed.
-*)
+
 End Stirling.
