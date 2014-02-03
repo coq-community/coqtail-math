@@ -9,16 +9,23 @@ things. It should also help you if coqide's loadpath is fucked up.
 
 # Developer's todo list
 
+Big things:
+
+- prove linear and non-linear theory of ℂ is decidable (using Groebner
+  basis)
+
 Lemmas to prove:
+
 - Mertens' Theorem for Complex numbers
 - (expand this list to your wish)
 
 Maintenance:
+
 - Add a "public" README at the root directory
 - Check for commented lemmas (and admits)
 - Remove useless "Require"s
 - Check for admits (run "./todos.sh").
-- Check for commented code (run "./todos.sh comments")
+- Check for commented results (run "./todos.sh comments")
 
 # Loadpath problems
 
