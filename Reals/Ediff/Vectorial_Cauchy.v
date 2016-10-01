@@ -19,5 +19,5 @@ Lemma Cauchy_autonomous : forall (f : V -> V) (I : R -> Prop) (K : V -> Prop) (o
 Proof.
 intros f I K openK t0 x0 Hx0K Hfcont lipschitzf.
 admit.
-Qed.
+Admitted.
 

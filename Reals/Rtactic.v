@@ -703,7 +703,7 @@ Section examples.
   assert (1 <> 0) by (intro Hc; fourier).
   elim_ident.
   admit.
-  Qed.
+  Abort.
   
   Example njfkl : forall y, Rabs (INR 5) * y + IZR 10 = 5 * y + 10.
   Proof.

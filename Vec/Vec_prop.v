@@ -50,9 +50,9 @@ match n return forall (v1 v2 : Vec A n), P n v1 v2 with
       end v2
     with
     | Vnil => H0
-    | Vcon _ _ _ => False_rect _
+    | Vcon _ _ => False_rect _
     end
-  | Vcon _ _ _ => False_rect _
+  | Vcon _ _ => False_rect _
   end
 | S n =>
   let F := F n in
@@ -63,7 +63,7 @@ match n return forall (v1 v2 : Vec A n), P n v1 v2 with
     end
   with
   | Vnil => False_rect _
-  | Vcon _ h1 v1 => fun F v2 =>
+  | Vcon h1 v1 => fun F v2 =>
     match v2 in Vec _ m return
       match m return forall v2 : Vec A m, Type with
       | 0 => fun v2 => False -> False
@@ -71,7 +71,7 @@ match n return forall (v1 v2 : Vec A n), P n v1 v2 with
       end v2
     with
     | Vnil => False_rect _
-    | Vcon _ h2 v2 => fun v1 F => HS _ h1 h2 v1 v2 (F v2)
+    | Vcon h2 v2 => fun v1 F => HS _ h1 h2 v1 v2 (F v2)
     end v1 (F v1)
   end F
 end.

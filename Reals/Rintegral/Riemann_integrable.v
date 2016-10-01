@@ -414,7 +414,7 @@ Proof.
   assumption.
   apply Rle_ge; left; apply Rinv_0_lt_compat.
   elim r; intro.
-  apply Rplus_lt_reg_r with x; rewrite Rplus_0_r; assumption.
+  apply Rplus_lt_reg_r with x; rewrite Rplus_comm, Rplus_0_r, Rplus_comm. assumption.
   elim H0; symmetry  in |- *; apply Rplus_eq_reg_l with x; rewrite Rplus_0_r;
     assumption.
 
@@ -448,9 +448,8 @@ Proof.
   repeat split.
   assumption.
   unfold R_dist. rewrite Rabs_left.
-  apply Rplus_lt_reg_r with (x0 - x1); replace (x0 - x1 + x1) with x0;
-    [ idtac | ring ].
-  replace (x0 - x1 + - (x0 - x)) with (x - x1); [ idtac | ring ].
+  apply Rplus_lt_reg_r with (x0 - x1); replace (x0 - x1 + x1) with x0 by ring.
+  replace (- (x0 - x) + (x0 - x1)) with (x - x1) by ring.
   apply Rle_lt_trans with (x + h).
   unfold Rminus in |- *; apply Rplus_le_compat_l; apply Ropp_le_cancel.
   rewrite Ropp_involutive; apply Rle_trans with (Rabs h).
@@ -458,9 +457,8 @@ Proof.
   rewrite <- Rabs_Ropp; apply RRle_abs.
   apply Rle_trans with x1;
     [ left; assumption | idtac ]. right. reflexivity.
-  elim H2; intros; assumption.
-  apply Rplus_lt_reg_r with x; rewrite Rplus_0_r;
-    replace (x + (x0 - x)) with x0; [ elim H2; intros; assumption | ring ].
+  ring_simplify. now intuition.
+  apply Rplus_lt_reg_r with x. ring_simplify. now intuition.
   unfold fct_cte in |- *; ring.
   rewrite RiemannInt_P15.
   rewrite Rmult_assoc; replace ((x - (x + h)) * Rabs (/ h)) with 1.
@@ -479,7 +477,7 @@ Proof.
   apply Rinv_lt_0_compat.
   assert (H8 : x + h < x).
   auto with real.
-  apply Rplus_lt_reg_r with x; rewrite Rplus_0_r; assumption.
+  apply Rplus_lt_reg_r with x. ring_simplify. rewrite Rplus_comm; assumption.
 Qed.
 
 Lemma RiemannInt_derivable_pt :

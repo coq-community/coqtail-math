@@ -126,7 +126,7 @@ assert (x_in : interval a b x).
             apply Rle_lt_trans with (2 * (x - h))%R ; [right ; ring |].
             apply Rmult_Rdiv_lt_compat_l_rev ; [fourier |].
             rewrite <- Rabs_right at 1 ; [| fourier].
-            rewrite Rabs_minus_sym ; assumption.
+            rewrite Rabs_minus_sym, Rplus_comm. assumption.
           + destruct (Rle_lt_dec h b) as [hleb | blth].
             - destruct (Rlt_irrefl b) ; apply Rlt_le_trans with h ; [| assumption].
               apply Rmult_lt_reg_l with 2 ; [fourier |].
@@ -137,7 +137,7 @@ assert (x_in : interval a b x).
                 apply Rle_lt_trans with (2 * (x - h))%R ; [right ; ring |].
                 apply Rmult_Rdiv_lt_compat_l_rev ; [fourier |].
                 rewrite <- Rabs_right at 1 ; [| fourier].
-                rewrite Rabs_minus_sym ; assumption.
+                rewrite Rabs_minus_sym, Rplus_comm ; assumption.
             - unfold Rminus ; rewrite Rplus_opp_r, Rabs_R0 ; assumption.
       }
 }

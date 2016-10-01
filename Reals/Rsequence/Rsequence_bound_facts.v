@@ -1,3 +1,4 @@
+Require Import Coq.omega.Omega.
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts Rsequence_sums_facts.
 Require Import Rsequence_rewrite_facts.

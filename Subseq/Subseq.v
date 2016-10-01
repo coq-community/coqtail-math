@@ -21,6 +21,7 @@ USA.
 
 Require Export Reals.
 Require Export Max.
+Require Export Coq.omega.Omega.
 Open Local Scope R_scope.
 
 Definition strictly_increasing (f : nat -> nat) := forall n: nat, (f n < f (S n)) %nat.

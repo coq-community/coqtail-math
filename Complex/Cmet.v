@@ -212,7 +212,7 @@ Proof.
   apply Rle_ge ; apply Cnorm_pos.
   rewrite Rplus_comm ; unfold Rgt in |- *; apply Rle_lt_0_plus_1;
     apply Cnorm_pos.
-  apply Rplus_lt_reg_r with (- Cnorm l)%R.
+  apply Rplus_lt_reg_l with (- Cnorm l)%R.
   rewrite <- Rplus_assoc ; rewrite (Rplus_comm (- Cnorm l) 1).
   rewrite (Rplus_assoc 1 (- Cnorm l) (Cnorm l)) ; rewrite Rplus_opp_l ;
   rewrite (proj1 (Rplus_ne 1)) ; rewrite (Rplus_comm (- Cnorm l) (Cnorm (f z'))) ;

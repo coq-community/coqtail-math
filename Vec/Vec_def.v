@@ -21,7 +21,7 @@ Definition Vec_ext {A n} (v1 v2 : Vec A n) :=
 Fixpoint Vconcat {A : Type} {m n : nat} (v1 : Vec A m) (v2 : Vec A n) : Vec A (m + n) :=
 match v1 in Vec _ m return Vec A (m + n) with
   | Vnil         => v2
-  | Vcon _ hd tl => Vcon hd (Vconcat tl v2)
+  | Vcon hd tl => Vcon hd (Vconcat tl v2)
 end.
 
 Fixpoint Vupdate {A : Type} {n : nat} (v : Vec A n) (m : nat) (mltn : m < n) (a : A)
@@ -38,7 +38,7 @@ Defined.
 Fixpoint Vmap {A B : Type} {n : nat} (f : A -> B) (v : Vec A n) : Vec B n :=
 match v in (Vec _ n0) return (Vec B n0) with
   | Vnil         => Vnil
-  | Vcon _ hd tl => Vcon (f hd) (Vmap f tl)
+  | Vcon hd tl => Vcon (f hd) (Vmap f tl)
 end.
 
 Fixpoint Vmap_full {A B : Type} {n : nat} (f : forall (m : nat) (mltn : m < n), A -> B)

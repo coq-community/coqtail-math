@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import Coq.omega.Omega.
 Require Import Rsequence_def.
 Require Import Morphisms Setoid.
 Require Import Fourier.

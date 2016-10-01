@@ -488,7 +488,7 @@ rewrite <- Rinv_1 ; apply Rpser_alembert_finite.
  apply Rgt_not_eq ; fourier.
  intro n ; apply Rinv_neq_0_compat, not_0_INR ; omega.
  assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; omega) ;
-  pose (phi := existT _ _ Hf) ; rewrite Rseq_cv_eq_compat with
+  pose (phi := exist _ _ Hf) ; rewrite Rseq_cv_eq_compat with
   (Vn := (Rseq_poly 1 ⋅ phi / (Rseq_shifts (Rseq_poly 1) 2 ⋅ phi))%Rseq).
  apply Rseq_equiv_cv_div.
   eapply Rseq_equiv_subseq_compat, Rseq_poly_shifts_equiv.

@@ -196,7 +196,7 @@ Proof.
 intros n; omega.
 Qed.
 
-Definition extractor_mult_2 := existT _ (mult 2) is_extractor_mult_2.
+Definition extractor_mult_2 := exist _ (mult 2) is_extractor_mult_2.
 
 (** Rseq_zip can be inversed thanks to extractors *)
 

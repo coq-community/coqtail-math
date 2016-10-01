@@ -20,6 +20,7 @@ USA.
 *)
 
 Require Import Reals.
+Require Import Coq.omega.Omega.
 Require Import Fourier.
 
 Open Scope R_scope.

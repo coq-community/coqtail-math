@@ -4,8 +4,8 @@ Run "./generate_makefile.sh" the first time to generate the Makefile
 from the Make file. Then Makefile will update itself whenever Make is
 modified.
 
-Run "/help.sh" if you feel "make" is not compiling the right
-things. It should also help you if coqide's loadpath is fucked up.
+Run "./help.sh" if you feel "make" is not compiling the right
+things. It should also help you if coqide's loadpath is messed up.
 
 # Developer's todo list
 

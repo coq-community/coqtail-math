@@ -72,7 +72,7 @@ end.
 Fixpoint comp_limit (r : rseq) (env : list Rseq_with_limit) : option rseq_limit :=
 match r with
   | rseq_cst r => Return (finite r)
-  | rseq_var n => Bind (nth_error env n) (fun x => Return (projT1 (projT2 x)))
+  | rseq_var n => Bind (nth_error env n) (fun x => Return (proj1_sig (projT2 x)))
   | rseq_opp r => Bind (comp_limit r env) (fun l => Some (rseq_limit_opp l))
   | rseq_plus rl rr => Bind (comp_limit rl env) (fun ll =>
                        Bind (comp_limit rr env) (fun lr => rseq_limit_add ll lr))
@@ -104,7 +104,7 @@ Proof.
 intros r env ; induction r ; intros un l Hun Hl ; simpl in *.
  inversion Hun ; inversion Hl ; apply Rseq_constant_cv.
  destruct (nth_error env n) as [Hget |].
-  inversion Hun ; inversion Hl ; apply (projT2 (projT2 Hget)).
+  inversion Hun ; inversion Hl ; apply (proj2_sig (projT2 Hget)).
   inversion Hl.
  destruct (comp_rseq r env) as [vn |] ; [| inversion Hun] ;
   destruct (comp_limit r env) as [lo |] ; [| inversion Hl] ;

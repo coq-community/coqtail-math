@@ -69,14 +69,25 @@ Hypothesis Heq : f == g.
 Lemma Rfun_continuity_pt_eq_compat :
   forall x, continuity_pt f x -> continuity_pt g x.
 Proof.
-intros x Hct.
-extensional_reflexivity Hct Heq.
+  intros x Hct eps H.
+  specialize (Hct eps H).
+  destruct Hct as (alp & pos & HH).
+  exists alp. split; auto.
+  intros x0 H0.
+  specialize (HH x0 H0).
+  eauto.
+  repeat rewrite <-Heq.
+  auto.
 Qed.
 
 Lemma Rfun_continuity_eq_compat :
   continuity f -> continuity g.
-intros H.
-extensional_reflexivity H Heq.
+Proof.
+  intros H i a p.
+  destruct (H i a p).
+  exists x. intuition.
+  repeat rewrite <-Heq.
+  eauto.
 Qed.
 
 End Rfun_eq.

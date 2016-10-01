@@ -81,7 +81,7 @@ Definition derivable_Rball (c r : R) (f : R -> R) :=
 (** We can now define the appropriate projection (aka. derive functions). *)
 
 Definition derive_pt_in D f x (pr : derivable_pt_in D f x) :=
-match pr with | exist l _ => l end.
+match pr with | exist _ l _ => l end.
 
 Definition derive_in D f (pr : derivable_in D f) x (Dx: D x) :=
   derive_pt_in D f x (pr x Dx).

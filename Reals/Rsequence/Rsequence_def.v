@@ -76,8 +76,8 @@ intro n ; induction n.
 Qed.
 
 Definition Rseq_zip Un Vn n := match n_modulo_2 n with
-| inl (exist p _) => Un p
-| inr (exist p _) => Vn p
+| inl (exist _ p _) => Un p
+| inr (exist _ p _) => Vn p
 end.
 
 (** * Extensionnal equality. *)

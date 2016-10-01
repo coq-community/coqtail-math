@@ -135,7 +135,7 @@ intros Un Vn x n ; unfold gt_pser, Rseq_prod, Rseq_mult.
  (fun n0 : nat => Un n0 * Vn (n - n0)%nat)%R n) ;
  unfold Rseq_mult, Rseq_constant in Hrew ;
  rewrite <- Hrew ; apply Rseq_sum_ext_strong.
- intros p p_bd ; replace (x ^ n) with (x ^ (p + (n - p)))%nat.
+ intros p p_bd ; replace (x ^ n) with (x ^ ((p + (n - p))%nat)).
  rewrite pow_add ; ring.
  replace (p + (n - p))%nat with n by omega ; reflexivity.
 Qed.

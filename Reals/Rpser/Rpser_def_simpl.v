@@ -1,3 +1,4 @@
+Require Import Coq.omega.Omega.
 Require Import MyRIneq Rpow_facts.
 Require Import Rsequence_def Rsequence_rewrite_facts.
 Require Import Rpser_def.

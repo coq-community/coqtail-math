@@ -21,6 +21,7 @@ USA.
 
 (** Properties of real sequences. *)
 
+Require Export Coq.omega.Omega.
 Require Export Reals.
 Require Export Rsequence_def.
 Require Export Rsequence_base_facts.

@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import Coq.omega.Omega.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_cv_facts Rsequence_rewrite_facts.
 Require Import Rpser_def Rpser_def_simpl.
 Require Import MyRIneq MyNat Fourier.

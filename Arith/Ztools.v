@@ -1,4 +1,5 @@
 Require Import ZArith Omega Znumtheory.
+Require Import Coq.micromega.Lia.
 
 (** * Contains some useful lemmas not in stdlib and a tactic *)
 
@@ -13,9 +14,19 @@ Qed.
 
 Lemma Zmult_le_1_compat : forall a b, 1 <= a -> 1 <= b -> 1 <= a * b.
 Proof.
-  intros [|[]|[]][|[]|[]] H I; compute in *; eauto.
+  intros a b.
+  replace a with (1 + (a - 1)) by omega.
+  replace b with (1 + (b - 1)) by omega.
+  generalize (a - 1).
+  generalize (b - 1).
+  intros c d.
+  intros.
+  assert (0 <= c) by omega.
+  assert (0 <= d) by omega.
+  ring_simplify.
+  assert (0 <= d * c) by auto with *.
+  omega.
 Qed.
-
 
 Lemma Zsquare_pos : forall x, 0 <> x -> 0 < x * x.
 Proof.
@@ -176,4 +187,4 @@ Proof.
     rewrite Zmult_comm, Z_mult_div_mod; auto.
     admit (* TODO déplacer et prouver : inutile ici mais intéressant.
     un peu intéressant, c'est dur environ comme sqrt(n)∈Q => sqrt(n)∈N *).
-Qed.
+Abort.

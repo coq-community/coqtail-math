@@ -25,6 +25,7 @@ USA.
 Require Import Reals.
 Require Import MyRfunctions.
 Require Import Rintegral.
+Require Import Coq.omega.Omega.
 
 Open Scope R_scope.
 

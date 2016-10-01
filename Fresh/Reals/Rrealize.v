@@ -317,7 +317,7 @@ Module Rrealize : Raxiom.CReals.
     admit.
     admit.
     admit.
-  Qed.
+  Admitted.
   
   Lemma Req_lt_compat_r : forall x1 x2 y : R, Req x1 x2 -> Rlt y x1 -> Rlt y x2.
   Admitted. (* TODO *)
@@ -418,11 +418,9 @@ Module Rrealize : Raxiom.CReals.
     destruct (Hu 1%nat) as (N, HN).
     split; exists O; exists N; intros n Hn.
     destruct (HN N n (le_refl _) Hn) as (NS, NI).
-    simpl Hu.
-    assert (HNN := Hu 1%nat).
-    simpl Rup.
-    
-    
+    (* simpl Hu. *)
+    (* assert (HNN := Hu 1%nat). *)
+    (* simpl Rup. *)
   Admitted.
   
   Definition Rseq_Cauchy (Un : nat -> R) : Type := forall eps, Rlt R0 eps ->

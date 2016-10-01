@@ -8,7 +8,7 @@ Require Import Rfunction_classes.
 Require Import Dequa_def Dequa_facts Dequa_quote.
 Require Import List.
 
-Require Import LegacyField_Theory.
+(* Require Import LegacyField_Theory. *)
 
 Open Local Scope R_scope.
 
@@ -62,4 +62,4 @@ Lemma Rexp_mult_simpl : forall a b x,
 Proof.
 intros a b ; unfold Rexp ; solve_diff_equa.
 admit.
-Qed.
+Abort.

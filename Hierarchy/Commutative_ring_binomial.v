@@ -22,6 +22,7 @@ USA.
 Require Import Type_class_definition.
 Require Import Type_class_instance.
 Require Import Coq.Relations.Relation_Definitions.
+Require Import Coq.omega.Omega.
 Require Import Arith.
 Require Import Nbinomial.
 
