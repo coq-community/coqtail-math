@@ -32,7 +32,7 @@ Require Import RTaylor.
 Require Import MyRfunctions.
 Require Import Rsequence_tactics.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 Section Wallis.
 (** printing ~	~ *)
@@ -527,7 +527,7 @@ assert (H2n1 : (fun n : nat => fact (S(2*n))) ~ (fun n : nat => (S(2*n) / exp 1)
   assumption.
   
 apply Rseq_equiv_cv_constant.
-Open Local Scope Rseq_scope.
+Local Open Scope Rseq_scope.
 apply Rseq_equiv_eq_compat with 
   (Un := 2 * (fun n => 2 ^ (4 * n)) * fact * fact * fact * fact *
   / (PI * (fun n => fact (2 * n)) * (fun n => fact (S (2 * n))))) (Vn := (l^2 / (2 * PI))%R).

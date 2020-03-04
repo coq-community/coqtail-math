@@ -251,7 +251,7 @@ assert (forall n, (n <= N)%nat -> Bn n = 0).
       destruct (Bool.eq_true_false_abs (f n)).
       assumption.
       apply HN; omega.
-    destruct (f n) as [He|He].
+    destruct (f n) as [|].
       elim Hd; reflexivity.
       ring.
 assert (Hd : Bn N = 0); [apply H; constructor|].

@@ -28,7 +28,7 @@ Require Import Rpow_facts.
 Require Import Max.
 Require Import Fourier MyRIneq MyNat MyNNR.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** ** Some lemmas manipulating the definitions. *)
 

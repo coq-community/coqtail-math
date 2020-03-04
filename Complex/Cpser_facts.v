@@ -37,7 +37,7 @@ Require Import Canalysis_cont.
 Require Import Canalysis_deriv.
 Require Import Canalysis_basic_facts.
 
-Open Local Scope C_scope.
+Local Open Scope C_scope.
 
 Lemma Rseq_norm_abs_Cre : 
 forall (An : nat -> C), {l | Rseq_cv (fun n => sum_f_R0 (fun n =>(Cnorm (An n))) n) l} -> 

@@ -23,8 +23,8 @@ Require Export Cbase Cfunctions.
 
 Delimit Scope Cseq_scope with Cseq.
 
-Open Local Scope C_scope.
-Open Local Scope Cseq_scope.
+Local Open Scope C_scope.
+Local Open Scope Cseq_scope.
 
 Definition Cseq := nat -> C.
 

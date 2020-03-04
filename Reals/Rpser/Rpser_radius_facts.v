@@ -9,7 +9,7 @@ Require Import Rpser_def Rpser_def_simpl Rpser_base_facts.
 Require Import Rpser_cv_facts Rpser_sums.
 Require Import MyINR.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** Abel's lemma : Normal convergence of the power serie *)
 

@@ -25,12 +25,12 @@ Require Export Arith.
 
 Section Finite_sets_facts.
 
-Implicit Arguments Union [U].
-Implicit Arguments Add [U].
-Implicit Arguments Singleton [U].
-Implicit Arguments Finite [U].
-Implicit Arguments cardinal [U].
-Implicit Arguments Disjoint [U].
+Arguments Union [U] B C _.
+Arguments Add [U] B x _.
+Arguments Singleton [U] x _.
+Arguments Finite [U] _.
+Arguments cardinal [U] _ _.
+Arguments Disjoint [U] B C.
 
 Variable U:Type.
 

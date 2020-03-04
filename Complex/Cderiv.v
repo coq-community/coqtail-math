@@ -26,7 +26,7 @@ Require Import Cprop_base.
 Require Import Classical_Prop.
 Require Import Classical_Pred_Type.
 
-Open Local Scope C_scope.
+Local Open Scope C_scope.
 
 (*********)
 Definition D_x (D:C -> Prop) (y x:C) : Prop := D x /\ y <> x.

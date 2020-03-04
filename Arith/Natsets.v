@@ -154,7 +154,7 @@ Proof.
     
     exists i; intuition; unfold inter in *;
       destruct (P i); destruct (Q i); intuition.
-Qed.
+Defined.
 
 
 Definition injective domain (f : nat -> nat) := forall i j,
@@ -190,7 +190,7 @@ Proof.
       auto_if; dumb.
       
       exists i; dumb.
-Qed.
+Defined.
 
 Lemma image_false : forall f domain y,
   image f domain y = false -> forall x, x < domain -> f x = y -> False.

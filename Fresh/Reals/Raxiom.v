@@ -1,6 +1,6 @@
-Module Type CReals.
-
 Require Export ZArith.
+
+Module Type CReals.
 
 (** * Constructive ordered field *)
 
@@ -8,7 +8,7 @@ Parameter R : Type.
 
 Delimit Scope R_scope with R.
 Bind Scope R_scope with R.
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** R ring objects **)
 Parameter R0 : R.
@@ -89,7 +89,6 @@ Fixpoint IPR (p : positive) : R :=
     | xO p => (R1 + R1) * (IPR p)
     | xH => R1
   end.
-Arguments Scope IPR [positive_scope].
 
 Definition IZR (z : Z) : R :=
   match z with
@@ -97,7 +96,6 @@ Definition IZR (z : Z) : R :=
     | Zpos p => IPR p
     | Zneg p => - IPR p
   end.
-Arguments Scope IZR [Z_scope].
 
 Definition Rdist x y d : Type := prod (x - y < d) (- d < x - y).
 

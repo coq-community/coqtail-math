@@ -176,7 +176,6 @@ Module Rimpl <: Raxiom.CReals.
       | xO p => Rmul (Radd R1 R1) (IPR p)
       | xH => R1
     end.
-  Arguments Scope IPR [positive_scope].
   
   Definition IZR (z : Z) : R :=
     match z with
@@ -184,7 +183,6 @@ Module Rimpl <: Raxiom.CReals.
       | Zpos p => IPR p
       | Zneg p => Ropp (IPR p)
     end.
-  Arguments Scope IZR [Z_scope].
   
   Definition Rdist x y d : Type := prod (Rlt (Rsub x y) d) (Rlt (Ropp d) (Rsub x y)).
   
@@ -199,7 +197,7 @@ Module Rimpl <: Raxiom.CReals.
   Proof.
     cut (forall p : positive, Raxioms.INR (nat_of_P p) = IPR p).
      intros H []; simpl; auto.
-     intros p; rewrite H; auto.
+     try intros p; rewrite H; auto.
    induction 0; auto.
     rewrite nat_of_P_xI, RI.S_INR, RI.mult_INR, IHp; auto.
     rewrite nat_of_P_xO, RI.mult_INR, IHp; auto.

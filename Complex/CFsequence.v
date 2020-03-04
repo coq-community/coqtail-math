@@ -27,8 +27,8 @@ Require Import Canalysis_def.
 
 Delimit Scope CFseq_scope with Cseq_scope.
 
-Open Local Scope C_scope.
-Open Local Scope CFseq_scope.
+Local Open Scope C_scope.
+Local Open Scope CFseq_scope.
 
 Implicit Type n : nat.
 Implicit Type fn gn : nat -> C -> C.

@@ -25,8 +25,8 @@ Require Import Rsequence_def.
 
 Delimit Scope RFseq_scope with Rseq.
 
-Open Local Scope R_scope.
-Open Local Scope RFseq_scope.
+Local Open Scope R_scope.
+Local Open Scope RFseq_scope.
 
 Implicit Type n : nat.
 Implicit Type fn gn : nat -> R -> R.

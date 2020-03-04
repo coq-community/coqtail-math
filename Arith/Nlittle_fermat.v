@@ -24,13 +24,69 @@ Require Export Nnewton.
 Require Export Ndiv.
 Open Scope nat_scope.
 
-(** * Fermat's little theorem over [nat] *)
-Theorem Nlittle_fermat : 
-  forall a p, Nprime p -> (p | a ^ p - a).
-(* begin hide *)
-  Lemma pow : forall (a p:nat), 
+Lemma minus_L0: forall p q x, p>=q -> p+x-q=p-q+x.
+Proof.
+  intros.
+  apply Nle_plus in H.
+  destruct H.
+  rewrite H.
+  rewrite minus_plus.
+  rewrite <- plus_assoc.
+  rewrite minus_plus.
+  auto.
+Qed.
+
+Lemma minus_L1 : forall p q x, p>=q -> x+(p-q)=x+p-q.
+Proof.
+  intros.
+  apply Nle_plus in H.
+  destruct H.
+  rewrite H.
+  rewrite minus_plus.
+  rewrite plus_assoc.
+  replace (x+q+x0) with (q+(x+x0)).
+  rewrite minus_plus.
+  auto.
+  ring.
+Qed.
+Lemma minus_L2 : forall n p q, n>=p+q -> n-p-q=n-(p+q).
+Proof.
+  intros.
+  apply Nle_plus in H.
+  destruct H.
+  rewrite H.
+  rewrite minus_plus.
+  replace (p+q+x-p) with (q+x).
+  rewrite minus_plus.
+  auto.
+  rewrite <- plus_assoc.
+  rewrite minus_plus.
+  auto.
+Qed.
+
+Lemma plus_minus : forall n m r, r<=m -> (n+m)-r=n+(m-r).
+Proof.
+  induction n.
+  intros.
+  simpl.
+  reflexivity.
+  intros.
+  assert (S n+m=S(n+m)).
+  auto with arith.
+  rewrite H0.
+  rewrite <- minus_Sn_m.
+  rewrite IHn.
+  auto with arith.
+  exact H.
+  assert (m<=n+m).
+  auto with arith.
+  apply le_trans with m.
+  exact H. exact H1.
+Qed.
+
+Lemma pow : forall (a p:nat), 
     Nprime p -> (p | (a+1)^p - a^p -1).
-  Proof.
+Proof.
   intros.
   rewrite Nnewton.
   assert (exists p', p=S(S p')).
@@ -65,25 +121,6 @@ Theorem Nlittle_fermat :
   auto with arith.
   rewrite H1. clear H1.
   
-  Lemma plus_minus : forall n m r, r<=m -> (n+m)-r=n+(m-r).
-  Proof.
-  induction n.
-  intros.
-  simpl.
-  reflexivity.
-  intros.
-  assert (S n+m=S(n+m)).
-  auto with arith.
-  rewrite H0.
-  rewrite <- minus_Sn_m.
-  rewrite IHn.
-  auto with arith.
-  exact H.
-  assert (m<=n+m).
-  auto with arith.
-  apply le_trans with m.
-  exact H. exact H1.
-  Qed.
 
   rewrite plus_minus.
   rewrite minus_diag.
@@ -105,7 +142,13 @@ Theorem Nlittle_fermat :
   auto.
   auto.
   auto.
-  Qed.
+Qed.
+
+
+(** * Fermat's little theorem over [nat] *)
+Theorem Nlittle_fermat : 
+  forall a p, Nprime p -> (p | a ^ p - a).
+(* begin hide *)
 
 induction a.
 intros.
@@ -143,31 +186,6 @@ apply Nle_plus in H0.
 destruct H0.
 rewrite H0.
 clear H0.
-  Lemma minus_L0: forall p q x, p>=q -> p+x-q=p-q+x.
-  Proof.
-  intros.
-  apply Nle_plus in H.
-  destruct H.
-  rewrite H.
-  rewrite minus_plus.
-  rewrite <- plus_assoc.
-  rewrite minus_plus.
-  auto.
-  Qed.
-
-  Lemma minus_L1 : forall p q x, p>=q -> x+(p-q)=x+p-q.
-  Proof.
-  intros.
-  apply Nle_plus in H.
-  destruct H.
-  rewrite H.
-  rewrite minus_plus.
-  rewrite plus_assoc.
-  replace (x+q+x0) with (q+(x+x0)).
-  rewrite minus_plus.
-  auto.
-  ring.
-  Qed.
 
 rewrite minus_L0.
 rewrite minus_plus.
@@ -201,20 +219,6 @@ auto with arith.
 auto with arith.
 rewrite H0 in H1.
 auto.
-  Lemma minus_L2 : forall n p q, n>=p+q -> n-p-q=n-(p+q).
-  Proof.
-  intros.
-  apply Nle_plus in H.
-  destruct H.
-  rewrite H.
-  rewrite minus_plus.
-  replace (p+q+x-p) with (q+x).
-  rewrite minus_plus.
-  auto.
-  rewrite <- plus_assoc.
-  rewrite minus_plus.
-  auto.
-  Qed.
 rewrite minus_L2.
 auto.
 apply le_trans with (a^(S(S p))+1^(S(S p))).

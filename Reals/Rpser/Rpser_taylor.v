@@ -6,7 +6,7 @@ Require Import Rpser_def Rpser_base_facts.
 Require Import Rpser_cv_facts.
 Require Import Rpser_sums Rpser_derivative.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * Comparison of Taylor development *)
 

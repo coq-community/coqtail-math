@@ -45,7 +45,7 @@ Qed.
 
 Lemma hmul_assoc : forall a b c, hmul a (hmul b c) = hmul (hmul a b) c.
 Proof.
-intros () () (); intros.
+intros [] [] []; intros.
  unfold hmul ; f_equal ; ring.
 Qed.
 

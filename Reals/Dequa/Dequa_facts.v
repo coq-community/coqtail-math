@@ -25,8 +25,7 @@ Proof.
 intros ; apply map_nth_error_None_iff ; assumption.
 Qed.
 
-Definition App (A B : Type) f (a : A) : option B := Bind f (fun g => g a).
-Implicit Arguments App [A B].
+Definition App {A B : Type} f (a : A) : option B := Bind f (fun g => g a).
 
 Lemma interp_side_equa_in_N_R : forall s l Un f,
   interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l) = Some Un ->

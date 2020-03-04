@@ -63,8 +63,6 @@ match (f s1 rho), (f s2 rho) with
   | _, _ => Invalid_context
 end.
 
-Implicit Arguments interp[A B].
-
 Definition interp_in_N e rho : Prop :=
   interp e rho interp_side_equa_in_N Rseq_eq.
 
@@ -81,7 +79,7 @@ Open Scope de_scope.
 
 Notation "`c k" := (cst k) (at level 40) : de_scope.
 Notation "- y" := (opp y) : de_scope.
-Infix "*" := scal : de_scope.
+(* Infix "*" := scal : de_scope. *)
 Infix "+" := plus : de_scope.
 Infix "*" := plus : de_scope.
 Infix "-" := min : de_scope.

@@ -31,14 +31,14 @@ Require Import Dequa_def Dequa_facts.
     argument of the application so we chose a right to left depth-first
     search algorithm. **)
 
-Ltac isconst := fun s x => match constr: s with
-  | x     => constr: false
+Ltac isconst := fun s x => match s with
+  | x     => false
   | ?f ?e =>
     match isconst e x with
       | true  => isconst f x
-      | false => constr: false
+      | false => false
     end
-  | ?y    => constr: true
+  | ?y    => true
 end.
 
 (** [add_var an rho l] adds the sequence [an] and the proof that its
@@ -51,11 +51,11 @@ end.
 Ltac add_var an rho l :=
   let rec aux an rho l n :=
   match l with
-    | List.nil                    => constr: (n , List.cons (existT _ an rho) List.nil)
-    | List.cons (existT _ an _) _ => constr: (n , l)
+    | List.nil                    => constr:(pair n (List.cons (existT _ an rho) List.nil))
+    | List.cons (existT _ an _) _ => constr:(pair n l)
     | List.cons ?a ?tl =>
       match aux an rho tl (S n) with
-        | (?m , ?tl') => constr: (m , List.cons a tl')
+        | (?m , ?tl') => constr:(pair m (List.cons a tl'))
       end
   end in aux an rho l O.
 
@@ -68,31 +68,31 @@ Ltac add_var an rho l :=
     Otherwise we deconstruct [s] until we reach either a constant or a function. **)
 
 Ltac quote_side_equa := fun env s x => match isconst s x with
-  | true  => constr: (env, cst s)
+  | true  => constr: (pair env (cst s))
   | false =>
-    match constr: s with
+    match constr:(s) with
 (* Common constructors for arithmetical operations *)
       | Ropp ?s1       =>
         match quote_side_equa env s1 x with
-         | (?env1, ?p) => constr: (env1, opp p)
+         | (?env1, ?p) => constr: (pair env1 (opp p))
         end
       | Rmult ?s1 ?s2  =>
         match isconst s1 x with
           | true  =>
             match quote_side_equa env s2 x with
-              | (?env1, ?p) => constr: (env1, scal s1 p)
+              | (?env1, ?p) => constr: (pair env1 (scal s1 p))
             end
           | false =>
             match isconst s2 x with
               | true  =>
                 match quote_side_equa env s1 x with
-                  | (?env1, ?p) => constr: (env1, scal s2 p)
+                  | (?env1, ?p) => constr: (pair env1 (scal s2 p))
                 end
               | false => 
                 match quote_side_equa env s1 x with
                   | (?env1, ?p) =>
                     match quote_side_equa env1 s2 x with
-                      | (?env2, ?q) => constr: (env2, mult p q)
+                      | (?env2, ?q) => constr: (pair env2 (mult p q))
             	    end
                 end
 	    end
@@ -101,54 +101,54 @@ Ltac quote_side_equa := fun env s x => match isconst s x with
         match quote_side_equa env s1 x with
           | (?env1, ?p) =>
             match quote_side_equa env1 s2 x with
-              | (?env2, ?q) => constr: (env2, min p q)
+              | (?env2, ?q) => constr: (pair env2 (min p q))
             end
         end
       | Rplus ?s1 ?s2  =>
         match quote_side_equa env s1 x with
           | (?env1, ?p) =>
             match quote_side_equa env1 s2 x with
-              | (?env2, ?q) => constr: (env2, plus p q)
+              | (?env2, ?q) => constr: (pair env2 (plus p q))
             end
         end
 (* Function symbols *)
       | derive (sum ?an ?rho) ?c x =>
         match add_var an rho env with
-          | (?p, ?env') => constr: (env', y p 1 1)
+          | (?p, ?env') => constr: (pair env' (y p 1 1))
         end
       | nth_derive (sum ?an ?rho) ?c x =>
         match add_var an rho env with
           | (?p, ?env') =>
             match type of c with
-              | D ?k (sum an rho) => constr: (env', y p k 1)
+              | D ?k (sum an rho) => constr: (pair env' (y p k 1))
             end
         end
       | sum ?an ?rho x =>
         match add_var an rho env with
-          | (?p, ?env') => constr: (env', y p 0 1)
+          | (?p, ?env') => constr: (pair env' (y p 0 1))
         end
       | x =>
         match add_var identity_seq identity_infinite_cv_radius env with
-          | (?p, ?env') => constr: (env', y p 0 1)
+          | (?p, ?env') => constr: (pair env' (y p 0 1))
         end
       | derive (sum ?an ?rho) ?c (?a * x) =>
         match add_var an rho env with
-          | (?p, ?env') => constr: (env', y p 1 a)
+          | (?p, ?env') => constr: (pair env' (y p 1 a))
         end
       | nth_derive (sum ?an ?rho) ?c (?a * x) =>
         match add_var an rho env with
           | (?p, ?env') =>
             match type of c with
-              | D ?k (sum an rho) => constr: (env', y p k a)
+              | D ?k (sum an rho) => constr: (pair env' (y p k a))
             end
         end
       | sum ?an ?rho (?a * x) =>
         match add_var an rho env with
-          | (?p, ?env') => constr: (env', y p 0 a)
+          | (?p, ?env') => constr: (pair env' (y p 0 a))
         end
 (** If everything fails, we output a 404 constant.
     Just for testing; should be removed (TODO) **)
-      | _ => constr: (env, cst 404)
+      | _ => constr: (pair env (cst 404))
     end
 end.
 
@@ -198,7 +198,7 @@ Qed.
 Ltac normalize_rec := fun p s x =>
 match p with | (existT _ ?an ?rho) =>
 match isconst s x with | false =>
-  match constr: s with
+  match s with
     | Ropp ?s1 => progress (normalize_rec p s1 x)
     | Rplus ?s1 ?s2 => progress (normalize_rec p s1 x)
     | Rplus ?s1 ?s2 => progress (normalize_rec p s2 x)
@@ -259,7 +259,7 @@ match goal with
    match quote_side_equa (@List.nil (sigT infinite_cv_radius)) s1 x with
     | (?env1, ?p) =>
      match quote_side_equa env1 s2 x with
-       | (?env2, ?q) => constr: (env2, p :=: q)
+       | (?env2, ?q) => constr: (pair env2 (p :=: q))
      end
    end
 end.

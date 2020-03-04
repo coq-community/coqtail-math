@@ -1,7 +1,7 @@
 Require Import Reals MyRIneq Fourier.
 Require Import Rsequence_usual_facts.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 Lemma pow_lt_compat : forall x y, 0 <= x -> x < y ->
   forall n, (1 <= n)%nat -> x ^ n < y ^ n.

@@ -1,6 +1,6 @@
 Require Export ZArith_base.
 Require Export Rdefinitions.
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 Axiom Rplus_comm : forall r1 r2:R, r1 + r2 = r2 + r1.
 Axiom Rplus_assoc : forall r1 r2 r3:R, r1 + r2 + r3 = r1 + (r2 + r3).

@@ -5,7 +5,7 @@ Require Import Setoid SetoidClass Morphisms.
 Require Import Rcauchy_lemmas.
 
 Definition R := nat -> Q.
-Open Local Scope Q_scope.
+Local Open Scope Q_scope.
 
 Definition Req u v := 
   forall ε, ε > 0 -> exists N:nat, forall n m, (n > N)%nat -> (m > N)%nat -> 
@@ -17,8 +17,8 @@ assert (Hε : (ε * (1#2)) > 0).
 apply Qdiv_pos.
 assumption.
 
-destruct (H1 (ε * (1#2)) Hε) as [N₁ H₁ ?]. 
-destruct (H2 (ε * (1#2)) Hε) as [N₂ H₂ ?]. 
+destruct (H1 (ε * (1#2)) Hε) as [N₁ H₁].
+destruct (H2 (ε * (1#2)) Hε) as [N₂ H₂].
 exists (Max.max N₁ N₂).
 intros n m Hn Hm.
 apply Qle_lt_trans with (Qabs ((x n - y m) + (y m - z m))).
@@ -83,7 +83,7 @@ Infix "<" := Rlt : R_scope.
 
 
 (* A bit too much... why omega can't do that ? *)
-Ltac max_solve trm := match constr:trm with 
+Ltac max_solve trm := match trm with 
     O => fail
  | S ?p => 
        eassumption 
@@ -208,7 +208,7 @@ apply Qplus_le_lt_compat; auto with qarith.
 destruct EB₂ as [B₂ HB₂]. 
 exists (Qmax (Qmax A₁ A₂) (Qmax B₁ B₂)).
 intros n.
-let rec t trm := match constr:trm with 
+let rec t trm := match trm with 
     O => fail
  | S ?p => 
    first [ apply HA₁ | apply HA₂ | apply HB₁ | apply HB₂  | apply lt_Qmax; t p| rewrite Qmax_comm; t p]

@@ -47,16 +47,16 @@ Require Import integrales.
 
 Module integral_vector (Import I : Integrals).
 
-Variable V : Type.
-Variable N : V -> R.
-Variable (vO:V).
-Variable vadd : V->V->V.
-Variable smul : R->V->V.
-Variable dim : nat.
-Variable base : nat -> V.
-Variable p : nat -> V -> R.
+Parameter V : Type.
+Parameter N : V -> R.
+Parameter (vO:V).
+Parameter vadd : V->V->V.
+Parameter smul : R->V->V.
+Parameter dim : nat.
+Parameter base : nat -> V.
+Parameter p : nat -> V -> R.
 
-Hypothesis vect_space : R_vector_space N vO vadd smul dim base p.
+Parameter vect_space : R_vector_space N vO vadd smul dim base p.
 
 Definition vect_Riemann_integrable (f : R -> V) (a b : R) := forall n, Riemann_integrable (fun x => p n (f x)) a b.
 

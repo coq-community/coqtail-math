@@ -22,8 +22,8 @@ USA.
 Require Export Complex.
 Require Export Csequence.
 Require Import Rsequence_def.
-Open Local Scope C_scope.
-Open Local Scope Cseq_scope.
+Local Open Scope C_scope.
+Local Open Scope Cseq_scope.
 
 (** * Convergence of series *)
 Definition Cser_cv Un l := Cseq_cv (sum_f_C0 Un) l.

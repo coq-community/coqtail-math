@@ -10,7 +10,7 @@ Require Import List.
 
 (* Require Import LegacyField_Theory. *)
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 Lemma constant_is_cst : forall (c : R) (rc: infinite_cv_radius (constant_seq c)),
   forall x, sum _ rc x = c.

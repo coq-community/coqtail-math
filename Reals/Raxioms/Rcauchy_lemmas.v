@@ -1,6 +1,6 @@
 Require Import QArith Qabs.
 
-Open Local Scope Q_scope.
+Local Open Scope Q_scope.
 
 Add Parametric Relation : Q Qle 
    reflexivity proved by Qle_refl

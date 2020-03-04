@@ -11,7 +11,7 @@ Qed.
 
 Lemma ex_is_inhabited_sig A (f : A -> Prop) :  ex f <-> [ sig f ].
 Proof.
-split; repeat intros []; eauto.
+firstorder.
 Qed.
 
 Lemma Prop_inhabited_stable : forall P : Prop, P -> [P].
@@ -21,7 +21,7 @@ Qed.
 
 Lemma Prop_inhabited_inversion : forall P : Prop, [P] -> P.
 Proof.
-intros ? []; apply id.
+firstorder.
 Qed.
 
 Lemma Type_inhabited_stable : forall P : Type, P -> [P].

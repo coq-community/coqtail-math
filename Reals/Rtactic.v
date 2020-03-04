@@ -410,39 +410,39 @@ match x with
 end.
 
 Ltac estceunnumeral x := match x with
-  | R0 => constr:1
-  | R1 => constr:1
+  | R0 => true
+  | R1 => true
   | (?a + ?b) =>
       let a1 := (estceunnumeral a) in
       let a2 := (estceunnumeral b) in
       match a1 with
-        | 0 => constr:0
-        | 1 => match a2 with 
-          | 0 => constr:0
-          | 1 => constr:1 
+        | false => false
+        | true => match a2 with
+          | false => false
+          | true => true
         end
       end
   | (?a * ?b) =>
       let a1 := (estceunnumeral a) in
       let a2 := (estceunnumeral b) in
       match a1 with
-        | 0 => constr:0
-        | 1 => match a2 with 
-          | 0 => constr:0
-          | 1 => constr:1
+        | false => false
+        | true => match a2 with
+          | false => false
+          | true => true
         end
       end
   | (?a / ?b) =>
       let a1 := (estceunnumeral a) in
       let a2 := (estceunnumeral b) in
       match a1 with
-        | 0 => constr:0
-        | 1 => match a2 with 
-          | 0 => constr:0
-          | 1 => constr:1
+        | false => false
+        | true => match a2 with
+          | false => false
+          | true => true
         end
       end
-  | _ => constr:0
+  | _ => false
 end.
 
 Ltac reduirenumeral x :=
@@ -460,8 +460,8 @@ match goal with
   
 let z := estceunnumeral x in
   match z with
-    | 1 => reduirenumeral x
-    | 0 =>
+    | true => reduirenumeral x
+    | false =>
   
 match x with
   | (- ?a) => rewrite (Rabs_Ropp a)
@@ -470,13 +470,13 @@ match x with
       let a1 := estceunnumeral a in 
       let b1 := estceunnumeral b in 
       match b1 with
-        | 0 => idtac
-        | 1 =>  let h := fresh "H" in
+        | false => idtac
+        | true =>  let h := fresh "H" in
               assert (h : b >= 0) by fourier
       end ; 
       match a1 with
-        | 0 => idtac
-        | 1 => let h := fresh "H" in
+        | false => idtac
+        | true => let h := fresh "H" in
               assert (h : a >= 0) by fourier
       end ;
       match goal with
@@ -512,13 +512,13 @@ match x with
           let a1 := estceunnumeral a in
             let b1 := estceunnumeral b in
               match b1 with
-                | 0 => idtac
-                | 1 => let h := fresh "H" in
+                | false => idtac
+                | true => let h := fresh "H" in
                       assert (h : b >= 0) by fourier
               end ; 
               match a1 with
-                | 0 => idtac
-                | 1 => let h := fresh "H" in
+                | false => idtac
+                | true => let h := fresh "H" in
                       assert (h : a >= 0) by fourier
               end ;
               match goal with

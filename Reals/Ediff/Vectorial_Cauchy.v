@@ -1,5 +1,6 @@
 Require Import Evect.
 
+Section Vectorial_Cauchy.
 Variable V : Type.
 Variable N : V -> R.
 Variable (vO:V).
@@ -21,3 +22,4 @@ intros f I K openK t0 x0 Hx0K Hfcont lipschitzf.
 admit.
 Admitted.
 
+End Vectorial_Cauchy.

@@ -55,14 +55,14 @@ Section Commutative_Ring.
   Definition CRsum : (nat -> X) -> nat -> X  := iter1 X add.
   Definition CRnatmul : nat -> X -> X := fun n x => iter_l X add zero x n.
   
-  Notation " a ^ b " := (CRpow a b).
+  Notation " a ^^ b " := (CRpow a b) (at level 30, right associativity).
   Notation " a * b " := (mul a b).
   Notation " a == b " := (eqr a b) (at level 90, no associativity).
   Notation " a + b " := (add a b).
   Notation " a ** b " := (CRnatmul a b) (at level 60).
   
   Definition newton_sum n a b : X :=
-    CRsum (fun k => (Nbinomial n k) ** (a ^ k) * (b ^ (n - k))) n.
+    CRsum (fun k => (Nbinomial n k) ** (a ^^ k) * (b ^^ (n - k))) n.
   
   Definition opp : X -> X.
   Proof.
@@ -201,7 +201,7 @@ Section Commutative_Ring.
    reflexivity.
   Qed.
   
-  Lemma CRpow_simpl : forall a n, a ^ (S n) = a ^ n * a.
+  Lemma CRpow_simpl : forall a n, a ^^ (S n) = a ^^ n * a.
   Proof.
   reflexivity.
   Qed.
@@ -269,7 +269,7 @@ Section Commutative_Ring.
    ring.
   Qed.
   
-  Theorem Newton : forall n a b, (a + b) ^ n == newton_sum n a b.
+  Theorem Newton : forall n a b, (a + b) ^^ n == newton_sum n a b.
   Proof.
   intros n a b.
   induction n; [compute; ring | ].
@@ -280,8 +280,8 @@ Section Commutative_Ring.
   rewrite <- CRsum_reindex.
   
   rewrite <- (CRsum_eq_compat (fun k => 
-    (Nbinomial (S n)    k  ** a ^ S k * b ^ (S (S n) - S k)) +
-    (Nbinomial (S n) (S k) ** a ^ S k * b ^ (S (S n) - S k)))).
+    (Nbinomial (S n)    k  ** a ^^ S k * b ^^ (S (S n) - S k)) +
+    (Nbinomial (S n) (S k) ** a ^^ S k * b ^^ (S (S n) - S k)))).
    rewrite CRsum_add_compat.
    rewrite CRpow_simpl.
    rewrite IHn.

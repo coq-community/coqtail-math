@@ -18,7 +18,7 @@ and is equal to 0 outside. *)
 
 (** * Definition of weaksum_r *)
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 Definition weaksum_r : forall (An : nat -> R) (r : R) (Pr : Cv_radius_weak An r), R -> R.
 Proof.

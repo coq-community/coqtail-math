@@ -24,8 +24,8 @@ Require Export Reals.
 
 Delimit Scope Rseq_scope with Rseq.
 
-Open Local Scope R_scope.
-Open Local Scope Rseq_scope.
+Local Open Scope R_scope.
+Local Open Scope Rseq_scope.
 
 Definition Rseq := nat -> R.
 

@@ -1,28 +1,23 @@
-Definition Return : forall (A : Type), A -> option A := Some.
+Definition Return : forall {A : Type}, A -> option A := @Some.
 
-Definition Bind : forall (A B : Type), option A -> (A -> option B) -> option B :=
+Definition Bind : forall {A B : Type}, option A -> (A -> option B) -> option B :=
 fun A B Oa f => match Oa with
   | None   => None
   | Some a => f a
 end.
 
-Definition Map : forall (A B : Type) (f : A -> B), option A -> option B :=
+Definition Map : forall {A B : Type} (f : A -> B), option A -> option B :=
 fun A B f Oa => match Oa with
   | None   => None
   | Some a => Some (f a)
 end.
 
-Definition Join : forall (A : Type), option (option A) -> option A :=
+Definition Join : forall {A : Type}, option (option A) -> option A :=
 fun A OOa => match OOa with
   | None          => None
   | Some None     => None
   | Some (Some a) => Some a
 end.
-
-Implicit Arguments Return [A].
-Implicit Arguments Bind [A B].
-Implicit Arguments Map [A B].
-Implicit Arguments Join [A].
 
 Section Monad_properties.
 

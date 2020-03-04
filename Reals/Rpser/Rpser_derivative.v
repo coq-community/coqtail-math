@@ -9,7 +9,7 @@ Require Import Rpser_def Rpser_base_facts Rpser_radius_facts Rpser_sums Rpser_su
 
 Require Import Ass_handling.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * Definition of the formal derivative *)
 

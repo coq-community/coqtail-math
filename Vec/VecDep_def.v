@@ -6,8 +6,8 @@ Inductive VecDep : forall (n : nat), Vec Type n -> Type :=
   | VDcon : forall {A : Type} {n : nat} {v : Vec Type n} (hd : A) (tl : VecDep n v),
             VecDep (S n) (Vcon A v).
 
-Implicit Arguments VecDep [n].
-Implicit Arguments VDcon [A n v].
+Arguments VecDep [n] _.
+Arguments VDcon [A n v] hd tl.
 
 Fixpoint VDget {n : nat} {v : Vec Type n} (vd : VecDep v)
          (m : nat) (mltn : m < n) : Vget v m mltn.

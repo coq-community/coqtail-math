@@ -5,7 +5,7 @@ Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicit
 Require Import Rinterval.
 Require Import Nth_derivative_def.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * Simple equivalences *)
 

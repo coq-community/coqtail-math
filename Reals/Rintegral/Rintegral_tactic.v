@@ -25,9 +25,9 @@ Require Import Rintegral_usual.
 (* TODO I modified a Rint_reverse into Rint_reverse_1.... check if there is a problem then erase*)
 (* constructs a proof of the form Rint f a b ?x *)
 Ltac Rint_constr f a b := match goal with
-  | id : Rint f a b ?x |- _ => constr:id
+  | id : Rint f a b ?x |- _ => constr:(id)
   | id : Rint f b a ?x |- _ => constr:(Rint_reverse_1 f b a x)
-  | _ => match constr:f with 
+  | _ => match constr:(f) with 
     | fct_cte ?c => constr:(Rint_constant c a b)
     | (?g + ?h)%F => let H1 := Rint_constr g a b in let H2 := Rint_constr h a b in
                      constr:(Rint_plus g h a b H1 H2)

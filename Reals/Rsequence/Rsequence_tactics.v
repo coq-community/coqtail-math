@@ -26,25 +26,25 @@ Require Import Rseries_def.
 Require Export Reals.
 Require Import Fourier.
 
-Open Local Scope Rseq_scope.
+Local Open Scope Rseq_scope.
 (** printing ~	~ *)
 (** * A tactic that constructs the limit of a sequence and the proof that this
  limit is exact *)
 
 Ltac neq := fun n =>
   match goal with
-    | id : (n <> 0)%R |- _ => constr: id
+    | id : (n <> 0)%R |- _ => id
     | id : (n > 0) |- _ => constr: (Rgt_not_eq _ _ id)
     | id : (n < 0) |- _ => constr: (Rlt_not_eq _ _ id)
     | _ =>
-      match constr:n with
+      match n with
       | Rabs ?a =>
         let H := neq a in constr: (Rabs_no_R0 _ H)
       end
   end.
 
 
-Ltac rseq_fold Un := match constr:Un with
+Ltac rseq_fold Un := match Un with
     | ?Vn ?c ?Wn => let Vn' := rseq_fold Vn in let Wn' := rseq_fold Wn in constr:(Vn' c Wn')
     | fun x : nat => ?Vn x => rseq_fold Vn
     | fun x : nat => (?Vn + ?Wn)%R => idtac "bla"
@@ -59,17 +59,17 @@ Ltac rseq_fold Un := match constr:Un with
         let Vn' := rseq_fold Vn in let Wn' := rseq_fold Wn in constr:(Vn' * Wn')
     | fun x : nat => (?Vn x / ?Wn x)%R => 
         let Vn' := rseq_fold Vn in let Wn' := rseq_fold Wn in constr:(Vn' / Wn')*)
-    | _ => constr:Un
+    | _ => Un
 end.
 
 Ltac rseq_lim := fun Un => match goal with
 (** Case 1: there exists a proof that the sequence converges in the hypothesis *)
-    | id : Rseq_cv Un ?l |- _ => constr:id
-    | id : Rseq_cv_pos_infty Un |- _ => constr:id
-    | id : Rseq_cv_neg_infty Un |- _ => constr:id
+    | id : Rseq_cv Un ?l |- _ => id
+    | id : Rseq_cv_pos_infty Un |- _ => id
+    | id : Rseq_cv_neg_infty Un |- _ => id
     | _ => 
 (** Case 2:  we have to deconstruct the sequence to infer the limit *)
-    match constr:Un with
+    match Un with
       (* constant *)
       | (Rseq_constant ?a) => constr:(Rseq_constant_cv a)
 (* inverse *)
@@ -171,10 +171,10 @@ Ltac rseq_lim := fun Un => match goal with
 end.
 
 Ltac rser_lim := fun Un => match goal with
-    | id : Rser_cv Un ?l |- _ => constr:id	
-    | id : Rser_cv_pos_infty Un |- _ => constr:id
-    | id : Rser_cv_neg_infty Un |- _ => constr:id
-    | _ =>     match constr:Un with
+    | id : Rser_cv Un ?l |- _ => id
+    | id : Rser_cv_pos_infty Un |- _ => id
+    | id : Rser_cv_neg_infty Un |- _ => id
+    | _ =>     match Un with
         | _ => idtac
  end
 end.

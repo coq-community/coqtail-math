@@ -71,21 +71,21 @@ Section Sets.
   Axiom Set_Extensionality : forall A B:set, Set_same A B -> A = B.
 End Sets.
 
-Implicit Arguments set [U].
-Implicit Arguments In [U].
-Implicit Arguments Set_included [U].
-Implicit Arguments Set_inter [U].
-Implicit Arguments Set_union [U].
-Implicit Arguments Set_empty [U].
-Implicit Arguments Set_full [U].
-Implicit Arguments Set_singleton [U].
-Implicit Arguments Set_couple [U].
-Implicit Arguments Set_triple [U].
-Implicit Arguments Set_complement [U].
-Implicit Arguments Set_minus [U].
-Implicit Arguments Set_subtract [U].
-Implicit Arguments Set_disjoint [U].
-Implicit Arguments Set_inhabited [U].
-Implicit Arguments Set_strict_included [U].
-Implicit Arguments Set_same [U].
-Implicit Arguments Set_Extensionality [U].
+Arguments set [U].
+Arguments In [U] A x.
+Arguments Set_included [U] A B.
+Arguments Set_inter [U] A B _.
+Arguments Set_union [U] A B _.
+Arguments Set_empty [U] _.
+Arguments Set_full [U] _.
+Arguments Set_singleton [U] x _.
+Arguments Set_couple [U] x y _.
+Arguments Set_triple [U] x y z _.
+Arguments Set_complement [U] A _.
+Arguments Set_minus [U] B C _.
+Arguments Set_subtract [U] B x _.
+Arguments Set_disjoint [U] B C.
+Arguments Set_inhabited [U] B.
+Arguments Set_strict_included [U] B C.
+Arguments Set_same [U] B C.
+Arguments Set_Extensionality [U] A B _.

@@ -23,8 +23,8 @@ USA.
 
 Require Import Reals.
 Require Import Rsequence_def.
-Open Local Scope R_scope.
-Open Local Scope Rseq_scope.
+Local Open Scope R_scope.
+Local Open Scope Rseq_scope.
 
 Implicit Type Un : Rseq.
 (** printing ~	~ *)

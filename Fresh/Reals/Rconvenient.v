@@ -26,7 +26,7 @@ Qed.
 
 Lemma Rdiscr_irrefl : forall r, r ## r -> False.
 Proof.
-intros ? [|]; apply Rlt_irrefl.
+intros ? [|]; eapply Rlt_irrefl; eauto.
 Qed.
 
 Lemma Req_trans : forall r1 r2 r3 : R, Req r1 r2 -> Req r2 r3 -> Req r1 r3.
@@ -44,7 +44,7 @@ Qed.
 Lemma Rlt_le_trans : forall x y z, Rlt x y -> Rle y z -> Rlt x z.
 Proof.
 intros ? ? ? ? [|?].
- apply Rlt_trans; auto.
+ eapply Rlt_trans; eauto.
  eapply Req_lt_compat_r; eauto.
 Qed.
 

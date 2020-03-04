@@ -4,8 +4,8 @@ Inductive Vec (A : Type) : nat -> Type :=
   | Vnil : Vec A 0
   | Vcon : forall {n : nat} (hd : A) (tl : Vec A n), Vec A (S n).
 
-Implicit Arguments Vnil [A].
-Implicit Arguments Vcon [A n].
+Arguments Vnil [A].
+Arguments Vcon [A n] hd tl.
 
 Fixpoint Vget {A : Type} {n : nat} (v : Vec A n) (m : nat) (mltn : m < n) : A.
 destruct v.

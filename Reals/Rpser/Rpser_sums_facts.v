@@ -5,7 +5,7 @@ Require Import Rpser_def Rpser_sums Rpser_base_facts Rpser_cv_facts Rpser_radius
 
 Require Import Rinterval Rfunction_def Rextensionality.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * Compatibility of Rpser with Rseq_prod (Mertens' theorem) *)
 

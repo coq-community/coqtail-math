@@ -26,12 +26,12 @@ Require Export Arith.
 
 Section Cartesian_product_facts.
 
-Implicit Arguments Product [U V].
-Implicit Arguments Union [U].
-Implicit Arguments Add [U].
-Implicit Arguments Singleton [U].
-Implicit Arguments Finite [U].
-Implicit Arguments cardinal [U].
+Arguments Product [U V] B C _.
+Arguments Union [U] B C _.
+Arguments Add [U] B x _.
+Arguments Singleton [U] x _.
+Arguments Finite [U] _.
+Arguments cardinal [U] _ _.
 
 Variable U V W: Type.
 

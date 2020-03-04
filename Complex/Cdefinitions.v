@@ -110,7 +110,6 @@ Fixpoint INC (n:nat) : C :=
   | S O => 1
   | S n => INC n + 1
   end.
-Arguments Scope INC [nat_scope].
 
 (** ** Injection from [Z] to [C]*)
 
@@ -119,5 +118,4 @@ Definition IZC (z:Z) : C :=
   | Z0 => 0
   | Zpos n => INC (nat_of_P n)
   | Zneg n => - INC (nat_of_P n)
-  end.  
-Arguments Scope IZC [Z_scope].
+  end.

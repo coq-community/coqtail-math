@@ -7,7 +7,7 @@ Ltac copy H := let b := fresh H in assert (b := H).
 
 (* use n Thm Hyp consumes the hypothesis Hyp to produce a thm based
 on Thm *)
-Ltac use n Thm Hyp := let H := fresh "H" in match constr:n with
+Ltac use n Thm Hyp := let H := fresh "H" in match n with
   | 0 => assert (H := Thm Hyp)
   | 1 => assert (H := Thm _ Hyp)
   | 2 => assert (H := Thm _ _ Hyp)

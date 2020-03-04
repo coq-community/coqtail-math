@@ -314,22 +314,8 @@ rewrite H.
 ring.
 Qed.
 
-(** Simplification of common factor *)
-Lemma Ndiv_mult_simpl : forall a b q, q <> 0 -> (a * q | b * q) -> (a | b).
-Proof.
-intros.
-destruct H0.
-destruct q.
-contradiction H.
-reflexivity.
-rewrite mult_assoc in H0.
-assert (S q*b=S q*(q0*a)).
-rewrite mult_comm.
-rewrite H0.
-ring.
-assert (b=q0*a).
 (* begin hide *)
-  Lemma toto : forall a b q, S q * a = S q * b -> a = b.
+Lemma toto : forall a b q, S q * a = S q * b -> a = b.
   induction a.
   intros.
   rewrite mult_0_r in H.
@@ -354,8 +340,23 @@ assert (b=q0*a).
   auto.
   rewrite H0.
   auto.
-  Qed.
+Qed.
 (* end hide *)
+
+(** Simplification of common factor *)
+Lemma Ndiv_mult_simpl : forall a b q, q <> 0 -> (a * q | b * q) -> (a | b).
+Proof.
+intros.
+destruct H0.
+destruct q.
+contradiction H.
+reflexivity.
+rewrite mult_assoc in H0.
+assert (S q*b=S q*(q0*a)).
+rewrite mult_comm.
+rewrite H0.
+ring.
+assert (b=q0*a).
 apply toto with q.
 rewrite mult_comm.
 rewrite H0.
@@ -617,18 +618,6 @@ end.
 Definition Ndiv_algo (n m:nat) : bool :=
   beq_nat (Ndiv_mod_algo n m) 0.
 
-(** [m] mod [n] equals [m] if [n] is greater than [m] *)
-Lemma Ndiv_mod_l0 : forall n m, m < n -> Ndiv_mod_algo n m = m.
-Proof.
-induction m.
-intros. destruct n. inversion H. compute. trivial.
-intros.
-destruct n.
-inversion H.
-simpl.
-replace (Ndiv_mod_algo (S n) m) with m.
-replace (beq_nat n m) with false.
-reflexivity.
   (* begin hide *)
   Lemma eq_nat_correct : forall n m, n<>m -> false=beq_nat n m.
   Proof.
@@ -647,6 +636,18 @@ reflexivity.
   auto with arith.
   Qed.
 (* end hide *)
+(** [m] mod [n] equals [m] if [n] is greater than [m] *)
+Lemma Ndiv_mod_l0 : forall n m, m < n -> Ndiv_mod_algo n m = m.
+Proof.
+induction m.
+intros. destruct n. inversion H. compute. trivial.
+intros.
+destruct n.
+inversion H.
+simpl.
+replace (Ndiv_mod_algo (S n) m) with m.
+replace (beq_nat n m) with false.
+reflexivity.
 apply eq_nat_correct.
 intro.
 rewrite H0 in H.

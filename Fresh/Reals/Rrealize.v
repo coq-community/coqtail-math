@@ -1,5 +1,7 @@
 Require Raxiom.
 Require Import ZArith.
+Require Import Max.
+  
 
 (* We use sequences of the form (z_n/2^n) so the property "Zseq_Cauchy" is quite verbose *)
 
@@ -39,8 +41,6 @@ Module Rrealize : Raxiom.CReals.
   
   Definition R0 := Const Z0.
   Definition R1 := Const 1%Z.
-  
-  Require Import Max.
   
   Program Definition Radd a b := Rdef (fun n => (Rseq a n + Rseq b n)%Z) _.
   (*Program Definition Radd a b := match a, b with Rcauchy u Hu, Rcauchy v Hv =>
@@ -397,7 +397,6 @@ Module Rrealize : Raxiom.CReals.
       | xO p => Rmul (Radd R1 R1) (IPR p)
       | xH => R1
     end.
-  Arguments Scope IPR [positive_scope].
   
   Definition IZR (z : BinInt.Z) : R :=
     match z with
@@ -405,7 +404,6 @@ Module Rrealize : Raxiom.CReals.
       | Zpos p => IPR p
       | Zneg p => Ropp (IPR p)
     end.
-  Arguments Scope IZR [Z_scope].
   
   Definition Rdist x y d : Type := prod (Rlt (Rsub x y) d) (Rlt (Ropp d) (Rsub x y)).
   

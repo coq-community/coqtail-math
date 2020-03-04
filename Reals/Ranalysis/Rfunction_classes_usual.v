@@ -8,7 +8,7 @@ Require Import Rextensionality.
 Require Import Rpser_def.
 Require Import Rpser_def Rpser_cv_facts Rpser_sums Rpser_sums_facts Rpser_derivative.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * Classification of common functions *)
 

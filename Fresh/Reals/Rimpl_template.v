@@ -98,7 +98,6 @@ Module Rrealize : Raxiom.CReals.
       | xO p => Rmul (Radd R1 R1) (IPR p)
       | xH => R1
     end.
-  Arguments Scope IPR [positive_scope].
   
   Definition IZR (z : BinInt.Z) : R :=
     match z with
@@ -106,7 +105,6 @@ Module Rrealize : Raxiom.CReals.
       | Zpos p => IPR p
       | Zneg p => Ropp (IPR p)
     end.
-  Arguments Scope IZR [Z_scope].
   
   Definition Rdist x y d : Type := prod (Rlt (Rsub x y) d) (Rlt (Ropp d) (Rsub x y)).
   

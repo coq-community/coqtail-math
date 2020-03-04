@@ -2,7 +2,7 @@ Require Import Reals.
 Require Import Rfunction_classes.
 Require Import Ranalysis_def Ranalysis_facts.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * Definition of the nth derivative *)
 

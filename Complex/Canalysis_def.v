@@ -25,7 +25,7 @@ Require Import Cfunctions.
 Require Export Cmet.
 Require Import Cderiv.
 
-Open Local Scope C_scope.
+Local Open Scope C_scope.
 
 Implicit Type f : C -> C.
 
@@ -42,22 +42,22 @@ Definition constant f : Prop := forall x y, f x = f y.
 
 Delimit Scope Cfun_scope with F.
 
-Arguments Scope plus_fct [Cfun_scope Cfun_scope C_scope].
-Arguments Scope mult_fct [Cfun_scope Cfun_scope C_scope].
-Arguments Scope minus_fct [Cfun_scope Cfun_scope C_scope].
-Arguments Scope div_fct [Cfun_scope Cfun_scope C_scope].
-Arguments Scope inv_fct [Cfun_scope C_scope].
-Arguments Scope opp_fct [Cfun_scope C_scope].
-Arguments Scope mult_real_fct [C_scope Cfun_scope C_scope].
-Arguments Scope div_real_fct [C_scope Cfun_scope C_scope].
-Arguments Scope comp [Cfun_scope Cfun_scope C_scope].
+Arguments plus_fct f1%Cfun_scope f2%Cfun_scope x%C_scope.
+Arguments mult_fct f1%Cfun_scope f2%Cfun_scope x%C_scope.
+Arguments minus_fct f1%Cfun_scope f2%Cfun_scope x%C_scope.
+Arguments div_fct f1%Cfun_scope f2%Cfun_scope x%C_scope.
+Arguments inv_fct f%Cfun_scope x%C_scope.
+Arguments opp_fct f%Cfun_scope x%C_scope.
+Arguments mult_real_fct a%C_scope f%Cfun_scope x%C_scope.
+Arguments div_real_fct a%C_scope f%Cfun_scope x%C_scope.
+Arguments comp f1%Cfun_scope f2%Cfun_scope x%C_scope.
 
 Infix "+" := plus_fct : Cfun_scope.
 Notation "- x" := (opp_fct x) : Cfun_scope.
 Infix "*" := mult_fct : Cfun_scope.
 Infix "-" := minus_fct : Cfun_scope.
 Infix "/" := div_fct : Cfun_scope.
-Notation Local "f1 'o' f2" := (comp f1 f2) (at level 20, right associativity) : Cfun_scope.
+Local Notation "f1 'o' f2" := (comp f1 f2) (at level 20, right associativity) : Cfun_scope.
 Notation "/ x" := (inv_fct x) : Cfun_scope.
 
 Definition fct_cte (a x:C) : C := a.
@@ -80,9 +80,9 @@ Definition continuity_along_axis_pt f v x := forall eps:R, eps > 0 ->
  exists delta:posreal, forall h:R, Rabs h < delta ->
  dist C_met (f (x + h * v)) (f x) < eps.
 
-Arguments Scope continuity_pt [Cfun_scope C_scope].
-Arguments Scope continuity [Cfun_scope C_scope C_scope].
-Arguments Scope continuity [Cfun_scope].
+Arguments continuity_pt f%Cfun_scope z%C_scope.
+Arguments continuity_along_axis_pt f%Cfun_scope v%C_scope x%C_scope.
+Arguments continuity f%Cfun_scope.
 
 
 Definition growth_rate f x := (fun y => (f y - f x) / (y - x)).
@@ -103,12 +103,12 @@ Definition derivable f := forall x, derivable_pt f x.
 Definition derive_pt f x (pr:derivable_pt f x) := proj1_sig pr.
 Definition derive f (pr:derivable f) x := derive_pt f x (pr x).
 
-Arguments Scope derivable_pt_lim [Cfun_scope C_scope].
-Arguments Scope derivable_pt_abs [Cfun_scope C_scope C_scope].
-Arguments Scope derivable_pt [Cfun_scope C_scope].
-Arguments Scope derivable [Cfun_scope].
-Arguments Scope derive_pt [Cfun_scope C_scope _].
-Arguments Scope derive [Cfun_scope _].
+Arguments derivable_pt_lim f%Cfun_scope x%C_scope l%C_scope.
+Arguments derivable_pt_abs f%Cfun_scope x%C_scope l%C_scope.
+Arguments derivable_pt f%Cfun_scope x%C_scope.
+Arguments derivable f%Cfun_scope.
+Arguments derive_pt f%Cfun_scope x%C_scope pr.
+Arguments derive f%Cfun_scope pr x.
 
 
 (*****************************************************)
@@ -129,11 +129,11 @@ Definition fully_differentiable f := forall v, differentiable f v.
 Definition differential_pt f x v (pr:differentiable_pt f x v) := proj1_sig pr.
 Definition differential f v (pr:differentiable f v) x := differential_pt f x v (pr x).
 
-Arguments Scope differentiable_pt_lim [Cfun_scope C_scope].
-Arguments Scope differentiable_pt_abs [Cfun_scope C_scope C_scope].
-Arguments Scope differentiable_pt [Cfun_scope C_scope].
-Arguments Scope differentiable [Cfun_scope].
-Arguments Scope fully_differentiable_pt [Cfun_scope C_scope].
-Arguments Scope fully_differentiable [Cfun_scope].
-Arguments Scope differential_pt [Cfun_scope C_scope _].
-Arguments Scope differential [Cfun_scope _].
+Arguments differentiable_pt_lim f%Cfun_scope (x v l)%C_scope .
+Arguments differentiable_pt_abs f%Cfun_scope (x v l)%C_scope.
+Arguments differentiable_pt f%Cfun_scope (x v)%C_scope.
+Arguments differentiable f%Cfun_scope v%C_scope.
+Arguments fully_differentiable_pt f%Cfun_scope x%C_scope.
+Arguments fully_differentiable f%Cfun_scope.
+Arguments differential_pt f%Cfun_scope x%C_scope v%C_scope pr.
+Arguments differential f%Cfun_scope v%C_scope pr x%C_scope.

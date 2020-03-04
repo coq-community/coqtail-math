@@ -30,7 +30,7 @@ Require Import Rsequence_subsequence.
 Require Import Riemann_integrable.
 Require Import Rintegral.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 (** printing ~	~ *)
 Section Rseries_RiemannInt.
 

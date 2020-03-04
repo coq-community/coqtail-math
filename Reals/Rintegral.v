@@ -27,7 +27,7 @@ Require Import RIneq.
 Require Import Fourier.
 Require Import R_sqr.
 Require Import MyRfunctions.
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (* begin hide *)
 

@@ -10,7 +10,7 @@ Require Import Rpser_radius_facts Rpser_sums Rpser_derivative.
 Require Import Rinterval.
 Require Import Rfunction_classes Nth_derivative_def Nth_derivative_facts.
 
-Open Local Scope R_scope.
+Local Open Scope R_scope.
 
 (** * An_nth_deriv is the general term of the nth derivative of sum An. *)
 
