@@ -1,11 +1,26 @@
-# First time usage
+# Requirements
 
-Run "./generate_makefile.sh" the first time to generate the Makefile
-from the Make file. Then Makefile will update itself whenever Make is
-modified.
+`master` is developed with Coq 8.11.0, but the following tags point
+to snapshots for different version of Coq, which should cover 8.5 to
+8.11.
 
-Run "./help.sh" if you feel "make" is not compiling the right
-things. It should also help you if coqide's loadpath is messed up.
+- tag `v8.6.1` for Coq 8.5pl3 and Coq 8.6.1
+- tag `v8.7.2` for Coq 8.7.2
+- tag `v8.8.2` for Coq 8.8.2
+- tag `v8.9.1` for Coq 8.9.1
+- tag `v8.10.2` for Coq 8.10.2
+- tag `v8.11.0` for Coq 8.11.0
+
+Use e.g. `git checkout v8.10.2` if you want to use Coq 8.10.2. Note
+that those tags are for backward compatibility only, there is no
+intention of maintaining them as branches: use master instead for
+development.
+
+# Compiling
+
+Running `cd src; make` should suffice. It uses a `_CoqProject` file,
+which should also allow you to use coqide and proofgeneral with no
+further configuration.
 
 # Developer's todo list
 
@@ -26,19 +41,3 @@ Maintenance:
 - Remove useless "Require"s
 - Check for admits (run "./todos.sh").
 - Check for commented results (run "./todos.sh comments")
-
-# Loadpath problems
-
-To make coqide handle loadpath correctly:
-
-- open coqide, go to Edit > Preferences > Project
-- change default name to 'Make'
-- choose option 'appended to arguments'
-
-# old configuration
-
-How to launch Real library mytheories in Proofgeneral:
-(setq coq-prog-args '("-R" "MY_PATH_TO_COQTAIL/coqtail/src/" "Coqtail"))
-
-For Coqide:
-coqide -R MY_PATH_TO_COQTAIL/coqtail/src/ Coqtail fichier.v
