@@ -206,33 +206,6 @@ apply IHn.
 exact H4.
 Qed.
 
-Lemma edges_to_path2_path : forall e : edges, (path_reflexive (edges_to_path2 e))/\(path_trans (edges_to_path2 e))/\(path_unique (edges_to_path2 e)) /\(path_back (edges_to_path2 e))/\(path_dec (edges_to_path2 e)).
-split.
-unfold path_reflexive ; intro.
-apply edges_to_path2_0.
-
-split.
-unfold path_trans.
-do 5 intro.
-generalize v1, v2, v3, m.
-clear v1. clear v2. clear v3. clear m.
-induction n ; intros ; simpl.
-inversion H.
-exact H0.
-inversion H.
-apply edges_to_path2_Sn with v4.
-exact H2.
-apply IHn with v2.
-exact H5.
-exact H0.
-
-split.
-unfold path_unique.
-intros.
-inversion H.
-reflexivity.
-
-split.
 Lemma edges_to_path_back : forall e, path_back (edges_to_path2 e).
 unfold path_back.
 intros.
@@ -244,15 +217,6 @@ exact H1.
 apply edges_to_path2_0.
 exact H4.
 Qed.
-apply edges_to_path_back.
-
-unfold path_dec.
-generalize e.
-clear e.
-
-assert (1=1).
-reflexivity.
-
 
 
 Fixpoint eq a b {struct a}:=
@@ -328,6 +292,42 @@ apply n.
 rewrite H1.
 reflexivity. 
 Qed.
+
+Lemma edges_to_path2_path : forall e : edges, (path_reflexive (edges_to_path2 e))/\(path_trans (edges_to_path2 e))/\(path_unique (edges_to_path2 e)) /\(path_back (edges_to_path2 e))/\(path_dec (edges_to_path2 e)).
+split.
+unfold path_reflexive ; intro.
+apply edges_to_path2_0.
+
+split.
+unfold path_trans.
+do 5 intro.
+generalize v1, v2, v3, m.
+clear v1. clear v2. clear v3. clear m.
+induction n ; intros ; simpl.
+inversion H.
+exact H0.
+inversion H.
+apply edges_to_path2_Sn with v4.
+exact H2.
+apply IHn with v2.
+exact H5.
+exact H0.
+
+split.
+unfold path_unique.
+intros.
+inversion H.
+reflexivity.
+
+split.
+apply edges_to_path_back.
+
+unfold path_dec.
+generalize e.
+clear e.
+
+assert (1=1).
+reflexivity.
 
 assert (forall e0 v, belong_listi e0 v nil -> (forall v0, not (belong (v,v0) e0))).
 intro.

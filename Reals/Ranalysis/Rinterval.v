@@ -1,4 +1,4 @@
-Require Import Rbase Rfunctions Rfunction_def Rtopology Fourier.
+Require Import Rbase Rfunctions Rfunction_def Rtopology Lra.
 Require Import MyRIneq MyNeq PSeries_reg.
 Require Import Ass_handling.
 
@@ -10,7 +10,8 @@ Definition interval_size lb ub : R := (ub - lb) / 2.
 
 Lemma interval_size_pos : forall lb ub, lb < ub -> 0 < interval_size lb ub.
 Proof.
-intros ; apply Rlt_mult_inv_pos ; fourier.
+unfold interval_size.
+intros ; lra.
 Qed.
 
 Definition whole_R := fun (_ : R) => True.
@@ -63,17 +64,17 @@ transitivity proved by (Rball_eq_trans c r) as Rball_eq'.
 
 Lemma center_in_Rball : forall c r, 0 < r -> Rball c r c.
 Proof.
-intros ; apply Rabs_def1 ; fourier.
+intros ; apply Rabs_def1 ; lra.
 Qed.
 
 Lemma center_in_interval : forall c r, 0 <= r -> interval (c - r) (c + r) c.
 Proof.
-intros ; split ; fourier.
+intros ; split ; lra.
 Qed.
 
 Lemma center_in_open_interval : forall c r, 0 < r -> open_interval (c - r) (c + r) c.
 Proof.
-intros ; split ; fourier.
+intros ; split ; lra.
 Qed.
 
 (** * [middle]'s properties. *)
@@ -107,10 +108,10 @@ Proof.
 intros x y x_lt_y ; split.
  apply Rle_lt_trans with (middle x x).
  right ; symmetry ; apply middle_identity.
- unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
+ unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [lra |] ;
  apply Rplus_lt_compat_l ; assumption.
  apply Rlt_le_trans with (middle y y).
- unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ;
+ unfold middle, Rdiv ; apply Rmult_lt_compat_r ; [lra |] ;
  apply Rplus_lt_compat_r ; assumption.
  right ; apply middle_identity.
 Qed.
@@ -138,19 +139,19 @@ Qed.
 Lemma middle_le_le_pos : forall x y, 0 <= x -> 0 <= y -> 0 <= middle x y.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
- apply Rle_mult_inv_pos ; fourier.
+  lra.
 Qed.
 
 Lemma middle_lt_lt_pos_lt : forall x y, 0 < x -> 0 < y -> 0 < middle x y.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
- apply Rlt_mult_inv_pos ; fourier.
+ lra.
 Qed.
 
 Lemma middle_le_lt_pos_lt : forall x y, 0 <= x -> 0 < y -> 0 < middle x y.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
- apply Rlt_mult_inv_pos ; fourier.
+ lra.
 Qed.
 
 Lemma middle_lt_le_pos_lt : forall x y, 0 < x -> 0 <= y -> 0 < middle x y.
@@ -163,14 +164,14 @@ Lemma middle_lt_lt_neg_lt : forall x y, x < 0 -> y < 0 -> middle x y < 0.
 Proof.
 intros x y x_neg y_neg ; unfold middle, Rdiv ;
  replace 0 with ((x + y) * 0) by ring ;
- apply Rmult_lt_gt_compat_neg_l ; fourier.
+ apply Rmult_lt_gt_compat_neg_l ; lra.
 Qed.
 
 Lemma middle_le_lt_neg_lt : forall x y, x <= 0 -> y < 0 -> middle x y < 0.
 Proof.
 intros x y x_pos y_pos ; unfold middle, Rdiv ;
   replace 0 with ((x + y) * 0) by ring ;
- apply Rmult_lt_gt_compat_neg_l ; fourier.
+ apply Rmult_lt_gt_compat_neg_l ; lra.
 Qed.
 
 Lemma middle_lt_le_neg_lt : forall x y, x < 0 -> y <= 0 -> middle x y < 0.
@@ -240,13 +241,13 @@ Lemma interval_opp_compat : forall lb ub x,
      interval lb ub x ->
      interval (-ub) (-lb) (-x).
 Proof.
-intros ; unfold interval in * ; split ; intuition ; fourier.
+intros ; unfold interval in * ; split ; intuition ; lra.
 Qed.
 
 Lemma interval_minus_compat : forall lb ub x y,
   interval lb ub x -> interval (lb - y) (ub - y) (x - y).
 Proof.
-intros lb ub x y [Hlb Hub] ; split ; fourier.
+intros lb ub x y [Hlb Hub] ; split ; lra.
 Qed.
 
 Lemma interval_minus_compat_0 : forall lb ub x,
@@ -260,7 +261,7 @@ Lemma open_interval_opp_compat : forall lb ub x,
      open_interval lb ub x ->
      open_interval (-ub) (-lb) (-x).
 Proof.
-intros ; unfold open_interval in * ; split ; intuition ; fourier.
+intros ; unfold open_interval in * ; split ; intuition ; lra.
 Qed.
 
 Lemma interval_middle_compat: forall lb ub x y,
@@ -296,8 +297,8 @@ intros lb ub x.
   destruct (Rle_lt_dec lb x).
    destruct (Rle_lt_dec x ub).
     left ; split ; assumption.
-    right ; intros [_ Hf] ; fourier.
-   right ; intros [Hf _] ; fourier.
+    right ; intros [_ Hf] ; lra.
+   right ; intros [Hf _] ; lra.
 Qed.
 
 Lemma in_open_interval_dec: forall lb ub x,
@@ -306,8 +307,8 @@ intros lb ub x.
   destruct (Rlt_le_dec lb x).
    destruct (Rlt_le_dec x ub).
     left ; split ; assumption.
-    right ; intros [_ Hf] ; fourier.
-   right ; intros [Hf _] ; fourier.
+    right ; intros [_ Hf] ; lra.
+   right ; intros [Hf _] ; lra.
 Qed.
 
 Lemma interval_open_interval_dec: forall lb ub x,
@@ -387,7 +388,7 @@ Lemma included_Rball_open_interval : forall c r,
   included (Rball c r) (open_interval (c - r) (c + r)).
 Proof.
 intros c r x H ; assert (H' := Rabs_def2 _ _ H) ;
- destruct H' ; split ; fourier.
+ destruct H' ; split ; lra.
 Qed.
 
 Lemma included_Rball_open_interval2 : forall lb ub,
@@ -396,9 +397,9 @@ Proof.
 intros lb ub x x_in ; destruct (Rabs_def2 _ _ x_in) as [x_lb x_ub] ; split.
  apply Rle_lt_trans with (middle lb ub - interval_size lb ub).
   right ; unfold middle, interval_size ; field.
-  fourier.
+  lra.
  apply Rlt_le_trans with (middle lb ub + interval_size lb ub).
-  fourier.
+  lra.
   right ; unfold middle, interval_size ; field.
 Qed.
 
@@ -417,7 +418,7 @@ Qed.
 Lemma included_open_interval_Rball2 : forall c r,
   included (open_interval (c - r) (c + r)) (Rball c r).
 Proof.
-intros c r x [x_lb x_ub] ; apply Rabs_def1 ; fourier.
+intros c r x [x_lb x_ub] ; apply Rabs_def1 ; lra.
 Qed.
 
 Lemma Rball_rewrite: forall c r x,
@@ -437,7 +438,7 @@ Qed.
 Lemma Rball_included: forall c r1 r2 x,
   r1 <= r2 -> Rball c r1 x -> Rball c r2 x.
 Proof.
-unfold Rball ; intros ; fourier.
+unfold Rball ; intros ; lra.
 Qed.
 
 (** The specific case where the center of the ball is 0. *)
@@ -474,7 +475,7 @@ Lemma Rball_ext_eq: forall c1 c2 r1 r2, r1 > 0 ->
   c1 = c2 /\ r1 = r2.
 Proof.
 intros c1 c2 r1 r2 r1_pos Hext.
- assert (Hord: c1 - r1 < c1 + r1) by fourier.
+ assert (Hord: c1 - r1 < c1 + r1) by lra.
  assert (Heq: c1 - r1 = c2 - r2 /\ c1 + r1 = c2 + r2).
   apply open_interval_ext_eq.
    assumption.
@@ -496,13 +497,13 @@ Lemma open_interval_dist_pos: forall lb ub x,
   0 < interval_dist lb ub x.
 Proof.
 intros lb ub x [x_lb x_ub] ;
- apply Rmin_pos_lt ; fourier.
+ apply Rmin_pos_lt ; lra.
 Qed.
 
 Lemma interval_dist_pos: forall lb ub x,
   interval lb ub x -> 0 <= interval_dist lb ub x.
 Proof.
-intros lb ub x [x_lb x_ub] ; apply Rmin_pos ; fourier.
+intros lb ub x [x_lb x_ub] ; apply Rmin_pos ; lra.
 Qed.
 
 Lemma open_interval_dist_bound:
@@ -521,7 +522,7 @@ intros lb ub x x_in h h_bd ;
    apply Rlt_le_trans with (Rmin (x - lb) (ub - x)).
     assumption.
     apply Rmin_r.
-  split ; clear -H1 H2 ; fourier.
+  split ; clear -H1 H2 ; lra.
 Qed.
 
 (* TODO : move *)

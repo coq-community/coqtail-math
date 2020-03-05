@@ -25,7 +25,7 @@ Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_fact
 Require Import Rsequence_subsequence.
 
 Require Import Max.
-Require Import Fourier.
+Require Import Lra.
 
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
 Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
@@ -485,7 +485,7 @@ Definition arct_seq : Rseq := fun n => / INR (S (2 * n)).
 Lemma arct_cv_radius : finite_cv_radius arct_seq 1.
 Proof.
 rewrite <- Rinv_1 ; apply Rpser_alembert_finite.
- apply Rgt_not_eq ; fourier.
+ apply Rgt_not_eq ; lra.
  intro n ; apply Rinv_neq_0_compat, not_0_INR ; omega.
  assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; omega) ;
   pose (phi := exist _ _ Hf) ; rewrite Rseq_cv_eq_compat with
@@ -512,7 +512,7 @@ Defined.
 
 Lemma arctan_cv_radius : finite_cv_radius arctan_seq 1.
 Proof.
-rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| fourier | simpl ; ring].
+rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| lra | simpl ; ring].
  apply finite_cv_radius_zip_compat_r.
   intros ; apply zero_infinite_cv_radius.
   simpl nonneg ; do 2 rewrite Rmult_1_r ;
@@ -537,7 +537,7 @@ Admitted. (*
   unfold Rseq_pps ; intro n ; apply Rseq_sum_ext ; clear n.
   intro n ; unfold gt_pser, tg_alt, PI_tg, Rseq_mult.
   do 2 rewrite pow1 ; rewrite unfold_plus1, Rmult_1_r ; reflexivity.
-  apply Rgt_not_eq ; fourier.
+  apply Rgt_not_eq ; lra.
  apply sum_r_sums, Rabs_def1.
   apply Rneq_le_lt ; assumption.
   assumption.
@@ -626,7 +626,7 @@ Qed.
 Lemma arctan_sum_0_0 : arctan_sum 0 = 0.
 Proof.
 eapply Rpser_unique ; [eapply arctan_sum_sums |].
- split ; fourier.
+ split ; lra.
  apply Rseq_cv_eq_compat with (fun _ => 0).
  intro ; rewrite Rseq_pps_0_simpl ; unfold arctan_seq, Rseq_zip.
   case (n_modulo_2 0) ; intros [p Hp] ; [reflexivity | apply False_ind ; omega ].
@@ -666,14 +666,14 @@ intros x x_in.
  intros y y_in ; eapply Rpser_unique, arctan_sum_sums.
   apply sum_r_sums with (Pr := arctan_cv_radius).
    rewrite <- Rball_0_simpl ; assumption.
-   split ; [| left] ; destruct (Rabs_def2 _ _ y_in) ; fourier.
+   split ; [| left] ; destruct (Rabs_def2 _ _ y_in) ; lra.
   replace (/ (1 + x ^ 2)) with (sum_r_derive arctan_seq 1 arctan_cv_radius x).
   apply derivable_pt_lim_in_sum_r ; assumption.
   transitivity (sum_pow (- x ^ 2)).
   assert (rho1 : finite_cv_radius (Rseq_alt sum_pow_seq) 1).
    rewrite <- finite_cv_radius_alt_compat ; apply sum_pow_cv_radius.
   assert (rho2 : finite_cv_radius (Rseq_zip (Rseq_alt sum_pow_seq) 0) 1).
-   rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| fourier | simpl ; ring] ;
+   rewrite <- Rsqrt_sqr with (y := nnr_sqr 1) ; [| lra | simpl ; ring] ;
    apply finite_cv_radius_zip_compat_l.
     simpl nonneg ; repeat rewrite Rmult_1_l ; apply rho1.
     intros ; apply zero_infinite_cv_radius.     

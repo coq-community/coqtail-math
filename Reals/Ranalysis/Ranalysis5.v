@@ -23,7 +23,7 @@ Require Import Rbase.
 Require Import Ranalysis.
 Require Import Rfunctions Rfunction_def.
 Require Import Rseries_def.
-Require Import Fourier.
+Require Import Lra.
 Require Import RiemannInt.
 Require Import SeqProp.
 Require Import Max.
@@ -58,18 +58,18 @@ intros f g lb ub lb_le_ub f_incr Hfg Hf b b_in.
    assert (xlb_in : interval lb ub xlb).
     split ; [apply RmaxLess2 |].
      unfold xlb ; apply Rmax_le_le_le ; split.
-      transitivity a ; [fourier | left ; apply a_in].
+      transitivity a ; [lra | left ; apply a_in].
       assumption.
    assert (xub_in : interval lb ub xub).
     split ; [| apply Rmin_r].
      unfold xub ; apply Rmin_le_le_le ; split.
-      transitivity a ; [left ; apply a_in | fourier].
+      transitivity a ; [left ; apply a_in | lra].
       assumption.
    assert (inc : included (interval xlb xub) (interval lb ub)).
     apply interval_restriction ; assumption.
    assert (a_in' : open_interval xlb xub a).
     split ; [apply Rmax_lt_lt_lt | apply Rmin_lt_lt_lt] ;
-    split ; (fourier || apply a_in).
+    split ; (lra || apply a_in).
    exists (interval_dist (f xlb) (f xub) (f a)) ; split.
     apply open_interval_dist_pos, strictly_increasing_interval_image.
      eapply strictly_increasing_in_contravariant ; eassumption.
@@ -376,14 +376,14 @@ Lemma Dfn_CVU_implies_Df_exists :
 Proof.
 intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos.
  assert (eps_6_pos : 0 < (eps / 3) / 2).
-  apply  Rlt_mult_inv_pos ; [apply Rlt_mult_inv_pos |] ; fourier.
+  apply  Rlt_mult_inv_pos ; [apply Rlt_mult_inv_pos |] ; lra.
  destruct (g_cont _ x_in _ eps_6_pos) as [d1 [d1_pos Hd1]].
  pose (delta := Rmin (interval_dist lb ub x) d1) ; assert (delta_pos : 0 < delta).
   apply Rmin_pos_lt ; [apply open_interval_dist_pos |] ; assumption.
  exists (mkposreal _ delta_pos) ; intros h h_neq h_bd.
  pose (eps1 := Rabs h * eps / 3) ; assert (eps1_pos : 0 < eps1).
   unfold eps1 ; repeat apply Rmult_lt_0_compat ;
-  [apply Rabs_pos_lt ; assumption | |] ; fourier.
+  [apply Rabs_pos_lt ; assumption | |] ; lra.
  destruct (fn_CV_f x x_in _ eps1_pos) as [N1 HN1].
  assert (xh_in : open_interval lb ub (x + h)).
   apply open_interval_dist_bound.
@@ -415,7 +415,7 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
  assert (pr2 : forall c : R, x + h < c < x -> derivable_pt id c).
   intros ; apply derivable_pt_id.
  destruct (MVT (fn N) id (x + h) x pr1 pr2) as [c [c_in H]].
-  fourier.
+  lra.
   intros c c_encad ; apply derivable_continuous_pt ; exists (fn' N c) ;
    apply derivable_pt_lim_open_interval_pt_lim with lb ub,
    Dfn_eq_fn' ; apply c_deduc ; assumption.
@@ -452,7 +452,7 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
   apply c_deduc, open_interval_interval ; assumption.
   transitivity (Rabs h) ; [| apply Rlt_le_trans with delta ; [apply h_bd | apply Rmin_r]].
   rewrite Rabs_left ; [| assumption] ; apply Rabs_def1 ; clear -c_in h_neg ;
-   destruct c_in ; [transitivity 0 |] ; fourier.
+   destruct c_in ; [transitivity 0 |] ; lra.
  destruct (pr1 c c_in) as [l Hl] ; eapply uniqueness_limite ; eauto.
  eapply derivable_pt_lim_open_interval_pt_lim, Dfn_eq_fn' ;
   apply c_deduc, open_interval_interval ; assumption.
@@ -469,7 +469,7 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
  assert (pr2 : forall c : R, x < c < x + h -> derivable_pt id c).
   intros ; apply derivable_pt_id.
  destruct (MVT (fn N) id x (x + h) pr1 pr2) as [c [c_in Hc]].
-  fourier.
+  lra.
   intros c c_encad ; apply derivable_continuous_pt ; exists (fn' N c) ;
    apply derivable_pt_lim_open_interval_pt_lim with lb ub,
    Dfn_eq_fn' ; apply c_deduc ; assumption.
@@ -503,7 +503,7 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
   apply c_deduc, open_interval_interval ; assumption.
   transitivity (Rabs h) ; [| apply Rlt_le_trans with delta ; [apply h_bd | apply Rmin_r]].
   rewrite Rabs_right ; [| left ; assumption] ; apply Rabs_def1 ; clear -c_in h_pos ;
-   destruct c_in ; [| transitivity 0] ; fourier.
+   destruct c_in ; [| transitivity 0] ; lra.
  destruct (pr1 c c_in) as [l Hl] ; eapply uniqueness_limite ; eauto.
  eapply derivable_pt_lim_open_interval_pt_lim, Dfn_eq_fn' ;
   apply c_deduc, open_interval_interval ; assumption.

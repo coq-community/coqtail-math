@@ -24,7 +24,7 @@ Require Import Rsequence_facts.
 Require Import Rseries_def.
 (* Require Import Rseries_facts. *)
 Require Export Reals.
-Require Import Fourier.
+Require Import Lra.
 
 Local Open Scope Rseq_scope.
 (** printing ~	~ *)

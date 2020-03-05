@@ -21,7 +21,7 @@ USA.
 
 Require Import Reals.
 Require Import Coq.omega.Omega.
-Require Import Fourier.
+Require Import Lra.
 
 Open Scope R_scope.
 
@@ -209,7 +209,7 @@ Lemma Rabs_le_maj : forall r1 r2 d, Rabs (r1 - r2) <= d -> r1 <= r2 + d.
 Proof.
 intros r1 r2 d H.
 unfold Rabs in H;
-repeat destruct Rcase_abs in H; fourier.
+repeat destruct Rcase_abs in H; lra.
 Qed.
 
 Lemma Bn_l_dist : forall n, l - Bn n <= (/2) ^ n.
@@ -342,19 +342,19 @@ Proof.
 assert (Hlt : l > 0); [apply Hl_lt_0|].
 assert (HN : exists N, forall n, (n >= N)%nat -> (/ 2) ^ n < l).
   destruct (pow_lt_1_zero (/2)) with l as [N HN].
-  rewrite Rabs_right; fourier.
-  fourier.
+  rewrite Rabs_right; lra.
+  lra.
   exists N; intros n Hn.
   pattern ((/ 2) ^ n); rewrite <- Rabs_right.
     apply HN; assumption.
-    apply Rle_ge; apply pow_le; fourier.
+    apply Rle_ge; apply pow_le; lra.
 destruct HN as [N HN].
 exists N; intros Hneg.
 assert (Hc : l <= (/2) ^ N).
   apply l_partial; assumption.
 assert (Hk : l > (/2) ^ N).
   apply HN; constructor.
-fourier.
+lra.
 Qed.
 
 Lemma l_not_R0 : exists n, f n <> false.

@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 Require Export Rfunctions.
 
 
@@ -42,28 +42,28 @@ Lemma R_dist_ge_l : forall x y z, R_dist x y <= z -> Rabs x <= Rabs y + z.
 Proof.
 unfold R_dist; unfold Rabs.
 intros x y z H.
-repeat destruct Rcase_abs; fourier.
+repeat destruct Rcase_abs; lra.
 Qed.
 
 Lemma R_dist_gt_l : forall x y z, R_dist x y < z -> Rabs x < Rabs y + z.
 Proof.
 unfold R_dist; unfold Rabs.
 intros x y z H.
-repeat destruct Rcase_abs; fourier.
+repeat destruct Rcase_abs; lra.
 Qed.
 
 Lemma R_dist_ge_r : forall x y z, R_dist x y <= z -> Rabs y - z <= Rabs x.
 Proof.
 unfold R_dist; unfold Rabs.
 intros x y z H.
-repeat destruct Rcase_abs; fourier.
+repeat destruct Rcase_abs; lra.
 Qed.
 
 Lemma R_dist_gt_r : forall x y z, R_dist x y < z -> Rabs y - z < Rabs x.
 Proof. 
 unfold R_dist; unfold Rabs.
 intros x y z H.
-repeat destruct Rcase_abs; fourier.
+repeat destruct Rcase_abs; lra.
 Qed.
 
 Lemma continuity_pt_constant : forall c x, continuity_pt (fct_cte c) x.
@@ -167,7 +167,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
         assert (0 < Rmin delta (Rmin (b-x) (x - a))) as Hposreal.
           apply Rmin_pos.
             apply cond_pos.
-            apply Rmin_pos; fourier.
+            apply Rmin_pos; lra.
         exists (mkposreal _ Hposreal).
         intros h hneq Hcond.
       destruct(Rlt_dec (x+h) a) as [Hxha | Hxha].
@@ -179,7 +179,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
           apply Rlt_le_trans with (Rmin (b - x) (x - a)).
             apply (proj2 ((Rmin_Rgt_l delta (Rmin (b - x) (x - a)) (Rabs h) Hcond))).
             apply Rmin_r.
-          fourier.
+          lra.
       destruct (Rle_dec (x+h) b) as [Hxhb | Hxhb].
         apply (Hdelta _ hneq).
         apply (proj1 (Rmin_Rgt_l delta _ _ Hcond)).
@@ -197,7 +197,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
         assert( Hposreal : 0 < Rmin delta (b-a)).
             apply Rmin_pos.
             apply cond_pos.
-            fourier.
+            lra.
         exists (mkposreal _ Hposreal).
         intros h hneq Hcond.
         destruct (Rlt_dec (a + h) a) as [Hah | Hah].
@@ -224,7 +224,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
         assert( Hposreal : 0 < Rmin delta (b-a)).
             apply Rmin_pos.
             apply cond_pos.
-            fourier.
+            lra.
         exists (mkposreal _ Hposreal).
         intros h hneq Hcond.
         destruct (Rlt_dec (b + h) a) as [Hbh | Hbh].
@@ -235,7 +235,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
             apply Rle_trans with (Rmin delta (b - a)).
               intuition. 
               apply Rmin_r.
-        fourier.
+        lra.
         
         destruct(Rle_dec (b+h) b) as [Hh | Hh].
           apply (Hdelta h hneq).
@@ -277,7 +277,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
           apply Rle_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
               intuition.
-        fourier.
+        lra.
         intuition.      
         
     destruct (Rle_dec (x + h) b) as [Hh | Hh].
@@ -286,7 +286,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
           apply Rle_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
               intuition.
-        fourier.
+        lra.
         
         rewrite Hrew2, Rabs_R0; assumption; apply Heps.
   intros eps Heps.
@@ -301,7 +301,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
         apply Rle_trans with (Rabs h).
           rewrite <- Rabs_Ropp; apply RRle_abs.
           intuition.
-        fourier.
+        lra.
         intuition.      
         
     destruct (Rle_dec (x + h) b) as [Hh | Hh].
@@ -310,7 +310,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
           apply Rle_lt_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
               intuition.
-        fourier.
+        lra.
   
   rewrite Hrew2, Rabs_R0; assumption.
 assert(derivable (C1_continuation f a b d)) as der_c by
@@ -346,14 +346,14 @@ assert False; try contradiction.
 apply (Rgt_asym a x1); try assumption.
 destruct H2; simpl in H3; unfold R_dist in H3.
 assert ((x1 - x) <= Rabs (x1 - x)) by apply RRle_abs.
-fourier.
+lra.
 repeat rewrite Hfl.
-apply (H1 x1). fourier.
+apply (H1 x1). lra.
 apply Rnot_lt_le; assumption.
 
 
 apply Rnot_lt_le in n.
-exists (a - x); split; try fourier.
+exists (a - x); split; try lra.
 intro.
 destruct (Rlt_dec a x1).
 intros.
@@ -361,15 +361,15 @@ assert False; try contradiction.
 apply (Rgt_asym a x1); try assumption.
 destruct H2; simpl in H3; unfold R_dist in H3.
 assert ((x1 - x) <= Rabs (x1 - x)) by apply RRle_abs.
-fourier.
+lra.
 assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gl x1) (gl x) < eps) by (exact (H1 x1)).
 apply Rnot_lt_le in n0.
-repeat rewrite Hfl; try fourier.
+repeat rewrite Hfl; try lra.
 intros; destruct H3.
 apply H2.
 split; try assumption.
-fourier.
+lra.
 
 destruct H.
 intros eps Heps.
@@ -380,23 +380,23 @@ destruct H; destruct H0.
 exists (Rmin x x0); split.
 apply Rmin_pos; assumption.
 intro x1; destruct (Rlt_dec x1 a).
-repeat rewrite Hfl; try fourier.
+repeat rewrite Hfl; try lra.
 assert (D_x no_cond a x1 /\ dist R_met x1 a < x ->
     dist R_met (gl x1) (gl a) < eps) by (exact (H1 x1)).
 intros; destruct H4.
 apply H3.
 split; try assumption.
 assert (Rmin x x0 <= x) by exact (Rmin_l x x0).
-fourier.
+lra.
 apply Rnot_lt_le in n.
-repeat rewrite Hfr; try fourier.
+repeat rewrite Hfr; try lra.
 assert (D_x no_cond a x1 /\ dist R_met x1 a < x0 ->
     dist R_met (gr x1) (gr a) < eps) by (exact (H2 x1)).
 intros; destruct H4.
 apply H3.
 split; try assumption.
 assert (Rmin x x0 <= x0) by exact (Rmin_r x x0).
-fourier.
+lra.
 
 intros eps Heps.
 destruct (Hr x eps); try assumption.
@@ -411,12 +411,12 @@ apply (Rgt_asym a x1); try assumption.
 destruct H2; simpl in H3; unfold R_dist in H3.
 assert (x - x1 <= Rabs (x1 - x)).
 rewrite Rabs_minus_sym; apply RRle_abs.
-fourier.
+lra.
 repeat rewrite Hfr.
-apply (H1 x1). fourier.
+apply (H1 x1). lra.
 apply Rnot_lt_le; assumption.
 
-exists (x - a); split; try fourier.
+exists (x - a); split; try lra.
 intro.
 destruct (Rlt_dec x1 a).
 intros.
@@ -425,16 +425,16 @@ apply (Rgt_asym a x1); try assumption.
 destruct H2; simpl in H3; unfold R_dist in H3.
 assert (x - x1 <= Rabs (x1 - x)).
 rewrite Rabs_minus_sym; apply RRle_abs.
-fourier.
+lra.
 apply Rnot_lt_le in n0.
-repeat rewrite Hfr; try fourier.
+repeat rewrite Hfr; try lra.
 apply Rnot_lt_le in n.
 assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gr x1) (gr x) < eps) by (exact (H1 x1)).
 intros; destruct H3.
 apply H2.
 split; try assumption.
-fourier.
+lra.
 Qed.
 
 
@@ -459,13 +459,13 @@ destruct (Rtotal_order x a) as [|[]].
   apply (Rgt_asym a x1); try assumption.
   destruct H2; simpl in H3; unfold R_dist in H3.
   assert ((x1 - x) <= Rabs (x1 - x)) by apply RRle_abs.
-  fourier.
+  lra.
   repeat rewrite Hfl.
-  apply (H1 x1). fourier.
+  apply (H1 x1). lra.
   apply Rnot_lt_le; assumption.
   
   apply Rnot_lt_le in n.
-  exists (a - x); split; try fourier.
+  exists (a - x); split; try lra.
   intro.
   destruct (Rlt_dec a x1).
   intros.
@@ -473,15 +473,15 @@ destruct (Rtotal_order x a) as [|[]].
   apply (Rgt_asym a x1); try assumption.
   destruct H2; simpl in H3; unfold R_dist in H3.
   assert ((x1 - x) <= Rabs (x1 - x)) by apply RRle_abs.
-  fourier.
+  lra.
   assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gl x1) (gl x) < eps) by (exact (H1 x1)).
   apply Rnot_lt_le in n0.
-  repeat rewrite Hfl; try fourier.
+  repeat rewrite Hfl; try lra.
   intros; destruct H3.
   apply H2.
   split; try assumption.
-  fourier.
+  lra.
  
  intros eps Heps.
  rewrite H in |-*; clear H x.
@@ -491,23 +491,23 @@ destruct (Rtotal_order x a) as [|[]].
  exists (Rmin x x0); split.
  apply Rmin_pos; assumption.
  intro x1; destruct (Rlt_dec x1 a).
- repeat rewrite Hfl; try fourier.
+ repeat rewrite Hfl; try lra.
  assert (D_x no_cond a x1 /\ dist R_met x1 a < x ->
    dist R_met (gl x1) (gl a) < eps) by (exact (H1 x1)).
  intros; destruct H4.
  apply H3.
  split; try assumption.
  assert (Rmin x x0 <= x) by exact (Rmin_l x x0).
- fourier.
+ lra.
  apply Rnot_lt_le in n.
- repeat rewrite Hfr; try fourier.
+ repeat rewrite Hfr; try lra.
  assert (D_x no_cond a x1 /\ dist R_met x1 a < x0 ->
    dist R_met (gr x1) (gr a) < eps) by (exact (H2 x1)).
  intros; destruct H4.
  apply H3.
  split; try assumption.
  assert (Rmin x x0 <= x0) by exact (Rmin_r x x0).
- fourier.
+ lra.
 
  intros eps Heps.
  destruct (Hr x (Rlt_le _ _ H) eps); try assumption.
@@ -522,12 +522,12 @@ destruct (Rtotal_order x a) as [|[]].
   destruct H2; simpl in H3; unfold R_dist in H3.
   assert (x - x1 <= Rabs (x1 - x)).
   rewrite Rabs_minus_sym; apply RRle_abs.
-  fourier.
+  lra.
   repeat rewrite Hfr.
-  apply (H1 x1). fourier.
+  apply (H1 x1). lra.
   apply Rnot_lt_le; assumption.
   
-  exists (x - a); split; try fourier.
+  exists (x - a); split; try lra.
   intro.
   destruct (Rlt_dec x1 a).
   intros.
@@ -536,16 +536,16 @@ destruct (Rtotal_order x a) as [|[]].
   destruct H2; simpl in H3; unfold R_dist in H3.
   assert (x - x1 <= Rabs (x1 - x)).
   rewrite Rabs_minus_sym; apply RRle_abs.
-  fourier.
+  lra.
   apply Rnot_lt_le in n0.
-  repeat rewrite Hfr; try fourier.
+  repeat rewrite Hfr; try lra.
   apply Rnot_lt_le in n.
   assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gr x1) (gr x) < eps) by (exact (H1 x1)).
   intros; destruct H3.
   apply H2.
   split; auto.
-  fourier.
+  lra.
 Qed.
 
 Lemma C0_sticking_two_pt : forall f gl gc gr a b,
@@ -567,7 +567,7 @@ intros eps Heps.
 destruct (Hl x eps); try assumption.
 destruct H0.
 exists (Rmin x0 (a-x)); split.
-repeat (apply Rmin_pos); fourier.
+repeat (apply Rmin_pos); lra.
 intro.
 destruct (Rlt_dec a x1).
 intros.
@@ -576,16 +576,16 @@ apply (Rgt_asym a x1); try assumption.
 destruct H2; simpl in H3; unfold R_dist in H3.
 assert ((x1 - x) <= Rabs (x1 - x)) by apply RRle_abs.
 assert (Rmin x0 (a - x) <= a - x) by exact (Rmin_r x0 (a - x)).
-fourier.
+lra.
 apply Rnot_lt_le in n.
-repeat rewrite Hfl; try fourier.
+repeat rewrite Hfl; try lra.
 assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gl x1) (gl x) < eps) by (exact (H1 x1)).
 intros; destruct H3.
 apply H2.
 split; try assumption.
 assert (Rmin x0 (a - x) <= x0) by exact (Rmin_l x0 (a - x)).
-fourier.
+lra.
 
 (* x = a, x1 < a *)
 destruct H.
@@ -595,16 +595,16 @@ destruct (Hl a eps); try assumption.
 destruct (Hc a (conj (Rle_refl a) (Rlt_le _ _ r)) eps); try assumption.
 destruct H; destruct H0.
 exists (Rmin x (Rmin x0 (b-a))); split.
-repeat (apply Rmin_pos); fourier.
+repeat (apply Rmin_pos); lra.
 intro x1; destruct (Rlt_dec x1 a).
-repeat rewrite Hfl; try fourier.
+repeat rewrite Hfl; try lra.
 assert (D_x no_cond a x1 /\ dist R_met x1 a < x ->
     dist R_met (gl x1) (gl a) < eps) by (exact (H1 x1)).
 intros; destruct H4.
 apply H3.
 split; try assumption.
 assert (Rmin x (Rmin x0 (b-a)) <= x) by exact (Rmin_l x (Rmin x0 (b-a))).
-fourier.
+lra.
 
 (* x = a, x1 > a *)
 apply Rnot_lt_le in n.
@@ -618,10 +618,10 @@ assert (Rmin x (Rmin x0 (b-a)) <= (b-a)).
 assert (Rmin x (Rmin x0 (b-a)) <= (Rmin x0 (b-a)))
      by exact (Rmin_r x (Rmin x0 (b-a))).
 assert ((Rmin x0 (b-a)) <= (b-a)) by exact (Rmin_r  x0 (b-a)).
-fourier.
-fourier.
+lra.
+lra.
 apply Rnot_lt_le in n0.
-repeat rewrite Hfc; try split; try fourier.
+repeat rewrite Hfc; try split; try lra.
 assert (D_x no_cond a x1 /\ dist R_met x1 a < x0 ->
     dist R_met (gc x1) (gc a) < eps) by (exact (H2 x1)).
 intros; destruct H4.
@@ -631,8 +631,8 @@ assert (Rmin x (Rmin x0 (b-a)) <= x0).
 assert (Rmin x (Rmin x0 (b-a)) <= (Rmin x0 (b-a)))
      by exact (Rmin_r x (Rmin x0 (b-a))).
 assert ((Rmin x0 (b-a)) <= x0) by exact (Rmin_l  x0 (b-a)).
-fourier.
-fourier.
+lra.
+lra.
 
 (* a < x < b *)
 destruct (Rtotal_order x b).
@@ -640,7 +640,7 @@ intros eps Heps.
 destruct (Hc x (conj (Rlt_le _ _ H) (Rlt_le _ _ H0)) eps); try assumption.
 destruct H1.
 exists (Rmin (Rmin (x-a) (b-x)) x0); split.
-repeat (apply Rmin_pos); fourier.
+repeat (apply Rmin_pos); lra.
 intro x1.
 destruct (Rlt_dec x1 a).
 intros.
@@ -653,8 +653,8 @@ assert ((Rmin (Rmin (x-a) (b-x)) x0) <= (x-a)).
 assert ((Rmin (Rmin (x-a) (b-x)) x0) <= (Rmin (x-a) (b-x)))
      by exact (Rmin_l (Rmin (x-a) (b-x)) x0).
 assert ((Rmin (x-a) (b-x)) <= x-a) by exact (Rmin_l  (x-a) (b-x)).
-fourier.
-fourier.
+lra.
+lra.
 destruct (Rlt_dec b x1).
 intros.
 assert False; try contradiction.
@@ -665,19 +665,19 @@ assert ((Rmin (Rmin (x-a) (b-x)) x0) <= (b-x)).
 assert ((Rmin (Rmin (x-a) (b-x)) x0) <= (Rmin (x-a) (b-x)))
      by exact (Rmin_l (Rmin (x-a) (b-x)) x0).
 assert ((Rmin (x-a) (b-x)) <= b-x) by exact (Rmin_r  (x-a) (b-x)).
-fourier.
-fourier.
+lra.
+lra.
 apply Rnot_lt_le in n.
 apply Rnot_lt_le in n0.
 assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gc x1) (gc x) < eps) by (exact (H2 x1)).
-repeat rewrite Hfc; try split; try fourier.
+repeat rewrite Hfc; try split; try lra.
 intros; destruct H4.
 apply H3.
 split; try assumption.
 assert ((Rmin (Rmin (x-a) (b-x)) x0) <= x0)
      by exact (Rmin_r (Rmin (x-a) (b-x)) x0).
-fourier.
+lra.
 
 (* x = b, x1 > b *)
 destruct H0.
@@ -687,9 +687,9 @@ destruct (Hc b (conj (Rlt_le _ _ r) (Rle_refl b)) eps); try assumption.
 destruct (Hr b eps); try assumption.
 destruct H; destruct H0.
 exists (Rmin x (Rmin x0 (b-a))); split.
-repeat (apply Rmin_pos); fourier.
+repeat (apply Rmin_pos); lra.
 intro x1; destruct (Rlt_dec b x1).
-repeat rewrite Hfr; try fourier.
+repeat rewrite Hfr; try lra.
 assert (D_x no_cond b x1 /\ dist R_met x1 b < x0 ->
     dist R_met (gr x1) (gr b) < eps) by (exact (H2 x1)).
 intros; destruct H4.
@@ -699,8 +699,8 @@ assert (Rmin x (Rmin x0 (b-a)) <= x0).
 assert (Rmin x (Rmin x0 (b-a)) <= (Rmin x0 (b-a)))
      by exact (Rmin_r x (Rmin x0 (b-a))).
 assert ((Rmin x0 (b-a)) <= x0) by exact (Rmin_l  x0 (b-a)).
-fourier.
-fourier.
+lra.
+lra.
 
 (* x = b, x1 < b *)
 destruct (Rlt_dec x1 a).
@@ -714,25 +714,25 @@ assert (Rmin x (Rmin x0 (b-a)) <= (b-a)).
 assert (Rmin x (Rmin x0 (b-a)) <= (Rmin x0 (b-a)))
      by exact (Rmin_r x (Rmin x0 (b-a))).
 assert ((Rmin x0 (b-a)) <= (b-a)) by exact (Rmin_r  x0 (b-a)).
-fourier.
-fourier.
+lra.
+lra.
 apply Rnot_lt_le in n.
 apply Rnot_lt_le in n0.
-repeat rewrite Hfc; try split; try fourier.
+repeat rewrite Hfc; try split; try lra.
 assert (D_x no_cond b x1 /\ dist R_met x1 b < x ->
     dist R_met (gc x1) (gc b) < eps) by (exact (H1 x1)).
 intros; destruct H4.
 apply H3.
 split; try assumption.
 assert (Rmin x (Rmin x0 (b-a)) <= x) by exact (Rmin_l x (Rmin x0 (b-a))).
-fourier.
+lra.
 
 (* x > b *)
 intros eps Heps.
 destruct (Hr x eps); try assumption.
 destruct H1.
 exists (Rmin x0 (x - b)); split.
-repeat (apply Rmin_pos); fourier.
+repeat (apply Rmin_pos); lra.
 intro.
 destruct (Rlt_dec x1 b).
 intros.
@@ -742,16 +742,16 @@ destruct H3; simpl in H4; unfold R_dist in H4.
 assert ((x - x1) <= Rabs (x1 - x)).
 rewrite Rabs_minus_sym; apply RRle_abs.
 assert (Rmin x0 (x - b) <= x - b) by exact (Rmin_r x0 (x - b)).
-fourier.
+lra.
 apply Rnot_lt_le in n.
-repeat rewrite Hfr; try fourier.
+repeat rewrite Hfr; try lra.
 assert (D_x no_cond x x1 /\ dist R_met x1 x < x0 ->
     dist R_met (gr x1) (gr x) < eps) by (exact (H2 x1)).
 intros; destruct H4.
 apply H3.
 split; try assumption.
 assert (Rmin x0 (x - b) <= x0) by exact (Rmin_l x0 (x - b)).
-fourier.
+lra.
 
 (* a = b *)
 rewrite e in *|-.

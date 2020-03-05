@@ -21,7 +21,7 @@ USA.
 
 
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 Require Import Rsequence_facts.
 Require Export Rseries.
 Require Import Rsequence_subsequence.
@@ -1082,7 +1082,7 @@ cut (2 * cn 0 N = 0).
  intro H.
  apply Rmult_integral in H.
  destruct H.
-  fourier.
+  lra.
   assumption.
  rewrite double.
  replace (cn 0 N + cn 0 N) with (cn 0 N + cn (- 0) N) by (inject; ring).
@@ -1222,7 +1222,7 @@ induction p.
 assert (Ho0 : forall p, 0 <= Sn (S (2 * p))).
 induction p.
  unfold Sn; simpl; unfold tg_alt, pow; ring_simplify.
- assert (Un 1%nat <= Un O) by auto; fourier.
+ assert (Un 1%nat <= Un O) by auto; lra.
  eapply Rle_trans.
   apply IHp.
   apply CV_ALT_step0; assumption.
@@ -1248,7 +1248,7 @@ destruct (even_odd_cor n) as [p [he|ho]]; subst; split.
  unfold tg_alt.
  rewrite pow_1_odd.
  assert (AP : forall a b c, a <= c -> 0 <= b -> a + -1 * b <= c)
-   by (intros; fourier); apply AP; clear AP.
+   by (intros; lra); apply AP; clear AP.
   apply Heu.
   apply pos.
 Qed.
@@ -1507,14 +1507,14 @@ assert (Rseq_cv
        / INR (2 * N + 1) *
        sum_f_R0 (fun n0 : nat => 2 / INR (2 * n0 + 1)) (pred N)) 0).
  apply (half_mean_0 _ 2).
-  fourier.
+  lra.
   
   omega.
   
-  intro; unfold Rdiv; apply Rle_mult_inv_pos; [fourier | INR_solve].
+  intro; unfold Rdiv; apply Rle_mult_inv_pos; [lra | INR_solve].
   
   intro; unfold Rdiv.
-  apply Rmult_le_compat_l; [fourier | ].
+  apply Rmult_le_compat_l; [lra | ].
   apply Rle_Rinv; INR_solve.
  
  intros e epos; destruct (H e epos) as [N J]; exists N; intros n nN.
@@ -1531,14 +1531,14 @@ assert (Rseq_cv
        / INR (2 * N + 3) *
        sum_f_R0 (fun n0 : nat => 2 / INR (2 * n0 + 3)) (pred N)) 0).
  apply (half_mean_0 _ 2).
-  fourier.
+  lra.
   
   omega.
   
-  intro; unfold Rdiv; apply Rle_mult_inv_pos; [fourier | INR_solve].
+  intro; unfold Rdiv; apply Rle_mult_inv_pos; [lra | INR_solve].
   
   intro; unfold Rdiv.
-  apply Rmult_le_compat_l; [fourier | ].
+  apply Rmult_le_compat_l; [lra | ].
   apply Rle_Rinv; INR_solve.
  
  intros e epos; destruct (H e epos) as [N J]; exists N; intros n nN.
@@ -1566,7 +1566,7 @@ assert (Rseq_cv
        / INR (2 * N + 1) *
        sum_f_R0 (fun n0 : nat => / INR (S n0)) (pred N)) 0).
  apply (half_mean_0 _ 1).
-  fourier.
+  lra.
   
   omega.
   
@@ -1592,7 +1592,7 @@ assert (Rseq_cv
        / INR (2 * N + 3) *
        sum_f_R0 (fun n0 : nat => / INR (S n0)) (pred N)) 0).
  apply (half_mean_0 _ 1).
-  fourier.
+  lra.
   
   omega.
   
@@ -1774,7 +1774,7 @@ Proof.
 apply Rmult_eq_reg_l with 2.
  replace (2 * (PI ^ 2 / 8)) with (PI ^ 2 / 4) by field.
  apply (Rseq_cv_unique _ _ _ Sum_bnz Bn_cv).
- assert(0 < 2) by fourier; auto with *.
+ assert(0 < 2) by lra; auto with *.
 Qed.
 
 Lemma odd_zeta : Rser_cv bntg (PI ^ 2 / 8).
@@ -1806,7 +1806,7 @@ replace (zeta2 / 4) with (/4 * zeta2) by field.
 assert (REW : forall a, (/4 * (4 * a))%Rseq == a).
  intros a n; unfold Rseq_mult, Rseq_inv; field.
  unfold Rseq_constant.
- apply Rgt_not_eq ; fourier.
+ apply Rgt_not_eq ; lra.
  
  eapply Rser_cv_ext.
   symmetry ; apply REW.
@@ -1831,7 +1831,7 @@ Qed.
 Lemma zeta2_val : zeta2 = PI ^ 2 / 6.
 Proof.
 apply Rmult_eq_reg_l with (3 / 4);
- [ | intro H; apply (Rmult_eq_compat_l 4) in H; field_simplify in H; fourier].
+ [ | intro H; apply (Rmult_eq_compat_l 4) in H; field_simplify in H; lra].
 replace (3 / 4 * zeta2) with (zeta2 - zeta2 / 4) by field.
 replace (3 / 4 * (PI ^ 2 / 6)) with (PI ^ 2 / 8) by field.
 eapply Rser_cv_unique.

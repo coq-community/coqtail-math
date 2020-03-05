@@ -82,7 +82,7 @@ intros An r r' r'_bd Rho.
    apply Rlt_le_trans with (Rabs r') ; [apply Rabs_pos_lt |] ; assumption.
   assert (r_neq : r <> 0%R).
    case (Req_or_neq r) ; intro s ; [| assumption] ;
-  apply False_ind ; rewrite s in r_pos ; rewrite Rabs_R0 in r_pos ; fourier.
+  apply False_ind ; rewrite s in r_pos ; rewrite Rabs_R0 in r_pos ; lra.
   destruct Rho as (C, HC) ; exists C ; intros x Hx ; destruct Hx as (u,Hu) ; rewrite Hu ;
   unfold_gt.
   replace (IRC r' ^ u) with ((IRC r' ^ u * /IRC r ^ u) * (IRC r ^ u)).

@@ -41,9 +41,9 @@ intros f x l1 l2 Hl1 Hl2 ;
  apply (single_limit (fun h => (f (x + h) - f x) / h) (fun h => h <> 0) l1 l2 0);
  try assumption.
  intros alpha alpha_pos ; exists (IRC (alpha / 2)) ; split.
- apply (proj2 (C0_neq_R0_neq _)) ; left ; simpl ; apply Rgt_not_eq ; fourier.
+ apply (proj2 (C0_neq_R0_neq _)) ; left ; simpl ; apply Rgt_not_eq ; lra.
  unfold C_dist ; rewrite Cminus_0_r ; rewrite Cnorm_IRC_Rabs ;
- rewrite Rabs_right ; fourier.
+ rewrite Rabs_right ; lra.
 Qed.
 
 Lemma uniqueness_step2 : forall f x l,
@@ -173,9 +173,9 @@ Theorem derivable_continuous_pt : forall f x,
 Proof.
 intros f x Hf_deriv eps eps_pos ; destruct Hf_deriv as (l, Hl).
  case (Ceq_or_neq_C0 l) ; intro Hl_0.
-  assert (eps_2_pos : eps / 2 > 0) by fourier ;
+  assert (eps_2_pos : eps / 2 > 0) by lra ;
   destruct (Hl (eps / 2)%R eps_2_pos) as ([alpha alpha_pos], Halpha) ;
-  exists (Rmin (1/2) alpha) ; split ; [apply Rmin_pos ; fourier|] ;
+  exists (Rmin (1/2) alpha) ; split ; [apply Rmin_pos ; lra|] ;
   intros x' [_ x'_bd] ; simpl ; simpl in Halpha ; unfold C_dist in *.
   pose (h := x' - x) ; replace x' with (x + h) by (unfold h ; intuition).
    case (Ceq_or_neq_C0 h) ; intro Hh_0.
@@ -188,7 +188,7 @@ intros f x Hf_deriv eps eps_pos ; destruct Hf_deriv as (l, Hl).
    rewrite Rmult_comm ; apply Rmult_lt_compat_l.
    apply Cnorm_pos_lt ; assumption.
    replace ((f (x + h) - f x) * / h) with ((f (x + h) - f x) / h - l). 
-   apply Rlt_trans with (eps / 2)%R ; [apply Halpha ; intuition | fourier].
+   apply Rlt_trans with (eps / 2)%R ; [apply Halpha ; intuition | lra].
    subst ; apply Rlt_le_trans with (Rmin (1/2) alpha) ; [apply x'_bd | apply Rmin_r].
    rewrite Hl_0 ; field ; assumption.
    assumption.
@@ -197,17 +197,17 @@ intros f x Hf_deriv eps eps_pos ; destruct Hf_deriv as (l, Hl).
    apply Rle_lt_trans with (eps / 2)%R.
    unfold Rdiv ; rewrite Rmult_comm ; apply Rmult_le_compat_l ; intuition ;
    apply Rle_trans with (1 * /2)%R ; [apply Rmin_l | right ; field].
-   fourier.
-   assert (eps_2_pos : eps / 2 > 0) by fourier ; 
+   lra.
+   assert (eps_2_pos : eps / 2 > 0) by lra ; 
    destruct (Hl (eps / 2)%R eps_2_pos) as ([alpha alpha_pos], Halpha).
    exists (Rmin (eps / (2 * Cnorm l)) (Rmin (1/2) alpha)) ; split ; [apply Rmin_pos |].
   unfold Rdiv ; rewrite Rinv_mult_distr ; repeat apply Rmult_lt_0_compat.
   assumption.
-  fourier.
+  lra.
   apply Rinv_0_lt_compat ; apply Cnorm_pos_lt ; assumption.
-  apply Rgt_not_eq ; fourier.
+  apply Rgt_not_eq ; lra.
   apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
-  apply Rmin_pos ; fourier.
+  apply Rmin_pos ; lra.
  intros x' [_ x'_bd] ; simpl ; unfold C_dist.
   pose (h := x' - x) ; replace x' with (x+h) by (unfold h ; intuition) ;
   case (Ceq_or_neq_C0 h) ; intro Hh_0.
@@ -227,7 +227,7 @@ intros f x Hf_deriv eps eps_pos ; destruct Hf_deriv as (l, Hl).
    [apply Cnorm_pos | apply Cnorm_triang_rev_l].
    rewrite Rmult_comm ; apply Rmult_lt_compat_l.
    apply Cnorm_pos_lt ; assumption.
-   apply Rlt_trans with (eps /2)%R ; [apply Halpha | fourier].
+   apply Rlt_trans with (eps /2)%R ; [apply Halpha | lra].
    assumption.
    unfold h ; apply Rlt_le_trans with (Rmin (eps / (2 * Cnorm l)) (Rmin (1/2) alpha)) ;
    [apply x'_bd |].
@@ -662,7 +662,7 @@ intro H.
    assert (Hf2 := Canalysis_diff.uniqueness_limite _ _ _ _ _ H2_neq H2 H2').
    subst.
    unfold Cdiv in Hf2 ; repeat rewrite Cmult_assoc in Hf2.
-   assert (Hneq : IRC 2 <> IRC 0) by (apply IRC_neq_compat ; apply Rgt_not_eq ; fourier) ;
+   assert (Hneq : IRC 2 <> IRC 0) by (apply IRC_neq_compat ; apply Rgt_not_eq ; lra) ;
    assert (T := Cmult_eq_reg_l _ _ _ Hneq Hf2).
    clear -T H1_neq H2_neq.
    do 2 rewrite Cinv_rew in T.
@@ -670,7 +670,7 @@ intro H.
    simpl in H ; ring_simplify in H.
    repeat rewrite Rmult_0_l in H ; repeat rewrite Rmult_1_l in H ;
    rewrite Rplus_0_r, Rinv_1 in H.
-   fourier.
+   lra.
    assumption.
    assumption.
    assumption.

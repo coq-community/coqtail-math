@@ -30,7 +30,7 @@ Require Import Rseries_usual.
 Require Import Rpser.
 Require Import Rintegral.
 Require Import RTaylor.
-Require Import Fourier.
+Require Import Lra.
 Require Import Wallis.
 
 (** printing ~	~ *)
@@ -84,7 +84,7 @@ Lemma ln_sqrt : forall r, 0 < r -> ln (sqrt r) = ln r / 2.
 Proof.
 intros r Hr.
 assert (H : 2 <> 0).
-  intros Hc; fourier.
+  intros Hc; lra.
 unfold Rdiv; rewrite Rmult_comm.
 apply (Rmult_eq_reg_l 2); [|assumption].
 rewrite <- Rmult_assoc.
@@ -93,7 +93,7 @@ rewrite Rmult_1_l.
 replace 2 with (INR 2) by reflexivity.
 rewrite <- ln_pow.
 replace (sqrt r ^ 2) with (sqrt r * sqrt r) by field.
-rewrite sqrt_def; [reflexivity|fourier].
+rewrite sqrt_def; [reflexivity|lra].
 apply sqrt_lt_R0; assumption.
 Qed.
 
@@ -122,7 +122,7 @@ repeat rewrite ln_pow; auto.
 repeat rewrite ln_sqrt; auto.
 repeat rewrite S_INR.
 field.
-fourier.
+lra.
 Qed.
 
 Let Tn n :=
@@ -158,20 +158,20 @@ eapply Rseq_big_O_eq_compat.
   unfold Rseq_pps. unfold Rseq_sum. unfold gt_pser. unfold Rseq_mult.
   simpl; destruct n; simpl; field.
   destruct n; intros Hc.
-    fourier.
-    assert (H := pos_INR (S n)); fourier.
+    lra.
+    assert (H := pos_INR (S n)); lra.
     rewrite Rabs_Rinv.
     rewrite <- Rinv_1.
     apply Rinv_1_lt_contravar; [apply Rle_refl|].
     rewrite Rabs_right; [|apply Rle_ge; apply pos_INR].
     replace (2 + n)%nat with (S (S n)) by omega.
     repeat rewrite S_INR.
-    assert (H := pos_INR n); fourier.
+    assert (H := pos_INR n); lra.
     replace (2 + n)%nat with (S (S n)) by omega.
     repeat rewrite S_INR.
-    intros Hc; assert (H := pos_INR n); fourier.
+    intros Hc; assert (H := pos_INR n); lra.
   apply Rseq_eq_refl.
-  fourier.
+  lra.
   apply Rseq_cv_pos_infty_inv_compat.
   apply Rseq_cv_pos_infty_eq_compat with (Un := fun n => 2 + Rseq_poly 1 n).
     intros n; replace (2 + n)%nat with (S (S n)) by omega.
@@ -208,45 +208,45 @@ repeat apply Rseq_big_O_plus_compat_l.
     rewrite <- tech_pow_Rmult.
     field; replace (1 + n)%nat with (S n) by auto; auto with real.
   apply Rseq_big_O_mult_compat.
-  exists 2; split; [fourier|].
+  exists 2; split; [lra|].
   exists 0%nat; intros n Hn.
   assert (Hle : 1 <= INR (1 + n)).
     replace (1 + n)%nat with (S n) by auto.
     rewrite S_INR.
-    assert (H := pos_INR n); fourier.
-  rewrite Rabs_right; [|fourier].
-  rewrite Rabs_right; [|fourier].
-  fourier.
+    assert (H := pos_INR n); lra.
+  rewrite Rabs_right; [|lra].
+  rewrite Rabs_right; [|lra].
+  lra.
   destruct ln_taylor_3 as [K [HK [N HN]]].
   exists K; split; [assumption|].
   exists (S N); intros n Hn.
   eapply Rle_trans.
   apply HN; omega.
-  apply Rmult_le_compat_l; [fourier|].
+  apply Rmult_le_compat_l; [lra|].
   assert (Hle : 1 <= INR (1 + n)).
     replace (1 + n)%nat with (S n) by auto.
     rewrite S_INR.
-    assert (H := pos_INR n); fourier.
+    assert (H := pos_INR n); lra.
   cutrewrite (Qn 4 (1 + n) = Qn 1 (1 + n) * Qn 3 (1 + n)).
   rewrite Rabs_mult.
   rewrite <- Rmult_1_l.
   apply Rmult_le_compat_r; [apply Rabs_pos|].
   rewrite Qn_S; [|omega]; rewrite pow_1.
-  rewrite Rabs_right; [|left; apply Rinv_0_lt_compat; fourier].
-  apply (Rmult_le_reg_l (INR (1 + n))); [fourier|].
-  rewrite Rinv_r; [|intros Hc; fourier].
+  rewrite Rabs_right; [|left; apply Rinv_0_lt_compat; lra].
+  apply (Rmult_le_reg_l (INR (1 + n))); [lra|].
+  rewrite Rinv_r; [|intros Hc; lra].
   rewrite Rmult_1_r; assumption.
   repeat (rewrite Qn_S; [|omega]).
   repeat rewrite <- tech_pow_Rmult.
-  field; intros Hc; fourier.
+  field; intros Hc; lra.
   apply Rseq_big_O_Rmult_compat_l; apply Rseq_big_O_refl.
   apply Rseq_big_O_Rmult_compat_l.
-  exists 1; split; [fourier|].
+  exists 1; split; [lra|].
   exists 0%nat; intros n _ ; unfold Rseq_shifts.
   rewrite Rmult_1_l.
   assert (HINR : 0 < INR (1 + n)).
     replace (1 + n)%nat with (S n) by omega.
-    rewrite S_INR; assert (H := pos_INR n); fourier.
+    rewrite S_INR; assert (H := pos_INR n); lra.
   repeat (rewrite Qn_S; [|omega]).
   rewrite Rabs_right; [|apply Rle_ge; apply pow_le; auto with real].
   rewrite Rabs_right; [|apply Rle_ge; apply pow_le; auto with real].
@@ -258,7 +258,7 @@ repeat apply Rseq_big_O_plus_compat_l.
   rewrite Rmult_1_r.
   replace (1 + n)%nat with (S n) by auto.
   rewrite S_INR.
-  assert (H := pos_INR n); fourier.
+  assert (H := pos_INR n); lra.
 Qed.
 
 Lemma Rser_cv_Riemann : {l | Rser_abs_cv (Qn 2) l}.
@@ -335,22 +335,22 @@ apply fact_neq_0.
 apply Rseq_equiv_sym.
 intros eps Heps.
 destruct (Hl (eps * / 2 * l)) as [N HN].
-  apply Rmult_lt_0_compat; [fourier|assumption].
+  apply Rmult_lt_0_compat; [lra|assumption].
 exists N; intros n Hn.
 unfold Rseq_constant, Rseq_minus, Rseq_div.
-rewrite (Rabs_right 1); [|fourier].
+rewrite (Rabs_right 1); [|lra].
 rewrite Rmult_1_r.
 rewrite Rabs_minus_sym.
-apply Rle_trans with (eps / 2); [left|fourier].
+apply Rle_trans with (eps / 2); [left|lra].
 apply (Rmult_lt_reg_l l); [assumption|].
-pattern l at 1; rewrite <- Rabs_right; [|fourier].
+pattern l at 1; rewrite <- Rabs_right; [|lra].
 rewrite <- Rabs_mult.
 rewrite (Rmult_comm l (eps / 2)).
 replace (l * (/ l * INR n ^ n * exp (- INR n) * sqrt (INR n) / Rseq_fact n - 1))
   with (INR n ^ n * exp (- INR n) * sqrt (INR n) / Rseq_fact n - l).
 apply HN; assumption.
 field; split.
-  intro; fourier.
+  intro; lra.
   apply not_0_INR; apply fact_neq_0.
 apply Rinv_0_lt_compat; assumption.
 Qed.
@@ -408,7 +408,7 @@ apply Hl.
 
 assert(HPI := PI_RGT_0).
 apply sqrt_lem_1.
-fourier.
+lra.
 auto with *.
 replace (l*l) with ((l^2 / (2*PI))* (2*PI)).
 rewrite Heq; ring.

@@ -23,7 +23,7 @@ Require Import Reals.
 Require Import Rsequence_def.
 Require Import Rsequence_facts.
 
-Require Import Fourier.
+Require Import Lra.
 Open Scope Rseq_scope.
 Open Scope nat_scope.
 (** printing ~	~ *)
@@ -222,13 +222,13 @@ assert (forall x y, x <= y -> Rabs (x - y) = y - x).
  intros.
  rewrite Rabs_minus_sym.
  apply Rabs_right.
- fourier.
+ lra.
  
  pose proof (Rle_trans _ _ _ ab bc) as ac.
  
   repeat rewrite H; rewrite H in ace; intuition;
   apply Rle_lt_trans with (c - a);
-   fourier.
+   lra.
 Qed.
 (* end hide *)
 
@@ -237,7 +237,7 @@ Lemma Rseq_subseq_growing_cv_compat :
 Proof.
 intros un vn l [phi ephi] uncv vngrow eps epspos.
 destruct phi as [phi Hphi]; unfold extracted in *; simpl in *.
-assert (spliteps : (eps / 3 > 0)%R) by fourier.
+assert (spliteps : (eps / 3 > 0)%R) by lra.
 destruct (uncv (eps / 3) spliteps) as [Nu Hu].
 exists (phi Nu).
 intros n nNu.

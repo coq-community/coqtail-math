@@ -1,7 +1,7 @@
 Require Import Reals.
 Require Import Rintegral Riemann_integrable.
 Require Import Rfunction_classes Nth_derivative_def.
-Require Import Fourier Ring.
+Require Import Lra Ring.
 Require Import Ranalysis.
 Require Import Rextensionality.
 

@@ -26,10 +26,10 @@ Lemma Req_or_neq : forall (x:R), {x = 0%R}+{x<>0%R}.
 Proof.
 intro x.
 case (Rgt_ge_dec x 0) ; intro H1.
-right ; intro Hfalse ; rewrite Hfalse in H1 ; apply False_ind ; fourier.
+right ; intro Hfalse ; rewrite Hfalse in H1 ; apply False_ind ; lra.
 case (Rle_lt_or_eq_dec x 0).
 intuition.
-clear H1 ; intro H1 ; right ; intro Hfalse ; rewrite Hfalse in H1 ; apply False_ind ; fourier.
+clear H1 ; intro H1 ; right ; intro Hfalse ; rewrite Hfalse in H1 ; apply False_ind ; lra.
 intro H ; left ; assumption.
 Qed.
 (* end hide *)
@@ -85,7 +85,7 @@ CusingRR ; simpl in *
 end
 with
 CusingR1 := intros ; CusingRR ; CusingR_rec1 ; subst ; intuition ;
-try ((fourier || (field ; CusingR1))).
+try ((lra || (field ; CusingR1))).
 (* end hide *)
 
 (** * Field Lemmas. *)

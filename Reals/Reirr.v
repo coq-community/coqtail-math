@@ -29,7 +29,7 @@ Require Import Reals.
 Require Import Rsequence_tactics.
 Require Import Rtactic.
 
-Require Import Fourier.
+Require Import Lra.
 
 Open Scope R_scope.
 
@@ -79,7 +79,7 @@ induction n.
  
  split. 
   apply INR_fact_neq_0.
-  assert (INR n >= 0) by intuition ; intro H1 ; fourier.
+  assert (INR n >= 0) by intuition ; intro H1 ; lra.
 Qed.
 
 Lemma integer_exp_minus_sum : forall a b : nat, 
@@ -126,7 +126,7 @@ Proof.
 intros n.
 assert (INR (fact n) > 0).
  induction n.
-  simpl. fourier.
+  simpl. lra.
   
   simpl. rewrite plus_INR. replace 0 with (0 + 0) by intuition.
   apply Rplus_gt_ge_compat. apply IHn. intuition.
@@ -136,13 +136,13 @@ Qed.
 Lemma Rminus_lt_plus : forall a b c, a - b < c -> a < b + c.
 Proof.
 intros.
-fourier.
+lra.
 Qed.
 
 Lemma Rplus_lt_minus : forall a b c, a < b + c -> a - b < c.
 Proof.
 intros.
-fourier.
+lra.
 Qed.
 
 Lemma sum_max1 : forall N b f, 
@@ -188,7 +188,7 @@ assert (H : y <= sum_f_R0 (fun n : nat => / INR (fact n)) b -> False).
    unfold Rminus. apply Rplus_lt_compat_r.
    apply sum_max. intuition. apply inv_INR_fact_pos.
   
-  fourier.
+  lra.
   
   apply Rminus_lt_plus in Hexp.
   apply (Rplus_le_compat_r (/ INR (fact (S b)))) in Habs.
@@ -202,7 +202,7 @@ assert (H : y <= sum_f_R0 (fun n : nat => / INR (fact n)) b -> False).
   assumption.
  
  apply Rgt_minus. apply Rlt_gt. 
- apply Rfourier_not_le_gt. assumption.
+ apply Rnot_le_gt. assumption.
 Qed.
 
 Lemma geometric_sum : forall (k:R),
@@ -212,7 +212,7 @@ intros k H0k1.
 intros eps Heps.
 assert (Hpos : 0 < eps * (1 - k)).
  apply Rmult_lt_0_compat ; [apply Heps |].
- unfold Rabs in *. destruct (Rcase_abs k) ; fourier.
+ unfold Rabs in *. destruct (Rcase_abs k) ; lra.
 destruct (pow_lt_1_zero k H0k1 (eps * (1 - k)) Hpos) as (N, HN).
 exists N.
 intros n Hn.
@@ -223,18 +223,18 @@ rewrite tech3.
 (* environnement -> False beginning*)   
    assert (H1 : (N >= N)%nat) by intuition. generalize (HN N H1). intros. 
    assert (eps * (1 - k) < 0). replace 0 with (eps * 0) by intuition.
-   apply Rmult_lt_compat_l. apply Heps. fourier. fourier.
+   apply Rmult_lt_compat_l. apply Heps. lra. lra.
 (*end *)
    replace eps with (eps * (1 - k) * / (-k + 1)).
     unfold Rdiv. apply Rmult_lt_compat_r.
-     apply Rinv_0_lt_compat. fourier.
+     apply Rinv_0_lt_compat. lra.
      
-     apply HN. intuition. field. intros H3. fourier. 
+     apply HN. intuition. field. intros H3. lra. 
     
-   unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; fourier. 
-  intro H2. unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; fourier.
- intro H2. unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; fourier.
-intro H2. unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; fourier.
+   unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; lra. 
+  intro H2. unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; lra.
+ intro H2. unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; lra.
+intro H2. unfold Rabs in H0k1 ; destruct (Rcase_abs k) ; lra.
 Qed.
 
 (* begin hide *)
@@ -335,9 +335,9 @@ assert (Hgeom : (infinite_sum (fun i => (/INR (S b)) ^ i) (1 / (1 - /INR (S b)))
    destruct b. 
     destruct Hb0. reflexivity. 
     
-    rewrite S_INR. assert (INR (S b) > 0) by intuition. fourier.
+    rewrite S_INR. assert (INR (S b) > 0) by intuition. lra.
   
-  rewrite H1. fourier.
+  rewrite H1. lra.
 (* end of geometric summation *)
 
 (* rewriting of Hexp *)
@@ -423,7 +423,7 @@ assert (H1 : (INR x >= 1)).
   apply Rplus_ge_compat. intuition. intuition.
   
  rewrite <- Rinv_1.
- apply Rle_Rinv. fourier. assumption.
+ apply Rle_Rinv. lra. assumption.
 intuition.
 Qed.
 
@@ -477,7 +477,5 @@ intros [|a|a] b Hb He.
  { rewrite <-INR_IPR. apply Rlt_mult_inv_pos. apply pos_INR_nat_of_P. INR_solve. }
  pose proof exp_pos 1 as Hpos.
  rewrite He in Hpos.
- apply (Rlt_not_le_frac_opp _ _ Hpos).
- rewrite Ropp_involutive.
- auto with real.
+ lra.
 Qed.

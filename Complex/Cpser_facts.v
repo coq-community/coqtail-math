@@ -114,7 +114,7 @@ Lemma Cpser_abel : forall (An : nat -> C) (r : R),
 Proof.
 intros An r Rho x x_ub.
  case (Req_or_neq r) ; intro r_0.
- exists 0 ; apply False_ind ; rewrite r_0 in x_ub ; assert (0 <= Cnorm x). apply Cnorm_pos. fourier.
+ exists 0 ; apply False_ind ; rewrite r_0 in x_ub ; assert (0 <= Cnorm x). apply Cnorm_pos. lra.
 assert (Hrew_abs : (Cnorm (x / r) = Cnorm x / r)%R).
  unfold Cdiv, Rdiv ; rewrite Cnorm_Cmult ; apply Rmult_eq_compat_l ;
  replace (/r) with (IRC (/r)). rewrite Cnorm_IRC_Rabs.
@@ -202,7 +202,7 @@ Proof.
 intros An r Pr x x_bd.
  unfold weaksum_r ; case (Rlt_le_dec (Cnorm x) r) ; intro s.
  destruct (Cpser_abel An r Pr x s) as (l,Hl) ; simpl ; assumption.
- apply False_ind ; fourier.
+ apply False_ind ; lra.
 Qed.
 
 Lemma sum_r_sums : forall (An : nat -> C) (r : R) (Pr : finite_cv_radius An r),
@@ -212,7 +212,7 @@ intros An r Pr x x_ub.
  unfold sum_r ; destruct (Rlt_le_dec (Cnorm x) r) as [x_bd | x_nbd].
  apply weaksum_r_sums.
  apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
-  apply False_ind ; fourier.
+  apply False_ind ; lra.
 Qed.
 
 Lemma sum_sums : forall (An : nat -> C) (Pr : infinite_cv_radius An),
@@ -320,7 +320,7 @@ intros An r Pr r0 r0_ub.
   apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat ; intuition |] ;
   apply Rplus_lt_compat_r ; rewrite Rabs_right in a_bd ; intuition.
   apply Rle_ge ; unfold Rdiv ; replace 0%R with (0 * /2)%R by field ;
-  apply Rmult_le_compat_r ; fourier.
+  apply Rmult_le_compat_r ; lra.
  assert (r'_bd2 : Cnorm (Rabs ((a + r) / 2)) < r).
  rewrite Cnorm_IRC_Rabs, Rabs_Rabsolu ; assumption.
  assert (Pr' := Cv_radius_weak_Cnorm_compat2 _ _ Pr).
@@ -353,8 +353,8 @@ intros An r Pr r0 r0_ub.
  apply Rle_trans with a ; [left ; assumption |].
  rewrite Cnorm_IRC_Rabs, Rabs_right.
  apply Rle_trans with ((a + a) / 2)%R ; [right ; field | unfold Rdiv ;
- apply Rmult_le_compat_r ; [fourier | apply Rplus_le_compat_l ; left ; assumption]].
- unfold Rdiv ; apply Rle_ge ; apply Rle_mult_inv_pos ; fourier.
+ apply Rmult_le_compat_r ; [lra | apply Rplus_le_compat_l ; left ; assumption]].
+ unfold Rdiv ; apply Rle_ge ; apply Rle_mult_inv_pos ; lra.
  apply Rle_ge ; apply Cnorm_pos.
 Qed.
 
@@ -447,7 +447,7 @@ intros An lam lam_pos An_neq An_frac_cv r r_bd.
   assumption.
   apply Rgt_not_eq ; assumption.
  apply Cpser_alembert_prelim2 with (Cnorm lam + eps)%R.
- fourier.
+ lra.
  apply An_neq.
  destruct (An_frac_cv (/ (middle (Rabs r) (/ Cnorm lam)) - Cnorm lam))%R as [N HN].
  assumption.
@@ -481,7 +481,7 @@ intros An An_neq An_frac_0 r.
  unfold R_dist in |-* ; rewrite Rminus_0_r, Rabs_right ; [reflexivity | apply Rle_ge ;
  apply Cnorm_pos].
  left ; apply HN ; intuition.
- rewrite Rinv_involutive ; [fourier |] ; apply Rgt_not_eq ;
+ rewrite Rinv_involutive ; [lra |] ; apply Rgt_not_eq ;
  apply Rplus_le_lt_0_compat ; [apply Rabs_pos | apply Rlt_0_1].
 Qed.
 
@@ -489,7 +489,7 @@ Lemma Cpser_bound_criteria : forall (An : nat -> C) (z l : C),
     Cpser An z l -> Cv_radius_weak An (Cnorm z).
 Proof.
 intros An z l Hzl.
- destruct Hzl with R1 as (N, HN) ; [fourier |].
+ destruct Hzl with R1 as (N, HN) ; [lra |].
  assert (H1 : forall n :  nat, (n >= S N)%nat -> gt_norm_pser An z n
     <= Rmax 2 (Cnorm (An 0%nat) + 1)).
   intros n Hn ; case_eq n ; unfold_gt.
@@ -901,7 +901,7 @@ intros An r Pr z z_bd eps eps_pos.
   apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ; [intuition | apply Rmin_r].
   unfold middle ; field_simplify.
   apply Rlt_le_trans with ((2 * Cnorm z + r + r) / 4)%R.
-  unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |].
+  unfold Rdiv ; apply Rmult_lt_compat_r ; [lra |].
   apply Rplus_lt_compat_r.
   apply Rle_lt_trans with (2 * Cnorm z + Cnorm z)%R.
   right ; ring.

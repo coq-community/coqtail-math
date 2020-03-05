@@ -1,7 +1,7 @@
 Require Import Rbase Ranalysis.
 Require Import Rinterval Rfunctions Rfunction_def.
 Require Import Ranalysis_def Ranalysis_def_simpl Rfunction_facts.
-Require Import MyRIneq MyR_dist Fourier.
+Require Import MyRIneq MyR_dist Lra.
 
 Require Import Ass_handling.
 
@@ -82,7 +82,7 @@ Proof.
 intros f Hf x eps eps_pos ;
  destruct (Hf _ _ _ (center_in_open_interval x 1 Rlt_0_1) _ eps_pos) as [delta [delta_pos Hdelta]] ;
  exists (Rmin delta 1) ; split.
-  apply Rmin_pos_lt ; fourier.
+  apply Rmin_pos_lt ; lra.
   simpl ; intros y [[_ y_neq] y_b] ; apply Hdelta ; split.
    rewrite <- Rball_rewrite ; eapply Rlt_le_trans ; [eassumption | apply Rmin_r].
    eapply Rlt_le_trans ; [eassumption | apply Rmin_l].
@@ -92,7 +92,7 @@ Qed.
 
 Lemma continuity_in_const : forall D c, continuity_in D (fun _ => c).
 Proof.
-intros ; exists 1 ; split ; [fourier |] ;
+intros ; exists 1 ; split ; [lra |] ;
  intros ; rewrite R_dist_eq ; assumption.
 Qed.
 
@@ -143,11 +143,11 @@ Lemma continuity_open_interval_Ropp_compat : forall f lb ub,
 Proof.
 intros f lb ub Hf b b_in eps eps_pos.
  assert (mb_in : open_interval lb ub (- b)).
-  destruct b_in ; split ; fourier.
+  destruct b_in ; split ; lra.
  destruct (Hf _ mb_in _ eps_pos) as [alpha [alpha_pos Halpha]] ;
  exists alpha ; split ; [assumption | intros x [x_in x_bd]].
  apply Halpha ; split ; simpl.
-  destruct x_in ; split ; fourier.
+  destruct x_in ; split ; lra.
   rewrite R_dist_opp_compat ; assumption.
 Qed.
 
@@ -168,11 +168,11 @@ Lemma continuity_interval_Ropp_compat : forall f lb ub,
 Proof.
 intros f lb ub Hf b b_in eps eps_pos.
  assert (mb_in : interval lb ub (- b)).
-  destruct b_in ; split ; fourier.
+  destruct b_in ; split ; lra.
  destruct (Hf _ mb_in _ eps_pos) as [alpha [alpha_pos Halpha]] ;
  exists alpha ; split ; [assumption | intros x [x_in x_bd]].
  apply Halpha ; split ; simpl.
-  destruct x_in ; split ; fourier.
+  destruct x_in ; split ; lra.
   rewrite R_dist_opp_compat ; assumption.
 Qed.
 
@@ -199,7 +199,7 @@ intros f D x y Dx f_cont Hneq ; pose (eps := R_dist (f x) y / 2).
  assert (eps_pos: 0 < eps).
   unfold eps, Rdiv ; apply Rlt_mult_inv_pos.
    apply Rabs_pos_lt ; intro Hf ; apply Hneq, Rminus_diag_uniq ; assumption.
-   fourier.
+   lra.
  destruct (f_cont Dx eps eps_pos) as [alp [alp_pos Halp]] ; exists alp ; split.
   assumption.
   intros a Da a_in ; apply Rminus_not_eq, Rabs_pos_lt_contravar.

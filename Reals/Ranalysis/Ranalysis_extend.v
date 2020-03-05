@@ -21,7 +21,7 @@ USA.
 
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_continuity.
 Require Import Ranalysis_derivability Ranalysis_usual Ranalysis_facts.
-Require Import Rbase MyRIneq MyR_dist Rfunctions Fourier.
+Require Import Rbase MyRIneq MyR_dist Rfunctions Lra.
 
 Open Scope R_scope.
 
@@ -53,8 +53,8 @@ intros a b f aleb f_cont x ; destruct (Rlt_le_dec x a) as [xlta | alex].
         - apply Rminus_le_compat_r, Rplus_le_compat ; assumption.
         - left. apply Rlt_minus_swap, Rminus_lt_compat_rev with (c := x).
           apply Rle_lt_trans with (2 * (h - x))%R ; [right ; ring |].
-          apply Rmult_Rdiv_lt_compat_l_rev ; [fourier |].
-          rewrite <- Rabs_right at 1 ; [assumption | fourier].
+          apply Rmult_Rdiv_lt_compat_l_rev ; [lra |].
+          rewrite <- Rabs_right at 1 ; [assumption | lra].
     }
     destruct (Rlt_irrefl x) ; apply Rlt_le_trans with a ; assumption.
 }
@@ -118,25 +118,25 @@ assert (x_in : interval a b x).
         + simpl in h_bd ; unfold R_dist in h_bd.
           destruct (Rlt_irrefl a) ; apply (Rle_lt_trans a h) ; [| assumption].
           transitivity b ; [assumption |].
-          left ; apply Rmult_lt_reg_l with 2 ; [fourier |].
+          left ; apply Rmult_lt_reg_l with 2 ; [lra |].
           transitivity (x + b)%R.
           - replace (2 * b)%R with (b + b)%R by ring ; apply Rplus_lt_compat_r.
             assumption.
           - apply Rlt_minus_sort3, Rplus_lt_reg_r with x.
             apply Rle_lt_trans with (2 * (x - h))%R ; [right ; ring |].
-            apply Rmult_Rdiv_lt_compat_l_rev ; [fourier |].
-            rewrite <- Rabs_right at 1 ; [| fourier].
+            apply Rmult_Rdiv_lt_compat_l_rev ; [lra |].
+            rewrite <- Rabs_right at 1 ; [| lra].
             rewrite Rabs_minus_sym, Rplus_comm. assumption.
           + destruct (Rle_lt_dec h b) as [hleb | blth].
             - destruct (Rlt_irrefl b) ; apply Rlt_le_trans with h ; [| assumption].
-              apply Rmult_lt_reg_l with 2 ; [fourier |].
+              apply Rmult_lt_reg_l with 2 ; [lra |].
               transitivity (x + b)%R.
               * replace (2 * b)%R with (b + b)%R by ring ; apply Rplus_lt_compat_r.
                 assumption.
               * apply Rlt_minus_sort3, Rplus_lt_reg_r with x.
                 apply Rle_lt_trans with (2 * (x - h))%R ; [right ; ring |].
-                apply Rmult_Rdiv_lt_compat_l_rev ; [fourier |].
-                rewrite <- Rabs_right at 1 ; [| fourier].
+                apply Rmult_Rdiv_lt_compat_l_rev ; [lra |].
+                rewrite <- Rabs_right at 1 ; [| lra].
                 rewrite Rabs_minus_sym, Rplus_comm ; assumption.
             - unfold Rminus ; rewrite Rplus_opp_r, Rabs_R0 ; assumption.
       }

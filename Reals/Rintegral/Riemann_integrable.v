@@ -1,6 +1,6 @@
 Require Import Max.
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 Require Import RiemannInt.
 Require Import Rfunction_classes_def.
 Require Import Rextensionality.
@@ -346,7 +346,7 @@ Proof.
  intros.
  unfold derivable_pt_lim. intros.
  (* epsilon is eps / 2 *)
- assert (H4:0 < eps / 2) by fourier.
+ assert (H4:0 < eps / 2) by lra.
  destruct (Hcont _ H4) as [x1 [Hcont1 Hcont2]].
  exists (mkposreal _ Hcont1). (* TODO c'est pas le bon epsilon *)
  (* epsilon is eps / 2 end *)
@@ -385,13 +385,13 @@ Proof.
   unfold fct_cte.
 (* end rewriting *)
 (* x <> x0 *)
-  assert (x <> x0) by (intro ; subst ; destruct H2 ; fourier).
+  assert (x <> x0) by (intro ; subst ; destruct H2 ; lra).
 (* end x <> x0 *)
 (* TODO pas besoin de x <= x+h là dedans*)
   left. simpl in *. unfold R_dist in *. apply Hcont2.
   unfold D_x, no_cond. repeat split. assumption.
   eapply Rlt_trans ; [|apply H1].
-  assert (0 < x0 - x < h) by (intuition ; fourier).
+  assert (0 < x0 - x < h) by (intuition ; lra).
   rewrite Rabs_pos_eq. rewrite Rabs_pos_eq. intuition.
   apply Rle_trans with (x0 - x) ; intuition. intuition.
 (* end TODO *) 
@@ -403,11 +403,11 @@ Proof.
    apply Rplus_le_compat_l. apply Rle_trans with x1. left.
    apply Rle_lt_trans with (Rabs h). apply RRle_abs. apply H1.
    (*unfold del.*) (*apply Rmin_l.*) right. reflexivity.
-   destruct H2. fourier.*)
+   destruct H2. lra.*)
 (* TODO here need eps / 2 et x <= x + h*)
   rewrite RiemannInt_constant.
   rewrite Rmult_assoc; replace ((x + h - x) * Rabs (/ h)) with 1.
-  ring_simplify. fourier.
+  ring_simplify. lra.
   rewrite Rabs_right.
   replace (x + h - x) with h; [ idtac | ring ].
   apply Rinv_r_sym.

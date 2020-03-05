@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Rbase Rpower Fourier.
+Require Import Rbase Rpower Lra.
 Require Import Ranalysis1 Ranalysis2.
 Require Import Rfunctions.
 Require Import MyRIneq.

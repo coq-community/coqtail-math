@@ -66,17 +66,17 @@ intros f d D z Hf_D eps eps_pos ; unfold continue_in, D_in, limit1_in,
    apply Rmult_le_compat_l ; auto with real.
    rewrite <- Rmult_1_r ; apply Rmult_le_compat_l ; [auto with real | apply Rmin_l].
    field ; apply Rgt_not_eq ; apply Cnorm_pos_lt ; auto with complex.
-  assert (eps_2_pos : 0 < eps / 2) by fourier ;
+  assert (eps_2_pos : 0 < eps / 2) by lra ;
   elim (Hf_D (eps / 2)%R eps_2_pos) ; clear Hf_D ; intros alpha [alpha_pos Hf_D].
   pose (delta := Rmin (eps / (2 * Cnorm (d z))) (Rmin (1/2) alpha)) ; exists delta ;
   split ; [apply Rmin_pos |].
   unfold Rdiv ; rewrite Rinv_mult_distr ; repeat apply Rmult_lt_0_compat.
   assumption.
-  fourier.
+  lra.
   apply Rinv_0_lt_compat ; apply Cnorm_pos_lt ; assumption.
-  apply Rgt_not_eq ; fourier.
+  apply Rgt_not_eq ; lra.
   apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
-  apply Rmin_pos ; fourier.
+  apply Rmin_pos ; lra.
   intros x' [[Dx' z_neq_x'] x'_bd] ; simpl ; unfold C_dist.
   apply Rlt_trans with (Cnorm (x' - z) * eps + Cnorm (x' - z) * Cnorm (d z))%R.
   apply Rle_lt_trans with (Cnorm (f x' - f z) * (/ Cnorm (x' - z) * Cnorm (x' - z)))%R.
@@ -94,7 +94,7 @@ intros f d D z Hf_D eps eps_pos ; unfold continue_in, D_in, limit1_in,
    [apply Cnorm_pos | apply Cnorm_triang_rev_l].
    rewrite Rmult_comm ; apply Rmult_lt_compat_l.
    apply Cnorm_pos_lt ; auto with complex.
-   apply Rlt_trans with (eps /2)%R ; [simpl in Hf_D ; apply Hf_D | fourier] ;
+   apply Rlt_trans with (eps /2)%R ; [simpl in Hf_D ; apply Hf_D | lra] ;
    repeat split ; [| | apply Rlt_le_trans with delta ;
    [| apply Rle_trans with (Rmin (1 / 2) alpha)%R ; apply Rmin_r]] ; assumption.
    auto with complex.

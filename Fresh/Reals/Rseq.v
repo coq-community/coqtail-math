@@ -15,7 +15,7 @@ Module Rsequence (Import T : CReals).
   
   (* There are bugs in the ring tactic: (ring_simplify; reflexivity > ring) *)
   (* Declaring a bigger setoid (e.g. for Rlt) would help *)
-  (* The fourier tactic would also help *)
+  (* The lra tactic would also help *)
   Lemma Rseq_cv_unique : forall u l l',
     Rseq_cv u l -> Rseq_cv u l' -> l == l'.
   Proof.

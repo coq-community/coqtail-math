@@ -24,7 +24,7 @@ Require Import Reals.
 Require Import Rintegral.
 Require Import Rintegral_usual.
 Require Import Rintegral_tactic.
-Require Import Fourier.
+Require Import Lra.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
 Require Import Rpser.
@@ -44,7 +44,7 @@ Lemma integrable_sin_n : forall n, Riemann_integrable (comp (fun x => pow x n) s
 Proof.
 intro n.
 apply RiemannInt_P6.
-pose proof PI_RGT_0; fourier.
+pose proof PI_RGT_0; lra.
 intros x Hx; apply continuity_pt_comp.
   apply continuity_sin.
   apply derivable_continuous; apply derivable_pow.
@@ -166,7 +166,7 @@ replace (INR 2) with 2 by trivial; field.
 repeat split.
 apply not_0_INR; apply fact_neq_0.
 auto with *.
-apply pow_nonzero; pose proof Rlt_R0_R2; intro; fourier.
+apply pow_nonzero; pose proof Rlt_R0_R2; intro; lra.
 Qed.
 
 
@@ -207,7 +207,7 @@ apply (Rint_le_compat (sin_n (S (2 * n))) (sin_n (2 * n)) 0 (PI/2)).
   rewrite <- tech_pow_Rmult.
   apply Rmult_le_compat_r.
     apply pow_le.
-    apply sin_ge_0; intuition; fourier.
+    apply sin_ge_0; intuition; lra.
     pose proof (SIN_bound u); intuition.
 
 apply Wallis_odd.
@@ -227,7 +227,7 @@ apply (Rint_le_compat (sin_n (2 * (S n))) (sin_n (S (2 * n))) 0 (PI/2)).
   rewrite <- tech_pow_Rmult.
   apply Rmult_le_compat_r.
     apply pow_le.
-    apply sin_ge_0; intuition; fourier.
+    apply sin_ge_0; intuition; lra.
     pose proof (SIN_bound u); intuition.
 
 apply Wallis_even.
@@ -241,7 +241,7 @@ intro n.
 destruct n.
 
   unfold W_even, W_odd, Rsqr.
-  simpl; field_simplify; fourier.
+  simpl; field_simplify; lra.
 
    replace 2 with (INR 2) by trivial; rewrite <- mult_INR.
   replace (2 * S n)%nat with (S (S (2 * n))) by auto with *.
@@ -268,15 +268,15 @@ Lemma W_even_pos : forall n, 0 < W_even n.
 Proof.
 intro n.
  unfold W_even, Rsqr, Rdiv.
- repeat apply Rmult_lt_0_compat; try fourier.
-  now apply Rlt_le_trans with (7 / 8); fourier || apply pi2_int.
+ repeat apply Rmult_lt_0_compat; try lra.
+  now apply Rlt_le_trans with (7 / 8); lra || apply pi2_int.
   now apply INR_fact_lt_0.
   repeat rewrite Rinv_mult_distr ; repeat apply Rmult_lt_0_compat.
    rewrite Rinv_pow.
-    apply pow_lt ; fourier.
-    apply Rgt_not_eq ; fourier.
+    apply pow_lt ; lra.
+    apply Rgt_not_eq ; lra.
    apply Rinv_0_lt_compat, pow_lt, INR_fact_lt_0.
-   apply Rgt_not_eq, pow_lt ; fourier.
+   apply Rgt_not_eq, pow_lt ; lra.
    apply Rgt_not_eq, pow_lt, INR_fact_lt_0.
 Qed.
 
@@ -308,13 +308,13 @@ apply Rseq_sandwich_theorem
     apply Rseq_equiv_sym.
     apply Rseq_equiv_plus_little_O_compat_l.
     apply Rseq_equiv_refl.
-    apply Rseq_little_O_Rmult_compat_r; [|intro H; fourier].
+    apply Rseq_little_O_Rmult_compat_r; [|intro H; lra].
     eapply Rseq_little_O_eq_compat
       with (Un := Rseq_poly 0) (Vn := Rseq_poly 1).
       intros n; unfold Rseq_poly; apply pow_O.
       intros n; unfold Rseq_poly; apply pow_1.
       apply Rseq_poly_little_O; constructor.
-    intros n; assert (H := pos_INR n); intros Hc; fourier.
+    intros n; assert (H := pos_INR n); intros Hc; lra.
   apply Rseq_constant_cv.
   apply Wallis_bound.
 Qed.
@@ -329,7 +329,7 @@ field; repeat split.
   apply not_0_INR; apply fact_neq_0.
   apply PI_neq0.
   apply not_0_INR; apply fact_neq_0.
-  apply pow_nonzero; intros H; fourier.
+  apply pow_nonzero; intros H; lra.
   replace (4 * n)%nat with (2 * n + 2 * n)%nat by omega.
   rewrite pow_add.
   reflexivity.
@@ -357,7 +357,7 @@ intros n H1.
 rewrite <- (sqrt_sqrt (2 * n)) at 2.
 field.
 intro H. apply H1. apply Rmult_eq_reg_l with 2. rewrite Rmult_0_r. apply sqrt_eq_0 ; intuition.
-apply Rmult_le_pos ; intuition. intro ; fourier.
+apply Rmult_le_pos ; intuition. intro ; lra.
 apply Rmult_le_pos ; intuition.
 Qed.
 
@@ -381,7 +381,7 @@ Proof.
 intros Un Un0.
 intros eps Heps.
 destruct (Un0 eps Heps) as (N, HUn).
-assert (H01 : 0 < 1) by fourier.
+assert (H01 : 0 < 1) by lra.
 destruct (Un0 1 H01) as (N1, HUn1).
 exists (max N N1).
 intros n HNmax.
@@ -438,10 +438,10 @@ Qed.
 Lemma Rseq_equiv_ln : forall Un, Rseq_cv Un 0 -> (fun n => ln (1 + Un n)) ~ Un.
 Proof.
 intros Un Hu.
-destruct (Hu 1) as [M HM]; [fourier|].
+destruct (Hu 1) as [M HM]; [lra|].
 apply Rseq_equiv_sym.
 intros eps Heps.
-assert (H1 : 0 < 1) by fourier.
+assert (H1 : 0 < 1) by lra.
 destruct (Rpser_little_O_partial_sum _ Un 1 1 H1 Hu ln_plus_cv_radius eps Heps) as [N HN].
 exists (Max.max M N); intros n Hn.
 unfold Rseq_minus; simpl.
@@ -467,13 +467,13 @@ apply Rle_lt_trans with (/INR (n + 1))%R.
  unfold R_dist. rewrite Rminus_0_r. rewrite Rabs_pos_eq.
   apply Rle_Rinv.
    generalize (pos_INR n) ; intros ; rewrite plus_INR ; intuition.
-   generalize (pos_INR n) ; intros ; fourier.
+   generalize (pos_INR n) ; intros ; lra.
    rewrite plus_INR. simpl. apply Rplus_le_compat_r. replace (INR n)%R with ((INR n ) * 1)%R by ring. rewrite Rmult_comm. apply Rmult_le_compat.
     intuition.
     apply pos_INR.
     intuition.
     intuition.
- left. apply Rinv_0_lt_compat. generalize (pos_INR n) ; intros ; fourier.
+ left. apply Rinv_0_lt_compat. generalize (pos_INR n) ; intros ; lra.
 unfold R_dist in Hun1. rewrite Rminus_0_r in Hun1. rewrite Rabs_right in Hun1. apply Hun1.
 left. apply Rgt_lt. apply Rinv_0_lt_compat. intuition.
 Qed.
@@ -558,13 +558,13 @@ apply Rmult_integral_contrapositive ; split ;
 [ apply Rmult_integral_contrapositive ; split ; 
 [ (apply pow_nonzero ; unfold Rdiv ; apply Rmult_integral_contrapositive ; split ;
 [ apply Rmult_integral_contrapositive ; split ; 
-[ (intro ; fourier) | (apply not_0_INR ; intuition) ] | (apply Rinv_neq_0_compat ; generalize (exp_pos 1) ; intros ; intro ; fourier)])
-| (intro H ; apply sqrt_eq_0 in H ; [ (apply Rmult_integral in H ; destruct H as [H|H] ; [ fourier | (generalize H ; apply not_0_INR ; intuition) ])
+[ (intro ; lra) | (apply not_0_INR ; intuition) ] | (apply Rinv_neq_0_compat ; generalize (exp_pos 1) ; intros ; intro ; lra)])
+| (intro H ; apply sqrt_eq_0 in H ; [ (apply Rmult_integral in H ; destruct H as [H|H] ; [ lra | (generalize H ; apply not_0_INR ; intuition) ])
 | apply Rmult_le_pos ; intuition ]) ]
 | apply Hneq ] ] | apply Rmult_integral_contrapositive ; split ; 
 [ apply Rmult_integral_contrapositive ; split ;
 [ (apply pow_nonzero ; unfold Rdiv ; apply Rmult_integral_contrapositive ; split ;
-[ apply not_0_INR ; intuition | (apply Rinv_neq_0_compat ; generalize (exp_pos 1) ; intros ; intro ; fourier) ])
+[ apply not_0_INR ; intuition | (apply Rinv_neq_0_compat ; generalize (exp_pos 1) ; intros ; intro ; lra) ])
 | (intro H ; apply sqrt_eq_0 in H ; [ (apply not_0_INR in H ; intuition )
 | apply pos_INR ])
 ] | apply Hneq ] ].
@@ -581,7 +581,7 @@ apply Rmult_integral_contrapositive ; split .
  apply pow_nonzero; assumption.
  apply Rinv_neq_0_compat.
  apply Rmult_integral_contrapositive; split.
-  intro ; fourier.
+  intro ; lra.
   apply PI_neq0.
 unfold Rseq_constant, Rseq_mult, Rseq_div, Rseq_plus, Rseq_minus, Rseq_inv.
 (* Simplification of the expression ! *)
@@ -623,57 +623,57 @@ intuition.
 split. apply pow_nonzero. apply not_0_INR. intuition.
 split. apply not_0_INR. intuition.
 split. apply pow_nonzero. apply not_0_INR. intuition.
-split. apply pow_nonzero. intro. fourier.
+split. apply pow_nonzero. intro. lra.
 split. apply PI_neq0.
-apply pow_nonzero. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. intro. generalize (exp_pos 1) ; intros ; lra.
 apply not_0_INR. intuition.
-intro ; fourier. 
+intro ; lra. 
 apply not_0_INR. intuition. 
-intro. generalize (exp_pos 1) ; intros ; fourier.
-intro. generalize (exp_pos 1) ; intros ; fourier.
-apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+intro. generalize (exp_pos 1) ; intros ; lra.
+intro. generalize (exp_pos 1) ; intros ; lra.
+apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 apply not_0_INR ; intuition.
-apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 apply not_0_INR ; intuition.
-intro ; fourier.
+intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 apply Rmult_integral_contrapositive ; split.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR ; intuition.
 apply pos_INR.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR ; intuition.
 apply pos_INR.
 apply Hneq.
-apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
 apply Rmult_integral_contrapositive ; split.
-apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
-apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
-intro ; fourier.
+intro ; lra.
 apply not_0_INR. intuition.
 apply Rmult_le_pos. intuition.
 intuition.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
-apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
-intro ; fourier.
+intro ; lra.
 apply not_0_INR. intuition.
 apply Rmult_le_pos. intuition. intuition.
 assumption.
@@ -682,11 +682,11 @@ apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
-apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
-intro ; fourier.
+intro ; lra.
 apply not_0_INR. intuition.
 apply Rmult_le_pos. intuition. intuition.
 assumption.
@@ -696,11 +696,11 @@ apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
-apply pow_nonzero. intro ; fourier.
+apply pow_nonzero. intro ; lra.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply Rmult_integral_contrapositive ; split.
-intro ; fourier.
+intro ; lra.
 apply not_0_INR. intuition.
 apply Rmult_le_pos. intuition. intuition.
 assumption.
@@ -708,7 +708,7 @@ apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply Rmult_integral_contrapositive ; split.
 apply pow_nonzero. apply not_0_INR ; intuition.
-apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; fourier.
+apply pow_nonzero. apply Rinv_neq_0_compat. intro. generalize (exp_pos 1) ; intros ; lra.
 intro H. apply sqrt_eq_0 in H. generalize H. apply not_0_INR. intuition.
 apply pos_INR. assumption.
 (* End of "<> 0" *)
@@ -734,8 +734,8 @@ eapply Rseq_equiv_cv_compat.
   replace (2 * n)%R with ((2 * n + 1) - 1)%R by ring. rewrite Rplus_0_l.
   unfold Rminus. rewrite Rinv_plus.
    rewrite Rinv_eq_1. unfold Rdiv in *. rewrite Ropp_mult_distr_l_reverse. rewrite Rmult_1_l. rewrite Rabs_minus_sym in DL1. apply DL1.
-    generalize (pos_INR n) ; intuition ; fourier.
-    generalize (pos_INR n) ; intuition ; fourier.
+    generalize (pos_INR n) ; intuition ; lra.
+    generalize (pos_INR n) ; intuition ; lra.
  apply Rseq_equiv_trans with (fun n : nat => exp ((2 * n + 1) * ln (1 - /(2 * INR n + 1)))).
  pose (Un := (fun n:nat => - /(2 * (INR n) + 1))%R).
  assert (Hcv0 : Rseq_cv Un 0).
@@ -744,13 +744,13 @@ eapply Rseq_equiv_cv_compat.
   apply Rseq_equiv_eq. exists O. intros n Hn.
   field_simplify ((2 * n + 1) * - / (2 * n + 1))%R. unfold Rseq_constant, Rseq_inv.
    rewrite <- exp_Ropp. unfold Rdiv. rewrite Rinv_1. rewrite Rmult_1_r. reflexivity.
-   generalize (pos_INR n) ; intuition ; fourier.
+   generalize (pos_INR n) ; intuition ; lra.
   apply Rseq_equiv_continuity with ((-1)).
    reg.
-   generalize (exp_pos (-1)) ; intros l1 H1 ; fourier.
+   generalize (exp_pos (-1)) ; intros l1 H1 ; lra.
    apply Rseq_cv_eq_compat with (-R1).
    intros n. unfold Rseq_constant, Rseq_minus, Rseq_plus, Rseq_opp.
-   field. intros H1 ; generalize (pos_INR n) ; intros ; fourier.
+   field. intros H1 ; generalize (pos_INR n) ; intros ; lra.
    change (-1)%R with (-(1%R))%R. intuition.
    eapply Rseq_equiv_cv_compat.
      2: reflexivity.
@@ -761,7 +761,7 @@ eapply Rseq_equiv_cv_compat.
      apply Hcv0.
     apply Rseq_cv_eq_compat with (-R1).
     unfold Rseq_opp, Rseq_constant, Rseq_minus.
-    intros n. field. generalize (pos_INR n) ; intuition ; fourier.
+    intros n. field. generalize (pos_INR n) ; intuition ; lra.
     change (-1)%R with (-(1%R))%R. intuition.
  apply Rseq_equiv_eq.
  exists 1%nat.
@@ -773,16 +773,16 @@ eapply Rseq_equiv_cv_compat.
   unfold Rminus. rewrite Rinv_plus. rewrite Rinv_eq_1.
    ring_simplify (2 * n + 1 + -(1) + 1)%R. unfold Rdiv. ring_simplify (1 + -(1) * / ((1 + 1) * n + 1))%R.
    rewrite (Rplus_comm (- / (2 * n + 1)) _). reflexivity.
-   generalize (pos_INR n) ; intuition ; fourier.
-   generalize (pos_INR n) ; intuition ; fourier.
+   generalize (pos_INR n) ; intuition ; lra.
+   generalize (pos_INR n) ; intuition ; lra.
    unfold Rdiv. apply Rmult_lt_0_compat. apply Rmult_lt_0_compat ; intuition.
    apply Rinv_0_lt_compat.
-   rewrite S_INR. generalize (pos_INR n) ; intuition ; fourier.
+   rewrite S_INR. generalize (pos_INR n) ; intuition ; lra.
 apply Rseq_cv_eq_compat with (Rsqr l / (2 * PI)).
 intro. unfold Rseq_mult, Rseq_plus, Rseq_constant, Rseq_div, Rseq_inv.
 field. split. 
 apply PI_neq0.
-intro. generalize (exp_pos 1) ; intros ; fourier.
+intro. generalize (exp_pos 1) ; intros ; lra.
 intros eps Heps. exists O. intros n Hn.
 unfold R_dist. unfold Rseq_constant, Rseq_div, Rseq_inv, Rseq_mult.
 unfold Rdiv, Rsqr. rewrite Rminus_diag_eq.

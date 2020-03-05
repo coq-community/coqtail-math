@@ -21,7 +21,7 @@ USA.
 
 Require Import Rbase Rpower.
 Require Import Ranalysis.
-Require Import Fourier.
+Require Import Lra.
 
 Require Import Rfunctions Rfunction_def Rextensionality.
 Require Import MyRIneq MyR_dist.
@@ -91,7 +91,7 @@ intros f lb ub pr Df_pos x y x_in y_in Hxy.
   intros ; reg.
   unfold id in Hc ; fold id in Hc ; replace (derive_pt id c (pr2 c c_in)) with 1 in Hc ;
    [rewrite Rmult_1_r in Hc |].
-  apply Rminus_gt ; rewrite <- Hc ; apply Rmult_lt_0_compat ; [fourier |].
+  apply Rminus_gt ; rewrite <- Hc ; apply Rmult_lt_0_compat ; [lra |].
    erewrite <- derive_open_interval_derive_pt ; [eapply Df_pos |] ;
     eapply open_interval_restriction ;
     try (eapply open_interval_interval || apply c_in) ; eassumption.
@@ -114,5 +114,5 @@ Proof.
 intros f g lb ub f_recip_g x x_in_I.
  unfold opp_fct ; rewrite f_recip_g.
   apply Ropp_involutive.
- unfold interval in * ; destruct x_in_I ; split ; fourier.
+ unfold interval in * ; destruct x_in_I ; split ; lra.
 Qed.

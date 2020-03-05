@@ -35,7 +35,7 @@ Require Import CFsequence.
 Require Import Cnorm.
 Require Import Cprop_base.
 Require Import Ctacfield.
-Require Import Fourier.
+Require Import Lra.
 Require Import Max.
 
 Open Scope C_scope.
@@ -49,11 +49,11 @@ Lemma CFseq_cvu_derivable : forall (fn fn' : nat -> C -> C) (f g : C -> C) (z c 
       derivable_pt_lim f z (g z).
 Proof.
 intros fn fn' f g z c r z_in Dfn_eq_fn' fn_cv_f fn'_cvu_g g_cont eps eps_pos.
- assert (eps_8_pos : 0 < eps / 8) by fourier.
+ assert (eps_8_pos : 0 < eps / 8) by lra.
  destruct (g_cont z z_in (eps/8)%R eps_8_pos) as [delta1 H] ; clear g_cont ; destruct H as [delta1_pos g_cont].
  assert (delta_pos : 0 < Rmin ((r - (Cnorm (z - c))) / 2) delta1).
   apply Rmin_pos_lt ; [| assumption].
-  unfold middle, Rdiv ; apply Rlt_mult_inv_pos ; [| fourier].
+  unfold middle, Rdiv ; apply Rlt_mult_inv_pos ; [| lra].
   apply Rlt_Rminus ; rewrite Cnorm_minus_sym ; apply z_in.
 
  pose (delta := mkposreal (Rmin ((r - (Cnorm (z - c))) / 2) delta1) (delta_pos)).
@@ -61,7 +61,7 @@ intros fn fn' f g z c r z_in Dfn_eq_fn' fn_cv_f fn'_cvu_g g_cont eps eps_pos.
  pose (eps' :=  ((Cnorm h) * eps / 4)%R).
  assert (eps'_pos : 0 < eps').
   unfold eps', Rdiv ; rewrite Rmult_assoc ; apply Rmult_lt_0_compat ;
-  [apply Cnorm_pos_lt ; assumption | fourier].
+  [apply Cnorm_pos_lt ; assumption | lra].
  destruct (fn_cv_f z z_in eps' eps'_pos) as [Nz fnz_cv_fz].
 
 assert (zh_in : Boule c r (z + h)).
@@ -77,7 +77,7 @@ assert (zh_in : Boule c r (z + h)).
   apply Rle_trans with ((Cnorm (z - c) + r) / 2)%R.
   right ; field.
   apply Rle_trans with ((r + r) / 2)%R.
-  unfold Rdiv ; apply Rmult_le_compat_r ; [fourier |] ; apply Rplus_le_compat_r ;
+  unfold Rdiv ; apply Rmult_le_compat_r ; [lra |] ; apply Rplus_le_compat_r ;
   rewrite Cnorm_minus_sym ; left ; apply z_in.
   right ; field.
 
@@ -115,7 +115,7 @@ apply Rle_trans with (Cnorm h * eps / 2 + Cnorm h * eps / 2)%R.
   apply Rplus_le_compat_l ; rewrite <- Rmult_1_l ; apply Rmult_le_compat_r ;
   [apply Cnorm_pos | rewrite Cnorm_IRC_Rabs].
   clear -t_in ; destruct t_in as [t_lb [t_eq | t_ub]].
-  left ; apply Rabs_def1 ; [| apply Rlt_le_trans with R0] ; fourier.
+  left ; apply Rabs_def1 ; [| apply Rlt_le_trans with R0] ; lra.
   subst ; rewrite Rabs_R1 ; right ; reflexivity.
   apply Rlt_le_trans with (Rplus (Cnorm (c - z)) delta) ;
   [apply Rplus_lt_compat_l ; assumption |].
@@ -200,7 +200,7 @@ unfold Cderiv.D_x, no_cond ; split ; [trivial |].
  apply Rmult_le_compat_r ; [left ; assumption |].
  rewrite Cnorm_IRC_Rabs.
   clear -u_in_I ; destruct u_in_I as [u_lb [u_eq | u_ub]].
-  left ; apply Rabs_def1 ; [| apply Rlt_le_trans with R0] ; fourier.
+  left ; apply Rabs_def1 ; [| apply Rlt_le_trans with R0] ; lra.
   subst ; rewrite Rabs_R1 ; right ; reflexivity.
   rewrite Rmult_1_l ; unfold delta ; apply Rmin_r.
 
@@ -254,7 +254,7 @@ unfold Cderiv.D_x, no_cond ; split ; [trivial |].
  apply Rmult_le_compat_r ; [left ; assumption |].
  rewrite Cnorm_IRC_Rabs.
   clear -v_in_I ; destruct v_in_I as [v_lb [v_eq | v_ub]].
-  left ; apply Rabs_def1 ; [| apply Rlt_le_trans with R0] ; fourier.
+  left ; apply Rabs_def1 ; [| apply Rlt_le_trans with R0] ; lra.
   subst ; rewrite Rabs_R1 ; right ; reflexivity.
   rewrite Rmult_1_l ; unfold delta ; apply Rmin_r.
 
@@ -305,12 +305,12 @@ Qed.
 
 Lemma Rlt_minus_exchange : forall a b c, a - b < c -> a - c < b.
 Proof.
-intros a b c H ; fourier.
+intros a b c H ; lra.
 Qed.
 
 Lemma Rlt_plus_exchange : forall a b c,  a - b < c  -> a < b + c.
 Proof.
-intros a b c H ; fourier.
+intros a b c H ; lra.
 Qed.
 
 Lemma sum_cv_maj : forall (An : nat -> R) (fn : nat -> C -> C) (z l1 : C) (l2 : R),
@@ -323,7 +323,7 @@ intros An fn z l1 l2 fn_cv An_cv fn_bd.
   assumption.
   pose (eps := ((Cnorm l1 - l2) / 4)%R) ;
   assert (eps_pos : 0 < eps).
-   unfold eps, Rdiv ; apply Rlt_mult_inv_pos ; fourier.
+   unfold eps, Rdiv ; apply Rlt_mult_inv_pos ; lra.
   destruct (fn_cv _ eps_pos) as [Nfn Hfn] ;
   destruct (An_cv _ eps_pos) as [NAn HAn].
   pose (N := max Nfn NAn).
@@ -361,7 +361,7 @@ intros An fn z l1 l2 fn_cv An_cv fn_bd.
    apply HAn ; apply le_max_r.
    assert (Cnorm l1 < Cnorm l1).
    apply Rlt_trans with (l2 + 2 * eps)%R.
-   fourier.
+   lra.
    unfold eps.
    apply Rle_lt_trans with ((Cnorm l1 + l2) / 2)%R.
    right ; field.
@@ -539,14 +539,14 @@ Lemma CVU_continuity_boule :forall (fn : nat -> C -> C) (f : C -> C) (c : C) (r 
        forall z, Boule c r z -> continuity_pt f z.
 Proof.
 intros fn f c r fn_cvu fn_cont z z_in.
- intros eps eps_pos ; assert (eps_3_pos : 0 < (eps / 3)%R) by fourier ;
+ intros eps eps_pos ; assert (eps_3_pos : 0 < (eps / 3)%R) by lra ;
  destruct (fn_cvu _ eps_3_pos) as [N HN] ;
  destruct (fn_cont N z z_in _ eps_3_pos) as [delta1 [delta1_pos Hdelta]].
  pose (delta := Rmin delta1 ((r - Cnorm (c - z))/2)) ;
  assert (delta_pos : 0 < delta).
   unfold delta ; apply Rmin_pos_lt.
   assumption.
-  unfold Rdiv ; apply Rlt_mult_inv_pos ; [apply Rlt_Rminus ; apply z_in | fourier].
+  unfold Rdiv ; apply Rlt_mult_inv_pos ; [apply Rlt_Rminus ; apply z_in | lra].
   exists delta ; split ; [assumption | intros x [_  Hx]].
   simpl ; unfold C_dist.
   apply Rle_lt_trans with (Cnorm (f x - fn N x) + Cnorm (fn N x - fn N z) + Cnorm (fn N z  - f z))%R.
@@ -568,7 +568,7 @@ intros fn f c r fn_cvu fn_cont z z_in.
  field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
  apply (middle_is_in_the_middle _ _ z_in).
  destruct (Ceq_dec x z) as [eq | neq].
- subst ; unfold Cminus ; rewrite Cadd_opp_r, Cnorm_C0 ; fourier.
+ subst ; unfold Cminus ; rewrite Cadd_opp_r, Cnorm_C0 ; lra.
  apply Rlt_le_trans with (eps/3 + eps/3 + eps/3)%R ; [| right ; field].
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l ; simpl in Hdelta ; apply Hdelta ; split.
  unfold Cderiv.D_x, no_cond ; split ; auto.

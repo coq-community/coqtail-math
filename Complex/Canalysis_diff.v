@@ -46,7 +46,7 @@ intros f x v l1 l2 v_neq Hl1 Hl2 ;
   assumption.
   apply IRC_neq_0_compat ; apply Rgt_not_eq ; assumption.
   apply Cinv_neq_0_compat ; apply IRC_neq_0_compat ;
-  apply Rgt_not_eq ; fourier.
+  apply Rgt_not_eq ; lra.
   apply Cinv_neq_0_compat ; apply IRC_neq_0_compat ;
   apply Cnorm_no_R0 ; assumption.
   exists (2 * Cnorm v / alp)%R.
@@ -64,13 +64,13 @@ intros f x v l1 l2 v_neq Hl1 Hl2 ;
   rewrite <- Cnorm_Cmult.
   replace (alp * / 2)%C with (IRC (alp / 2)%R).
   rewrite Cnorm_IRC_Rabs, Rabs_right.
-  fourier.
-  fourier.
+  lra.
+  lra.
   clear ; CusingR_f.
-  apply IRC_neq_0_compat ; apply Rgt_not_eq ; fourier.
+  apply IRC_neq_0_compat ; apply Rgt_not_eq ; lra.
   apply Cnorm_no_R0 ; assumption.
   apply IRC_neq_0_compat ; apply Cnorm_no_R0 ; assumption.
-  apply IRC_neq_0_compat ; apply Rgt_not_eq ; fourier.
+  apply IRC_neq_0_compat ; apply Rgt_not_eq ; lra.
 Qed.
 
 Lemma uniqueness_step2 : forall f x v l, v <> 0 ->
@@ -185,13 +185,13 @@ intros f x v f_diff.
    intros h h_ub ; simpl ; unfold C_dist, Cminus ; rewrite v_eq, Cmult_0_r,
     Cadd_0_r, Cadd_opp_r, Cnorm_C0 ; assumption.
    destruct f_diff as (l, f_diff) ; destruct (Ceq_dec l 0) as [l_eq | l_neq].
-  assert (eps_2_pos : eps / 2 > 0) by fourier ;
+  assert (eps_2_pos : eps / 2 > 0) by lra ;
   destruct (f_diff v_neq (eps / 2)%R eps_2_pos) as ([alpha alpha_pos], Halpha).
   assert (delta_pos : 0 < Rmin (/ (2 * Cnorm v)) alpha).
    apply Rmin_pos.
    rewrite Rinv_mult_distr.
-   apply Rlt_mult_inv_pos ; [fourier | apply Cnorm_pos_lt ; assumption].
-   apply Rgt_not_eq ; fourier.
+   apply Rlt_mult_inv_pos ; [lra | apply Cnorm_pos_lt ; assumption].
+   apply Rgt_not_eq ; lra.
    apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
    assumption.
   exists (mkposreal (Rmin (/(2 * Cnorm v)) alpha) delta_pos).
@@ -210,7 +210,7 @@ intros f x v f_diff.
    apply Halpha.
    intro Hf ; apply h_neq ; rewrite Hf ; intuition.
    subst ; apply Rlt_le_trans with (Rmin (/(2* Cnorm v)) alpha) ; [apply h_ub | apply Rmin_r].
-   fourier.
+   lra.
    rewrite l_eq ; field ; split ; assumption.
    apply Cmult_integral_contrapositive_currified ; assumption.
    rewrite Cnorm_Cmult.
@@ -223,15 +223,15 @@ intros f x v f_diff.
    apply Rmult_le_compat_r ; [apply Cnorm_pos | apply Rmin_l].
    right ; field.
    apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
-   fourier.
-   assert (eps_2_pos : eps / 2 > 0) by fourier ; 
+   lra.
+   assert (eps_2_pos : eps / 2 > 0) by lra ; 
    destruct (f_diff v_neq (eps / 2)%R eps_2_pos) as ([alpha alpha_pos], Halpha).
    pose (delta1 := Rmin (eps / (2 * Cnorm l)) (Rmin (1/2) alpha)).
    assert (delta1_pos : 0 < delta1).
     unfold delta1 ; repeat apply Rmin_pos.
     apply Rlt_mult_inv_pos ; [| apply Rmult_lt_0_compat] ;
-    [| fourier | apply Cnorm_pos_lt] ; assumption.
-    fourier.
+    [| lra | apply Cnorm_pos_lt] ; assumption.
+    lra.
     assumption.
    pose (delta := Rmin (delta1 / Cnorm v)%R delta1).
    assert (delta_pos : 0 < delta).
@@ -258,7 +258,7 @@ intros f x v f_diff.
    [apply Cnorm_pos | apply Cnorm_triang_rev_l].
    rewrite Rmult_comm ; apply Rmult_lt_compat_l.
    apply Cnorm_pos_lt ; apply Cmult_integral_contrapositive_currified ; assumption.
-   apply Rlt_trans with (eps /2)%R ; [apply Halpha | fourier].
+   apply Rlt_trans with (eps /2)%R ; [apply Halpha | lra].
    intro Hf ; apply h_neq ; rewrite Hf ; intuition.
    apply Rlt_le_trans with delta ; [apply h_ub |].
    apply Rle_trans with delta1 ; [apply Rmin_r |].
@@ -415,9 +415,9 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
   destruct (Rle_dec 1 eps) as [eps_lb | eps_ub].
-  destruct (Hf1 v_neq (Rmin 1 eps)) as [delta1 Hdelta1] ; [apply Rmin_pos ; fourier |].
+  destruct (Hf1 v_neq (Rmin 1 eps)) as [delta1 Hdelta1] ; [apply Rmin_pos ; lra |].
   destruct (differentiable_continuous_along_axis f2 x v Hf2' (Rmin 1 eps)%R) as
-  [delta2 Hdelta2] ; [apply Rmin_pos ; fourier |].
+  [delta2 Hdelta2] ; [apply Rmin_pos ; lra |].
   pose (delta := Rmin delta1 delta2) ; assert (delta_pos : 0 < delta) by
   (apply Rmin_pos ; [apply delta1 | apply delta2]).
   exists (mkposreal delta delta_pos) ; intros h h_neq h_ub.
@@ -458,8 +458,8 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   simpl in Hdelta2 ; unfold C_dist in Hdelta2 ; apply Hdelta2.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_r].
   destruct (Hf1 v_neq (Rmin (eps/2)%R ((eps/2) / Cnorm (f2 x)))) as [delta1 Hdelta1].
-  apply Rmin_pos ; [fourier |].
-  apply Rmult_lt_0_compat ; [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ;
+  apply Rmin_pos ; [lra |].
+  apply Rmult_lt_0_compat ; [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ;
   assumption.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
@@ -502,9 +502,9 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   ring.
   apply Cnorm_no_R0 ; assumption.
   destruct (Ceq_dec (f2 x) 0) as [f2_eq | f2_neq].
-  destruct (Hf1 v_neq (eps/2)%R) as [delta1 Hdelta1] ; [fourier |].
+  destruct (Hf1 v_neq (eps/2)%R) as [delta1 Hdelta1] ; [lra |].
   destruct (Hf2 v_neq ((eps / 2) / Cnorm (f1 x))%R) as [delta2 Hdelta2].
-  apply Rmult_lt_0_compat ; [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ;
+  apply Rmult_lt_0_compat ; [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ;
   assumption.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
@@ -528,7 +528,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   [right ; rewrite Cminus_0_r ; reflexivity | left ; apply Hdelta1].
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
-  rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [fourier |].
+  rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [lra |].
   apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) 0) ; [right ; simpl ; unfold C_dist ;
   rewrite Cminus_0_r ; reflexivity | apply Hdelta3].
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rle_trans with (Rmin delta2 delta3) ;
@@ -546,11 +546,11 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   apply Cnorm_no_R0 ; assumption.
   right ; field ; apply Cnorm_no_R0 ; assumption.
   destruct (Hf1 v_neq (Rmin(eps/3) ((eps/3) / Cnorm (f2 x)))%R) as [delta1 Hdelta1].
-  apply Rmin_pos ; [fourier |] ; apply Rmult_lt_0_compat ;
-  [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
+  apply Rmin_pos ; [lra |] ; apply Rmult_lt_0_compat ;
+  [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
   destruct (Hf2 v_neq ((eps / 3) / Cnorm (f1 x))%R) as [delta2 Hdelta2].
   apply Rmult_lt_0_compat ;
-  [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
+  [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
   destruct (differentiable_continuous_along_axis f2 x v Hf2' R1 Rlt_0_1)
@@ -590,7 +590,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
  [right ; rewrite Cminus_0_r ; reflexivity |] ; left ; apply Hdelta1.
  assumption.
  apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
- rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [fourier |] ;
+ rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [lra |] ;
  simpl in Hdelta3 ; unfold C_dist in Hdelta3 ; apply Hdelta3.
  apply Rlt_le_trans with delta ; [apply h_ub | apply Rle_trans with (Rmin delta2 delta3) ;
  apply Rmin_r].
@@ -606,13 +606,13 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
  right ; field ; apply Cnorm_no_R0 ; assumption.
   destruct (Ceq_dec (f1 x) 0) as [f1_eq | f1_neq].
   destruct (Ceq_dec (f2 x) 0) as [f2_eq | f2_neq].
-  destruct (Hf1 v_neq (eps / 2)%R) as [delta1 Hdelta1] ; [fourier |].
+  destruct (Hf1 v_neq (eps / 2)%R) as [delta1 Hdelta1] ; [lra |].
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
   destruct (differentiable_continuous_along_axis f2 x v Hf2'
   (Rmin R1 ((eps / 2) / Cnorm l1))) as [delta2 Hdelta2].
-  apply Rmin_pos ; [fourier |].
-  apply Rmult_lt_0_compat ; [fourier | apply Rinv_0_lt_compat ;
+  apply Rmin_pos ; [lra |].
+  apply Rmult_lt_0_compat ; [lra | apply Rinv_0_lt_compat ;
   apply Cnorm_pos_lt ; assumption].
   pose (delta := Rmin delta1 delta2) ; assert (delta_pos : 0 < delta) by
   (apply Rmin_pos ; [apply delta1 | apply delta2]) ; exists (mkposreal delta
@@ -642,21 +642,21 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   right ; reflexivity | left ; apply Hdelta1].
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
-  rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [fourier |].
+  rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [lra |].
   apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) 0) ; [simpl ; unfold C_dist ;
   rewrite Cminus_0_r ; right ; reflexivity |].
   apply Rlt_le_trans with (Rmin 1 (eps / 2 / Cnorm l1)) ; [apply Hdelta2 |
   apply Rmin_l].
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_r].
   destruct (Hf1 v_neq (Rmin (eps / 3) (eps / 3 / Cnorm (f2 x)))) as [delta1 Hdelta1].
-  apply Rmin_pos ; [fourier |] ; apply Rmult_lt_0_compat ;
-  [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
+  apply Rmin_pos ; [lra |] ; apply Rmult_lt_0_compat ;
+  [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
   destruct (differentiable_continuous_along_axis f2 x v Hf2' (Rmin 1 (eps / 3 / Cnorm l1)))
   as [delta2 Hdelta2].
   apply Rmin_pos ; [apply Rlt_0_1 | apply Rmult_lt_0_compat ;
-  [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption].
+  [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption].
   pose (delta := Rmin delta1 delta2) ; assert (delta_pos : 0 < delta) by
   (apply Rmin_pos ; [apply delta1 | apply delta2]) ;
   exists (mkposreal delta delta_pos) ; intros h h_neq h_ub ;
@@ -694,7 +694,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   rewrite Cminus_0_r ; reflexivity | left ; apply Hdelta1].
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
-  rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [fourier |].
+  rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [lra |].
   apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) (f2 x)) ; [right ;
   simpl ; unfold C_dist ; reflexivity |].
   apply Rlt_le_trans with (Rmin 1 (eps / 3 / Cnorm l1)) ; [apply Hdelta2 | apply Rmin_l].
@@ -709,16 +709,16 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_r].
   right ; field ; apply Cnorm_no_R0 ; assumption.
   destruct (Ceq_dec (f2 x) 0) as [f2_eq | f2_neq].
-  destruct (Hf1 v_neq (eps / 3)%R) as [delta1 Hdelta1] ; [fourier |].
+  destruct (Hf1 v_neq (eps / 3)%R) as [delta1 Hdelta1] ; [lra |].
   destruct (Hf2 v_neq (eps / 3 / Cnorm (f1 x))%R) as [delta2 Hdelta2].
-  apply Rmult_lt_0_compat ; [fourier | apply Rinv_0_lt_compat ;
+  apply Rmult_lt_0_compat ; [lra | apply Rinv_0_lt_compat ;
   apply Cnorm_pos_lt] ; assumption.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
   destruct (differentiable_continuous_along_axis f2 x v Hf2' (Rmin 1 (eps / 3 / Cnorm l1)))
   as [delta3 Hdelta3].
   apply Rmin_pos ; [apply Rlt_0_1 |] ; apply Rmult_lt_0_compat ;
-  [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
+  [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
   pose (delta := Rmin delta1 (Rmin delta2 delta3)) ; assert (delta_pos : 0 < delta) by
   (repeat apply Rmin_pos ; [apply delta1 | apply delta2 | apply delta3]) ;
   exists (mkposreal delta delta_pos) ; intros h h_neq h_ub ;
@@ -739,7 +739,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   [apply Rmult_le_compat_r ; [apply Cnorm_pos | left ; apply Hdelta1] |].
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
-  rewrite <- Rmult_1_r ; apply Rmult_le_compat_l ; [fourier |] ;
+  rewrite <- Rmult_1_r ; apply Rmult_le_compat_l ; [lra |] ;
   apply Rle_trans with (dist C_met (f2 (x + h * v)) 0) ; [simpl ; unfold C_dist ; rewrite
   Cminus_0_r ; right ; reflexivity |] ; apply Rle_trans with (Rmin 1 (eps / 3 / Cnorm l1)) ;
   [left ; apply Hdelta3 | apply Rmin_l].
@@ -767,17 +767,17 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   [apply Rmin_r | apply Rmin_l]].
   right ; field ; apply Cnorm_no_R0 ; assumption.
   destruct (Hf1 v_neq (Rmin (eps / 4) (eps / 4 / Cnorm (f2 x)))) as [delta1 Hdelta1].
-  apply Rmin_pos ; [fourier |] ; apply Rmult_lt_0_compat ; [fourier | apply Rinv_0_lt_compat ;
+  apply Rmin_pos ; [lra |] ; apply Rmult_lt_0_compat ; [lra | apply Rinv_0_lt_compat ;
   apply Cnorm_pos_lt] ; assumption.
   destruct (Hf2 v_neq (eps / 4 / Cnorm (f1 x))%R) as [delta2 Hdelta2].
-  apply Rmult_lt_0_compat ; [fourier | apply Rinv_0_lt_compat ;
+  apply Rmult_lt_0_compat ; [lra | apply Rinv_0_lt_compat ;
   apply Cnorm_pos_lt] ; assumption.
   assert (Hf2' : differentiable_pt f2 x v).
    exists l2 ; apply Hf2.
   destruct (differentiable_continuous_along_axis f2 x v Hf2' (Rmin 1 (eps / 4 / Cnorm l1)))
   as [delta3 Hdelta3].
   apply Rmin_pos ; [apply Rlt_0_1 |] ; apply Rmult_lt_0_compat ;
-  [fourier | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
+  [lra | apply Rinv_0_lt_compat ; apply Cnorm_pos_lt] ; assumption.
   pose (delta := Rmin delta1 (Rmin delta2 delta3)) ; assert (delta_pos : 0 < delta) by
   (repeat apply Rmin_pos ; [apply delta1 | apply delta2 | apply delta3]) ;
   exists (mkposreal delta delta_pos) ; intros h h_neq h_ub ;
@@ -817,7 +817,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   apply Hdelta1 | apply Rmin_l].
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
-  rewrite <- Rmult_1_r ; apply Rmult_le_compat_l ; [fourier |] ;
+  rewrite <- Rmult_1_r ; apply Rmult_le_compat_l ; [lra |] ;
   apply Rle_trans with (Rmin 1 (eps / 4 / Cnorm l1)) ; [| apply Rmin_l].
   apply Rle_trans with (dist C_met (f2 (x + h * v)) (f2 x)) ; [simpl ; unfold C_dist ;
   right ; reflexivity | left ; apply Hdelta3].

@@ -1,6 +1,6 @@
 Require Import Reals.
 Require Import Rinterval.
-Require Import Fourier.
+Require Import Lra.
 
 Require Import Rpser_def Rpser_base_facts Rpser_cv_facts.
 
@@ -36,7 +36,7 @@ Proof.
 intros An r Pr x x_bd.
  unfold weaksum_r ; case (Rlt_le_dec (Rabs x) r) ; intro s.
  destruct (Rpser_abel An r Pr x s) as (l,Hl) ; simpl ; assumption.
- apply False_ind ; fourier.
+ apply False_ind ; lra.
 Qed.
 
 (** Proof that the sum is unique *)
@@ -85,7 +85,7 @@ intros An r Pr x x_ub.
  unfold sum_r ; destruct (Rlt_le_dec (Rabs x) r) as [x_bd | x_nbd].
  apply weaksum_r_sums.
  apply (proj1 (middle_is_in_the_middle _ _ x_bd)).
-  apply False_ind ; fourier.
+  apply False_ind ; lra.
 Qed.
 
 (** Proof that the sum is unique *)

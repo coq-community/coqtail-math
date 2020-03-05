@@ -23,7 +23,7 @@ USA.
 Require Import Max.
 Require Export Rseries_facts.
 Require Export Rsequence_facts.
-Require Import Fourier.
+Require Import Lra.
 Require Import Complex.
 Require Import Csequence_facts.
 Require Import Cseries.

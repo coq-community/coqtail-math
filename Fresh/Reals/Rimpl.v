@@ -195,7 +195,8 @@ Module Rimpl <: Raxiom.CReals.
   
   Lemma IPR_2_same : forall p, RD.IPR_2 p = Rmul (Radd R1 R1) (IPR p).
   Proof.
-    induction 0; simpl.
+    intros p.
+    induction p; simpl.
       rewrite IHp, (RA.Rplus_comm RD.R1 (RD.Rmult _ _)); auto.
       rewrite IHp; auto.
       rewrite <-RI.Rmult_1_r at 1; auto.
@@ -203,7 +204,7 @@ Module Rimpl <: Raxiom.CReals.
 
   Lemma IPR_same : forall p, RD.IPR p = IPR p.
   Proof.
-    destruct 0; auto.
+    intros []; auto.
       change (RD.Rplus RD.R1 (RD.IPR_2 p) = IPR p~1). rewrite IPR_2_same, RA.Rplus_comm. auto.
       change (RD.IPR_2 p = IPR p~0). rewrite IPR_2_same. auto.
   Qed.
@@ -331,7 +332,7 @@ Module Rimpl <: Raxiom.CReals.
      replace (Rdefinitions.Rplus (RD.Rinv (RD.Rplus R1 R1)) (RD.Rinv (RD.Rplus R1 R1))) with
      (RD.Rmult (RD.Rplus R1 R1) (RD.Rinv (RD.Rplus R1 R1))).  
      rewrite (RA.Rmult_comm (RD.Rplus _ _) _). rewrite RA.Rinv_l. intuition.
-     assert (RD.Rlt R0 2). change R0 with (RD.IZR Z0). intuition. intro. unfold R0 in *.
+     assert (RD.Rlt R0 (RD.Rplus R1 R1)). change R0 with (RD.IZR Z0). intuition. intro. unfold R0 in *.
      change RD.R0 with (RD.IZR Z0)in H0. rewrite <- H1 in H0. apply RI.Rlt_irrefl in H0. 
      destruct H0.
      apply RI.double.

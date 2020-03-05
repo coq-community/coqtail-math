@@ -21,9 +21,10 @@ USA.
 
 Require Import ZArith.
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 Require Import DiscrR.
 Require Import Rfunctions.
+Open Scope R_scope.
 
 Lemma Rmult_pow : forall x y n, (x * y) ^ n = x ^ n * y ^ n.
 Proof.
@@ -152,7 +153,7 @@ Proof.
 intros x H.
 unfold Rabs.
 destruct (Rcase_abs x).
-fourier.
+lra.
 reflexivity.
 Qed.
 
@@ -174,20 +175,20 @@ Lemma Rabs_add : forall x y, x >= 0 -> y >= 0 -> Rabs (x + y) = Rabs x + Rabs y.
 Proof.
 intros x y H H1.
 unfold Rabs.
-(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [fourier|idtac|idtac]) ; 
-(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [fourier|idtac|idtac]) ;
-(destruct (Rcase_abs (x + y)) as [H4|[H4|H4]] ; [fourier|ring|ring]).
+(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [lra|idtac|idtac]) ; 
+(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [lra|idtac|idtac]) ;
+(destruct (Rcase_abs (x + y)) as [H4|[H4|H4]] ; [lra|ring|ring]).
 Qed.
 
 Lemma Rabs_add1 : forall x y, 0 >= x -> 0 >= y -> Rabs (x + y) = Rabs x + Rabs y.
 Proof.
 intros x y H H1.
 unfold Rabs.
-(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [idtac|fourier|idtac]) ; 
-(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [idtac|fourier|idtac]) ;
-(destruct (Rcase_abs (x + y)) as [H4|[H4|H4]] ; [idtac|fourier|idtac]).
-ring. fourier. rewrite H3. ring. fourier. 
-rewrite H2. ring. fourier. rewrite H2. rewrite H3. ring.
+(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [idtac|lra|idtac]) ; 
+(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [idtac|lra|idtac]) ;
+(destruct (Rcase_abs (x + y)) as [H4|[H4|H4]] ; [idtac|lra|idtac]).
+ring. lra. rewrite H3. ring. lra. 
+rewrite H2. ring. lra. rewrite H2. rewrite H3. ring.
 reflexivity.
 Qed. (* TODO à refaire en plus rapide *)
 
@@ -195,9 +196,9 @@ Lemma Rabs_minus : forall x y, x >= 0 -> 0 >= y -> Rabs (x - y) = Rabs x + Rabs 
 Proof.
 intros x y H H1.
 unfold Rabs.
-(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [fourier|idtac|idtac]) ; 
-(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [idtac|fourier|idtac]) ;
-(destruct (Rcase_abs (x - y)) as [H4|[H4|H4]] ; [fourier|idtac|idtac]).
+(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [lra|idtac|idtac]) ; 
+(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [idtac|lra|idtac]) ;
+(destruct (Rcase_abs (x - y)) as [H4|[H4|H4]] ; [lra|idtac|idtac]).
 ring. ring. rewrite H3. ring. rewrite H3. ring.
 ring. ring. rewrite H3. ring. rewrite H3. rewrite H2. ring.
 Qed.
@@ -206,17 +207,17 @@ Lemma Rabs_minus1 : forall x y, 0 >= x -> y >= 0 -> Rabs (x - y) = Rabs x + Rabs
 Proof.
 intros x y H H1.
 unfold Rabs.
-(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [idtac|fourier|idtac]) ; 
-(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [fourier|idtac|idtac]) ;
-(destruct (Rcase_abs (x - y)) as [H4|[H4|H4]] ; [idtac|fourier|idtac]).
-ring. fourier. ring. fourier. rewrite H2. ring.
-fourier. rewrite H2. rewrite H3. ring. rewrite H2. rewrite H3. ring.
+(destruct (Rcase_abs (x)) as [H2|[H2|H2]] ; [idtac|lra|idtac]) ; 
+(destruct (Rcase_abs (y)) as [H3|[H3|H3]] ; [lra|idtac|idtac]) ;
+(destruct (Rcase_abs (x - y)) as [H4|[H4|H4]] ; [idtac|lra|idtac]).
+ring. lra. ring. lra. rewrite H2. ring.
+lra. rewrite H2. rewrite H3. ring. rewrite H2. rewrite H3. ring.
 Qed.
 
 Lemma Rabs_2 : Rabs (2) = 2.
 Proof.
 unfold Rabs. destruct (Rcase_abs 2).
-fourier. reflexivity.
+lra. reflexivity.
 Qed.
 
 Lemma Rabs_minus_dev : forall a b, a >= b -> Rabs (a - b) = a - b.
@@ -224,7 +225,7 @@ Proof.
 intros a b H.
 unfold Rabs.
 destruct (Rcase_abs (a - b)).
-fourier.
+lra.
 ring.
 Qed.
 
@@ -281,7 +282,7 @@ Proof.
 intros x y H.
 assert (H0 : (y <> 0)).
 intros H1. rewrite H1 in H.
-fourier.
+lra.
 rewrite (Rabs_div x y H0).
 rewrite (Rabs_right1 y H).
 reflexivity.
@@ -292,7 +293,7 @@ Proof.
 intros x y H.
 assert (H0 : (y <> 0)).
 intros H1. rewrite H1 in H.
-fourier.
+lra.
 rewrite (Rabs_div x y H0).
 rewrite (Rabs_left y H).
 field. assumption.
@@ -302,7 +303,7 @@ Lemma Rabs_Rinv_pos : forall x, x > 0 -> Rabs (/x) = / x.
 Proof.
 intros x H.
 assert (H0 : ( x <> 0)).
-intro H1. rewrite H1 in H. fourier.
+intro H1. rewrite H1 in H. lra.
 rewrite Rabs_Rinv.
 rewrite Rabs_right.
 reflexivity.
@@ -314,7 +315,7 @@ Lemma Rabs_Rinv_neg : forall x, 0 > x -> Rabs (/x) = - / x.
 Proof.
 intros x H.
 assert (H0 : ( x <> 0)).
-intro H1. rewrite H1 in H. fourier.
+intro H1. rewrite H1 in H. lra.
 rewrite Rabs_Rinv.
 rewrite Rabs_left.
 field. assumption.
@@ -447,7 +448,7 @@ end.
 
 Ltac reduirenumeral x :=
   let h := fresh "H" in 
-    (assert (h : x >= 0) by fourier) ;
+    (assert (h : x >= 0) by lra) ;
     rewrite (Rabs_right x h).
 
 Ltac elim_Rabs x :=
@@ -472,12 +473,12 @@ match x with
       match b1 with
         | false => idtac
         | true =>  let h := fresh "H" in
-              assert (h : b >= 0) by fourier
+              assert (h : b >= 0) by lra
       end ; 
       match a1 with
         | false => idtac
         | true => let h := fresh "H" in
-              assert (h : a >= 0) by fourier
+              assert (h : a >= 0) by lra
       end ;
       match goal with
         | H : a > 0 |- _ => generalize (Rgt_ge a 0 H) ; intro
@@ -514,12 +515,12 @@ match x with
               match b1 with
                 | false => idtac
                 | true => let h := fresh "H" in
-                      assert (h : b >= 0) by fourier
+                      assert (h : b >= 0) by lra
               end ; 
               match a1 with
                 | false => idtac
                 | true => let h := fresh "H" in
-                      assert (h : a >= 0) by fourier
+                      assert (h : a >= 0) by lra
               end ;
               match goal with
                 | H : a >= 0 |- _ => 
@@ -700,7 +701,7 @@ Section examples.
   
   Example hfdd : sum_f_R0 (fun n => (aaa n n) / 1) 0 = 1.
   Proof.
-  assert (1 <> 0) by (intro Hc; fourier).
+  assert (1 <> 0) by (intro Hc; lra).
   elim_ident.
   admit.
   Abort.

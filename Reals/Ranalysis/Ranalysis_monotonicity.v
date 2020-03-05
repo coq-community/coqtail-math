@@ -1,7 +1,7 @@
 Require Import Rbase Ranalysis.
 Require Import Rinterval Rfunctions Rfunction_def Rfunction_facts.
 Require Import Ranalysis_def Ranalysis_def_simpl.
-Require Import MyRIneq MyR_dist Fourier.
+Require Import MyRIneq MyR_dist Lra.
 
 Require Import Ass_handling.
 
@@ -293,7 +293,7 @@ Lemma strictly_increasing_strictly_decreasing_interval2 : forall f lb ub,
   strictly_decreasing_interval (- ub) (- lb) (fun x => f(-x)).
 Proof.
 intros f c r f_incr ; intros x y x_in_B y_in_B x_lt_y.
- apply f_incr ; unfold interval in * ; try split ; intuition ; fourier.
+ apply f_incr ; unfold interval in * ; try split ; intuition ; lra.
 Qed.
 
 Lemma strictly_decreasing_strictly_increasing_interval2 : forall f lb ub,
@@ -301,7 +301,7 @@ Lemma strictly_decreasing_strictly_increasing_interval2 : forall f lb ub,
   strictly_increasing_interval (-ub) (-lb) (fun x => f(-x)).
 Proof.
 intros f c r f_decr ; intros x y x_in_B y_in_B x_lt_y.
- apply f_decr ; unfold interval in * ; try split ; intuition ; fourier.
+ apply f_decr ; unfold interval in * ; try split ; intuition ; lra.
 Qed.
 
 Lemma strictly_increasing_reciprocal_interval_compat : forall f g lb ub,

@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import Rbase Rtactic.
-Require Import Fourier.
+Require Import Lra.
 Require Import Ranalysis Rfunctions Rtrigo_facts.
 Require Import Rseries_def.
 Require Import SeqProp.
@@ -101,7 +101,7 @@ Lemma tan_cv_pos_infty_prelim : forall y , 0 < y ->
   { x | open_interval (- PI / 2) (PI / 2) x /\ y < tan x }.
 Proof.
 intros y y_pos ; destruct (cos_cv_0_left (/ (2 * y)) (PI / 6)) as [x [x_in Hx]].
- apply Rinv_0_lt_compat ; fourier.
+ apply Rinv_0_lt_compat ; lra.
  apply PI6_in.
  assert (x_bd : open_interval (- PI / 2) (PI / 2) x).
   eapply open_interval_restriction.
@@ -111,11 +111,11 @@ intros y y_pos ; destruct (cos_cv_0_left (/ (2 * y)) (PI / 6)) as [x [x_in Hx]].
  assert (cosx_pos : 0 < cos x) by (apply cos_pos ; assumption).
  exists x ; split ; [assumption |].
   apply Rlt_le_trans with (/ (2 * cos x)).
-   rewrite <- Rinv_involutive with y ; [apply Rinv_lt_contravar | apply Rgt_not_eq ; fourier].
-    apply Rlt_mult_inv_pos ; [apply Rmult_lt_0_compat |] ; (assumption || fourier).
+   rewrite <- Rinv_involutive with y ; [apply Rinv_lt_contravar | apply Rgt_not_eq ; lra].
+    apply Rlt_mult_inv_pos ; [apply Rmult_lt_0_compat |] ; (assumption || lra).
     apply Rmult_Rinv_lt_compat_r_rev ; [| rewrite <- Rinv_mult_distr, Rmult_comm] ;
-    (assumption || apply Rgt_not_eq || idtac) ; fourier.
-   rewrite Rinv_mult_distr ; try (apply Rgt_not_eq ; (assumption || fourier)) ;
+    (assumption || apply Rgt_not_eq || idtac) ; lra.
+   rewrite Rinv_mult_distr ; try (apply Rgt_not_eq ; (assumption || lra)) ;
     apply Rmult_le_compat_r ; [left ; apply Rinv_0_lt_compat ; assumption |].
     transitivity (sin (PI / 6)).
      right ; rewrite sin_PI6 ; unfold Rdiv ; ring.
@@ -142,7 +142,7 @@ intro y ; destruct (tan_cv_pos_infty (- y)) as [x [x_in Hx]] ;
  exists (- x) ; split.
   rewrite <- (Ropp_involutive (PI /2)), Ropp_Rdiv_compat_l ;
    [apply open_interval_opp_compat ; rewrite <- Ropp_Rdiv_compat_l |] ;
-   (assumption || apply Rgt_not_eq ; fourier).
+   (assumption || apply Rgt_not_eq ; lra).
  rewrite tan_neg ; apply Ropp_lt_cancel ; rewrite Ropp_involutive ; assumption.
 Qed.
 
@@ -236,20 +236,20 @@ intro x ; pose (d := interval_dist (- PI / 2) (PI / 2) (atan x)) ;
  pose (lb := atan x - d / 2) ; pose (ub := atan x + d / 2).
  assert (lb_in : open_interval (- PI / 2) (PI / 2) lb).
   apply open_interval_dist_bound ; [apply open_interval_interval, atan_in |].
-  rewrite Rabs_Ropp, Rabs_right ; fold d ; fourier.
+  rewrite Rabs_Ropp, Rabs_right ; fold d ; lra.
  assert (ub_in : open_interval (- PI / 2) (PI / 2) ub).
   apply open_interval_dist_bound ; [apply open_interval_interval, atan_in |].
-  rewrite Rabs_right ; fold d ; fourier.
+  rewrite Rabs_right ; fold d ; lra.
  assert (x_in : open_interval (tan lb) (tan ub) x).
  split.
   apply Rlt_le_trans with (tan (atan x)).
    apply strictly_increasing_open_interval_tan ;
-    [assumption | apply atan_in | unfold lb ; fourier].
+    [assumption | apply atan_in | unfold lb ; lra].
    right ; apply reciprocal_tan_atan ; exact I.
   apply Rle_lt_trans with (tan (atan x)).
    right ; symmetry ; apply reciprocal_tan_atan ; exact I.
    apply strictly_increasing_open_interval_tan ;
-    [apply atan_in | assumption | unfold ub ; fourier].
+    [apply atan_in | assumption | unfold ub ; lra].
  apply derivable_pt_lim_open_interval_pt_lim with (tan lb) (tan ub).
   assumption.
   replace (x ^ 2) with (tan (atan x) ^ 2) by (f_equal ; apply reciprocal_tan_atan ; exact I).
@@ -462,19 +462,19 @@ Proof.
 intros x x_in ; unfold arctan, arctan_pos, arctan_sum.
  destruct (Rlt_le_dec x 0).
   destruct (Rlt_le_dec (- x) 0).
-   apply False_ind ; fourier.
+   apply False_ind ; lra.
    destruct (Rle_lt_dec (- x) 1).
     destruct (Req_dec (- x) 1).
      destruct (Req_dec x 1).
-      apply False_ind ; fourier.
-      apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; fourier.
+      apply False_ind ; lra.
+      apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; lra.
      destruct (Req_dec x 1).
-      apply False_ind ; fourier.
+      apply False_ind ; lra.
       symmetry ; apply sum_r_arctan_odd ; assumption.
-     apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; fourier.
+     apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; lra.
     destruct (Rle_lt_dec x 1).
      reflexivity.
-     apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; fourier.
+     apply False_ind ; destruct (Rabs_def2 _ _ x_in) ; lra.
 Qed.
 
 Lemma arctan_explicit_pos : forall x, 1 <= x ->
@@ -482,31 +482,31 @@ Lemma arctan_explicit_pos : forall x, 1 <= x ->
 Proof.
 intros x x_lb ; unfold arctan, arctan_sum, arctan_pos.
  destruct (Rlt_le_dec x 0).
-  apply False_ind ; fourier.
+  apply False_ind ; lra.
   destruct (Rle_lt_dec x 1).
    destruct (Rlt_le_dec 1 0).
-    apply False_ind ; fourier.
+    apply False_ind ; lra.
     destruct (Rle_lt_dec 1 1).
      destruct (Req_dec (/ x) 1) as [Heq | Hneq].
       assert (Hx : x = 1).
        rewrite <- (Rmult_1_r x), <- Heq, Rinv_r.
         symmetry ; assumption.
-        apply Rgt_not_eq ; fourier.
+        apply Rgt_not_eq ; lra.
       rewrite Hx, arctan_sum_1_PI4 ; ring.
      assert (Hx : x = 1) by (apply Rle_antisym ; assumption).
       apply False_ind, Hneq ; rewrite Hx, Rinv_1 ; reflexivity.
-    apply False_ind ; fourier.
+    apply False_ind ; lra.
    destruct (Rlt_le_dec 1 0).
-    apply False_ind ; fourier.
+    apply False_ind ; lra.
     destruct (Rle_lt_dec 1 1).
      unfold arctan_sum ; destruct (Req_dec (/ x) 1) as [Heq | Hneq].
       assert (Hx : x = 1).
        rewrite <- (Rmult_1_r x), <- Heq, Rinv_r.
         symmetry ; assumption.
-        apply Rgt_not_eq ; fourier.
-      apply False_ind ; fourier.
+        apply Rgt_not_eq ; lra.
+      apply False_ind ; lra.
      reflexivity.
-    apply False_ind ; fourier.
+    apply False_ind ; lra.
 Qed.
 
 Lemma derivable_arctan_pos : forall lb ub x,
@@ -514,7 +514,7 @@ Lemma derivable_arctan_pos : forall lb ub x,
   derivable_pt_lim_in (open_interval lb ub) arctan x (/ (1 + x ^ 2)).
 Proof.
 intros lb ub x lb_lb x_in.
- assert (x_pos : 0 < x) by (transitivity 1 ; [fourier | apply Rle_lt_trans with lb ; ass_apply]).
+ assert (x_pos : 0 < x) by (transitivity 1 ; [lra | apply Rle_lt_trans with lb ; ass_apply]).
  assert (Rinvx_in : Rball 0 1 (/ x)).
   rewrite Rball_0_simpl, Rabs_Rinv_pos, <- Rinv_1 ; [| assumption].
   apply Rinv_1_lt_contravar ; [reflexivity | apply Rle_lt_trans with lb ; ass_apply].
@@ -551,9 +551,9 @@ intros x x_in ; destruct (Req_dec x 0) as [x_eq | x_neq].
  assert (Hbs : lb < ub).
   apply Rmin_lt_Rmax ; symmetry ; assumption.
  assert (lb_lb : - 1 < lb).
-  apply Rmin_glb_lt ; [| destruct (Rabs_def2 _ _ x_in)] ; fourier.
+  apply Rmin_glb_lt ; [| destruct (Rabs_def2 _ _ x_in)] ; lra.
  assert (ub_ub : ub < 1).
-  apply Rmax_lub_lt ; [| destruct (Rabs_def2 _ _ x_in)] ; fourier.
+  apply Rmax_lub_lt ; [| destruct (Rabs_def2 _ _ x_in)] ; lra.
  assert (atan_der : forall c, lb < c < ub -> derivable_pt atan c).
   intros ; apply derivable_atan.
  assert (arctan_der1 : forall c, lb <= c <= ub -> derivable_pt arctan_sum c).

@@ -22,7 +22,7 @@ USA.
 Require Import Rbase Ranalysis.
 Require Import Rinterval Rfunctions Rfunction_def Rfunction_facts.
 Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_continuity.
-Require Import MyRIneq MyR_dist Fourier.
+Require Import MyRIneq MyR_dist Lra.
 
 Require Import Ass_handling.
 
@@ -285,7 +285,7 @@ Lemma derivable_open_interval_derivable : forall f,
 Proof.
 intros f Hf x ; eapply derivable_open_interval_pt, (center_in_open_interval _ 1).
  apply Hf.
- fourier.
+ lra.
 Qed.
 
 (** * derivable implies continuous *)
@@ -448,7 +448,7 @@ Lemma derivable_pt_lim_in_const: forall D k x,
   derivable_pt_lim_in D (fun _ => k) x 0.
 Proof.
 intros D k x eps eps_pos ; exists 1 ; intros ; split.
- fourier.
+ lra.
  intros ; simpl ; unfold R_dist, growth_rate, Rminus, Rdiv ;
  rewrite Rplus_opp_r, Rmult_0_l, Rplus_opp_r, Rabs_R0 ;
  assumption.

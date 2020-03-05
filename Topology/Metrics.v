@@ -24,7 +24,8 @@ USA.
 Require Import Reals.
 Require Import Ensembles.
 Require Import Topology.
-Require Import Fourier.
+Require Import Lra.
+Open Scope R_scope.
 
 (** * Metric Space *)
 
@@ -77,7 +78,7 @@ Section Balls.
    eapply Rle_lt_trans.
     apply (metric_tri _ _ x).
     
-    rewrite (metric_sym y x); fourier.
+    rewrite (metric_sym y x); lra.
   Qed.
 End Balls.
 
@@ -158,7 +159,7 @@ destruct (Rtotal_order (d x y) 0%R) as [|[|]]; auto.
   apply metric_pos.
  pose (d x y / 2)%R as r.
  assert (rpos : 0 < r).
-  unfold r; fourier.
+  unfold r; lra.
  pose (fun c => open_ball X d c r rpos) as ball.
  assert (centerinball : forall x, ball x x).
   constructor.

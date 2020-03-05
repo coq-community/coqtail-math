@@ -1,4 +1,4 @@
-Require Import Reals MyRIneq Fourier.
+Require Import Reals MyRIneq Fourier Lra.
 Require Import Rsequence_usual_facts.
 
 Local Open Scope R_scope.
@@ -168,7 +168,7 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
  apply Rabs_pos_lt ; assumption.
  rewrite Rabs_right.
  assert (Temp : forall a b c, b < c - a -> a + b < c).
-  clear ; intros ; fourier.
+  clear ; intros ; lra.
  apply Temp.
  replace (/INR (i + M)) with (R_dist (/INR (S (i + pred M))) 0).
  apply HN ; intuition.

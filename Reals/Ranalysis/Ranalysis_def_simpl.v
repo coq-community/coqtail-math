@@ -1,7 +1,7 @@
 Require Import Rbase Ranalysis.
 Require Import Rinterval Rfunctions Rfunction_def.
 Require Import Ranalysis_def Rfunction_facts.
-Require Import MyRIneq MyR_dist Fourier.
+Require Import MyRIneq MyR_dist Lra.
 
 Require Import Ass_handling.
 
@@ -15,23 +15,23 @@ Lemma middle_r_in_Rball : forall c r, 0 < r -> Rball c r (middle c (c + r)).
 Proof.
 intros c r r_pos ; apply included_open_interval_Rball2 ; split.
  transitivity c.
-  fourier.
-  apply middle_is_in_the_middle ; fourier.
- apply middle_is_in_the_middle ; fourier.
+  lra.
+  apply middle_is_in_the_middle ; lra.
+ apply middle_is_in_the_middle ; lra.
 Qed.
 
 Lemma middle_l_in_Rball : forall c r, 0 < r -> Rball c r (middle (c - r) c).
 Proof.
 intros c r r_pos ; apply included_open_interval_Rball2 ; split.
- apply middle_is_in_the_middle ; fourier.
+ apply middle_is_in_the_middle ; lra.
  transitivity c.
-  apply middle_is_in_the_middle ; fourier.
-  fourier.
+  apply middle_is_in_the_middle ; lra.
+  lra.
 Qed.
 
 Lemma Rlt_div_2 : forall x, 0 < x -> x / 2 < x.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma dense_interval: forall lb ub x, lb < ub ->
@@ -42,16 +42,16 @@ intros lb ub x Hlt [xlb xub] eps eps_pos ; destruct xlb as [xlb | xeq].
   pose (h := Rmin (eps / 2) (interval_dist lb ub x)) ;
   assert (h_pos : 0 < h).
    apply Rmin_pos_lt, open_interval_dist_pos ;
-   [fourier | split ; assumption].
+   [lra | split ; assumption].
   exists (x + h) ; split.
    split.
     apply interval_dist_bound ; [split ; left ; assumption |].
     rewrite Rabs_right ; [apply Rmin_r | left ; assumption].
     apply Rplus_pos_neq ; assumption.
    rewrite R_dist_Rplus_compat, Rabs_right ; [| left ; assumption].
-    apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
+    apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | lra].
   pose (h := Rmin (eps / 2) (ub - lb)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; fourier).
+  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; lra).
    exists (x - h) ; split. split. split.
     transitivity (x - (ub - lb)).
      right ; subst ; ring.
@@ -59,40 +59,40 @@ intros lb ub x Hlt [xlb xub] eps eps_pos ; destruct xlb as [xlb | xeq].
      left ; subst ; apply Rminus_pos_lt ; assumption.
      subst ; apply Rgt_not_eq, Rminus_pos_lt ; assumption.
      rewrite R_dist_Rminus_compat, Rabs_right ; [| left ; assumption].
-     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
+     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | lra].
   pose (h := Rmin (eps / 2) (ub - lb)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; fourier).
+  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; lra).
    exists (x + h) ; split. split. split.
     left ; rewrite xeq ; apply Rplus_pos_lt ; assumption.
     transitivity (x + (ub - lb)) ; [| right ; rewrite xeq ; ring].
      apply Rplus_le_compat_l, Rmin_r.
      apply Rlt_not_eq, Rplus_pos_lt ; assumption.
      rewrite R_dist_Rplus_compat, Rabs_right ; [| left ; assumption].
-     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
+     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | lra].
 Qed.
 
 Lemma dense_open_interval: forall lb ub x, lb < ub ->
   interval lb ub x -> dense (open_interval lb ub) x.
 Proof.
-intros lb ub x Hlt [xlb xub] eps eps_pos ; assert (lbub : 0 < ub - lb) by fourier.
+intros lb ub x Hlt [xlb xub] eps eps_pos ; assert (lbub : 0 < ub - lb) by lra.
 destruct xlb as [xlb | xeq].
  destruct xub as [xub | xeq].
   assert (d_pos : 0 < interval_dist lb ub x / 2).
-   apply Rlt_mult_inv_pos ; [apply open_interval_dist_pos | fourier].
+   apply Rlt_mult_inv_pos ; [apply open_interval_dist_pos | lra].
    split ; assumption.
   pose (h := Rmin (eps / 2) (interval_dist lb ub x / 2)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; fourier).
+  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; lra).
   exists (x + h) ; split.
    split.
     apply open_interval_dist_bound ; [split ; left ; assumption |].
     apply Rle_lt_trans with (interval_dist lb ub x / 2).
     rewrite Rabs_right ; [apply Rmin_r | left ; assumption].
-    fourier.
+    lra.
     apply Rplus_pos_neq ; assumption.
    rewrite R_dist_Rplus_compat, Rabs_right ; [| left ; assumption].
-    apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
+    apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | lra].
   pose (h := Rmin (eps / 2) ((ub - lb) / 2)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; [| apply Rlt_mult_inv_pos] ; fourier).
+  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; [| apply Rlt_mult_inv_pos] ; lra).
    exists (x - h) ; repeat split.
     apply Rle_lt_trans with (x - (ub - lb)).
      right ; subst ; ring.
@@ -101,9 +101,9 @@ destruct xlb as [xlb | xeq].
      subst ; apply Rminus_pos_lt ; assumption.
      subst ; apply Rgt_not_eq, Rminus_pos_lt ; assumption.
      rewrite R_dist_Rminus_compat, Rabs_right ; [| left ; assumption].
-     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
+     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | lra].
   pose (h := Rmin (eps / 2) ((ub - lb)/2)) ;
-  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; [| apply Rlt_mult_inv_pos] ; fourier).
+  assert (h_pos : 0 < h) by (apply Rmin_pos_lt ; [| apply Rlt_mult_inv_pos] ; lra).
    exists (x + h) ; repeat split.
     rewrite xeq ; apply Rplus_pos_lt ; assumption.
     apply Rlt_le_trans with (x + (ub - lb)) ; [| right ; rewrite xeq ; ring].
@@ -111,14 +111,14 @@ destruct xlb as [xlb | xeq].
      apply Rlt_div_2 ; assumption.
      apply Rlt_not_eq, Rplus_pos_lt ; assumption.
      rewrite R_dist_Rplus_compat, Rabs_right ; [| left ; assumption].
-     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | fourier].
+     apply Rle_lt_trans with (eps / 2) ; [apply Rmin_l | lra].
 Qed.
 
 Lemma dense_Rball : forall c r x, Rball c r x -> dense (Rball c r) x.
 Proof.
 intros c r x x_in eps eps_pos ;
  assert (r_pos : 0 < r) by (eapply Rball_radius_pos ; eassumption) ;
- assert (Hlbub : c - r < c + r) by fourier ;
+ assert (Hlbub : c - r < c + r) by lra ;
  assert (x_in' : interval (c - r) (c + r) x).
   apply open_interval_interval, included_Rball_open_interval ; assumption.
  destruct (dense_open_interval (c - r) (c + r) x Hlbub x_in' eps eps_pos) as [y [[y_in y_neq] Hy]] ;
@@ -373,7 +373,7 @@ assert (forall x l, lb < x < ub -> (derivable_pt_abs f x l <-> derivable_pt_abs 
    apply Req_le ; apply Rabs_right ; apply Rgt_ge ; assumption.
  split.
  assert (Sublemma : forall x y z, -z < y - x -> x < y + z).
-  intros ; fourier.
+  intros ; lra.
  apply Sublemma.
  apply Sublemma2. rewrite Rabs_Ropp.
  apply Rlt_le_trans with (r2:=a-lb) ; [| apply RRle_abs] ;
@@ -382,7 +382,7 @@ assert (forall x l, lb < x < ub -> (derivable_pt_abs f x l <-> derivable_pt_abs 
  apply Rlt_le_trans with (r2:=Rmin (ub - a) (a - lb)) ; [| apply Rmin_r] ;
  apply Rlt_le_trans with (r2:=Rmin delta (Rmin (ub - a) (a - lb))) ; [| apply Rmin_r] ; assumption.
  assert (Sublemma : forall x y z, y < z - x -> x + y < z).
-  intros ; fourier.
+  intros ; lra.
  apply Sublemma.
  apply Sublemma2.
  apply Rlt_le_trans with (r2:=ub-a) ; [| apply RRle_abs] ;
@@ -412,7 +412,7 @@ assert (forall x l, lb < x < ub -> (derivable_pt_abs f x l <-> derivable_pt_abs 
    apply Req_le ; apply Rabs_right ; apply Rgt_ge ; assumption.
  split.
  assert (Sublemma : forall x y z, -z < y - x -> x < y + z).
-  intros ; fourier.
+  intros ; lra.
  apply Sublemma.
  apply Sublemma2. rewrite Rabs_Ropp.
  apply Rlt_le_trans with (r2:=a-lb) ; [| apply RRle_abs] ;
@@ -421,7 +421,7 @@ assert (forall x l, lb < x < ub -> (derivable_pt_abs f x l <-> derivable_pt_abs 
  apply Rlt_le_trans with (r2:=Rmin (ub - a) (a - lb)) ; [| apply Rmin_r] ;
  apply Rlt_le_trans with (r2:=Rmin delta (Rmin (ub - a) (a - lb))) ; [| apply Rmin_r] ; assumption.
  assert (Sublemma : forall x y z, y < z - x -> x + y < z).
-  intros ; fourier.
+  intros ; lra.
  apply Sublemma.
  apply Sublemma2.
  apply Rlt_le_trans with (r2:=ub-a) ; [| apply RRle_abs] ;

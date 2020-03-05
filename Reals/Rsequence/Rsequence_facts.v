@@ -28,7 +28,7 @@ Require Export Rsequence_base_facts.
 Require Export Rsequence_cv_facts.
 Require Export Rsequence_rel_facts.
 Require Export Rsequence_usual_facts.
-Require Import Fourier.
+Require Import Lra.
 Open Scope R_scope.
 Open Scope Rseq_scope.
 

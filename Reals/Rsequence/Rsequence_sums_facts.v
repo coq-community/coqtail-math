@@ -22,7 +22,7 @@ USA.
 Require Import Coq.omega.Omega.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_cv_facts Rsequence_rewrite_facts.
 Require Import Rpser_def Rpser_def_simpl.
-Require Import MyRIneq MyNat Fourier.
+Require Import MyRIneq MyNat Lra.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -341,8 +341,8 @@ intros An d d_neg An_neg HAn ; apply Rseq_cv_neg_infty_eq_compat with (- Rseq_su
  intro n ; unfold Rseq_opp at 1 ; rewrite Rseq_sum_opp_compat ; unfold Rseq_opp ;
  apply Ropp_involutive.
  apply Rseq_cv_pos_infty_opp_compat, Rseq_cv_pos_infty_criteria with (- d)%R.
-  fourier.
-  intro n ; unfold Rseq_opp ; pose (An_neg n) ; fourier.
+  lra.
+  intro n ; unfold Rseq_opp ; pose (An_neg n) ; lra.
   intro M ; destruct (HAn M) as [N [N_lb HN]] ; exists N ; split.
    assumption.
    rewrite Rseq_sum_ext with (Vn := - Rseq_shifts An M).

@@ -20,14 +20,14 @@ USA.
 *)
 
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 
 Open Scope R_scope.
 (* begin hide *)
 
 Lemma epsilon_2 : forall x, 0 < x -> x / 2 < x.
 Proof.
-intros x H; fourier.
+intros x H; lra.
 Qed.
 
 Lemma Rabs_include :
@@ -35,18 +35,18 @@ Lemma Rabs_include :
 Proof.
 intros x y u v [Hul Hur] [Hvl Hvr].
 unfold Rabs.
-repeat destruct Rcase_abs; fourier.
+repeat destruct Rcase_abs; lra.
 Qed.
 
 Lemma Rabs_max : forall x y d, Rabs (x - y) <= d -> x <= y + d.
 Proof.
 intros x y d H.
-unfold Rabs in H; destruct Rcase_abs; fourier.
+unfold Rabs in H; destruct Rcase_abs; lra.
 Qed.
 
 Lemma Rabs_min : forall x y d, Rabs (x - y) <= d -> x - d <= y.
 intros x y d H.
-unfold Rabs in H; destruct Rcase_abs; fourier.
+unfold Rabs in H; destruct Rcase_abs; lra.
 Qed.
 
 Section middle_facts.
@@ -58,12 +58,12 @@ Variables x y x' y': R.
 Lemma Rlt_middle_r : x < y -> (middle x y) < y.
 Proof.
 intros H.
-unfold middle; unfold Rdiv; rewrite Rmult_plus_distr_r; fourier.
+unfold middle; unfold Rdiv; rewrite Rmult_plus_distr_r; lra.
 Qed.
 
 Lemma Rlt_middle_l : x < y -> x < middle x y.
 intros H.
-unfold middle; unfold Rdiv; rewrite Rmult_plus_distr_r; fourier.
+unfold middle; unfold Rdiv; rewrite Rmult_plus_distr_r; lra.
 Qed.
 
 Lemma middle_sym : middle x y = middle y x.
@@ -87,8 +87,8 @@ reflexivity.
 rewrite Rabs_Rinv.
 rewrite Rabs_pos_eq.
 reflexivity.
-fourier.
-apply Rgt_not_eq; fourier.
+lra.
+apply Rgt_not_eq; lra.
 Qed.
 
 End middle_facts.
@@ -120,17 +120,17 @@ Proof.
 unfold succ.
 destruct (total_order_T (middle x y) k) as [[Ho|Ho]|Ho];
 simpl; intro Hn.
-destruct Hn as [_ Hn]; fourier.
+destruct Hn as [_ Hn]; lra.
 assert (Hm: middle x (middle x y) < middle x y).
 apply Rlt_middle_r; apply Rlt_middle_l; assumption.
-destruct Hn as [_ [Hn|Hn]]; fourier.
-destruct Hn as [Hn _]; fourier.
+destruct Hn as [_ [Hn|Hn]]; lra.
+destruct Hn as [Hn _]; lra.
 Qed.
 
 Lemma succ_included_l : x <= fst (succ x y k).
 Proof.
 unfold succ.
-destruct (total_order_T (middle x y) k) as [[_|_]|_]; simpl; try fourier.
+destruct (total_order_T (middle x y) k) as [[_|_]|_]; simpl; try lra.
 left; apply Rlt_middle_l; assumption.
 Qed.
 
@@ -153,9 +153,9 @@ apply middle_dist.
 repeat (rewrite middle_dist).
 apply epsilon_2.
 unfold Rdiv.
-apply Rmult_lt_0_compat; [|fourier].
-destruct (R_dist_pos x y) as [Hp|Hp]; [fourier|].
-apply -> R_dist_refl in Hp; fourier.
+apply Rmult_lt_0_compat; [|lra].
+destruct (R_dist_pos x y) as [Hp|Hp]; [lra|].
+apply -> R_dist_refl in Hp; lra.
 rewrite R_dist_sym; rewrite middle_sym.
 rewrite middle_dist.
 rewrite R_dist_sym; reflexivity.
@@ -183,7 +183,7 @@ Lemma non_zero_dist : R_dist lb ub > 0.
 Proof.
 destruct (R_dist_pos lb ub) as [Ho|Ho].
 assumption.
-apply -> R_dist_refl in Ho; fourier.
+apply -> R_dist_refl in Ho; lra.
 Qed.
 
 Lemma diagonal_compat : forall n, fst (Dn n) < snd (Dn n).
@@ -224,7 +224,7 @@ apply succ_dist; apply diagonal_compat.
 rewrite tech_pow_Rmult;
 replace (R_dist lb ub * (/2 * (/2) ^ (S n)))
   with (R_dist lb ub * (/ 2) ^ (S n) /2) by field;
-fourier.
+lra.
 Qed.
 
 Lemma diagonal_not_in : forall n p, (n <= p)%nat -> ~ (fst (Dn p) <= Rn n <= snd (Dn p)).
@@ -266,14 +266,14 @@ replace (R_dist lb ub * (/2 * (/2) ^ n))
   with ((R_dist lb ub * (/2) ^ n)/2) by field.
 apply epsilon_2; apply Rmult_lt_0_compat.
 apply non_zero_dist.
-apply pow_lt; fourier.
+apply pow_lt; lra.
 Qed.
 
 Lemma sequence_cauchy_crit : Cauchy_crit Ln.
 Proof.
 intros eps H.
 assert (Hinf: (Rabs (/ 2)) < 1).
-rewrite Rabs_right; fourier.
+rewrite Rabs_right; lra.
 destruct (pow_lt_1_zero (/2) Hinf (eps / (R_dist lb ub))) as [n M].
 apply Rmult_lt_0_compat.
 assumption.
@@ -294,7 +294,7 @@ rewrite Rmult_1_l;
 rewrite Rmult_comm;
 exact Hr.
 apply Rgt_not_eq; apply non_zero_dist.
-apply Rle_ge; apply pow_le; fourier.
+apply Rle_ge; apply pow_le; lra.
 Qed.
 
 Lemma sequence_cv : { l : R | Un_cv Ln l }.
@@ -312,20 +312,20 @@ intros n; split;
 apply le_epsilon;
 intros eps Heps;
 destruct (l_is_limit (eps / 2)) as [N H].
-fourier.
+lra.
 destruct (sequence_bound n (Max.max N n)) as [Hb _].
 apply Max.le_max_r.
 eapply Rle_trans; [apply Hb|].
 apply Rabs_max.
-apply Rle_trans with (r2 := eps / 2); [|fourier].
+apply Rle_trans with (r2 := eps / 2); [|lra].
 left; apply H; apply Max.le_max_l.
-fourier.
+lra.
 destruct (sequence_bound n (Max.max N n)) as [_ Hb].
 apply Max.le_max_r.
-assert (l - eps <= snd (Dn n)); [|fourier].
+assert (l - eps <= snd (Dn n)); [|lra].
 eapply Rle_trans; [|apply Hb].
 apply Rabs_min.
-apply Rle_trans with (r2 := eps / 2); [|fourier].
+apply Rle_trans with (r2 := eps / 2); [|lra].
 left; rewrite Rabs_minus_sym; apply H.
 apply Max.le_max_l.
 Qed.
@@ -379,5 +379,5 @@ Qed.
 
 Theorem R_uncountable : forall (f : nat -> R), {l : R | forall n, l <> f n}.
 Proof.
-apply (segment_uncountable 0 1); fourier.
+apply (segment_uncountable 0 1); lra.
 Qed.

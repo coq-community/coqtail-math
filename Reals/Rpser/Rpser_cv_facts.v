@@ -24,7 +24,7 @@ Require Import Rsequence_def.
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rsequence_facts.
 Require Import Rsequence_sums_facts Rsequence_rewrite_facts.
 Require Import Rpow_facts.
-Require Import Fourier.
+Require Import Lra.
 
 Require Import Max Min.
 Require Import MyRIneq MyNeq.
@@ -119,7 +119,7 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
        R_dist (Rseq_pps An x n) (Rseq_pps An x m) <=
        (Rabs x / r) ^ S (min m n) * (M * 2 / (1 - Rabs x / r))).
    destruct Main as [B HB] ; exists (Rmax B 1) ; split ;
-   [apply Rlt_le_trans with 1 ; [fourier | apply RmaxLess2] | intros m n m_neq_n].
+   [apply Rlt_le_trans with 1 ; [lra | apply RmaxLess2] | intros m n m_neq_n].
     assert (Temp : (1 - (Rabs x / r) ^ S (max m n - S (min m n))) <= 2).
     apply Rle_trans with (Rabs (1 - (Rabs x / r) ^ S (max m n - S (min m n)))) ;
     [apply RRle_abs |].
@@ -164,7 +164,7 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
   apply Rmult_lt_0_compat.
   unfold Rdiv ; apply Rmult_lt_0_compat.
   assumption.
-  apply Rinv_0_lt_compat ; fourier.
+  apply Rinv_0_lt_compat ; lra.
   apply Rgt_minus ; rewrite <- Hrew_abs ; assumption.
   elim (pow_lt_1_zero (x/r) Rabsx_r_lt_1 (eps / (4 * M) * (1 - (Rabs x / r))) y_pos) ; intros N HN ;
   exists N ; intros n m n_lb m_lb.
@@ -180,7 +180,7 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
    apply Rlt_trans with ((eps / (4 * M) * (1 - Rabs x / r)) * ((M * 2 / (1 - Rabs x / r)))).
    apply Rmult_lt_compat_r.
    apply Rmult_lt_0_compat.
-   fourier.
+   lra.
    apply Rinv_0_lt_compat.
    apply Rgt_minus ; rewrite <- Hrew_abs ; assumption.
    rewrite <- Hrew_abs ; rewrite RPow_abs ; rewrite Hrew_abs ; apply HN ; assumption.
@@ -188,9 +188,9 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
        (eps * (/2 * (/(2*M) * (2*M) * ((1 - Rabs x / r) / (1 - Rabs x / r))))).
    replace (/ (2 * M) * (2 * M)) with 1.
    rewrite Rmult_1_l ; unfold Rdiv ; rewrite Rinv_r.
-   fourier.
+   lra.
    apply Rgt_not_eq ; apply Rgt_minus ; unfold Rdiv in Hrew_abs ; rewrite <- Hrew_abs ; assumption.
-   symmetry ; apply Rinv_l ; apply Rgt_not_eq ; fourier.
+   symmetry ; apply Rinv_l ; apply Rgt_not_eq ; lra.
    field ; split ; [|split].
    apply Rgt_not_eq ; apply Rle_lt_trans with (Rabs x) ; [apply Rabs_pos | assumption].
    apply Rgt_not_eq ; apply Rgt_minus ; assumption.
@@ -257,11 +257,11 @@ assert (eps_pos : 0 < eps).
  unfold eps ; apply Rmult_lt_0_compat ;
  [unfold Rdiv ; apply Rlt_mult_inv_pos ;
  [ | apply Rlt_trans with 1] | apply Rabs_pos_lt] ;
- intuition ; fourier.
+ intuition ; lra.
 destruct (Hl _ eps_pos) as [N HN] ; exists N ; intros n.
 apply Rle_lt_trans with (Rabs l - eps).
 unfold eps, Rdiv ; right ; field ; apply Rgt_not_eq ;
- apply Rlt_trans with 1 ; fourier.
+ apply Rlt_trans with 1 ; lra.
 apply R_dist_gt_r ; apply HN ; intuition.
 Qed.
 
@@ -319,7 +319,7 @@ intros An lam lam_neq An_neq An_frac_cv r r_bd.
   assumption.
   apply Rgt_not_eq ; assumption.
  apply Rpser_alembert_prelim2 with (lam + eps)%R.
- fourier.
+ lra.
  apply An_neq.
  destruct (An_frac_cv (/ (middle (Rabs r) (/ lam)) - lam))%R as [N HN].
  assumption.
@@ -354,7 +354,7 @@ assert (rlam_lb : 1 < Rabs r * lam).
  apply Rmult_lt_compat_r ; assumption.
 assert (lam_l'_pos : 0 <= lam / l').
  apply Rle_mult_inv_pos ; [| apply Rlt_trans with 1;
- [| apply middle_is_in_the_middle]] ; fourier.
+ [| apply middle_is_in_the_middle]] ; lra.
 destruct (Rseq_cv_bounded _ _ lam_neq An_frac_ub l') as [N H].
  apply middle_is_in_the_middle ; assumption. 
 assert (HN : forall n, Rabs (An N) * (lam / l') ^ n <= Rabs (An (N + n)%nat)).
@@ -374,7 +374,7 @@ assert (HN : forall n, Rabs (An N) * (lam / l') ^ n <= Rabs (An (N + n)%nat)).
 clear H.
 assert (r_gt_1: 1 < (lam / l') * Rabs r).
  apply Rlt_le_trans with (Rabs r * lam * / l') ; [| right ; unfold Rdiv ; ring].
- apply Rlt_1_mult_inv ; [apply Rlt_trans with 1 ; [fourier |]|] ;
+ apply Rlt_1_mult_inv ; [apply Rlt_trans with 1 ; [lra |]|] ;
  apply middle_is_in_the_middle ; assumption.
 assert (Hinfty : Rseq_cv_pos_infty (gt_abs_pser An r)).
  apply Rseq_cv_pos_infty_shifts_compat with N.
@@ -390,7 +390,7 @@ assert (Hinfty : Rseq_cv_pos_infty (gt_abs_pser An r)).
  apply Rseq_cv_finite_pos_mult_pos_infty_r with (Rabs (An N) * Rabs r ^ N).
  rewrite RPow_abs, <- Rabs_mult ; apply Rabs_pos_lt ;
  apply Rmult_integral_contrapositive_currified ; [apply An_neq | apply pow_nonzero].
- intro r_eq ; rewrite r_eq, Rabs_R0, Rmult_0_l in rlam_lb ; clear -rlam_lb ; fourier.
+ intro r_eq ; rewrite r_eq, Rabs_R0, Rmult_0_l in rlam_lb ; clear -rlam_lb ; lra.
  apply Rseq_constant_cv.
  apply Rseq_pow_gt_1_cv ; assumption.
 destruct Hf as [B HB].
@@ -504,7 +504,7 @@ Lemma Rpser_bound_criteria : forall (An : nat -> R) (x l : R),
     Rpser An x l -> Cv_radius_weak An x.
 Proof.
 intros An x l Hxl.
- destruct (Hxl 1) as [N HN] ; [fourier |] ; unfold R_dist in HN.
+ destruct (Hxl 1) as [N HN] ; [lra |] ; unfold R_dist in HN.
  assert (H1: forall n, (S N <= n)%nat -> gt_abs_pser An x n <= Rmax 2 (Rabs (An O))).
   intros n n_lb ; destruct n ; unfold gt_abs_pser, Rseq_abs.
    unfold gt_pser, Rseq_mult ; simpl ; rewrite Rmult_1_r ; apply RmaxLess2.

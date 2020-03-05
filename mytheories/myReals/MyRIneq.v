@@ -22,7 +22,7 @@ USA.
 Require Import RIneq MyNeq.
 Require Import Rfunctions.
 
-Require Import Fourier.
+Require Import Lra.
 
 Open Scope R_scope.
 
@@ -59,12 +59,12 @@ Qed.
 
 Lemma Rplus_pos_lt : forall x h, 0 < h -> x < x + h.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_pos_lt : forall x h, 0 < h -> x - h < x.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rplus_pos_neq : forall x h, 0 < h -> x <> x + h.
@@ -75,40 +75,40 @@ Qed.
 
 Lemma Rlt_minus_sort : forall a b c, a < c + b -> a - c < b.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rlt_minus_sort2 : forall a b c, a - c < b -> - c < b - a.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_lt_compat_l : forall a b c, a < b + c -> a - b < c.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_lt_compat_r : forall a b c, a + c < b -> a < b - c.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_lt_compat_l_rev : forall a b c, a - b < c -> a < b + c.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_le_compat_l : forall a b c, a <= b + c -> a - b <= c.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_le_compat_r : forall a b c, a + c <= b -> a <= b - c.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_le_compat_l_rev : forall a b c, a - b <= c -> a <= b + c.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rinv_lt_contravar_rev : forall x y, 0 < x -> 0 < y -> /x < /y -> y < x.
@@ -126,17 +126,17 @@ Qed.
 
 Lemma Rle_Rminus : forall a b, a <= b -> 0 <= b - a.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rle_Rminus_rev : forall a b, 0 <= b - a -> a <= b.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rlt_Rminus_rev : forall a b, 0 < b - a -> a < b.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rmult_Rinv_lt_compat_r : forall a b c, 0 < a -> a * b < c -> b < c * / a.
@@ -169,7 +169,7 @@ Qed.
 
 Lemma Rlt_minus_swap: forall x y z, x - y < z -> x - z < y.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rdiv_0_l: forall r, 0 / r = 0.
@@ -358,22 +358,22 @@ Qed.
 
 Lemma Rplus_lt_simpl_l : forall r1 r2, 0 < r2 -> r1 < r1 + r2.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rplus_lt_simpl_r : forall r1 r2, 0 < r1 -> r2 < r1 + r2.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rplus_le_simpl_l : forall r1 r2, 0 <= r2 -> r1 <= r1 + r2.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rplus_le_simpl_r : forall r1 r2, 0 <= r1 -> r2 <= r1 + r2.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rmax_lt_lt_lt : forall x y z, Rmax x y < z <-> x < z /\ y < z.
@@ -459,17 +459,17 @@ intros a b ab_neq ; destruct (Rlt_le_dec a b).
 Qed.
 
 Lemma Rminus_lt_compat_r_rev : forall a b c : R, a - c < b -> a < b + c.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_lt_compat : forall a b c, a < b -> a - c < b - c.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rminus_lt_compat_rev : forall a b c, a - c < b - c -> a < b.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma Rmult_Rdiv_lt_compat_l_rev: forall a b c : R, 0 < c -> a < b / c -> c * a < b.
@@ -481,10 +481,10 @@ Qed.
 
 Lemma Rlt_minus_sort3: forall a b c : R, a - b < - c -> a + c < b.
 Proof.
-intros ; fourier.
+intros ; lra.
 Qed.
 
 Lemma dist_2_pos : forall lb ub, lb < ub -> (0 < (ub - lb) / 2)%R.
 Proof.
-intros lb ub lt ; apply Rlt_mult_inv_pos ; fourier.
+intros lb ub lt ; lra.
 Qed.

@@ -23,7 +23,7 @@ USA.
 
 Require Import Reals.
 Require Import RFsequence.
-Require Import Fourier.
+Require Import Lra.
 Require Import Max.
 
 Open Scope R_scope.
@@ -33,7 +33,7 @@ Lemma ub_lt_2_pos : forall x ub lb, lb < x -> x < ub -> 0 < (ub-lb)/2.
 Proof.
 intros x ub lb lb_lt_x x_lt_ub.
  assert (T : 0 < ub - lb).
-  fourier.
+  lra.
  unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition.
 Qed.
 
@@ -52,7 +52,7 @@ Lemma RFseq_cvu_derivable : forall (fn fn':nat -> R -> R) (f g:R->R)
       derivable_pt_lim f x (g x).
 Proof.
 intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_pos.
- assert (eps_8_pos : 0 < eps / 8) by fourier.
+ assert (eps_8_pos : 0 < eps / 8) by lra.
  destruct (g_cont x lb_lt_x x_lt_ub (eps/8)%R eps_8_pos) as (delta1, Hdelta1) ; clear g_cont ;
  destruct Hdelta1 as (delta1_pos, g_cont).
  assert (delta_pos : 0 < Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1).
@@ -63,13 +63,13 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  assert (eps'_pos : 0 < (Rabs h) * eps / 4).
   unfold Rdiv ; rewrite Rmult_assoc ; apply Rmult_lt_0_compat.
   apply Rabs_pos_lt ; assumption.
-  fourier.
+  lra.
  elim (fn_CV_f x lb_lt_x x_lt_ub ((Rabs h) * eps / 4)%R eps'_pos) ; intros N2 fnx_CV_fx.
  assert(lb_lt_xh : lb < x + h).
   apply Rlt_trans with (x - delta)%R.
   unfold delta.
   assert (Temp : forall a b c, a + c < b -> a < b - c).
-   intros ; fourier.
+   intros ; lra.
   apply Temp ; clear Temp ; apply Rle_lt_trans with (lb + Rmin ((x - lb) / 2) ((ub - x) / 2))%R.
   apply Rplus_le_compat_l ; apply Rmin_l.
   apply Rle_lt_trans with (lb + (x - lb) / 2)%R.
@@ -78,7 +78,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
   assert (Temp : forall a b, a < b -> (a+b)/2 < b).
    clear ; intros a b a_lt_b.
    unfold Rdiv ; rewrite Rmult_plus_distr_r.
-   fourier.
+   lra.
   apply Temp ; assumption.
   apply Rplus_lt_compat_l. 
   exact (proj2 (Rabs_def2 h delta h_ub)).
@@ -95,7 +95,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
   assert (Temp : forall a b, a < b -> (b+a)/2 < b).
    clear ; intros a b a_lt_b.
    unfold Rdiv ; rewrite Rmult_plus_distr_r.
-   fourier.
+   lra.
   apply Temp ; assumption.
  elim (fn_CV_f (x+h) lb_lt_xh xh_lt_ub ((Rabs h) * eps / 4) eps'_pos) ;
  clear fn_CV_f ; intros N1 fnxh_CV_fxh.
@@ -118,7 +118,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  assert (pr2 : forall c : R, x + h < c < x -> derivable_pt id c).
   intros c c_encad ; apply derivable_id.
  assert (xh_x : x+h < x).
-  fourier.
+  lra.
  assert (pr3 : forall c : R, x + h <= c <= x -> continuity_pt (fn N) c).
   intros c c_encad ; apply derivable_continuous_pt.
   exists (fn' N c) ; apply Dfn_eq_fn' ; intuition.
@@ -166,10 +166,10 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  unfold Boule.
  assert (Rabs (c - (lb + ub) / 2) < (ub - lb) / 2).
   apply Rabs_def1.
-  assert (Temp : forall a b c, a < b + c -> a - b < c). intros ; fourier.
+  assert (Temp : forall a b c, a < b + c -> a - b < c). intros ; lra.
   apply Temp ; clear Temp ; replace ((lb + ub) / 2 + (ub - lb) / 2) with ub by field.
   apply Rlt_trans with x ; [exact (proj2 P) | intuition].
-  assert (Temp : forall a b c, a - b < c -> - b < c - a). intros ; fourier.
+  assert (Temp : forall a b c, a - b < c -> - b < c - a). intros ; lra.
   apply Temp ; clear Temp ; replace ((lb + ub) / 2 - ((ub - lb) / 2)) with lb by field.
   apply Rlt_trans with (x+h) ; [intuition | exact (proj1 P)].
   assumption.
@@ -184,14 +184,14 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  unfold R_dist. apply Rlt_trans with (Rabs h).
  apply Rabs_def1. apply Rlt_trans with 0.
  assert (Temp : forall a b, a < b -> a - b < 0).
-  intros ; fourier.
+  intros ; lra.
  apply Temp ; exact (proj2 P).
  apply Rabs_pos_lt ; assumption.
  apply Rle_lt_trans with h.
  rewrite Rabs_left1.
  apply Req_le ; field.
  apply Rlt_le ; assumption.
- assert (Temp : forall a b c, a + b < c -> b < c - a). intros ; fourier.
+ assert (Temp : forall a b c, a + b < c -> b < c - a). intros ; lra.
  apply Temp ; clear Temp ; exact (proj1 P).
  apply Rlt_le_trans with delta ; [intuition | unfold delta ; apply Rmin_r].
  rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite <- Rmult_plus_distr_l.
@@ -199,7 +199,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
       (Rabs h * (eps / 4 + eps / 4 + eps / 8 + eps / 8)) by field.
  apply Rmult_lt_compat_l. 
  apply Rabs_pos_lt ; assumption.
- fourier.
+ lra.
  assert (lb_lt_c : lb < c).
    apply Rlt_trans with (x+h) ; intuition ; exact (proj1 P).
   assert (c_lt_ub : c < ub).
@@ -234,7 +234,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  assert (pr2 : forall c : R, x < c < x + h -> derivable_pt id c).
   intros c c_encad ; apply derivable_id.
  assert (xh_x : x < x + h).
-  fourier.
+  lra.
  assert (pr3 : forall c : R, x <= c <= x + h -> continuity_pt (fn N) c).
   intros c c_encad ; apply derivable_continuous_pt.
   exists (fn' N c) ; apply Dfn_eq_fn' ; intuition.
@@ -277,10 +277,10 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  unfold Boule.
  assert (Rabs (c - (lb + ub) / 2) < (ub - lb) / 2).
   apply Rabs_def1.
-  assert (Temp : forall a b c, a < b + c -> a - b < c). intros ; fourier.
+  assert (Temp : forall a b c, a < b + c -> a - b < c). intros ; lra.
   apply Temp ; clear Temp ; replace ((lb + ub) / 2 + (ub - lb) / 2) with ub by field.
   apply Rlt_trans with (x+h) ; [exact (proj2 P) | intuition].
-  assert (Temp : forall a b c, a - b < c -> - b < c - a). intros ; fourier.
+  assert (Temp : forall a b c, a - b < c -> - b < c - a). intros ; lra.
   apply Temp ; clear Temp ; replace ((lb + ub) / 2 - ((ub - lb) / 2)) with lb by field.
   apply Rlt_trans with x ; [intuition | exact (proj1 P)].
   assumption.
@@ -294,17 +294,17 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  unfold no_cond ; intuition. apply Rlt_not_eq ; exact (proj1 P).
  unfold R_dist. apply Rlt_trans with (Rabs h).
  apply Rabs_def1. 
- assert (Temp : forall a b c, c < a + b -> c - a < b). intros ; fourier.
+ assert (Temp : forall a b c, c < a + b -> c - a < b). intros ; lra.
  apply Temp ; clear Temp ; rewrite Rabs_right. exact (proj2 P).
  apply Rgt_ge ; assumption.
- assert (Temp : forall a b, a - b < c -> - b < c - a). intros ; fourier.
+ assert (Temp : forall a b, a - b < c -> - b < c - a). intros ; lra.
  apply Temp ; apply Rlt_trans with x ; [| exact (proj1 P)].
  rewrite <- Rplus_0_r.
  apply Rplus_lt_compat_l.
  apply Ropp_lt_gt_0_contravar ; apply Rabs_pos_lt ; apply Rgt_not_eq ; assumption.
  apply Rle_lt_trans with h.
  rewrite Rabs_right. apply Req_le ; reflexivity.
- fourier.
+ lra.
  apply Rlt_le_trans with delta ; [intuition | unfold delta ; apply Rmin_r].
  rewrite Rabs_right in h_ub ; intuition.
  rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite <- Rmult_plus_distr_l.
@@ -312,7 +312,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
       (Rabs h * (eps / 4 + eps / 4 + eps / 8 + eps / 8)) by field.
  apply Rmult_lt_compat_l. 
  apply Rabs_pos_lt ; assumption.
- fourier.
+ lra.
  assert (lb_lt_c : lb < c).
    apply Rlt_trans with x ; intuition ; exact (proj1 P).
   assert (c_lt_ub : c < ub).

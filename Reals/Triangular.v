@@ -25,14 +25,14 @@ Require Import Rseries_RiemannInt.
 Require Import Rseries_facts.
 Require Import Rtactic.
 Require Import Rsequence_facts.
-Require Import Fourier.
+Require Import Lra.
 
 Definition triangle n := INR (n * S n) / 2.
 
 Lemma triangle_sum n : sum_f_R0 INR n = triangle n.
 Proof.
  unfold triangle.
- induction 0.
+ induction n.
   simpl; field.
   
   rewrite tech5.
@@ -74,7 +74,7 @@ Qed.
 Lemma sum_triangular_tetrahedral n : sum_f_R0 triangle n = INR (n * S n * S (S n)) / 6.
 Proof.
  unfold triangle.
- induction 0.
+ induction n.
   simpl.
   field.
   
@@ -98,7 +98,7 @@ Qed.
 
 Lemma sum_inv_snssn n : sum_f_R0 inv_snssn n = 1 - inv_sn (S n).
 Proof.
- induction 0.
+ induction n.
   compute; field.
   
   simpl.

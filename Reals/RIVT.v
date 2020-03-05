@@ -24,7 +24,7 @@ Require Export Rsequence.
 Require Import Ranalysis.
 Require Import Rfunctions.
 Require Import Rseries_def.
-Require Import Fourier.
+Require Import Lra.
 Require Import RiemannInt.
 Require Import SeqProp.
 Require Import MyRIneq.
@@ -87,7 +87,7 @@ Proof.
 intros x y P xley ; eapply Rseq_cv_eq_compat.
  intro n ; apply dicho_lb_dicho_up ; assumption.
  eapply Rseq_cv_pos_infty_div_compat, Rseq_constant_cv.
- apply Rseq_pow_gt_1_cv ; fourier.
+ apply Rseq_pow_gt_1_cv ; lra.
 Qed.
 
 Lemma interval_open_interval : forall x y z,
@@ -142,7 +142,7 @@ intros f x y l Hf Hxy Hl ;
  destruct IVT_open_interval_prelim with (f - (fun _ => l))%F x y as [z [z_in Hz]].
   apply continuity_in_minus, continuity_in_const ; assumption.
   assumption.
-  clear - Hl; destruct Hl ; split ; unfold minus_fct ; fourier.
+  clear - Hl; destruct Hl ; split ; unfold minus_fct ; lra.
  exists z ; split ; [assumption |].
   clear - Hz ; unfold minus_fct in * ; intuition.
 Qed. 

@@ -101,9 +101,9 @@ Lemma Croot_sqrt_pos : forall a b : R, 0 <= (sqrt (a * a + b * b) - a) / 2.
 Proof.
 intros.
 unfold Rdiv. replace 0%R with (0 * /2)%R by field. apply Rmult_le_compat_r.
-fourier. apply Rle_Rminus.
+lra. apply Rle_Rminus.
 apply Rle_trans with (Rabs a).
-split_Rabs. fourier. intuition.
+split_Rabs. lra. intuition.
 apply Rsqr_incr_0_var. rewrite Rsqr_sqrt.
 rewrite <- Rsqr_abs. replace (Rsqr a) with (a * a)%R by intuition.
 replace (a * a)%R with ((a * a) + 0)%R by intuition. 
@@ -117,9 +117,9 @@ Lemma Croot_sqrt_pos_plus : forall a b : R, 0 <= (sqrt (a * a + b * b) + a) / 2.
 Proof.
 intros.
 unfold Rdiv. replace 0%R with (0 * /2)%R by field. apply Rmult_le_compat_r.
-fourier. replace a with (--a)%R by intuition. apply Rle_Rminus.
+lra. replace a with (--a)%R by intuition. apply Rle_Rminus.
 apply Rle_trans with (Rabs a).
-split_Rabs. fourier. intuition. fourier.
+split_Rabs. lra. intuition. lra.
 replace (--a)%R with a by intuition.
 apply Rsqr_incr_0_var. rewrite Rsqr_sqrt.
 rewrite <- Rsqr_abs. replace (Rsqr a) with (a * a)%R by intuition. 
@@ -154,11 +154,11 @@ rewrite Rmult_assoc. rewrite <- sqrt_mult.
 field_simplify ((sqrt (a * a + b * b) + a) / 2 * ((sqrt (a * a + b * b) - a) / 2))%R.
 rewrite sqrt_square2. field_simplify ((a * a + b * b - a ^ 2) / 4)%R.
 unfold Rdiv. replace (/4)%R with (/2 * /2)%R by field. rewrite sqrt_mult. 
-replace (sqrt (/2 * /2))%R with (/2)%R by (rewrite sqrt_square ; try reflexivity ; fourier).
+replace (sqrt (/2 * /2))%R with (/2)%R by (rewrite sqrt_square ; try reflexivity ; lra).
 replace (b ^ 2)%R with (-b * -b)%R by ring. rewrite sqrt_square. 
-field. fourier. 
+field. lra. 
 replace (b ^ 2)%R with (Rsqr b) by (simpl ; rewrite Rmult_1_r ; intuition).
-intuition. fourier. apply Rle_ge . apply (Cnorm_sqr_pos a b).
+intuition. lra. apply Rle_ge . apply (Cnorm_sqr_pos a b).
 apply Croot_sqrt_pos_plus. apply Croot_sqrt_pos.
 (* case b >= 0 *)
 exists (sqrt ( (sqrt ( a * a + b * b) + a)/2),
@@ -175,11 +175,11 @@ field_simplify ((sqrt (a * a + b * b) + a) / 2 * ((sqrt (a * a + b * b) - a) / 2
 repeat rewrite sqrt_square2.
 field_simplify ((a * a + b * b - a ^ 2) / 4)%R.
 unfold Rdiv. replace (/4)%R with (/2 * /2)%R by field. rewrite sqrt_mult. 
-replace (sqrt (/2 * /2))%R with (/2)%R by (rewrite sqrt_square ; try reflexivity ; fourier).
+replace (sqrt (/2 * /2))%R with (/2)%R by (rewrite sqrt_square ; try reflexivity ; lra).
 replace (b ^ 2)%R with (b * b)%R by ring. rewrite sqrt_square. 
-field. fourier.  
+field. lra.  
 replace (b ^ 2)%R with (Rsqr b) by (simpl ; rewrite Rmult_1_r ; intuition).
-intuition. fourier. apply Rle_ge . apply (Cnorm_sqr_pos a b).
+intuition. lra. apply Rle_ge . apply (Cnorm_sqr_pos a b).
 apply Croot_sqrt_pos_plus. apply Croot_sqrt_pos.
 Qed.
 
@@ -202,7 +202,7 @@ intros a b H Habs.
 apply (HC0_norm_R0 ((a + a)%R +i (b + b)%R)) in Habs.
 apply H. replace ((a + a)%R +i (b + b)%R) with ((2 +i 0%R) * (a +i b)) in Habs by CusingR_f.
 apply Cmult_integral in Habs. destruct Habs ; 
-assert (H1 : (2 +i 0%R) = 0 -> False) ; CusingR2 ; (fourier || intuition).
+assert (H1 : (2 +i 0%R) = 0 -> False) ; CusingR2 ; (lra || intuition).
 Qed.
 
 Lemma Rpow_2_inf_0 : forall x, (x^2 < 0 -> False)%R.
@@ -210,7 +210,7 @@ Proof.
 intros. 
 replace (x ^ 2)%R with (Rsqr x) in * by (unfold Rsqr ; simpl ; ring).
 assert (Rsqr x >= 0) by (auto with real).
-fourier.
+lra.
 Qed.
 
 Lemma Rpow_2_opp_inf_0 : forall x, (-x^2 > 0 -> False)%R.
@@ -218,7 +218,7 @@ Proof.
 intros.
 replace (x ^ 2)%R with (Rsqr x) in * by (unfold Rsqr ; simpl ; ring).
 assert (Rsqr x >= 0) by (auto with real).
-fourier.
+lra.
 Qed.
 (* end hide*) 
 
@@ -310,24 +310,24 @@ CusingR2. ring_simpl.
 generalize H2. intro H3.
 (apply Rmult_integral in H3 ; destruct H3 as [H3|H3]).
 (apply Rmult_integral in H3 ; destruct H3 as [H3|H3]).
-fourier.
+lra.
 rewrite H3 in *. rewrite <- H1 in H0. ring_simpl.
 apply Rpow_2_opp_inf_0 in H0. destruct H0.
 rewrite H3. ring.
 CusingR2. ring_simpl.
 (apply Rmult_integral in H2 ; destruct H2 as [H2|H2]).
 (apply Rmult_integral in H2 ; destruct H2 as [H2|H2]).
-fourier. rewrite H2 in H1. rewrite <- H1 in H0. ring_simpl.
+lra. rewrite H2 in H1. rewrite <- H1 in H0. ring_simpl.
 apply Rpow_2_opp_inf_0 in H0. destruct H0.
 rewrite H2. ring. 
 CusingR2. ring_simpl.
 apply Rmult_integral in H0 ; destruct H0 as [H0|H0].
 apply Rmult_integral in H0 ; destruct H0 as [H0|H0].
 apply Rmult_integral in H0 ; destruct H0 as [H0|H0].
-fourier.
+lra.
 apply Rinv_neq_0_compat in H0. destruct H0.
 intro H8. ring_simplify in H8. apply Rmult_integral in H8. destruct H8 as [H8|H8].
-fourier.
+lra.
 replace (r9 ^ 2)%R with (Rsqr r9) in H8 by (unfold Rsqr ; simpl ; ring).
 assert (H5 : (r9 = 0)%R). apply Rsqr_0_uniq ; assumption.
 rewrite H5 in *. apply Ha. split ; reflexivity.
@@ -338,10 +338,10 @@ CusingR2. ring_simpl.
 apply Rmult_integral in H0 ; destruct H0 as [H0|H0].
 apply Rmult_integral in H0 ; destruct H0 as [H0|H0].
 apply Rmult_integral in H0 ; destruct H0 as [H0|H0].
-fourier.
+lra.
 apply Rinv_neq_0_compat in H0. destruct H0.
 intro H8. ring_simplify in H8. apply Rmult_integral in H8. destruct H8 as [H8|H8].
-fourier.
+lra.
 replace (r9 ^ 2)%R with (Rsqr r9) in H8 by (unfold Rsqr ; simpl ; ring).
 assert (H5 : (r9 = 0)%R). apply Rsqr_0_uniq ; assumption.
 rewrite H5 in *. apply Ha. split ; reflexivity.
@@ -357,7 +357,7 @@ rewrite H1. unfold Cdiv. ring.
 CusingR2. ring_simpl.
 apply Rmult_integral in H2 ; destruct H2 as [H2|H2].
 apply Rmult_integral in H2 ; destruct H2 as [H2|H2].
-fourier.
+lra.
 rewrite H2 in *. ring_simplify in H1.
 rewrite <- H1 in H0. replace (r2 ^ 2)%R with (Rsqr r2) in H0 by (unfold Rsqr ; simpl ; ring).
 assert (H10 : (r2 = 0)%R). apply Rsqr_0_uniq. apply Ropp_eq_0_compat in H0.
@@ -571,7 +571,7 @@ replace (a + b + c)%R with (c + a + b)%R in H3 by ring.
 replace (c + 2 * a * x2 +a)%R with (c + a + 2 * a * x2)%R in H3 by ring.
 apply Rplus_eq_reg_l in H3. subst.
 replace ((2 * a * x2) ^ 2 - 4 * a * (a * x2 ^ 2))%R with (0)%R in H by ring .
-fourier.
+lra.
 replace (((x1 - x2) / 2) ^ 2)%R with (Rsqr (((x1 - x2) / 2))) by (unfold Rsqr ; simpl ; ring).
 apply Rlt_0_sqr.
 intro H30. replace 0%R with (0/2)%R in H30 by field.
@@ -585,7 +585,7 @@ intuition.
 assert ( 0 <= a * (- (x1 + x2) / 2 + x1) * (- (x1 + x2) / 2 + x2)).
 rewrite <- H1. replace ( (- (x1 + x2) / 2) ^ 2)%R with ((- (x1 + x2) / 2) * (- (x1 + x2) / 2) )%R by ring.
 rewrite <- Rmult_assoc. apply Hpoly.
-fourier.
+lra.
 Qed.
 
 Require Import Cpolar.
@@ -598,12 +598,12 @@ Lemma ast_fun_pos : forall n r, (n > 0)%nat -> r > 0 -> (r + 1) ^ n - r > 0.
 Proof.
 intros n r Hn Hr.
 induction Hn.
-simpl. ring_simplify. fourier.
+simpl. ring_simplify. lra.
 simpl. rewrite Rmult_plus_distr_r. replace 0%R with (0 + 0)%R by intuition.
 unfold Rminus. rewrite Rplus_assoc. apply Rplus_lt_compat.
 apply Rmult_gt_0_compat.
 assumption.
-apply pow_lt. fourier.
+apply pow_lt. lra.
 rewrite Rmult_1_l. apply IHHn.
 Qed.
 
@@ -615,14 +615,14 @@ pose (f := (fun x => x ^ n - r)%R).
 assert (Cont_pow : forall x, continuity_pt f x).
 unfold f. intros x. reg.
 destruct (total_order_T r 0) as [[order|order]|order].
-fourier.
+edestruct Rge_not_lt; eauto.
 exists 0. rewrite order.
 rewrite pow_ne_zero. reflexivity.
 intuition.
-assert (Hsup0 : r+1 > 0) by fourier.
+assert (Hsup0 : r+1 > 0) by lra.
 assert (Hpos : forall n, (n > 0)%nat -> (r + 1) ^ n - r > 0).
  intros n1 Hn1. apply ast_fun_pos. assumption. assumption.
-assert (Hneg : 0 ^ n - r < 0). rewrite pow_ne_zero. fourier.
+assert (Hneg : 0 ^ n - r < 0). rewrite pow_ne_zero. lra.
  intuition.
 
 generalize (IVT (fun x => x ^ n - r) 0 (r + 1) Cont_pow Hsup0 Hneg)%R.

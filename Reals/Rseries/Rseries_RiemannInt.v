@@ -24,7 +24,7 @@ Require Import Reals.
 Require Import Rseries_def.
 Require Import Rseries_facts.
 Require Import RiemannInt.
-Require Import Fourier.
+Require Import Lra.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
 Require Import Riemann_integrable.
@@ -37,8 +37,8 @@ Section Rseries_RiemannInt.
 Local Coercion INR : nat >-> R.
 
 (* begin hide *)
-Lemma Rle_minus' : forall a b, b <= a -> 0 <= a - b. intros; fourier. Qed.
-Lemma Rminus_le_compat_r: forall r r1 r2 : R, r2 <= r1 -> r - r1 <= r - r2. intros; fourier. Qed.
+Lemma Rle_minus' : forall a b, b <= a -> 0 <= a - b. intros; lra. Qed.
+Lemma Rminus_le_compat_r: forall r r1 r2 : R, r2 <= r1 -> r - r1 <= r - r2. intros; lra. Qed.
 (* end hide *)
 
 Lemma Telescoping_series : forall a n, sum_f_R0 (fun i => a (S i) - a i) n = a (S n) - a O.
@@ -236,7 +236,7 @@ intros x Hx.
 
      unfold plus_fct, fct_cte, id.
      intuition.
-     apply Rlt_le_trans with (a + 1); fourier.
+     apply Rlt_le_trans with (a + 1); lra.
   intros x Hx.
   apply continuity_pt_inv.
   apply continuity_pt_plus.
@@ -267,7 +267,7 @@ unfold plus_fct, fct_cte, id, inv_fct.
   auto with *.
 
   intros x y [Hxpos Hxy].
-  apply Rle_Rinv; fourier.
+  apply Rle_Rinv; lra.
   assert (Heq2 : (fun n : nat => ln (INR (S (S n)))) ==
           (fun n : nat => RiemannInt (int_f_0_n (S n)))).
     intro n.

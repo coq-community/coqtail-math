@@ -25,7 +25,7 @@ Require Export Rsequence_def Rsequence_facts Rsequence_sums_facts.
 Require Export Rseries_def.
 Require Import Rpser_def Rpser_sums Rpser_sums_facts Rpser_derivative.
 Require Import Rpser_radius_facts Rpser_taylor.
-Require Import Fourier.
+Require Import Lra.
 Require Import Rintegral.
 Require Import Rseries_facts.
 Require Import Rseries_RiemannInt.
@@ -46,7 +46,7 @@ intros u Hu.
 repeat rewrite <- H1.
 apply H2.
 split; intuition.
-unfold Rmin in * |- ; destruct Rle_dec; fourier.
+unfold Rmin in * |- ; destruct Rle_dec; lra.
 rewrite R_dist_eq; assumption.
 apply Rlt_le_trans with (Rmin alp1 alp2).
   destruct Hu as [_ Hu].
@@ -80,10 +80,10 @@ unfold Un; destruct n.
     apply Rplus_le_compat_r.
     apply pos_INR.
   rewrite Rabs_Ropp.
-  rewrite Rabs_Rinv; [|intros Hc; fourier].
-  rewrite Rabs_right; [|fourier].
-  apply (Rmult_le_reg_l (INR (S n))); [fourier|].
-  rewrite Rinv_r; [fourier|intros Hc; fourier].
+  rewrite Rabs_Rinv; [|intros Hc; lra].
+  rewrite Rabs_right; [|lra].
+  apply (Rmult_le_reg_l (INR (S n))); [lra|].
+  rewrite Rinv_r; [lra|intros Hc; lra].
 Qed.
 (* begin hide *)
 
@@ -198,7 +198,7 @@ assert (Hb : forall u, Rmin 0 x <= u <= Rmax 0 x -> -1 < u < 1).
   destruct (Rabs_def2 x 1 Hx) as [Hmax Hmin].
   intros u [Hul Hur].
     unfold Rmin, Rmax in Hul, Hur.
-    destruct Rle_dec; split; fourier.
+    destruct Rle_dec; split; lra.
 pose (Hcv := ln_minus_cv_radius).
 pose (g := weaksum_r Un 1 Hcv).
 pose (dg := weaksum_r_derive Un 1 Hcv).
@@ -224,9 +224,9 @@ destruct Rint_derive2
 assert (Heq : forall u, -1 < u < 1 -> dg u = df u).
   intros u [Hul Hur]; unfold df, dg.
   replace (/ (1 - u) * (0 - 1))
-    with (- / (1 - u)) by (field; intros Hc; fourier).
+    with (- / (1 - u)) by (field; intros Hc; lra).
   assert (Habs : Rabs u < 1).
-    unfold Rabs; destruct Rcase_abs; fourier.
+    unfold Rabs; destruct Rcase_abs; lra.
   assert (Hser1 := weaksum_r_derive_sums Un 1 Hcv u Habs).
   assert (Hser2 := GP_infinite u Habs).
   eapply Rseq_cv_unique.
@@ -242,7 +242,7 @@ assert (Heq : forall u, -1 < u < 1 -> dg u = df u).
           simpl. unfold Rseq_shift, Rseq_mult; simpl; field.
           unfold Rseq_shift. unfold Rseq_mult. unfold Un.
           field; assert (H := pos_INR (S n)); intros Hc. do 2 rewrite S_INR in Hc.
-          fourier.
+          lra.
     eapply Rseq_cv_eq_compat; unfold Rseq_pps, Rseq_sum, gt_pser. 
     erewrite <- Hrw. reflexivity. apply Rseq_cv_opp_compat; apply Hser2.
 edestruct Rint_eq_compat
@@ -256,14 +256,14 @@ destruct Rint_derive2
   apply derivable_pt_lim_weaksum_r.
   apply Hb in Hu.
   destruct Hu as [Hul Hur].
-  unfold Rabs; destruct Rcase_abs; fourier.
+  unfold Rabs; destruct Rcase_abs; lra.
   intros u Hu.
   assert (Hu2 := Hb u Hu).
   destruct Hu2 as [Hul Hur].
   assert (Hct : continuity_pt df u).
     unfold df.
     apply continuity_pt_mult.
-    apply continuity_pt_inv; [|intros Hc; fourier].
+    apply continuity_pt_inv; [|intros Hc; lra].
     apply continuity_pt_minus.
     apply continuity_pt_const; unfold constant; auto.
     apply derivable_continuous_pt; apply derivable_pt_id.
@@ -273,15 +273,15 @@ destruct Rint_derive2
     pose (alp2 := /2 - u / 2).
     exists (Rmin alp1 alp2); split.
     apply Rmin_pos_lt.
-      unfold alp1; fourier.
-      unfold alp2; fourier.
+      unfold alp1; lra.
+      unfold alp2; lra.
     intros y Hy; symmetry.
     apply Heq.
     unfold alp1, alp2, R_dist, Rabs, Rmin in *.
     destruct Rcase_abs as [Hc|Hc] in Hy;
     destruct Rle_dec as [Hl|Hl] in Hy;
-    split; try fourier.
-    apply Rnot_le_lt in Hl; fourier.
+    split; try lra;
+      try apply Rnot_le_lt in Hl; lra.
 assert (Hint : Rint dg 0 x (f x - f 0)).
   apply Rint_eq_compat with (f := df).
   intros u Hu.
@@ -300,7 +300,7 @@ replace (weaksum_r Un 1 Hcv 0) with 0 in Heq_fun.
 rewrite Rminus_0_r in Heq_fun; assumption.
 symmetry.
 eapply Rseq_cv_unique.
-apply weaksum_r_sums; rewrite Rabs_R0; fourier.
+apply weaksum_r_sums; rewrite Rabs_R0; lra.
 intros eps Heps; exists 0%nat; intros n _.
 unfold Rseq_pps, gt_pser.
 rewrite sum_eq_R0.
@@ -349,10 +349,10 @@ unfold Un; destruct n.
     apply pos_INR.
   unfold Rdiv; rewrite Rabs_mult.
   rewrite pow_1_abs; rewrite Rmult_1_l.
-  rewrite Rabs_Rinv; [|intros Hc; fourier].
-  rewrite Rabs_right; [|fourier].
-  apply (Rmult_le_reg_l (INR (S n))); [fourier|].
-  rewrite Rinv_r; [fourier|intros Hc; fourier].
+  rewrite Rabs_Rinv; [|intros Hc; lra].
+  rewrite Rabs_right; [|lra].
+  apply (Rmult_le_reg_l (INR (S n))); [lra|].
+  rewrite Rinv_r; [lra|intros Hc; lra].
 Qed.
 
 Let sum x := weaksum_r Un 1 ln_plus_cv_radius x.

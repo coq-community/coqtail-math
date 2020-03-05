@@ -24,7 +24,7 @@ Require Import Max.
 Require Import Rsequence_def.
 Require Import Rsequence_facts.
 Require Import Rsequence_base_facts.
-Require Import Fourier.
+Require Import Lra.
 Require Import Complex.
 Require Import Csequence_def.
 
@@ -101,9 +101,9 @@ split ; intro H.
  right ; apply Rabs_eq_compat ; field.
  replace (2 / 2 * Cre (Un n - lu))%R with (/2 * (2 * Cre (Un n - lu)))%R by field.
  replace (2 * Cre (Un n - lu))%R with (Cre (Un n - lu + Cconj (Un n - lu)))%R.
- rewrite Rabs_mult ; rewrite Rabs_right by fourier ; apply Rlt_le_trans with
+ rewrite Rabs_mult ; rewrite Rabs_right by lra ; apply Rlt_le_trans with
  (/2 * (2 * eps))%R.
- apply Rmult_lt_compat_l ; [fourier |] ; apply Rle_lt_trans with
+ apply Rmult_lt_compat_l ; [lra |] ; apply Rle_lt_trans with
  (Rabs (Cre (Un n - lu)) + Rabs (Cre (Cconj (Un n - lu))))%R.
  rewrite <- Cre_add_compat ; apply Rabs_triang.
  apply Rle_lt_trans with (Cnorm (Un n - lu) + Rabs (Cre (Cconj (Un n - lu))))%R.
@@ -127,9 +127,9 @@ split ; intro H.
  right ; apply Rabs_eq_compat ; field.
  replace (2 / 2 * Cim (Un n - lu))%R with (/2 * (2 * Cim (Un n - lu)))%R by field.
  replace (2 * Cim (Un n - lu))%R with (Cim (Un n - lu - Cconj (Un n - lu)))%R.
- rewrite Rabs_mult ; rewrite Rabs_right by fourier ; apply Rlt_le_trans with
+ rewrite Rabs_mult ; rewrite Rabs_right by lra ; apply Rlt_le_trans with
  (/2 * (2 * eps))%R.
- apply Rmult_lt_compat_l ; [fourier |] ; apply Rle_lt_trans with
+ apply Rmult_lt_compat_l ; [lra |] ; apply Rle_lt_trans with
  (Rabs (Cim (Un n - lu)) + Rabs (- Cim (Cconj (Un n - lu))))%R.
  rewrite <- Cim_minus_compat ; unfold Rminus ; apply Rabs_triang.
  apply Rle_lt_trans with (Cnorm (Un n - lu) + Rabs (Cim (Cconj (Un n - lu))))%R.
@@ -145,7 +145,7 @@ split ; intro H.
  rewrite Rplus_0_r ; reflexivity.
  field.
  destruct H as [Hre Him] ; intros eps eps_pos ;
- assert (eps_2_pos : 0 < eps/2) by fourier ; destruct (Hre _ eps_2_pos) as (N1, HN1) ;
+ assert (eps_2_pos : 0 < eps/2) by lra ; destruct (Hre _ eps_2_pos) as (N1, HN1) ;
  destruct (Him _ eps_2_pos) as (N2, HN2) ; exists (max N1 N2) ; intros n Hn.
  apply Rle_lt_trans with (Rabs (Cre (Un n - lu)) + Rabs (Cim (Un n - lu)))%R.
  apply Cnorm_le_Cre_Cim.
@@ -182,7 +182,7 @@ intro Un_cauchy ; split ; intros eps eps_pos ;
  rewrite Cnorm_IRC_Rabs ; apply Rle_lt_trans with (Cnorm (Un m - Un n))%R ;
  [apply Cim_le_Cnorm | apply HN] ; assumption.
  intros [Cre_cauchy Cim_cauchy] ; intros eps eps_pos ;
- assert (eps_2_pos : 0 < eps / 2) by fourier ;
+ assert (eps_2_pos : 0 < eps / 2) by lra ;
  destruct (Cre_cauchy (eps / 2)%R eps_2_pos) as [N1 HN1] ;
  destruct (Cim_cauchy (eps / 2)%R eps_2_pos) as [N2 HN2] ;
  unfold R_dist in * ; exists (max N1 N2) ; intros m n m_ub n_ub.
@@ -213,12 +213,12 @@ Hypothesis Hv : Cseq_cv Vn lv.
 (**********)
 Lemma Cseq_cv_bound : exists M, 0 < M /\ Cseq_bound Un M.
 Proof.
-destruct (Hu 1%R) as [N HN]; [fourier|].
+destruct (Hu 1%R) as [N HN]; [lra|].
 destruct (Cseq_partial_bound Un N) as [M HM].
 exists (Rmax (1 + (Cnorm lu)) M).
 split.
 eapply Rlt_le_trans; [|apply RmaxLess1].
-apply Rplus_lt_le_0_compat; [fourier|apply Cnorm_pos].
+apply Rplus_lt_le_0_compat; [lra|apply Cnorm_pos].
 intros n.
 destruct (le_ge_dec n N) as [He|He].
 eapply Rle_trans; [apply HM; assumption|apply RmaxLess2].
@@ -265,8 +265,8 @@ Qed.
 Lemma Cseq_cv_add_compat : Cseq_cv (Un + Vn) (lu + lv).
 Proof.
 intros eps Heps.
-destruct (Hu (eps/2)%R) as [Nu HNu]; [fourier|].
-destruct (Hv (eps/2)%R) as [Nv HNv]; [fourier|].
+destruct (Hu (eps/2)%R) as [Nu HNu]; [lra|].
+destruct (Hv (eps/2)%R) as [Nv HNv]; [lra|].
 exists (Max.max Nu Nv).
 intros n Hn.
 unfold R_dist; unfold Cseq_add.
@@ -319,10 +319,10 @@ destruct Cseq_cv_bound with Un lu%C as [Mb [HMb Hb]] ; [assumption |].
 pose (eps1 := (eps / 2 / (Rmax 1 (Cnorm lv)))%R).
 pose (eps2 := (eps / 2 / Mb)%R).
 assert (Heps1 : eps1 > 0).
-unfold eps1; repeat apply Rmult_gt_0_compat; try fourier.
+unfold eps1; repeat apply Rmult_gt_0_compat; try lra.
 apply Rinv_0_lt_compat; eapply Rlt_le_trans; [apply Rlt_0_1|apply RmaxLess1].
 assert (Heps2 : eps2 > 0).
-unfold eps2; repeat apply Rmult_gt_0_compat; try fourier.
+unfold eps2; repeat apply Rmult_gt_0_compat; try lra.
 apply Rinv_0_lt_compat; assumption.
 destruct (Hu eps1) as [Nu HNu]; [assumption|].
 destruct (Hv eps2) as [Nv HNv]; [assumption|].
@@ -345,15 +345,15 @@ unfold Cminus ; rewrite <- Copp_mult_distr_l_reverse.
 rewrite <- Cmult_add_distr_r.
 rewrite Cnorm_Cmult.
 destruct (Ceq_dec lv C0) as [Hlv|Hlv].
-  rewrite Hlv ; rewrite Cnorm_C0 ; rewrite Rmult_0_r; fourier.
+  rewrite Hlv ; rewrite Cnorm_C0 ; rewrite Rmult_0_r; lra.
 eapply Rlt_le_trans.
   apply Rmult_lt_compat_r; [apply Cnorm_pos_lt; assumption|].
   apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
 unfold eps1.
 unfold Rdiv; rewrite Rmult_assoc; rewrite <- Rmult_1_r.
-apply Rmult_le_compat_l; [fourier|].
+apply Rmult_le_compat_l; [lra|].
 assert (Hmax : Rmax 1 (Cnorm lv) > 0%R).
-eapply Rlt_le_trans with 1%R; [fourier|apply RmaxLess1].
+eapply Rlt_le_trans with 1%R; [lra|apply RmaxLess1].
 pattern 1%R at 2; rewrite <- (Rinv_l (Rmax 1 (Cnorm lv))).
   apply Rmult_le_compat_l.
     left; apply Rinv_0_lt_compat; assumption.
@@ -367,9 +367,9 @@ Lemma Cseq_cv_inv_compat : lu <> 0 -> Cseq_cv (/ Un) (/ lu).
 Proof.
 intros H eps Heps.
 destruct (Hu (Cnorm lu / 2))%R as [Ninf Hinf].
-apply Rmult_lt_0_compat; [apply Cnorm_pos_lt|fourier]; assumption.
+apply Rmult_lt_0_compat; [apply Cnorm_pos_lt|lra]; assumption.
 destruct (Hu (/2 * Cnorm lu * Cnorm lu * eps))%R as [N HN].
-repeat apply Rmult_lt_0_compat; (apply Cnorm_pos_lt || fourier); assumption.
+repeat apply Rmult_lt_0_compat; (apply Cnorm_pos_lt || lra); assumption.
 exists (Max.max Ninf N).
 intros n Hn.
 unfold R_dist; unfold Cseq_inv.
@@ -382,15 +382,15 @@ apply Hinf; eapply le_trans; [apply Max.le_max_l|eexact Hn].
  assert (Temp := Cnorm_triang_rev_r (lu - Un n) lu).
  replace (Cnorm (Un n)) with (Cnorm (- Un n)) by (apply Cnorm_opp) ;
  replace (- Un n)%C with (lu - Un n - lu)%C by field.
-fourier.
+lra.
 assert (Hpos : Un n <> 0).
 case (Ceq_or_neq_C0 (Un n)) ; intro HUn.
 apply False_ind ; elim (Rlt_irrefl 0).
 apply Rlt_le_trans with (Cnorm lu / 2)%R.
 unfold Rdiv ; rewrite Rmult_comm ; replace (/2)%R with (Rabs (/2)) by
-  (apply Rabs_right ; fourier) ; rewrite <- Cnorm_mult ; apply Cnorm_pos_lt ;
+  (apply Rabs_right ; lra) ; rewrite <- Cnorm_mult ; apply Cnorm_pos_lt ;
   apply Cnorm_gt_not_eq ; rewrite Cnorm_mult ; apply Rmult_lt_0_compat.
-  rewrite Rabs_right ; fourier.
+  rewrite Rabs_right ; lra.
   apply Cnorm_pos_lt ; assumption.
   apply Rle_trans with (Cnorm (Un n)) ; [assumption | rewrite HUn ;
   rewrite Cnorm_C0 ; right ; trivial].
@@ -460,7 +460,7 @@ Lemma Cseq_cv_re_im_compat : forall Un l,
 Proof.
 intros Un l Hre Him e epos.
 pose (e / 2)%R as e'.
-assert (e'pos : e' > 0) by (unfold e'; fourier).
+assert (e'pos : e' > 0) by (unfold e'; lra).
 destruct (Hre e' e'pos) as [Nre HNre].
 destruct (Him e' e'pos) as [Nim HNim].
 exists (max Nre Nim).

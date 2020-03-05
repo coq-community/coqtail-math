@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Export Reals.
-Require Export Fourier.
+Require Export Lra.
 
 Open Scope R_scope.
 

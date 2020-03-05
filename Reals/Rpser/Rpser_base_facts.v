@@ -26,7 +26,7 @@ Require Import Rsequence_def Rsequence_base_facts Rsequence_subsequence Rsequenc
 Require Import Rsequence_cv_facts Rsequence_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
 Require Import Max.
-Require Import Fourier MyRIneq MyNat MyNNR.
+Require Import Lra MyRIneq MyNat MyNNR.
 
 Local Open Scope R_scope.
 
@@ -554,7 +554,7 @@ intros An r [rho rho_ub] ; split.
    assert (Hf := Hr' _ H).
    assert (Hf' : r' < middle r' r) by (apply middle_is_in_the_middle ;
     assumption).
-   clear -Hf Hf' ; apply False_ind ; fourier.
+   clear -Hf Hf' ; apply False_ind ; lra.
 Qed.
 
 (** The reciprocal implication needs the EM axiom because is_lub is not informative

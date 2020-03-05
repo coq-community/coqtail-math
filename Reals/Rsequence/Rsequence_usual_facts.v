@@ -26,7 +26,7 @@ Require Import Rsequence_base_facts.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_rel_facts.
 Require Import Rsequence_rewrite_facts.
-Require Import MyRIneq MyReals Fourier.
+Require Import MyRIneq MyReals Lra.
 (** printing ~	~ *)
 (** * Convergence of usual sequences. *)
 
@@ -86,7 +86,7 @@ Proof.
 intros d H M.
 assert (Hm : forall n, Rseq_poly d n >= INR n).
 unfold Rseq_poly; induction H; intros n.
-simpl; fourier.
+simpl; lra.
 eapply Rge_trans with (INR n * INR n)%R.
 rewrite <- tech_pow_Rmult.
 apply Rmult_ge_compat_l; [apply Rle_ge; apply pos_INR|apply IHle].
@@ -106,7 +106,7 @@ eapply Rlt_le_trans with (INR N); [|apply le_INR; assumption].
 rewrite INR_IZR_INZ; rewrite <- Hz.
 destruct (archimed (Rmax 0 (M + 1))) as [Hp _].
 eapply Rlt_trans; [|eexact Hp].
-eapply Rlt_le_trans with (M + 1)%R; [fourier|apply RmaxLess2].
+eapply Rlt_le_trans with (M + 1)%R; [lra|apply RmaxLess2].
 Qed.
 
 (** Convergence of power sequences. *)
@@ -153,12 +153,12 @@ Proof.
 intros r Hr M.
 unfold Rseq_pow.
 destruct (Pow_x_infinity r) with (b := (M + 1)%R) as [N HN].
-rewrite Rabs_right; fourier.
+rewrite Rabs_right; lra.
 exists N; intros n Hn.
 rewrite <- Rabs_right.
-eapply Rlt_le_trans with (M + 1)%R; [fourier|].
+eapply Rlt_le_trans with (M + 1)%R; [lra|].
 apply Rge_le; apply HN; assumption.
-left; apply pow_lt; fourier.
+left; apply pow_lt; lra.
 Qed.
 
 (** Convergence of factorial. *)
@@ -189,7 +189,7 @@ eapply Rlt_le_trans with (INR N); [|apply le_INR; assumption].
 rewrite INR_IZR_INZ; rewrite <- Hz.
 destruct (archimed (Rmax 0 (M + 1))) as [Hp _].
 eapply Rlt_trans; [|eexact Hp].
-eapply Rlt_le_trans with (M + 1)%R; [fourier|apply RmaxLess2].
+eapply Rlt_le_trans with (M + 1)%R; [lra|apply RmaxLess2].
 Qed.
 
 (** * Growth comparison. *)
@@ -213,7 +213,7 @@ rewrite Rmult_assoc.
 pattern (Rabs (INR n ^ d1)) at 1; rewrite <- Rmult_1_r.
 apply Rmult_le_compat_l; [apply Rabs_pos|].
 rewrite <- (Rinv_l eps); [|apply Rgt_not_eq; assumption].
-apply Rmult_le_compat_r; [fourier|].
+apply Rmult_le_compat_r; [lra|].
 rewrite Rabs_right; [|apply Rle_ge; apply pow_le; apply pos_INR].
 left; apply HN; assumption.
 Qed.
@@ -248,7 +248,7 @@ intros r1 r2 [Hp Hr] eps Heps.
 pose (k := (r1 / r2)%R).
 assert (Hkl : 0 <= k).
 unfold k; unfold Rdiv; replace 0 with (0 * 0)%R by field.
-apply Rmult_le_compat; try apply Rle_refl; try fourier.
+apply Rmult_le_compat; try apply Rle_refl; try lra.
 left; apply Rinv_0_lt_compat; eapply Rle_lt_trans; eassumption.
 assert (Hkr : k < 1).
 unfold k; unfold Rdiv.
@@ -285,16 +285,16 @@ assert (Ho : forall k, Rseq_poly (npow 2%nat k) = o(Rseq_pow r)).
 induction k; simpl.
 (* Case k = 0 *)
 set (x := (r - 1)%R).
-assert (Hx : x > 0); [unfold x; fourier|].
+assert (Hx : x > 0); [unfold x; lra|].
 assert (Hdev : forall n, (2 <= n)%nat -> (1 + x) ^ n >= 1 + INR n * x + (INR n * (INR n - 1)) * /2 * x * x).
 intros n H; induction H.
 simpl; right; field.
 rewrite <- tech_pow_Rmult.
 eapply Rge_trans.
-apply Rmult_ge_compat_l; [fourier|apply IHle].
+apply Rmult_ge_compat_l; [lra|apply IHle].
 repeat rewrite S_INR.
 field_simplify.
-unfold Rdiv; apply Rmult_ge_compat_r; [fourier|].
+unfold Rdiv; apply Rmult_ge_compat_r; [lra|].
 assert (HINR : 1 < INR m); [apply lt_1_INR; omega|].
 rewrite <- Rplus_0_l.
 unfold Rminus; repeat rewrite Rplus_assoc.
@@ -303,14 +303,14 @@ apply Rplus_ge_compat_r.
 rewrite <- Ropp_mult_distr_r_reverse.
 rewrite <- Rmult_plus_distr_l.
 rewrite <- (Rmult_0_l 0).
-apply Rmult_ge_compat; try fourier.
-apply Rle_ge; apply pow_le; fourier.
+apply Rmult_ge_compat; try lra.
+apply Rle_ge; apply pow_le; lra.
 simpl.
 pattern (INR m) at 3; rewrite <- Rmult_1_r.
 rewrite <- Ropp_mult_distr_r_reverse.
 rewrite <- Rmult_plus_distr_l.
 rewrite <- (Rmult_0_l 0).
-apply Rmult_ge_compat; try fourier.
+apply Rmult_ge_compat; try lra.
 assert (Hmin : forall n, (2 <= n)%nat -> r ^ n > (INR n * (INR n - 1) * / 2 * x * x)).
 intros n Hd.
 replace r with (1 + x)%R by (unfold x; field).
@@ -319,8 +319,8 @@ eapply Rlt_le_trans; [|apply Rge_le; apply Hdev; assumption].
 apply Rplus_lt_compat_r.
 assert (HINR: 0 <= INR n); [apply pos_INR; omega|].
 pattern 0; rewrite <- Rplus_0_l.
-apply Rplus_lt_le_compat; [fourier|].
-apply Rmult_le_pos; fourier.
+apply Rplus_lt_le_compat; [lra|].
+apply Rmult_le_pos; lra.
 assert (HO : (Rseq_poly 2) = O(fun n => INR n * (INR n - 1) * / 2 * x * x)%R).
 unfold Rseq_poly.
 exists (INR 4 * / x * / x)%R; split.
@@ -331,7 +331,7 @@ exists (INR 4 * / x * / x)%R; split.
   left; apply Rmult_lt_0_compat; apply Rinv_0_lt_compat; assumption.
   exists 2%nat; intros n Hn.
   repeat rewrite Rabs_mult.
-  repeat rewrite Rabs_right; try fourier.
+  repeat rewrite Rabs_right; try lra.
   simpl; field_simplify; [|apply Rgt_not_eq; assumption].
   replace ((4 * INR n ^ 2 - 4 * INR n) / 2)%R
     with (INR n * (2 * (INR n - 1)))%R by field.
@@ -347,12 +347,12 @@ exists (INR 4 * / x * / x)%R; split.
   apply Rle_ge; apply pos_INR.
   apply Rle_ge; apply pow_le; apply pos_INR.
 assert (HO2 : (fun n => INR n * (INR n - 1) * / 2 * x * x)%R = O(Rseq_pow r)).
-  exists 1; split; [fourier|].
+  exists 1; split; [lra|].
   exists 2%nat; intros n Hn.
   rewrite Rabs_right; [rewrite Rabs_right|].
   left; rewrite Rmult_1_l; apply Hmin; assumption.
-  apply Rle_ge; apply pow_le; fourier.
-  apply Rle_ge; left; repeat apply Rmult_lt_0_compat; try fourier.
+  apply Rle_ge; apply pow_le; lra.
+  apply Rle_ge; left; repeat apply Rmult_lt_0_compat; try lra.
   apply lt_0_INR; omega.
   replace 1 with (INR 1) by reflexivity; rewrite <- minus_INR; [|omega].
   apply lt_0_INR; omega.
@@ -370,9 +370,9 @@ intros eps Heps.
 destruct (IHk (/ Rabs (2 ^ kk) * sqrt eps * / sqrt r))%R as [N HN].
 repeat apply Rmult_lt_0_compat.
 apply Rinv_0_lt_compat; apply Rabs_pos_lt;
-apply pow_nonzero; apply Rgt_not_eq; fourier.
-apply sqrt_lt_R0; fourier.
-apply Rinv_0_lt_compat; apply sqrt_lt_R0; fourier.
+apply pow_nonzero; apply Rgt_not_eq; lra.
+apply sqrt_lt_R0; lra.
+apply Rinv_0_lt_compat; apply sqrt_lt_R0; lra.
 exists (2 * N)%nat; intros n Hn.
 unfold Rseq_poly; unfold Rseq_pow.
 pose (m :=
@@ -407,29 +407,29 @@ change (1 + 1) with 2.
 field_simplify.
 simpl; unfold Rdiv; repeat rewrite Rinv_1;
 repeat rewrite Rmult_1_r.
-rewrite sqrt_sqrt; [|fourier].
-rewrite sqrt_sqrt; [|fourier].
+rewrite sqrt_sqrt; [|lra].
+rewrite sqrt_sqrt; [|lra].
 rewrite Rmult_assoc.
-apply Rmult_le_compat_l; [fourier|].
-pattern (/ r)%R at 1; rewrite <- Rabs_right; [|left; apply Rinv_0_lt_compat; fourier].
+apply Rmult_le_compat_l; [lra|].
+pattern (/ r)%R at 1; rewrite <- Rabs_right; [|left; apply Rinv_0_lt_compat; lra].
 repeat rewrite <- Rabs_mult.
 rewrite <- pow_add.
 repeat rewrite Rabs_right.
-apply (Rmult_le_reg_l r); [fourier|].
+apply (Rmult_le_reg_l r); [lra|].
 field_simplify.
 unfold Rdiv; repeat rewrite Rinv_1; repeat rewrite Rmult_1_r.
 rewrite tech_pow_Rmult.
-apply Rle_pow; [fourier|].
+apply Rle_pow; [lra|].
 replace (m + m)%nat with (2 * m)%nat by ring; assumption.
-apply Rgt_not_eq; fourier.
-apply Rle_ge; apply pow_le; fourier.
+apply Rgt_not_eq; lra.
+apply Rle_ge; apply pow_le; lra.
 replace 0 with (0 * 0)%R by field.
-apply Rmult_ge_compat; try fourier.
-left; apply pow_lt; fourier.
-left; apply Rinv_0_lt_compat; fourier.
+apply Rmult_ge_compat; try lra.
+left; apply pow_lt; lra.
+left; apply Rinv_0_lt_compat; lra.
 split; apply Rgt_not_eq.
-apply sqrt_lt_R0; fourier.
-apply Rabs_pos_lt; apply pow_nonzero; apply Rgt_not_eq; fourier.
+apply sqrt_lt_R0; lra.
+apply Rabs_pos_lt; apply pow_nonzero; apply Rgt_not_eq; lra.
 assert (Hp : (forall n, exists p, n < npow 2 p)%nat).
 intros n.
 destruct (zerop n) as [H|H].
@@ -489,8 +489,8 @@ assert (HO : forall n, Rseq_pow (INR n) = O(Rseq_fact)).
     apply lt_INR; apply lt_O_fact.
   exists (INR n ^ n / INR (fact n)); split.
     replace 0 with (0 * 0)%R by field.
-    apply Rmult_ge_compat; try fourier.
-      left; apply Hf.
+    apply Rmult_ge_compat; try lra;
+      try left; apply Hf.
   exists n; intros m Hm.
   induction Hm.
     rewrite Rabs_right; [|apply Rle_ge; apply Hp].
@@ -534,8 +534,8 @@ Proof.
 intros d.
 eapply Rseq_little_O_trans.
 apply Rseq_poly_pow_gt_1_little_O.
-instantiate (1 := 2); fourier.
-apply Rseq_pow_fact_little_O; fourier.
+instantiate (1 := 2); lra.
+apply Rseq_pow_fact_little_O; lra.
 Qed.
 
 (** * Things that don't have anything to do there... *)

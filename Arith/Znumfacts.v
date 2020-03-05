@@ -84,38 +84,41 @@ Proof.
     intros H2; subst n; red; apply Zis_gcd_intro; auto with zarith.
 Defined.
 
-Definition Z_le_lt_eq_dec x y : x <= y -> {x < y} + {x = y}.
+Lemma Pcompare_notEq_notEq : forall a b,
+    (Pcompare a b Lt <> Eq) /\ (Pcompare a b Gt <> Eq).
 Proof.
-  Lemma Zcompare_Eq_eq : forall n m : Z, (n ?= m) = Eq -> n = m.
-  Proof.
-    Lemma Pcompare_notEq_notEq : forall a b,
-      (Pcompare a b Lt <> Eq) /\ (Pcompare a b Gt <> Eq).
-    Proof.
-      intros a; induction a; intros b; destruct b; split; intros E; simpl in E;
-          try solve [
-            inversion E |
-            auto |
-            eapply (proj1 (IHa _)); eauto |
-            eapply (proj2 (IHa _)); eauto
-            ].
-    Qed.
-    Lemma Pcompare_Eq_eq : forall a b, Pcompare a b Eq = Eq -> a = b.
-    Proof.
-      intros a; induction a; intros b; destruct b; intros E; simpl in E;
-        try solve [
+  intros a; induction a; intros b; destruct b; split; intros E; simpl in E;
+    try solve [
+          inversion E |
+          auto |
+          eapply (proj1 (IHa _)); eauto |
+          eapply (proj2 (IHa _)); eauto
+        ].
+Qed.
+
+Lemma Pcompare_Eq_eq : forall a b, Pcompare a b Eq = Eq -> a = b.
+Proof.
+  intros a; induction a; intros b; destruct b; intros E; simpl in E;
+    try solve [
           inversion E |
           auto |
           f_equal; apply IHa; eauto
-          ].
-        exfalso; eapply Pcompare_notEq_notEq; eauto.
-        exfalso; eapply (proj1 (Pcompare_notEq_notEq _ _)); eauto.
-    Defined.
-    intros [ | p | p ] [ | q | q] E; simpl in E;
-      reflexivity ||
-      solve [ inversion E ] ||
-      (f_equal; eapply Pcompare_Eq_eq; eauto).
-      fold (p ?= q)%positive; destruct ((p ?= q)%positive); auto || inversion E.
-  Defined.
+        ].
+  exfalso; eapply Pcompare_notEq_notEq; eauto.
+  exfalso; eapply (proj1 (Pcompare_notEq_notEq _ _)); eauto.
+Defined.
+
+Lemma Zcompare_Eq_eq : forall n m : Z, (n ?= m) = Eq -> n = m.
+Proof.
+  intros [ | p | p ] [ | q | q] E; simpl in E;
+    reflexivity ||
+                solve [ inversion E ] ||
+                (f_equal; eapply Pcompare_Eq_eq; eauto).
+  fold (p ?= q)%positive; destruct ((p ?= q)%positive); auto || inversion E.
+Defined.
+
+Definition Z_le_lt_eq_dec x y : x <= y -> {x < y} + {x = y}.
+Proof.
   pose (Zcompare_Eq_iff_eq := 
     fun x y => conj (fun E : (x ?= y) = Eq => Zcompare_Eq_eq x y E)
       (fun E : x = y =>

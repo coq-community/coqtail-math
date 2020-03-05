@@ -25,7 +25,7 @@ Require Export Reals.
 Require Export Rsequence.
 Require Export Rseries_def Rseries_base_facts Rseries_pos_facts.
 Require Export Rseries_remainder_facts Rseries_cv_facts Rseries_usual.
-Require Import Fourier.
+Require Import Lra.
 Require Import Max.
 Require Import Rtactic MyRIneq.
 
@@ -323,7 +323,7 @@ Lemma Rser_partial_little_O_compat : forall (Un : nat -> R),
     Un = o(Vn) -> sum_f_R0 Un = o(sum_f_R0 Vn).
 Proof.
 intros Un Ho eps Heps.
-assert (0<eps/2) as Heps2; [fourier|].
+assert (0<eps/2) as Heps2; [lra|].
 destruct (Rser_little_O_maj _ _ Vn_pos Ho (eps /2)) as [C HC].
 apply Heps2.
 destruct (Vn_infty (C/(eps/2))%R) as [N HN].

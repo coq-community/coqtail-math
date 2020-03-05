@@ -1,4 +1,4 @@
-Require Import Reals Fourier.
+Require Import Reals Lra.
 Require Import Rsequence.
 Require Import Rseries_def Rseries_cv_facts.
 Require Import Rpser_def Rpser_sums Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
@@ -25,7 +25,7 @@ Lemma sum_r_unfold : forall An r r' (pr1 : finite_cv_radius An r)
   sum_r An r pr1 x = weaksum_r An r' pr2 x.
 Proof.
 intros An r r' pr1 pr2 x x_bd x_bd' ; unfold sum_r ;
- destruct (Rlt_le_dec (Rabs x) r) as [H1 | Hf] ; [| exfalso ; fourier].
+ destruct (Rlt_le_dec (Rabs x) r) as [H1 | Hf] ; [| exfalso ; lra].
  apply weaksum_r_unique_strong ; [apply middle_is_in_the_middle |] ;
  assumption.
 Qed.
@@ -35,7 +35,7 @@ Lemma sum_unfold : forall An r (pr1 : infinite_cv_radius An)
   sum An pr1 x = weaksum_r An r pr2 x.
 Proof.
 intros An r pr1 pr2 x x_ub ; unfold sum ;
- apply weaksum_r_unique_strong ; [fourier | assumption].
+ apply weaksum_r_unique_strong ; [lra | assumption].
 Qed.
 
 (** * Compatibility of weaksum_r with the common operations. *)

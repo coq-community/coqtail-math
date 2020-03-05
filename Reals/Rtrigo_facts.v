@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import Rbase Rtactic.
-Require Import Fourier.
+Require Import Lra.
 Require Import Ranalysis Ranalysis5 Rtrigo AltSeries.
 Require Import Rfunctions.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
@@ -39,7 +39,7 @@ Qed.
 Lemma One_plus_sqr_pos_lt : forall x, 0 < 1 + x ^ 2.
 Proof.
 intro x ; replace 0 with (0 + 0) by ring ;
- apply Rplus_lt_le_compat ; [fourier | apply sqr_pos].
+ apply Rplus_lt_le_compat ; [lra | apply sqr_pos].
 Qed.
 
 Lemma cos_pos : forall x, open_interval (- PI/2) (PI/2) x -> 0 < cos x.
@@ -121,7 +121,7 @@ Qed.
 Lemma sqr_lt_switch : forall x y, x < y -> y <= 0 -> y² < x².
 Proof.
 intros x y xlty yneg ; rewrite (Rsqr_neg x), (Rsqr_neg y) ;
- apply Rsqr_incrst_1 ; fourier.
+ apply Rsqr_incrst_1 ; lra.
 Qed.
 
 Lemma sin_bound : forall x, interval (- 1) 1 (sin x).
@@ -132,12 +132,12 @@ intro x ; destruct (Rle_lt_dec (sin x) 1) as [Hub | Hf].
   destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((-(1))² + (cos x)²).
    rewrite <- Rsqr_neg, Rsqr_1 ; apply Rplus_le_simpl_l, Rle_0_sqr.
    apply Rlt_le_trans with ((sin x)² + (cos x)²).
-    apply Rplus_lt_compat_r, sqr_lt_switch ; fourier.
+    apply Rplus_lt_compat_r, sqr_lt_switch ; lra.
     right ; apply sin2_cos2.
   destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with (1² + (cos x)²).
    rewrite Rsqr_1 ; apply Rplus_le_simpl_l, Rle_0_sqr.
    apply Rlt_le_trans with ((sin x)² + (cos x)²).
-    apply Rplus_lt_compat_r, Rsqr_incrst_1 ; fourier.
+    apply Rplus_lt_compat_r, Rsqr_incrst_1 ; lra.
     right ; apply sin2_cos2.
 Qed.
 
@@ -149,12 +149,12 @@ intro x ; destruct (Rle_lt_dec (cos x) 1) as [Hub | Hf].
   destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((sin x)² + (-(1))²).
    rewrite <- Rsqr_neg, Rsqr_1 ; apply Rplus_le_simpl_r, Rle_0_sqr.
    apply Rlt_le_trans with ((sin x)² + (cos x)²).
-    apply Rplus_lt_compat_l, sqr_lt_switch ; fourier.
+    apply Rplus_lt_compat_l, sqr_lt_switch ; lra.
     right ; apply sin2_cos2.
   destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((sin x)² + 1²).
    rewrite Rsqr_1 ; apply Rplus_le_simpl_r, Rle_0_sqr.
    apply Rlt_le_trans with ((sin x)² + (cos x)²).
-    apply Rplus_lt_compat_l, Rsqr_incrst_1 ; fourier.
+    apply Rplus_lt_compat_l, Rsqr_incrst_1 ; lra.
     right ; apply sin2_cos2.
 Qed.
 
@@ -209,10 +209,10 @@ Proof.
 intros eps a eps_pos a_pos ; pose (f := Rmin eps a) ;
  assert (f_pos : 0 < f) by (apply Rmin_pos_lt ; assumption) ;
  exists (f / 2) ; repeat split.
-  apply Rlt_mult_inv_pos ; [assumption | fourier].
- apply Rlt_le_trans with f ; [fourier | apply Rmin_r].
+  apply Rlt_mult_inv_pos ; [assumption | lra].
+ apply Rlt_le_trans with f ; [lra | apply Rmin_r].
  apply Rle_lt_trans with (f / 2) ; [apply sin_first_order |
-  apply Rlt_le_trans with f, Rmin_l] ; fourier.
+  apply Rlt_le_trans with f, Rmin_l] ; lra.
 Qed.
 
 Lemma cos_cv_0_left : forall eps a, 0 < eps -> a < PI / 2 ->
@@ -220,8 +220,8 @@ Lemma cos_cv_0_left : forall eps a, 0 < eps -> a < PI / 2 ->
 Proof.
 intros eps a eps_pos a_ub ;
  destruct (sin_cv_0_right _ (PI / 2 - a) eps_pos) as [x [[x_lb x_ub] Hx]].
- fourier.
- exists (PI / 2 - x) ; rewrite cos_shift ; repeat split ; (trivial || fourier).
+ lra.
+ exists (PI / 2 - x) ; rewrite cos_shift ; repeat split ; (trivial || lra).
 Qed.
 
 Lemma cos2PI_period : forall x k, cos x = cos (x + 2 * IZR ( k ) * PI).

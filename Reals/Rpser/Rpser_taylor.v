@@ -1,5 +1,5 @@
 Require Import Reals.
-Require Import Fourier.
+Require Import Lra.
 
 Require Import Rsequence.
 Require Import Rpser_def Rpser_base_facts.
@@ -78,7 +78,7 @@ assert (prw : Cv_radius_weak Wn r).
   apply pow_lt; assumption.
   replace (r ^ (S N) * (M / r ^ (S N)))
     with M by (field; apply Rgt_not_eq; apply pow_lt; assumption).
-  rewrite <- (Rabs_right (r ^ (S N))); [|apply Rle_ge; apply pow_le; fourier].
+  rewrite <- (Rabs_right (r ^ (S N))); [|apply Rle_ge; apply pow_le; lra].
   rewrite <- Rabs_mult.
   rewrite Rmult_comm.
   rewrite Rmult_assoc.
@@ -187,7 +187,7 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
 assert (Hct : continuity_pt Ss 0).
   apply continuity_pt_weaksum_r.
   rewrite Rabs_R0; assumption.
-destruct (Hct 1) as [alp [Halp Hd]]; [fourier|].
+destruct (Hct 1) as [alp [Halp Hd]]; [lra|].
 assert (Hradius : exists P, forall p, (p >= P)%nat -> Rabs (En p) < r /\ Rabs (En p) < alp).
   destruct (Hcv r H) as [P1 HP1].
   destruct (Hcv alp Halp) as [P2 HP2].
@@ -199,7 +199,7 @@ destruct Hradius as [P HP].
 exists (Rabs (Ss 0) + 1); split.
   apply Rle_ge; apply Rplus_le_le_0_compat.
     apply Rabs_pos.
-    fourier.
+    lra.
   exists P; intros p Hp.
   assert (Hp1 : Rabs (En p) < r).
     apply (HP p); assumption.
@@ -223,7 +223,7 @@ exists (Rabs (Ss 0) + 1); split.
     apply Rabs_triang_inv.
     destruct (Req_dec (En p) 0) as [He|He].
       rewrite He; unfold Rminus; rewrite Rplus_opp_r.
-      rewrite Rabs_R0; fourier.
+      rewrite Rabs_R0; lra.
     apply Rlt_le; apply (Hd (En p)); split.
       compute; auto.
       simpl; unfold R_dist; rewrite Rminus_0_r.

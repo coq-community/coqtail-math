@@ -640,7 +640,7 @@ apply sqrt_lt_1.
  unfold Cnorm_sqr. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
  rewrite <- H1. ring_simplify. apply Rplus_le_lt_0_compat.
  replace (IZR 0) with (2*0)%R by ring.
- apply Rmult_le_compat_l. fourier. assumption. fourier.
+ apply Rmult_le_compat_l. lra. assumption. lra.
 rewrite S_INC. 
 apply Rlt_trans with (Cnorm (INC m)). exact IHle.
 generalize (Cre_INC_pos m). generalize (Cim_INC_0 m).
@@ -651,7 +651,7 @@ apply sqrt_lt_1.
 unfold Cnorm_sqr. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
 rewrite <- H1. ring_simplify. apply Rplus_le_lt_0_compat.
 replace (IZR 0) with (2*0)%R by ring.
-apply Rmult_le_compat_l. fourier. assumption. fourier.
+apply Rmult_le_compat_l. lra. assumption. lra.
 Qed.
 Hint Resolve Cnorm_lt_INC: complex.
 
@@ -667,20 +667,20 @@ rewrite S_INC.
 generalize (Cre_INC_pos n). generalize (Cim_INC_0 n).
 intros H2 H3.
 destruct (INC n); simpl in *.
-rewrite <- sqrt_1. apply sqrt_lt_1. fourier. apply Cnorm_sqr_pos.
+rewrite <- sqrt_1. apply sqrt_lt_1. lra. apply Cnorm_sqr_pos.
 unfold Cnorm_sqr ; simpl.
 rewrite <- H2.
 apply Rminus_gt. unfold Cnorm_sqr. ring_simplify.
 unfold Rminus ; rewrite Rplus_assoc ; apply Rplus_le_lt_0_compat.
 apply Rmult_le_pos ; [| rewrite Rmult_1_r] ; assumption.
- replace R0 with  (4*0)%R by ring.  fourier.
+ replace R0 with  (4*0)%R by ring.  lra.
 Qed.
 Hint Resolve Cnorm_lt_1_INC : complex.
 
 Lemma Cnorm_INC_lt : forall n m:nat, Cnorm (INC n) < Cnorm (INC m) -> (n < m)%nat.
 Proof.
 double induction n m.
-   simpl. intro Habs. fourier.
+   simpl. intro Habs. lra.
   intros n1 H1 H2. destruct n1. intuition. constructor. assert (Hind : (0<S n1 -> 1 <= S n1)%nat). intuition.
   apply Hind. apply H1. rewrite S_INC. 
   generalize (Cre_INC_pos n1). generalize (Cim_INC_0 n1). intros Hu Hs.
@@ -689,14 +689,14 @@ double induction n m.
    unfold Cnorm_sqr. simpl. rewrite <- Hu. ring_simplify. apply Rplus_le_lt_0_compat. apply Rplus_le_le_0_compat.
     replace (r^2)%R with (Rsqr r) by (compute; ring). apply Rle_0_sqr.
    replace (IZR 0) with (2*0)%R by ring.
-   apply Rmult_le_compat_l. fourier. assumption. fourier.
+   apply Rmult_le_compat_l. lra. assumption. lra.
  intros n0 H1 H2. rewrite S_INC in H2. 
  generalize (Cre_INC_pos n0). generalize (Cim_INC_0 n0). intros Hu Hs.
  destruct (INC n0). simpl in *. apply sqrt_lt_0 in H2. unfold Cnorm_sqr in *. simpl in *. rewrite <- Hu in H2. 
    ring_simplify in H2. assert (H : 0<= (Rsqr (r+1))%R). apply Rle_0_sqr. destruct H. compute in H. ring_simplify in H.
-    assert (H0 : (forall x: R, x > 0 -> x < 0 -> False)). intros. fourier. assert (Habs : ((0 < r ^ 2 + 2 * r + 1) ->  (r ^ 2 + 2 * r + 1 < 0)->False)%R).
+    assert (H0 : (forall x: R, x > 0 -> x < 0 -> False)). intros. lra. assert (Habs : ((0 < r ^ 2 + 2 * r + 1) ->  (r ^ 2 + 2 * r + 1 < 0)->False)%R).
      apply H0. destruct Habs ; assumption.
-   rewrite H in H2. compute in H2. ring_simplify in H2. fourier.
+   rewrite H in H2. compute in H2. ring_simplify in H2. lra.
   apply Cnorm_sqr_pos. unfold Cnorm_sqr. simpl. apply Cnorm_sqr_pos.
 intros n0 H1 n1 H3 H4.
 assert (H : (n1<n0 -> S n1 < S n0)%nat). intuition.
@@ -717,8 +717,8 @@ rewrite <- Hu in *. rewrite <- Hu1 in *. apply sqrt_lt_0 in H4. ring_simplify in
   replace (r ^ 2 + 2 * r + 1)%R with (Rsqr (r + 1))%R by (compute; ring).
   replace ( r1 ^ 2)%R with (Rsqr r1) by (compute ; ring).
   replace ( r ^ 2)%R with (Rsqr r) by (compute ; ring).
-intro H5. apply Rsqr_incrst_0 in H5. apply Rsqr_incrst_1. fourier.
-exact Hs1. exact Hs. fourier. fourier. apply Cnorm_sqr_pos. apply Cnorm_sqr_pos. 
+intro H5. apply Rsqr_incrst_0 in H5. apply Rsqr_incrst_1. lra.
+exact Hs1. exact Hs. lra. lra. apply Cnorm_sqr_pos. apply Cnorm_sqr_pos. 
 Qed.
 Hint Resolve Cnorm_INC_lt: complex.
 
@@ -748,7 +748,7 @@ rewrite S_INC.
 generalize (Cre_INC_pos n).
 intro H1.
 destruct (INC n). simpl in *. rewrite <- Ceq. 
-simpl. intuition. fourier.
+simpl. intuition. lra.
 Qed.
 Hint Resolve not_0_INC : complex.
 
@@ -757,10 +757,10 @@ Proof.
 double induction n m. intuition.
 intros n1 H1 H2. intro H. apply H2. rewrite S_INC in H.
 generalize (Cre_INC_pos n1). intro H3. destruct (INC n1). simpl in *.
-apply Ceq in H. elim H. intros H5 H6. simpl in *. fourier.
+apply Ceq in H. elim H. intros H5 H6. simpl in *. lra.
 intros n1 H1 H2. intro H. apply H2. rewrite S_INC in H.
 generalize (Cre_INC_pos n1). intro H3. destruct (INC n1). simpl in *.
-apply Ceq in H. elim H. intros H5 H6. simpl in *. fourier.
+apply Ceq in H. elim H. intros H5 H6. simpl in *. lra.
 intros n0 H1 n1 H3 H4.
 do 2 rewrite S_INC. assert ( H : (INC n1 <> INC n0 -> INC n1 + 1 <> INC n0 + 1)).
 intros temp1 temp2. 

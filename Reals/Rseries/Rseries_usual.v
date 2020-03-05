@@ -1,7 +1,7 @@
 Require Import Rsequence.
 Require Import Rseries_def Rseries_base_facts Rseries_pos_facts Rseries_cv_facts.
 
-Require Import Fourier Rtactic.
+Require Import Lra Rtactic.
 
 Local Open Scope R_scope.
 Local Open Scope Rseq_scope.
@@ -24,8 +24,8 @@ apply Rser_pos_maj_cv with (/ (Rseq_shift INR * Rseq_shifts INR 2)).
   rewrite Rseq_sum_simpl, IHp ; unfold Rseq_constant, Rseq_mult, Rseq_inv,
   Rseq_shifts, Rseq_shift, Rminus ; rewrite Rplus_assoc ; apply Rplus_eq_compat_l.
   simpl ; field ; split ; apply Rgt_not_eq.
-  destruct p ; [| assert (H := lt_0_INR _ (lt_0_Sn p))] ; fourier.
-  destruct p ; [| assert (H := lt_0_INR _ (lt_0_Sn p))] ; fourier.
+  destruct p ; [| assert (H := lt_0_INR _ (lt_0_Sn p))] ; lra.
+  destruct p ; [| assert (H := lt_0_INR _ (lt_0_Sn p))] ; lra.
   rewrite <- Rminus_0_r ; apply Rseq_cv_minus_compat ; [apply Rseq_constant_cv |].
    apply Rseq_cv_pos_infty_inv_compat ; eapply Rseq_cv_pos_infty_eq_compat ;
    [| eapply Rseq_cv_finite_plus_pos_infty_l ; [eapply (Rseq_poly_cv 1) |

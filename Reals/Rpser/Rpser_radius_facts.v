@@ -1,5 +1,5 @@
 Require Import Reals.
-Require Import Fourier.
+Require Import Fourier Lra.
 Require Import Rpow_facts.
 
 Require Import Rinterval Rextensionality.
@@ -228,9 +228,9 @@ intro An ; split.
 intros Rho r ; apply Cv_radius_weak_derivable_compat with (r := (Rabs r) + 1).
  apply Rho.
  replace (Rabs (Rabs r + 1)) with (Rabs r + 1).
- fourier.
+ lra.
  symmetry ; apply Rabs_right.
- apply Rle_ge ; apply Rle_trans with (Rabs r) ; [apply Rabs_pos | fourier].
+ apply Rle_ge ; apply Rle_trans with (Rabs r) ; [apply Rabs_pos | lra].
 
 intros Rho r ; apply Cv_radius_weak_derivable_compat_rev ; apply Rho.
 Qed.
@@ -282,7 +282,7 @@ Proof.
 intros An Bn rAn rBn r ; apply Cv_radius_weak_prod_compat with (Rabs r + 1) (Rabs r + 1).
  apply rAn.
  apply rBn.
- apply Rlt_le_trans with (Rabs r + 1) ; [fourier |].
+ apply Rlt_le_trans with (Rabs r + 1) ; [lra |].
  right ; rewrite Rmin_diag ; symmetry ; apply Rabs_pos_eq ;
  rewrite Rplus_comm ; apply Rle_zero_pos_plus1, Rabs_pos.
 Qed.

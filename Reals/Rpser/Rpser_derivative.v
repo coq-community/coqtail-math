@@ -2,7 +2,7 @@ Require Import Reals Rpow_facts.
 Require Import Rfunction_def Rinterval Rextensionality.
 Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
-Require Import Fourier MyRIneq.
+Require Import Lra MyRIneq.
 
 Require Import Rsequence_facts Rsequence_sums_facts RFsequence RFsequence_facts.
 Require Import Rpser_def Rpser_base_facts Rpser_radius_facts Rpser_sums Rpser_sums_facts.
@@ -55,26 +55,26 @@ assert (lb_lt_x : - middle (Rabs x) (Rabs r) < x).
     pose (r' := middle (middle (Rabs x) (Rabs r)) (Rabs r)).
     assert (r'_bd1 := proj2 (middle_is_in_the_middle _ _ x_bd')).
     replace (middle (Rabs x) (Rabs r)) with (Rabs (middle (Rabs x) (Rabs r))) in r'_bd1 ; [| apply Rabs_right ;
-    unfold r' ; apply Rle_ge ; unfold Rdiv ; apply Rle_mult_inv_pos ; [| fourier] ;
+    unfold r' ; apply Rle_ge ; unfold Rdiv ; apply Rle_mult_inv_pos ; [| lra] ;
     apply Rplus_le_le_0_compat ; apply Rabs_pos].
     assert (r'_bd := proj2 (middle_is_in_the_middle _ _ r'_bd1)).
     assert (Temp : middle (Rabs (middle (Rabs x) (Rabs r))) (Rabs r) = r').
      unfold r' ; unfold Rdiv ; apply Rmult_eq_compat_r ; apply Rplus_eq_compat_r ;
-     apply Rabs_right ; apply Rle_ge ; apply Rle_mult_inv_pos ; [| fourier] ;
+     apply Rabs_right ; apply Rle_ge ; apply Rle_mult_inv_pos ; [| lra] ;
      apply Rplus_le_le_0_compat ; apply Rabs_pos.
      rewrite Temp in r'_bd ; clear Temp ;
     fold r' in r'_bd ; replace r' with (Rabs r') in r'_bd ; [| apply Rabs_right ;
-    unfold r' ; apply Rle_ge ; unfold Rdiv ; apply Rle_mult_inv_pos ; [| fourier] ;
+    unfold r' ; apply Rle_ge ; unfold Rdiv ; apply Rle_mult_inv_pos ; [| lra] ;
     apply Rplus_le_le_0_compat ; [| apply Rabs_pos] ; unfold Rdiv ;
-    apply Rle_mult_inv_pos ; [| fourier] ; apply Rplus_le_le_0_compat ; apply Rabs_pos].
+    apply Rle_mult_inv_pos ; [| lra] ; apply Rplus_le_le_0_compat ; apply Rabs_pos].
     pose (r'' := middle (Rabs x) (Rabs r)).
     assert (r''_pos : 0 < r'').
-    unfold r''. apply Rlt_mult_inv_pos ; [| fourier] ;
+    unfold r''. apply Rlt_mult_inv_pos ; [| lra] ;
      apply Rplus_le_lt_0_compat ; [| apply Rle_lt_trans with (Rabs x) ; [| assumption]] ;
      apply Rabs_pos.
     assert (r''_bd : r'' < r').
      unfold r'', r'.
-     unfold Rdiv ; apply Rmult_lt_compat_r ; [fourier |] ; apply Rplus_lt_compat_r.
+     unfold Rdiv ; apply Rmult_lt_compat_r ; [lra |] ; apply Rplus_lt_compat_r.
      apply middle_is_in_the_middle ; assumption.
     pose (myR := mkposreal r'' r''_pos).
     assert (myR_ub : myR < r') by intuition.
@@ -315,7 +315,7 @@ Proof.
 intros An r Pr x x_bd ; unfold weaksum_r_derive ;
 destruct (Rlt_le_dec (Rabs x) r) as [H | Hf].
  apply weaksum_r_sums ; apply middle_is_in_the_middle ; assumption.
- exfalso ; fourier.
+ exfalso ; lra.
 Qed.
 
 Lemma sum_r_derive_sums : forall An r (Pr : finite_cv_radius An r) x,
@@ -458,7 +458,7 @@ assert (pr : Cv_radius_weak An (middle (Rabs z) r)).
  destruct (Rlt_le_dec (Rabs z) (middle (Rabs z) r)) as [z_bd' | Hf].
  apply sum_r_unfold ; [| do 2 apply middle_is_in_the_middle] ; assumption.
  assert (T := proj1 (middle_is_in_the_middle _ _ z_bd)) ; clear - Hf T ;
- exfalso ; fourier.
+ exfalso ; lra.
  apply Rlt_le_trans with delta ; [assumption | unfold delta ; apply Rmin_l].
  assumption.
  assumption.
@@ -517,25 +517,25 @@ Lemma derivable_pt_lim_sum : forall An (Pr : infinite_cv_radius An), forall z,
       derivable_pt_lim (sum An Pr) z (sum_derive An Pr z).
 Proof.
 intros An rho z eps eps_pos.
- assert (z_bd : Rabs z < Rabs z + 1) by fourier. 
+ assert (z_bd : Rabs z < Rabs z + 1) by lra. 
  destruct (derivable_pt_lim_weaksum_r _ _ (rho _) _ z_bd _ eps_pos) as [d Hd].
  pose (d' := Rmin d (1 / 2)).
  assert (d'_pos : 0 < d').
-  unfold Rmin ; apply Rmin_pos_lt ; [apply d | fourier].
+  unfold Rmin ; apply Rmin_pos_lt ; [apply d | lra].
  pose (delta := mkposreal d' d'_pos) ; exists delta ; intros h h_neq h_bd ;
  specify2 Hd h h_neq ; eapply Rle_lt_trans ; [| eapply Hd].
  right ; apply Rabs_eq_compat ; apply Rminus_eq_compat.
  unfold Rdiv ; apply Rmult_eq_compat_r ; unfold sum ; apply Rminus_eq_compat ;
  apply weaksum_r_unique_strong ; auto.
- apply Rle_lt_trans with (Rabs (z + h) + 0) ; [right ; ring | fourier].
+ apply Rle_lt_trans with (Rabs (z + h) + 0) ; [right ; ring | lra].
  apply Rle_lt_trans with (Rabs z + Rabs h) ; [apply Rabs_triang |] ;
  apply Rplus_lt_compat_l ; apply Rlt_trans with (1/2) ; [apply Rlt_le_trans with
- delta |] ; [| unfold delta ; apply Rmin_r |] ; fourier.
+ delta |] ; [| unfold delta ; apply Rmin_r |] ; lra.
  unfold sum_derive, sum, weaksum_r_derive ;
  destruct (Rlt_le_dec (Rabs z) (Rabs z + 1)) as [H | Hf].
  apply weaksum_r_unique_strong ; [| apply middle_is_in_the_middle] ; assumption.
  exfalso ; apply (Rlt_irrefl (Rabs z)) ; apply Rlt_le_trans with (Rabs z + 1) ;
- fourier.
+ lra.
  apply Rlt_le_trans with delta ; [assumption | unfold delta ; apply Rmin_l].
 Qed.
  

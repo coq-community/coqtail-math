@@ -3,7 +3,7 @@ Require Import Rseries_def Rseries_base_facts Rseries_pos_facts.
 Require Import MyNat MyRIneq.
 
 Require Import Max.
-Require Import Fourier Rtactic.
+Require Import Lra Rtactic.
 
 Local Open Scope R_scope.
 
@@ -90,7 +90,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
    eapply (sum_incr (| An |) O).
     trivial.
     intro ; apply Rabs_pos.
- assert (eps2_pos : 0 < eps2) by (apply Rlt_mult_inv_pos; auto; fourier).
+ assert (eps2_pos : 0 < eps2) by (apply Rlt_mult_inv_pos; auto; lra).
  destruct (Hlb _ eps2_pos) as [N1 HN1].
  destruct (Rseq_cv_bound (Rseq_sum Bn) _ Hlb) as [MBn [MBn_pos HMBn]].
  pose (MB := MBn + Rabs lb).
@@ -102,7 +102,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
    apply Rplus_le_compat ; [trivial | reflexivity].
  pose (eps3 := eps / 8 / INR (S N1) / (MB + 1)).
  assert (eps3_pos: 0 < eps3).
-  repeat apply Rlt_mult_inv_pos ; intuition ; fourier.
+  repeat apply Rlt_mult_inv_pos ; intuition ; lra.
  destruct (Rser_cv_zero An _ Hla _ eps3_pos) as [N2 HN2t].
  assert (HN2: forall n : nat, (n >= N2)%nat -> Rabs (An n) < eps3).
   intros p p_lb ; rewrite <- (Rminus_0_r (An p)) ; apply HN2t ; assumption.
@@ -160,7 +160,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  apply Rmult_lt_compat_r ; [| apply Rmult_lt_compat_l].
   apply lt_0_INR ; omega.
   assumption.
-  fourier.
+  lra.
  right ; unfold eps3 ; field ; split.
  replace 0 with (INR O) by auto ; apply not_INR ; auto.
  apply Rgt_not_eq ; apply Rle_lt_0_plus_1 ; left ; assumption.
@@ -180,7 +180,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  rewrite <- (Rseq_sum_reindex_compat (fun i => Rabs (An i))).
 (* TODO: remove growing_ineq from std_lib *)
  apply growing_ineq.
- intro p ; rewrite Rseq_sum_simpl ; assert (H := Rabs_pos (An (S p))) ; fourier.
+ intro p ; rewrite Rseq_sum_simpl ; assert (H := Rabs_pos (An (S p))) ; lra.
  apply Hlna.
  right ; unfold eps2 ; field ; apply Rgt_not_eq ; assumption.
  rewrite Rabs_mult ; apply Rle_lt_trans with (eps4 * Rabs lb).
@@ -188,7 +188,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  left ; apply HN3, le_trans with N ; [apply le_max_r | assumption].
  replace eps with (eps4 * 2 * (Rabs lb + 1)) by (unfold eps4 ; field ;
   apply Rgt_not_eq ; apply Rle_lt_0_plus_1, Rabs_pos).
- field_simplify ; unfold Rdiv ; apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; fourier.
+ field_simplify ; unfold Rdiv ; apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; lra.
  unfold Rseq_prod ; apply Rseq_sum_ext ; intro p ; unfold Rseq_mult, Rseq_minus,
   Rseq_constant, Rseq_plus ; ring.
 Qed.

@@ -1,5 +1,5 @@
 Require Import Reals Ranalysis_def Rinterval.
-Require Import MyRIneq Fourier.
+Require Import MyRIneq Lra.
 
 Lemma R_dist_opp_compat: forall x y,
   R_dist (- x) (- y) = R_dist x y.
@@ -32,10 +32,10 @@ Qed.
 
 Lemma Rlt_le_Rdist_compat : forall a b c, a < b -> b <= c -> R_dist c b < R_dist c a.
 Proof.
-intros a b c aleb alec ; unfold R_dist ; do 3 (rewrite Rabs_right || fourier).
+intros a b c aleb alec ; unfold R_dist ; do 3 (rewrite Rabs_right || lra).
 Qed.
 
 Lemma Rle_lt_Rdist_compat : forall a b c, a <= b -> b < c -> R_dist b a < R_dist c a.
 Proof.
-intros a b c aleb alec ; unfold R_dist ; do 3 (rewrite Rabs_right || fourier).
+intros a b c aleb alec ; unfold R_dist ; do 3 (rewrite Rabs_right || lra).
 Qed.

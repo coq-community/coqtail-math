@@ -105,7 +105,7 @@ unfold limit1_in, limit_in ; intros f D l l' x HD Hl Hl' ;
  apply Cseq_cv_unique with (fun _ => l).
  apply Cseq_cst_cv.
  intros eps eps_pos ; exists 0%nat ; intros n n_lb ; apply Hforall ; assumption.
- intros eps eps_pos ; assert (eps_2_pos : eps / 2 > 0) by fourier ;
+ intros eps eps_pos ; assert (eps_2_pos : eps / 2 > 0) by lra ;
  destruct (Hl (eps / 2)%R eps_2_pos) as (alpha1, [alpha1_pos Halpha1]) ;
  destruct (Hl' (eps / 2)%R eps_2_pos) as (alpha2, [alpha2_pos Halpha2]) ;
  assert (alpha'_pos : Rmin alpha1 alpha2 > 0) by (apply Rmin_pos ; assumption) ;
@@ -286,7 +286,7 @@ intros f D l z Hf l_neq ; intros eps eps_pos ; elim (Hf ((Cnorm l) / 2)%R).
  apply Rmult_lt_compat_r.
  apply Rinv_0_lt_compat; apply Cnorm_pos_lt; assumption.
  apply Rmult_lt_reg_l with (Cnorm (f x) * Cnorm l * / 2)%R.
- repeat apply Rmult_lt_0_compat ; [| | fourier] ; apply Cnorm_pos_lt; assumption.
+ repeat apply Rmult_lt_0_compat ; [| | lra] ; apply Cnorm_pos_lt; assumption.
  rewrite Rmult_comm ; repeat rewrite <- Rmult_assoc ; rewrite Rinv_l.
  rewrite Rmult_1_l ; repeat rewrite Rmult_assoc ;
  replace (Cnorm l * (/ 2 * (2 * / Cnorm l)))%R with 1%R.
@@ -300,7 +300,7 @@ intros f D l z Hf l_neq ; intros eps eps_pos ; elim (Hf ((Cnorm l) / 2)%R).
  apply Cmult_integral_contrapositive_currified ; assumption.
  field ; split ; assumption.
  apply Cnorm_gt_not_eq ; apply Rlt_gt ; apply Rle_lt_trans with (Cnorm l / 2)%R ;
- [assert (Temp := Cnorm_pos l) ; fourier | assumption].
+ [assert (Temp := Cnorm_pos l) ; lra | assumption].
  split ; [| apply Rlt_le_trans with (Rmin delta1 delta2) ; [| apply Rmin_r]] ; assumption.
  split ; [| apply Rlt_le_trans with (Rmin delta1 delta2) ; [| apply Rmin_l]] ; assumption.
  unfold Rdiv ; repeat apply Rmult_lt_0_compat ; intuition ;

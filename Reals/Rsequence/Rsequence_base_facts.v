@@ -22,7 +22,7 @@ USA.
 Require Import Coq.omega.Omega.
 Require Import Rsequence_def.
 Require Import Morphisms Setoid.
-Require Import Fourier.
+Require Import Lra.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.

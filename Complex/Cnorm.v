@@ -211,9 +211,9 @@ destruct z1 as (r0, r1) ; destruct z2 as (r2, r3) ; simpl ; apply Rsqr_incr_0. u
  replace 8%R with  (4 * 2)%R by ring ; replace (Rsqr 2)%R with 4%R by intuition ;
  rewrite <- Rmult_plus_distr_r ; rewrite Rmult_assoc ; rewrite Rmult_assoc ;
  rewrite Rmult_assoc ; rewrite Rmult_assoc ; rewrite Rmult_comm ;
- apply Rmult_le_compat_r ; [fourier |].
+ apply Rmult_le_compat_r ; [lra |].
  ring_simplify ; ring_simplify in H1 ; exact H1.
- rewrite Rmult_assoc ; apply Rmult_le_pos ; [fourier |] ; apply Rmult_le_pos ;
+ rewrite Rmult_assoc ; apply Rmult_le_pos ; [lra |] ; apply Rmult_le_pos ;
  apply sqrt_positivity ; apply Rplus_le_le_0_compat ; apply Rle_0_sqr. 
  apply Rplus_le_le_0_compat ; apply Rle_0_sqr.
  apply sqrt_positivity; apply Rplus_le_le_0_compat ; apply Rle_0_sqr. 

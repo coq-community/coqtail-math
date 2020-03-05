@@ -1,4 +1,4 @@
-Require Import Rbase Ranalysis Fourier.
+Require Import Rbase Ranalysis Lra.
 Require Import Rfunctions Rfunction_facts Rextensionality.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
@@ -375,7 +375,7 @@ Lemma limit_scal: forall a f D x l,
   limit1_in (mult_real_fct a f) D (a * l) x.
 Proof.
 intros a f D x l Hf eps eps_pos ; destruct (Req_dec a 0).
- exists 1 ; split ; [fourier | intros y [y_in y_bd]] ;
+ exists 1 ; split ; [lra | intros y [y_in y_bd]] ;
   unfold mult_real_fct ; simpl ; subst ;
   rewrite R_dist_scal_compat, Rabs_R0, Rmult_0_l ;
   assumption.

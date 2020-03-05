@@ -24,7 +24,7 @@ USA.
 Require Import Reals.
 Require Import RiemannInt.
 Require Import RIneq.
-Require Import Fourier.
+Require Import Lra.
 Require Import R_sqr.
 Require Import MyRfunctions.
 Local Open Scope R_scope.
@@ -408,22 +408,22 @@ assert(exists c, exists d, a <= c <= b /\ a <= d <= b /\ c < d /\ forall x, c <=
     apply Rmax_le.
       left; apply Hab.
 
-    apply Rle_trans with u; [fourier | intuition].
+    apply Rle_trans with u; [lra | intuition].
     
     apply Rmin_ge.
       left; apply Hab.
-    apply Rle_trans with u;  [intuition | fourier].
+    apply Rle_trans with u;  [intuition | lra].
     
     apply Rmin_l.
     
     case(Rle_lt_or_eq_dec a u(proj1 Haub)); intro Hau.
       apply Rlt_le_trans with u.
-        apply Rmax_lt; [intuition | fourier].
-    apply Rmin_ge; [intuition | fourier].
+        apply Rmax_lt; [intuition | lra].
+    apply Rmin_ge; [intuition | lra].
     subst.
     apply Rle_lt_trans with u.
-      apply Rmax_le; fourier.
-    apply Rmin_2; fourier.
+      apply Rmax_le; lra.
+    apply Rmin_2; lra.
   intros x Hx.
   rewrite <- Rabs_pos_eq.
     apply Rabs_pos_lt.
@@ -433,15 +433,15 @@ assert(exists c, exists d, a <= c <= b /\ a <= d <= b /\ c < d /\ forall x, c <=
     split.
       apply Rlt_le_trans with (Rmax a (u - eps/2)).
         apply Rlt_le_trans with (u-eps/2).
-          fourier.
+          lra.
         apply RmaxLess2.
         apply Hx.
       apply Rle_lt_trans with (Rmin b (u + eps/2)).
         apply Hx.
       apply Rle_lt_trans with (u + eps/2).
         apply Rmin_r.
-      fourier.
-    apply Rabs_def1; fourier.        
+      lra.
+    apply Rabs_def1; lra.        
   apply Hpos.
   split.
     eapply Rle_trans.
@@ -461,7 +461,7 @@ destruct (continuity_ab_min f c d) as [m Hm].
  apply Hcont.
  split; eapply Rle_trans; [apply Hacb | apply Hcxd | apply Hcxd | apply Hadb].
 apply Rlt_le_trans with ((f m) * (d - c)).
- apply Rmult_lt_0_compat; [apply Hstp; apply Hm | fourier].
+ apply Rmult_lt_0_compat; [apply Hstp; apply Hm | lra].
 apply Rle_trans with T.
  apply Rint_le_compat with (fct_cte (f m)) f c d.
   apply Hcdb.
@@ -479,7 +479,7 @@ apply Rle_trans with (X - Y).
     assert(Hdbpos : forall x : R, d <= x <= b -> 0 <= f x).
       intros x [H1 H2]; apply Hpos; split;[apply Rle_trans with d| ]; intuition.
     apply (Rint_pos _ _ _ _ (proj2 Hadb) Hdbpos HT').
-  fourier.
+  lra.
 assert(Hacpos : forall x : R, a <= x <= c -> 0 <= f x).
   intros x [H1 H2]; apply Hpos; split; [ | apply Rle_trans with c]; intuition.
 pose proof (Rint_pos _ _ _ _ (proj1 Hacb) Hacpos HY) as H.
@@ -487,7 +487,7 @@ pose proof (Rint_pos _ _ _ _ (proj1 Hacb) Hacpos HY) as H.
     assert(Hdbpos : forall x : R, d <= x <= b -> 0 <= f x).
       intros x [H1 H2]; apply Hpos; split;[apply Rle_trans with d| ]; intuition.
     apply (Rint_pos _ _ _ _ (proj2 Hadb) Hdbpos HT').
-  fourier.
+  lra.
 Qed.
 
 (** A non negative function with null integral in a non trivial segment is null on it *)
@@ -512,7 +512,7 @@ intros a Haa.
 destruct (total_order_T a 0) as [[|]|]; subst; trivial;
  (cut (0 < a * a); [intro; apply False_ind; apply (Rlt_not_eq _ _ H); auto|]);
  [replace (a * a) with (- a * - a) by ring|];
- apply Rmult_lt_0_compat; fourier.
+ apply Rmult_lt_0_compat; lra.
 Qed.
 
 (* end hide *)
