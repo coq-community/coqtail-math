@@ -179,10 +179,11 @@ unfold antg_neg.
 rewrite S_INR.
 simpl pow.
 field; split;
+ replace (-2) with (-(2%R)) by reflexivity;
  replace 2 with (INR 2) by reflexivity;
  replace 1 with (INR 1) by reflexivity.
  INR_solve.
- 
+
  intro Hinv.
  rewrite Ropp_mult_distr_l_reverse in Hinv.
  pose proof (Rplus_opp_r_uniq _ _ Hinv) as H.
@@ -358,7 +359,7 @@ Qed.
 
 Lemma pow1_Rabs : forall z, Rabs (pow1 z) = 1.
 Proof.
-destruct z; try destruct p; simpl; try rewrite Rabs_Ropp; apply Rabs_R1.
+destruct z; try destruct p; simpl; change (-1) with (-(1%R)); try rewrite Rabs_Ropp; apply Rabs_R1.
 Qed.
 
 Lemma pow1_P_plus : forall a b, pow1_P (a + b) = pow1_P a * pow1_P b.
@@ -1121,11 +1122,11 @@ replace
    simpl; ring.
    rewrite bisum_one_step.
    rewrite IHk.
-   replace 0%Z with (Z_of_nat O) by trivial.
+   change (Z.eq_dec 0) with (Z.eq_dec (Z_of_nat O)).
    destruct (Z_eq_dec (Z_of_nat 0) (Z_of_nat (S k))).
     apply inj_eq_rev in e.
     inversion e.
-   replace (Z_of_nat O) with (- Z_of_nat O)%Z by trivial.
+   replace (Z.eq_dec (Z_of_nat O)) with (Z.eq_dec (- Z_of_nat O)%Z) by trivial.
    destruct (Z_eq_dec (- Z_of_nat O)%Z (- Z_of_nat (S k))).
     apply Zopp_inj in e.
     apply inj_eq_rev in e.

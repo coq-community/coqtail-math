@@ -654,7 +654,8 @@ Proof.
   exact pr.
 Qed.
 
-Extraction "Arith/Lagrange_four_square.ml" lagrange_fun.
+Require Extraction.
+Extraction "Lagrange_four_square.ml" lagrange_fun.
 
 (*
 Eval compute in lagrange_fun 0.

@@ -320,7 +320,7 @@ assert (derivable_pt f ((fun x => -x) x)). apply Df. apply H2.
 pose (p := derivable_pt_comp (fun x => (-x)) f x H0 H3).
 rewrite (pr_nu_var _ _ _ H p).
 unfold p.
-rewrite derive_pt_comp. replace (derive_pt (fun x0 : R => (- x0)%R) x H0) with (-1).
+rewrite derive_pt_comp. replace (derive_pt (fun x0 : R => (- x0)%R) x H0) with (-(1%R)).
 ring_simplify. apply Ropp_eq_compat. apply pr_nu.
 rewrite <- derive_pt_id with x. rewrite <- derive_pt_opp.
 unfold id. apply pr_nu.

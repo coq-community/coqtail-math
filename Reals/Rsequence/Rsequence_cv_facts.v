@@ -413,7 +413,7 @@ replace (Un n * Vn n)%R with ((- Un n) *( - Vn n))%R by ring.
 replace (Rabs M)%R with (( - -Rabs M) *( - - 1))%R by ring.
 apply Rmult_le_0_lt_compat.
 rewrite Ropp_involutive; apply Rabs_pos.
-rewrite Ropp_involutive; apply Rle_0_1.
+fourier.
 apply Ropp_lt_contravar; apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
 apply Ropp_lt_contravar; apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
 Qed.
@@ -434,7 +434,7 @@ apply Ropp_lt_contravar.
 replace (Rabs M)%R with ((Rabs M) * (- - 1))%R by ring.
 apply Rmult_le_0_lt_compat.
 apply Rabs_pos.
-rewrite Ropp_involutive; apply Rle_0_1.
+fourier.
 apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
 apply Ropp_lt_contravar; apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
 replace M with (- -M)%R by ring; apply Ropp_le_contravar; rewrite Ropp_involutive.
@@ -655,10 +655,12 @@ rewrite <- Ropp_mult_distr_l_reverse, <- (Ropp_mult_distr_l_reverse (Un n) (Vn n
 apply Rmult_le_0_lt_compat.
 repeat apply Rmult_gt_0_compat; try fourier.
 replace (-(Rabs M)*(2*/l))%R with ((Rabs M)*(- 2*/l))%R by ring.
-replace 0%R with (Rabs M * 0)%R by field.
+replace (IZR 0) with (Rabs M * 0)%R by field.
 apply Rmult_le_compat_l.
 apply Rabs_pos.
 apply Rlt_le.
+Set Printing All.
+change (IZR (-2)) with (- (IZR 2))%R.
 rewrite Ropp_mult_distr_l_reverse, <- Ropp_mult_distr_r_reverse.
 repeat apply Rmult_gt_0_compat; try fourier.
 apply Ropp_0_gt_lt_contravar.
@@ -761,6 +763,7 @@ replace 0%R with (Rabs M * 0)%R by field.
 apply Rmult_le_compat_l.
 apply Rabs_pos.
 apply Rlt_le.
+change (IZR (-2)) with (- (IZR 2))%R.
 rewrite Ropp_mult_distr_l_reverse, <- Ropp_mult_distr_r_reverse.
 repeat apply Rmult_gt_0_compat; try fourier.
 apply Ropp_0_gt_lt_contravar.
@@ -853,6 +856,7 @@ replace 0%R with (Rabs M * 0)%R by field.
 apply Rmult_le_compat_l.
 apply Rabs_pos.
 apply Rlt_le.
+change (IZR (-2)) with (- (IZR 2))%R.
 rewrite Ropp_mult_distr_l_reverse, <- Ropp_mult_distr_r_reverse.
 repeat apply Rmult_gt_0_compat; try fourier.
 apply Ropp_0_gt_lt_contravar.
@@ -959,6 +963,7 @@ replace 0%R with (Rabs M * 0)%R by field.
 apply Rmult_le_compat_l.
 apply Rabs_pos.
 apply Rlt_le.
+change (IZR (-2)) with (- (IZR 2))%R.
 rewrite Ropp_mult_distr_l_reverse, <- Ropp_mult_distr_r_reverse.
 repeat apply Rmult_gt_0_compat; try fourier.
 apply Ropp_0_gt_lt_contravar.

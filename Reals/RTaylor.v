@@ -124,7 +124,7 @@ Proof.
  rewrite <- Rabs_Ropp.
  rewrite Ropp_minus_distr.
  assert (Hrew := (Rseq_pps_opp_compat Un (-1) n)) ; unfold Rseq_opp in Hrew ;
- unfold Rminus ; rewrite <- Hrew.
+ unfold Rminus . change (-(1)) with (-1). rewrite <- Hrew.
  apply Rle_lt_trans with (R_dist (sum_f_R0 (tg_alt (fun n0 : nat => - Un (S n0))) (pred n)) l).
  right ; rewrite <- Rabs_Ropp ; unfold R_dist ; apply Rabs_eq_compat.
  clear - n_lb; induction n ; unfold tg_alt.

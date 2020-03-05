@@ -568,7 +568,7 @@ intros An r rho r' r'_bd.
   apply Rle_lt_trans with (Rabs r') ; [apply Rabs_pos | assumption].
  assert (x_lt_1 : Rabs (r'/ r) < 1).
   unfold Rdiv ; rewrite Rabs_mult ; rewrite Rabs_Rinv.
-  replace R1 with (Rabs r *  / Rabs r)%R.
+  replace 1%R with (Rabs r *  / Rabs r)%R.
   apply Rmult_lt_compat_r ; [apply Rinv_0_lt_compat |] ; assumption.
   apply Rinv_r ; apply Rgt_not_eq ; assumption.
   intro Hf ; rewrite Hf, Rabs_R0 in Rabsr_pos ; apply (Rlt_irrefl _ Rabsr_pos).
@@ -596,7 +596,7 @@ intros An r rho r' r'_bd.
  rewrite Cmult_assoc.
  replace ((/ r) ^ S i * (r ^ S i * / r')) with (/ r').
  simpl ; field ; auto with complex.
- assert (r_neq : r <> R0).
+ assert (r_neq : r <> 0%R).
   intro Hf ; rewrite Hf, Rabs_R0 in Rabsr_pos ; elim (Rlt_irrefl _ Rabsr_pos).
  rewrite <- Cpow_inv.
  rewrite <- Cmult_assoc.

@@ -129,7 +129,7 @@ Proof.
 intro x ; destruct (Rle_lt_dec (sin x) 1) as [Hub | Hf].
  destruct (Rle_lt_dec (- 1) (sin x)) as [Hlb | Hf].
   split ; assumption.
-  destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((-1)² + (cos x)²).
+  destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((-(1))² + (cos x)²).
    rewrite <- Rsqr_neg, Rsqr_1 ; apply Rplus_le_simpl_l, Rle_0_sqr.
    apply Rlt_le_trans with ((sin x)² + (cos x)²).
     apply Rplus_lt_compat_r, sqr_lt_switch ; fourier.
@@ -146,7 +146,7 @@ Proof.
 intro x ; destruct (Rle_lt_dec (cos x) 1) as [Hub | Hf].
  destruct (Rle_lt_dec (- 1) (cos x)) as [Hlb | Hf].
   split ; assumption.
-  destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((sin x)² + (-1)²).
+  destruct (Rlt_irrefl 1) ; apply Rle_lt_trans with ((sin x)² + (-(1))²).
    rewrite <- Rsqr_neg, Rsqr_1 ; apply Rplus_le_simpl_r, Rle_0_sqr.
    apply Rlt_le_trans with ((sin x)² + (cos x)²).
     apply Rplus_lt_compat_l, sqr_lt_switch ; fourier.
@@ -226,30 +226,35 @@ Qed.
 
 Lemma cos2PI_period : forall x k, cos x = cos (x + 2 * IZR ( k ) * PI).
 Proof.
-intros.
-destruct (k). simpl. ring_simplify (x + 2 * 0 * PI).
-reflexivity.
-simpl. destruct (nat_of_P p). simpl. ring_simplify (x + 2 * 0 * PI).
-reflexivity.
-rewrite cos_period. reflexivity.
-simpl. destruct (nat_of_P p). simpl. ring_simplify (x + 2 * - 0 * PI).
-reflexivity.
-replace (x + 2 * - INR (S n) * PI) with (x - (0 + 2 * INR (S n) * PI)) by ring.
-rewrite cos_minus. rewrite cos_period. rewrite sin_period.
-rewrite cos_0. rewrite sin_0. ring.
+intros; symmetry.
+destruct k.
+
+f_equal. ring.
+
+unfold IZR.
+rewrite <-2INR_IPR.
+apply cos_period.
+
+unfold IZR.
+replace (x + IPR 2 * - IPR p * PI) with (x - (0 + IPR 2 * IPR p * PI)) by ring.
+rewrite <-2INR_IPR.
+rewrite cos_minus, cos_period, sin_period, cos_0, sin_0. ring.
 Qed.
 
 Lemma sin2PI_period : forall x k, sin x = sin (x + 2 * IZR ( k ) * PI).
 Proof.
-intros.
-destruct (k). simpl. ring_simplify (x + 2 * 0 * PI).
-reflexivity.
-simpl. destruct (nat_of_P p). simpl. ring_simplify (x + 2 * 0 * PI).
-reflexivity.
-rewrite sin_period. reflexivity.
-simpl. destruct (nat_of_P p). simpl. ring_simplify (x + 2 * - 0 * PI).
-reflexivity.
-replace (x + 2 * - INR (S n) * PI) with (x - (0 + 2 * INR (S n) * PI)) by ring.
-rewrite sin_minus. rewrite cos_period. rewrite sin_period.
-rewrite cos_0. rewrite sin_0. ring.
+intros; symmetry.
+
+destruct k.
+
+f_equal. ring.
+
+unfold IZR.
+rewrite <-2INR_IPR.
+apply sin_period.
+
+unfold IZR.
+replace (x + IPR 2 * - IPR p * PI) with (x - (0 + IPR 2 * IPR p * PI)) by ring.
+rewrite <-2INR_IPR.
+rewrite sin_minus, cos_period, sin_period, cos_0, sin_0. ring.
 Qed.

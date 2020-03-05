@@ -467,7 +467,7 @@ Qed.
 
 Lemma Cexp_0 : Cexp C0 = C1.
 Proof.
-replace C0 with (IRC R0) by auto.
+replace C0 with (IRC (IZR 0)) by auto.
 rewrite Cexp_exp_compat ; rewrite exp_0 ; auto.
 Qed.
 

@@ -338,8 +338,8 @@ exists (INR 4 * / x * / x)%R; split.
   replace (INR n ^ 2 / 1)%R with (INR n * INR n)%R by field.
   apply Rmult_le_compat_l; [apply pos_INR|].
   replace 1%R with (INR 1) by reflexivity.
-  rewrite <- plus_INR.
   rewrite <- minus_INR; [|omega].
+  change 2 with (INR 2).
   rewrite <- mult_INR.
   apply le_INR; omega.
   replace 1%R with (INR 1) by reflexivity.
@@ -399,9 +399,11 @@ replace 0 with (0 * 0)%R by field;
 apply Rmult_le_compat; (apply Rle_refl || apply Rabs_pos).
 replace 0 with (0 * 0)%R by field;
 apply Rmult_le_compat; (apply Rle_refl || apply Rabs_pos).
+change (1 + 1) with 2.
 apply Rmult_le_compat_l; [apply Rabs_pos|]; apply HN; omega.
 apply Rmult_le_compat_l; [apply Rabs_pos|]; apply HN; omega.
 unfold Rseq_pow.
+change (1 + 1) with 2.
 field_simplify.
 simpl; unfold Rdiv; repeat rewrite Rinv_1;
 repeat rewrite Rmult_1_r.

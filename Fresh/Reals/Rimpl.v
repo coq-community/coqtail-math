@@ -193,16 +193,28 @@ Module Rimpl <: Raxiom.CReals.
     exact Coq.Reals.R_Ifp.Int_part.
   Defined.
   
-  Lemma IZR_same : forall z, Raxioms.IZR z = IZR z.
+  Lemma IPR_2_same : forall p, RD.IPR_2 p = Rmul (Radd R1 R1) (IPR p).
   Proof.
-    cut (forall p : positive, Raxioms.INR (nat_of_P p) = IPR p).
-     intros H []; simpl; auto.
-     try intros p; rewrite H; auto.
-   induction 0; auto.
-    rewrite nat_of_P_xI, RI.S_INR, RI.mult_INR, IHp; auto.
-    rewrite nat_of_P_xO, RI.mult_INR, IHp; auto.
+    induction 0; simpl.
+      rewrite IHp, (RA.Rplus_comm RD.R1 (RD.Rmult _ _)); auto.
+      rewrite IHp; auto.
+      rewrite <-RI.Rmult_1_r at 1; auto.
   Qed.
-  
+
+  Lemma IPR_same : forall p, RD.IPR p = IPR p.
+  Proof.
+    destruct 0; auto.
+      change (RD.Rplus RD.R1 (RD.IPR_2 p) = IPR p~1). rewrite IPR_2_same, RA.Rplus_comm. auto.
+      change (RD.IPR_2 p = IPR p~0). rewrite IPR_2_same. auto.
+  Qed.
+
+  Lemma IZR_same : forall z, RD.IZR z = IZR z.
+  Proof.
+    destruct z; auto.
+      apply IPR_same.
+      change (RD.Ropp (RD.IPR p) = Ropp (IPR p)). rewrite IPR_same. auto.
+  Qed.
+
   Lemma Rup_spec : forall r : R, Rdist r (IZR (Rup r)) R1.
   Proof.
     intros r.
@@ -249,7 +261,8 @@ Module Rimpl <: Raxiom.CReals.
   apply RA.Rlt_trans with R0; intuition.
   rewrite <- RI.Ropp_involutive. apply RI.Ropp_lt_contravar. 
   assumption.
-  unfold Rsub. rewrite H1 in *. unfold R0 in H. rewrite Rbasic_fun.Rabs_R0 in H.
+  unfold Rsub. rewrite H1 in *. unfold R0 in H.
+  change RD.R0 with (RD.IZR Z0) in H. rewrite Rbasic_fun.Rabs_R0 in H.
   split. apply H. apply RI.Ropp_lt_gt_0_contravar. intuition.
   
   rewrite Rbasic_fun.Rabs_right in H; intuition.
@@ -258,7 +271,8 @@ Module Rimpl <: Raxiom.CReals.
   apply RA.Rlt_trans with R0; intuition.
   intuition.
   apply RI.Rlt_irrefl in H0. destruct H0.
-  subst. unfold R0. unfold Ropp. rewrite RI.Ropp_0. assumption.
+  subst. unfold R0. unfold Ropp.
+  change RD.R0 with (RD.IZR Z0). rewrite RI.Ropp_0. assumption.
 
   apply RA.Rlt_trans with R0. intuition.
   intuition.
@@ -317,7 +331,8 @@ Module Rimpl <: Raxiom.CReals.
      replace (Rdefinitions.Rplus (RD.Rinv (RD.Rplus R1 R1)) (RD.Rinv (RD.Rplus R1 R1))) with
      (RD.Rmult (RD.Rplus R1 R1) (RD.Rinv (RD.Rplus R1 R1))).  
      rewrite (RA.Rmult_comm (RD.Rplus _ _) _). rewrite RA.Rinv_l. intuition.
-     assert (RD.Rlt R0 2). intuition. intro. unfold R0 in *. rewrite <- H1 in H0. apply RI.Rlt_irrefl in H0. 
+     assert (RD.Rlt R0 2). change R0 with (RD.IZR Z0). intuition. intro. unfold R0 in *.
+     change RD.R0 with (RD.IZR Z0)in H0. rewrite <- H1 in H0. apply RI.Rlt_irrefl in H0. 
      destruct H0.
      apply RI.double.
     

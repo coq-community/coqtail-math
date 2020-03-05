@@ -639,7 +639,7 @@ apply sqrt_lt_1.
    apply Cnorm_sqr_pos. apply Cnorm_sqr_pos.
  unfold Cnorm_sqr. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
  rewrite <- H1. ring_simplify. apply Rplus_le_lt_0_compat.
- replace R0 with (2*0)%R by ring.
+ replace (IZR 0) with (2*0)%R by ring.
  apply Rmult_le_compat_l. fourier. assumption. fourier.
 rewrite S_INC. 
 apply Rlt_trans with (Cnorm (INC m)). exact IHle.
@@ -650,7 +650,7 @@ apply sqrt_lt_1.
    apply Cnorm_sqr_pos. apply Cnorm_sqr_pos. 
 unfold Cnorm_sqr. simpl. ring_simplify. do 2 rewrite Rplus_assoc. apply (Rplus_lt_compat_l (r^2)).
 rewrite <- H1. ring_simplify. apply Rplus_le_lt_0_compat.
-replace R0 with (2*0)%R by ring.
+replace (IZR 0) with (2*0)%R by ring.
 apply Rmult_le_compat_l. fourier. assumption. fourier.
 Qed.
 Hint Resolve Cnorm_lt_INC: complex.
@@ -688,7 +688,7 @@ double induction n m.
    unfold Cnorm_sqr. apply Cnorm_sqr_pos.
    unfold Cnorm_sqr. simpl. rewrite <- Hu. ring_simplify. apply Rplus_le_lt_0_compat. apply Rplus_le_le_0_compat.
     replace (r^2)%R with (Rsqr r) by (compute; ring). apply Rle_0_sqr.
-   replace R0 with (2*0)%R by ring.
+   replace (IZR 0) with (2*0)%R by ring.
    apply Rmult_le_compat_l. fourier. assumption. fourier.
  intros n0 H1 H2. rewrite S_INC in H2. 
  generalize (Cre_INC_pos n0). generalize (Cim_INC_0 n0). intros Hu Hs.

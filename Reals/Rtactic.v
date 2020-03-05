@@ -34,17 +34,17 @@ rewrite IHn.
 ring.
 Qed.
 
-Lemma INR_0 : INR 0 = 0.
+Lemma INR_0 : INR 0 = R0.
 Proof.
 reflexivity.
 Qed.
 
-Lemma IZR_0 : IZR 0 = 0.
+Lemma IZR_0 : IZR 0 = R0.
 Proof.
 reflexivity.
 Qed.
 
-Lemma pow_0 : forall x, x ^ 0 = 1.
+Lemma pow_0 : forall x, x ^ 0 = R1.
 Proof.
 intros x.
 reflexivity.
@@ -102,14 +102,14 @@ simpl. rewrite Rmult_1_r.
 apply sqrt_Rabs_mult_compat.
 Qed.
 
-Lemma Zpos_xO_IZR : forall x, IZR (Zpos (xO x)) = 2 * IZR (Zpos x).
+Lemma Zpos_xO_IZR : forall x, IZR (Zpos (xO x)) = (R1 + R1) * IZR (Zpos x).
 intros x.
 rewrite Zpos_xO.
 rewrite mult_IZR.
 reflexivity.
 Qed.
 
-Lemma Zpos_xI_IZR : forall x, IZR (Zpos (xI x)) = 2 * IZR (Zpos x) + 1.
+Lemma Zpos_xI_IZR : forall x, IZR (Zpos (xI x)) = (R1 + R1) * IZR (Zpos x) + R1.
 Proof.
 intros x.
 rewrite Zpos_xI.
@@ -118,7 +118,7 @@ rewrite mult_IZR.
 reflexivity.
 Qed.
 
-Lemma Zneg_xI_IZR : forall x, IZR (Zneg (xI x)) = 2 * IZR (Zneg x) - 1.
+Lemma Zneg_xI_IZR : forall x, IZR (Zneg (xI x)) = (R1 + R1) * IZR (Zneg x) - R1.
 Proof.
 intros x.
 rewrite Zneg_xI.
@@ -130,19 +130,19 @@ simpl.
 ring.
 Qed.
 
-Lemma Zneg_xO_IZR : forall x, IZR (Zneg (xO x)) = 2 * IZR (Zneg x).
+Lemma Zneg_xO_IZR : forall x, IZR (Zneg (xO x)) = (R1 + R1) * IZR (Zneg x).
 intros x.
 rewrite Zneg_xO.
 rewrite mult_IZR.
 reflexivity.
 Qed.
 
-Lemma Zneg_xH_IZR : IZR (Zneg xH) = -1.
+Lemma Zneg_xH_IZR : IZR (Zneg xH) = -R1.
 Proof.
 intuition.
 Qed.
 
-Lemma Zpos_xH_IZR : IZR (Zpos xH) = 1.
+Lemma Zpos_xH_IZR : IZR (Zpos xH) = R1.
 Proof.
 intuition.
 Qed.

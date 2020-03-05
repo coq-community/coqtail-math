@@ -368,7 +368,7 @@ induction n.
  replace (S n)%R with (n+1)%nat by omega.
  rewrite plus_INR.
  replace (INR 1) with R1 by trivial.
- ring_simplify (x * (INR n + 1)).
+ ring_simplify (x * (INR n + R1)).
  rewrite exp_plus, IHn.
  auto with *.
 Qed.
@@ -387,11 +387,11 @@ assert(l^2/(2*PI) = 1) as Heq.
  eapply Rseq_cv_unique.
  apply Wallis_quotient_lim2.
   auto with *.
-  assert (Hrw : (fun n => l * n ^ n * exp (-n) * sqrt n) == (fun n => ((n / exp 1) ^ n * sqrt n * l))).
+  assert (Hrw : (fun n => l * n ^ n * exp (-n) * sqrt n) == (fun n => ((n / exp R1) ^ n * sqrt n * l))).
    intro n.
    rewrite exp_Ropp.
    replace (exp n) with (exp (R1*n)) by auto with *.
-   rewrite <- (exp_pow 1 n).
+   rewrite <- (exp_pow R1 n).
    unfold Rdiv; rewrite Rpow_mult_distr, Rinv_pow.
     field.
     assert (H := exp_pos 1); auto with *.

@@ -94,7 +94,7 @@ intros An r r' r'_bd Rho.
   rewrite Cnorm_pow.
   replace 1%R with (1 ^ u)%R.
   apply pow_le_compat. apply Cnorm_pos.
-  rewrite Cnorm_Cmult ; replace R1 with (Cnorm (IRC r) * / Cnorm (IRC r))%R.
+  rewrite Cnorm_Cmult ; replace (IZR 1) with (Cnorm (IRC r) * / Cnorm (IRC r))%R.
   rewrite Cnorm_inv ; repeat rewrite Cnorm_IRC_Rabs.
   apply Rmult_le_compat_r.
   left ; apply Rinv_0_lt_compat ; apply Rabs_pos_lt ; assumption.

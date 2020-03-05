@@ -441,18 +441,9 @@ Qed.
 
 Lemma integer_0_1 : forall x, 0 < IZR x < 1 -> False.
 Proof.
-destruct x ; intros H.
- intuition. simpl in *. fourier.
- 
- simpl in *.
- induction (nat_of_P p).
-  simpl in *. destruct H. fourier.
-  
-  assert (INR (S n) >= 1). destruct n. simpl. right. reflexivity. intuition. 
-  destruct H. fourier.
-  
- assert (IZR (Zneg p) <= 0). simpl. intuition.
- destruct H. fourier.
+  intros x [H0 H1].
+  apply lt_IZR in H0; apply lt_IZR in H1.
+  omega.
 Qed.
 
 Lemma eirr : forall a b, b <> 0%nat -> e = (INR a) / (INR b) -> False.
@@ -480,11 +471,11 @@ intros [|a|a] b Hb He.
  simpl in He; assumption.
  
  refine (eirr (nat_of_P a) b Hb _).
- simpl in He; assumption.
+ rewrite INR_IPR. assumption.
  
  unfold IZR, e in *.
- assert (0 < INR (nat_of_P a) / INR b) by
-   (apply Rlt_mult_inv_pos; auto with real; INR_solve).
+ assert (0 < IPR a / INR b).
+ { rewrite <-INR_IPR. apply Rlt_mult_inv_pos. apply pos_INR_nat_of_P. INR_solve. }
  pose proof exp_pos 1 as Hpos.
  rewrite He in Hpos.
  apply (Rlt_not_le_frac_opp _ _ Hpos).

@@ -760,6 +760,8 @@ intros f z h f_deriv h_neq.
 
   erewrite derivable_pt_lim_derive_pt_open_interval in Hc.
 
+  change R0 with (IZR 0).
+  change R1 with (IZR 1).
   rewrite <- Hc.
   reflexivity.
   assumption.
@@ -846,6 +848,8 @@ intros f z h f_deriv h_neq.
 
   erewrite derivable_pt_lim_derive_pt_open_interval in Hc.
 
+  change R0 with (IZR 0).
+  change R1 with (IZR 1).
   rewrite <- Hc.
   reflexivity.
   assumption.

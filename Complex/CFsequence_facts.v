@@ -354,7 +354,8 @@ intros An fn z l1 l2 fn_cv An_cv fn_bd.
    apply Rle_ge ; apply Rseq_limit_comparison with (fun _ => R0)  (fun n : nat => sum_f_R0 An n).
    intros n ; apply cond_pos_sum ; intro n' ; apply Rle_trans with (Cnorm (fn n' z)) ;
    [apply Cnorm_pos | apply fn_bd].
-   intros ; exists O ; intros ; simpl ; unfold R_dist ; rewrite Rminus_0_r, Rabs_R0 ; assumption.
+   intros ; exists O ; intros ; simpl ; unfold R_dist . rewrite Rminus_0_r.
+   change R0 with (IZR 0). rewrite Rabs_R0 ; assumption.
    assumption.
    unfold R_dist ; apply Rabs_triang_inv.
    apply HAn ; apply le_max_r.

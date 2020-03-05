@@ -39,7 +39,7 @@ transitivity proved by Rlt_trans as Rlt.
 
 Lemma Rabs_opp1 : forall p, Rabs ((- 1) ^ p) = 1.
 Proof.
-intros ; rewrite <- RPow_abs, Rabs_Ropp, Rabs_R1 ; apply pow1.
+apply pow_1_abs.
 Qed.
 
 Lemma Rdiv_eq_0_inv : forall a b, a / b = 0 -> b <> 0 -> a = 0.

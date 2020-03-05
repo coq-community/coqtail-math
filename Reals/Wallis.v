@@ -751,7 +751,7 @@ eapply Rseq_equiv_cv_compat.
    apply Rseq_cv_eq_compat with (-R1).
    intros n. unfold Rseq_constant, Rseq_minus, Rseq_plus, Rseq_opp.
    field. intros H1 ; generalize (pos_INR n) ; intros ; fourier.
-   intuition.
+   change (-1)%R with (-(1%R))%R. intuition.
    eapply Rseq_equiv_cv_compat.
      2: reflexivity.
     symmetry; instantiate (1 := (fun n => (2 * INR n + 1) * - / (2 * INR n + 1))%R).
@@ -762,7 +762,7 @@ eapply Rseq_equiv_cv_compat.
     apply Rseq_cv_eq_compat with (-R1).
     unfold Rseq_opp, Rseq_constant, Rseq_minus.
     intros n. field. generalize (pos_INR n) ; intuition ; fourier.
-    intuition.
+    change (-1)%R with (-(1%R))%R. intuition.
  apply Rseq_equiv_eq.
  exists 1%nat.
  intros n Hn.
@@ -771,7 +771,7 @@ eapply Rseq_equiv_cv_compat.
   rewrite S_INR. rewrite mult_INR. repeat rewrite S_INR.
   rewrite Rplus_0_l.
   unfold Rminus. rewrite Rinv_plus. rewrite Rinv_eq_1.
-   ring_simplify (2 * n + 1 + -1 + 1)%R. unfold Rdiv. ring_simplify (1 + -1 * / (2 * n + 1))%R.
+   ring_simplify (2 * n + 1 + -(1) + 1)%R. unfold Rdiv. ring_simplify (1 + -(1) * / ((1 + 1) * n + 1))%R.
    rewrite (Rplus_comm (- / (2 * n + 1)) _). reflexivity.
    generalize (pos_INR n) ; intuition ; fourier.
    generalize (pos_INR n) ; intuition ; fourier.

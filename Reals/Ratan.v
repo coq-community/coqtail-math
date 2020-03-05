@@ -383,7 +383,7 @@ rewrite sin_plus. rewrite cos_plus.
 rewrite cos_PI. rewrite sin_PI.
 do 2 rewrite Rmult_0_r. unfold Rminus. rewrite Ropp_0.
 do 2 rewrite Rplus_0_r. unfold Rdiv.
-rewrite Rinv_mult_distr. rewrite <- Ropp_inv_permute.
+rewrite Rinv_mult_distr. change (-1) with (-(1)). rewrite <- Ropp_inv_permute.
 field. apply H. discrR. apply H. discrR.
 Qed.
 

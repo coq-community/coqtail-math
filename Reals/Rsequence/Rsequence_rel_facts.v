@@ -207,6 +207,7 @@ exists 2; split; [fourier|].
 exists N; intros n Hn.
 replace (Un n) with (Un n - Vn n + Vn n)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
+change 2 with (1 + 1)%R.
 rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat; [|rewrite Rmult_1_l; apply Rle_refl].
 rewrite Rabs_minus_sym; apply HN; assumption.
@@ -278,6 +279,7 @@ exists (2 * M)%R; split; [fourier|].
 exists (Max.max Ne NO); intros n Hn.
 replace (Vn n) with (Vn n - Un n + Un n)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
+change 2 with (1 + 1)%R.
 rewrite Rmult_assoc; rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat; rewrite Rmult_1_l.
 rewrite Rabs_minus_sym.
@@ -303,6 +305,7 @@ rewrite Rmult_assoc.
 apply Rmult_le_compat_l; [fourier|].
 replace (Un n) with (Un n - Vn n + Vn n)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
+change 2 with (1 + 1)%R.
 rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat.
 rewrite Rabs_minus_sym.
@@ -363,7 +366,7 @@ apply HNo; eapply le_trans; [apply Max.le_max_l|eexact Hn].
 unfold eps1; unfold Rdiv.
 rewrite Rmult_assoc; apply Rmult_le_compat_l; [fourier|].
 rewrite <- Rmult_1_l.
-pattern 1 at 3.
+pattern 1 at 1.
 replace 1%R with (/ (2 + eps) * (2 + eps))%R
   by (field; apply Rgt_not_eq; fourier).
 rewrite Rmult_assoc; apply Rmult_le_compat_l.
@@ -633,7 +636,7 @@ destruct (Req_dec r 0) as [He|He].
 exists 0%nat; intros n Hn.
 rewrite He; rewrite <- Rmult_minus_distr_l.
 do 2 rewrite Rabs_mult.
-change (R0 n) with R0; rewrite Rabs_R0.
+change ((IZR 0) n) with (IZR 0); rewrite Rabs_R0.
 right; field.
 destruct (Hu eps) as [N HN]; [assumption|].
 exists N; intros n Hn.
@@ -1023,7 +1026,7 @@ destruct (H eps Heps) as [N HN].
 exists N.
 intros n Hn.
 unfold Rseq_minus, Rseq_div, Rseq_constant in *.
-replace (eps * Rabs R1)%R with eps in HN by (rewrite Rabs_R1; ring).
+replace (eps * Rabs (IZR 1))%R with eps in HN by (rewrite Rabs_R1; ring).
 replace (Vn n - Un n)%R with ((1 - Un n / Vn n)* (Vn n))%R by (field; trivial).
 rewrite Rabs_mult.
 apply Rmult_le_compat_r.

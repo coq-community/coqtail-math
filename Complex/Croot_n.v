@@ -302,7 +302,7 @@ unfold Cminus. repeat rewrite Cadd_assoc.
 apply Cadd_eq_compat_l.
 ring_simplify. rewrite Rplus_0_l.
 assert (H : (2 * 2 = 4)) by (CusingR_simpl ; ring).
-rewrite <- H. replace (2, 0%R) with (IRC 2) by (reflexivity).
+rewrite <- H. replace ((R1+R1)%R, R0) with (IRC 2) by (reflexivity).
 replace (a + a) with (2 * a) by (CusingR_simpl ; ring).
 field. split. assumption. intro H0. rewrite <- Ceq in H0. simpl in H0.
 destruct H0. assert (2 <> 0)%R by discrR. intuition.

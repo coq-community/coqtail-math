@@ -37,7 +37,7 @@ Section Rseries_RiemannInt.
 Local Coercion INR : nat >-> R.
 
 (* begin hide *)
-Lemma Rle_minus' : forall a b, b <= a -> 0 <= a - b. intros; fourier. Save.
+Lemma Rle_minus' : forall a b, b <= a -> 0 <= a - b. intros; fourier. Qed.
 Lemma Rminus_le_compat_r: forall r r1 r2 : R, r2 <= r1 -> r - r1 <= r - r2. intros; fourier. Qed.
 (* end hide *)
 
@@ -273,6 +273,7 @@ unfold plus_fct, fct_cte, id, inv_fct.
     intro n.
     replace (ln (S (S n))) with ((ln (S n + 1)%R - ln (O + 1))).
     destruct (Rint_inv1 0%nat (S n)) as [Hint Heq].
+    change (INR O) with 0.
     auto with *.
     rewrite <- Heq.
     apply RiemannInt_P18.

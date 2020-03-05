@@ -299,7 +299,7 @@ Proof.
 intro n ; unfold exp_seq, An_deriv, Rseq_shift, Rseq_mult.
  replace (fact (S n))%nat with ((S n) * fact n)%nat by reflexivity.
  rewrite mult_INR, Rinv_mult_distr, <- Rmult_assoc, Rinv_r, Rmult_1_l ;
- [reflexivity | | |] ; replace R0 with (INR O) by reflexivity ; apply not_INR ;
+ [reflexivity | | |] ; replace 0 with (INR O) by reflexivity ; apply not_INR ;
  try apply fact_neq_0 ; intuition.
 Qed.
 

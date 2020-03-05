@@ -126,7 +126,7 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
     apply Rle_trans with (Rabs 1 + Rabs (- (Rabs x / r) ^ S (max m n - S (min m n)))) ;
     [apply Rabs_triang | rewrite Rabs_R1 ; apply Rplus_le_compat_l].
     rewrite Rabs_Ropp ; rewrite <- RPow_abs ; rewrite <- Hrew_abs ; rewrite Rabs_Rabsolu ;
-    replace 1 with (1 ^  S (max m n - S (min m n))) ; [apply pow_le_compat | apply pow1].
+    replace R1 with (1 ^  S (max m n - S (min m n))) ; [apply pow_le_compat | apply pow1].
     apply Rabs_pos.
     apply Rlt_le ; rewrite Hrew_abs ; assumption.
    apply Rle_trans with (B * ((Rabs x / r) ^ S (min m n) *
@@ -491,6 +491,7 @@ intro n ; unfold Rseq_shifts ; rewrite max_comm ;
  destruct (max_explicit N2 N1) as [p Hp] ; rewrite Hp, <- Rabs_Rabsolu ;
  replace (N2 + p + S n)%nat with (S (N2 + p + n)) by ring ;
  assert (Hyp := HN2 (N2 + p + n)%nat) ; unfold R_dist, Rminus in Hyp ;
+ change R0 with (IZR 0) in Hyp;
  rewrite Ropp_0, Rplus_0_r in Hyp ; left ; apply Hyp.
 omega.
 rewrite Rinv_involutive ; [intuition |].
