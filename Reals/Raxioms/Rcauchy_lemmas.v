@@ -24,13 +24,13 @@ destruct a as [a₁ a₂]; destruct b as [b₁ b₂]; destruct c as [c₁ c₂];
 unfold Qlt in *.
 simpl in *.
 
-replace ('(b₂ * d₂))%Z with ('b₂ * 'd₂)%Z; [|auto with zarith].
-replace ('(a₂ * c₂))%Z with ('a₂ * 'c₂)%Z; [|auto with zarith].
+replace (Z.pos (b₂ * d₂))%Z with (Z.pos b₂ * Z.pos d₂)%Z; [|auto with zarith].
+replace (Z.pos (a₂ * c₂))%Z with (Z.pos a₂ * Z.pos c₂)%Z; [|auto with zarith].
 
-replace ((a₁ * 'c₂ + c₁ * 'a₂) * ('b₂ * 'd₂))%Z with
-        ((a₁ * 'b₂) * ('d₂ * 'c₂)  + (c₁ * 'd₂) * ('a₂ * 'b₂))%Z; [|ring].
-replace ((b₁ * 'd₂ + d₁ * 'b₂) * ('a₂ * 'c₂))%Z with 
-        ((b₁ * 'a₂) * ('d₂ * 'c₂) + (d₁ * 'c₂) * ('a₂ * 'b₂))%Z;[|ring].
+replace ((a₁ * Z.pos c₂ + c₁ * Z.pos a₂) * (Z.pos b₂ * Z.pos d₂))%Z with
+        ((a₁ * Z.pos b₂) * (Z.pos d₂ * Z.pos c₂)  + (c₁ * Z.pos d₂) * (Z.pos a₂ * Z.pos b₂))%Z; [|ring].
+replace ((b₁ * Z.pos d₂ + d₁ * Z.pos b₂) * (Z.pos a₂ * Z.pos c₂))%Z with 
+        ((b₁ * Z.pos a₂) * (Z.pos d₂ * Z.pos c₂) + (d₁ * Z.pos c₂) * (Z.pos a₂ * Z.pos b₂))%Z;[|ring].
 apply Zplus_le_lt_compat.
 apply Zmult_le_compat_r; auto with zarith.
 apply Zmult_lt_compat_r; auto with zarith.

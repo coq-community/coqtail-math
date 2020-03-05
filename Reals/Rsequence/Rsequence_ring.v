@@ -38,7 +38,8 @@ rewrite Hxy.
 reflexivity.
 Qed.
 
-Add Morphism Rseq_minus : Rseq_minus_Rseq_eq_compat.
+Add Morphism Rseq_minus with signature Rseq_eq ==> Rseq_eq ==> Rseq_eq as Rseq_minus_Rseq_eq_compat.
+(* Add Morphism Rseq_minus : Rseq_minus_Rseq_eq_compat. *)
 Proof.
 unfold Rseq_eq, Rseq_minus.
 intros Un Vn Huv Xn Yn Hxy n.

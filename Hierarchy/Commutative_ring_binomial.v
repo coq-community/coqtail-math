@@ -25,6 +25,7 @@ Require Import Coq.Relations.Relation_Definitions.
 Require Import Coq.omega.Omega.
 Require Import Arith.
 Require Import Nbinomial.
+Require Import Setoid.
 
 Definition iter_l (A : Type) (op : operation A) (neutral : A) (x : A) :=
 fix s n := match n with 
@@ -72,8 +73,6 @@ Section Commutative_Ring.
   Defined.
   
   Definition sub : X -> X -> X := fun a b => add a (opp b).
-  
-  Require Import Setoid.
   
   Add Setoid X eqr monoid_setoid as setoid_X.
   

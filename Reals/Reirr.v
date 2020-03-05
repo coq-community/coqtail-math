@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Section eirr.
 Require Import Max.
 
 Require Import Rseries_facts.
@@ -482,5 +481,3 @@ intros [|a|a] b Hb He.
  rewrite Ropp_involutive.
  auto with real.
 Qed.
-
-End eirr.

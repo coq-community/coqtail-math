@@ -71,7 +71,7 @@ Module Rrealize : Raxiom.CReals.
      intros HA; apply HA; simpl pow2 in U, V; rewrite Zpos_xO, Zmult_assoc in U, V; assumption.
      clear.
      intros e f a b Ha Hb.
-     rewrite <- (Zopp_involutive (Zneg e)), Zopp_neg in *.
+     rewrite <- (Z.opp_involutive (Zneg e)), Zopp_neg in *.
      repeat rewrite <- (Zmult_comm f), Zmult_assoc in *; rewrite <- (Zmult_comm f).
      assert (He : (0 < Zpos e)%Z) by reflexivity.
      remember (Zpos e) as Pe.
@@ -100,7 +100,7 @@ Module Rrealize : Raxiom.CReals.
      intros e a a' b b' f Hab.
      rewrite Zmult_minus_distr_r in *.
      repeat rewrite <- Zopp_mult_distr_l in *.
-     rewrite <- (Zopp_involutive (Zneg e)), Zopp_neg in *.
+     rewrite <- (Z.opp_involutive (Zneg e)), Zopp_neg in *.
      assert (He : (0 < Zpos e)%Z) by reflexivity.
      remember (Zpos e) as Pe.
      remember (a * a' * f)%Z as fa.
@@ -132,9 +132,9 @@ Module Rrealize : Raxiom.CReals.
   Definition Rge (r1 r2 : R) := Rle r2 r1.
   
   Program Definition Rinv (x : R) (_ : Rdiscr x R0) :=
-    Rdef (fun n => Zdiv (Zpos (pow2 n)) (Rseq x n))%Z _.
+    Rdef (fun n => Z.div (Zpos (pow2 n)) (Rseq x n))%Z _.
   Next Obligation.
-    Let P2 := fun n => Zpos (pow2 n).
+    set (P2 := fun n => Zpos (pow2 n)).
     destruct x as (u, Cu).
     destruct H as [ xneg | xpos ].
       (* Cas : x < 0 *)
@@ -169,7 +169,7 @@ Module Rrealize : Raxiom.CReals.
         admit.
         
         (* _ <= + 2p2q *)
-        unfold Zdiv.
+        unfold Z.div.
         
   Admitted.
   
@@ -180,7 +180,7 @@ Module Rrealize : Raxiom.CReals.
    intros (x, Cx) (y, Cy) (z, Cz) (nxy, (Nxy, Hxy)) (nyz, (Nyz, Hyz)).
    exists nxy; exists (max Nxy Nyz).
    intros n Hn.
-   eapply Zle_trans.
+   eapply Z.le_trans.
     apply Hxy; eapply max_lub_l; eauto.
     cut (y n <= z n)%Z.
      intros H.
@@ -189,7 +189,7 @@ Module Rrealize : Raxiom.CReals.
      
      apply (Zmult_lt_0_le_reg_r _ _ (Zpos (pow2 nyz))).
       reflexivity.
-      refine (Zle_trans _ _ _ _ (Hyz n (max_lub_r _ _ _ Hn))).
+      refine (Z.le_trans _ _ _ _ (Hyz n (max_lub_r _ _ _ Hn))).
       rewrite <- Zplus_0_r at 1.
       apply Zplus_le_compat_l; apply Zlt_le_weak; reflexivity.
   Qed.
@@ -225,7 +225,7 @@ Module Rrealize : Raxiom.CReals.
   Lemma JOKER {P} : P.
   Admitted.
   
-  Lemma Zneg_Zpos : forall p, Zneg p = Zopp (Zpos p).
+  Lemma Zneg_Zpos : forall p, Zneg p = Z.opp (Zpos p).
   Proof.
    reflexivity.
   Qed.
@@ -269,14 +269,14 @@ Module Rrealize : Raxiom.CReals.
     apply Zmult_lt_0_le_reg_r with (4 * DN)%Z; [ reflexivity | ].
     rewrite Zmult_plus_distr_l.
     ring_simplify.
-    apply Zle_trans with (4 * a N * DE * Dn0 + 5 * Dn0 * DN)%Z.
+    apply Z.le_trans with (4 * a N * DE * Dn0 + 5 * Dn0 * DN)%Z.
      apply Zplus_le_reg_r with (- 4 * a n0 * DE * DN - 5 * DN * Dn0)%Z.
      ring_simplify.
-     assert (AP : forall a a' b b', a = a' -> b = b' -> Zle a b -> Zle a' b')
+     assert (AP : forall a a' b b', a = a' -> b = b' -> Z.le a b -> Z.le a' b')
        by (intros; subst; auto).
      refine (AP _ _ _ _ _ _ HNa''); ring.
      
-     apply Zle_trans with (4 * DE * Dn0 * b N - DN * Dn0)%Z.
+     apply Z.le_trans with (4 * DE * Dn0 * b N - DN * Dn0)%Z.
       replace (5 * Dn0 * DN)%Z with (5 * DN * Dn0)%Z by ring.
       replace (4 * DE * Dn0 * b N)%Z with (4 * DE * b N * Dn0)%Z by ring.
       rewrite <- Zmult_plus_distr_l.
@@ -302,7 +302,7 @@ Module Rrealize : Raxiom.CReals.
       admit.
     assert (I4 : (c N * Dn * DE4 <= c n * DN * DE4 - Dn * DN)%Z).
       admit.
-    assert (I5 := Zle_trans _ _ _ I1 (Zle_trans _ _ _ I2 (Zle_trans _ _ _ I3 I4))).
+    assert (I5 := Z.le_trans _ _ _ I1 (Z.le_trans _ _ _ I2 (Z.le_trans _ _ _ I3 I4))).
     repeat rewrite <- Zmult_assoc in I5.
     repeat rewrite (Zmult_comm DN) in I5.
     repeat rewrite Zmult_assoc in I5.
@@ -407,7 +407,7 @@ Module Rrealize : Raxiom.CReals.
   
   Definition Rdist x y d : Type := prod (Rlt (Rsub x y) d) (Rlt (Ropp d) (Rsub x y)).
   
-  Definition Rup (x : R) : Z := let (N, _) := Rcauchy x 1%nat in (Zdiv (Rseq x N) (Zpos (pow2 N))).
+  Definition Rup (x : R) : Z := let (N, _) := Rcauchy x 1%nat in (Z.div (Rseq x N) (Zpos (pow2 N))).
   
   Lemma Rup_spec : forall r : R, Rdist r (IZR (Rup r)) R1.
   Proof.

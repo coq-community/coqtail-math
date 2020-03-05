@@ -93,11 +93,11 @@ replace ((zR +i 0%R) ^ k * (0%R +i zI) ^ (S n - k) * INC (fact n) *
 replace (INC (fact n) * / INC (fact k * fact (n - k)) -
  INC (fact (S n)) * / INC (fact k * fact (S n - k))) with
 (-(INC (k * fact n) / INC ( fact k * fact (S (n-k))))).
-Focus 2. rewrite <- binom_add_INC.
+2: { rewrite <- binom_add_INC.
 rewrite minus_Sn_m. unfold Cdiv. rewrite Copp_add_distr. rewrite Copp_mult_distr_l_reverse.
 rewrite Copp_invol.
 replace (fact k * fact (n-k))%nat with (fact (n-k) * fact k)%nat by ring.
-reflexivity. apply Hinf. apply Hinf.
+reflexivity. apply Hinf. apply Hinf. }
 (* end replace*)
 assert (H1 : (forall a b c d : C, a + b - (c - d) = (a -c) + (b + d))). intros. ring.
 rewrite H1.
@@ -166,13 +166,13 @@ replace (sum_f_C0
    (fun k : nat =>
     (zR +i 0%R) ^ S k * (0%R +i zI) ^ (S (S n) - S k) *
     INC (S k * fact (S n)) / INC (fact (S k) * fact (S n - S k + 1))) n).
-Focus 2. apply sum_f_C0_eq_seq. intros m H.
+2: { apply sum_f_C0_eq_seq. intros m H.
 repeat rewrite fact_simpl. repeat rewrite mult_INC.
 replace (S n - S m + 1)%nat with (S n - m)%nat by intuition.
 replace (S (S n) - S m)%nat with (S n - m)%nat by intuition.
 field. 
 split ; try split ; apply not_0_INC ; try apply fact_neq_0 ; intuition.
-(* end replace *)
+}
 ring_simplify.
 replace (S n - S n)%nat with O by intuition.
 replace (S (S n) - S (S n))%nat with O by intuition.

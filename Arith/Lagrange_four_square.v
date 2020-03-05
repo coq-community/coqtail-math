@@ -36,7 +36,7 @@ Lemma Zmod_sqrt_eq_compat : forall p i j, prime p ->
   i * i ≡ j * j [p] -> i = j)%Z.
 Proof.
   intros p i j Pp Pi Pj Bi Bj ES.
-  destruct (Z_eq_dec ((i + j) mod p) 0) as [ E | E ].
+  destruct (Z.eq_dec ((i + j) mod p) 0) as [ E | E ].
     cut (i + j = 0); [ omega | ].
     cut (i + j < p); [ intros H | omega ].
     rewrite <- E; symmetry; apply Zmod_small.
@@ -71,11 +71,11 @@ Proof.
     apply prime_2.
 Qed.
 
-Lemma odd_bound_1 : forall p i, p mod 2 = 1 -> i < Zsucc (p / 2) -> 2 * i < p.
+Lemma odd_bound_1 : forall p i, p mod 2 = 1 -> i < Z.succ (p / 2) -> 2 * i < p.
 Proof.
   intros p i Op Bi.
-  unfold Zsucc in Bi.
-  apply Zle_lt_trans with (2 * (p / 2)).
+  unfold Z.succ in Bi.
+  apply Z.le_lt_trans with (2 * (p / 2)).
     omega.
     
     rewrite Z_mult_div_mod; [ | auto with * ].
@@ -137,8 +137,8 @@ Proof.
   intros x m Pm Bx.
   simpl; unfold Zpower_pos; simpl.
   rewrite Zmult_assoc.
-  rewrite <- Zabs_square.
-  apply Zle_trans with (Zabs x * m).
+  rewrite <- Z.abs_square.
+  apply Z.le_trans with (Z.abs x * m).
     rewrite <- Zmult_assoc.
     apply Zmult_le_compat_l; zify; omega.
     
@@ -157,13 +157,13 @@ Lemma prime_dividing_sum_of_two_squares_plus_one : forall p,
 Proof.
   intros p Pp Op.
   
-  pose (np := Zabs_nat p).
+  pose (np := Z.abs_nat p).
   
   assert (p_odd : p mod 2 = 1) by (apply prime_odd; auto || omega).
   
   pose (s := fun x : Z => x * x).
   assert (s_pos : forall x, 0 <= s x).
-    intros; unfold s; rewrite <- Zabs_square.
+    intros; unfold s; rewrite <- Z.abs_square.
     apply Zmult_le_0_compat; auto with *.
   
   assert (mod_pos : forall x, 0 <= x mod p).
@@ -171,22 +171,22 @@ Proof.
   
   assert (hp_pos : 0 <= p / 2) by (apply Z_div_pos; omega).
   
-  assert (autobound : forall i, (i < S (Zabs_nat (p / 2)))%nat -> 2 * Z_of_nat i < p).
+  assert (autobound : forall i, (i < S (Z.abs_nat (p / 2)))%nat -> 2 * Z_of_nat i < p).
     intros i Li.
     apply inj_lt in Li.
-    rewrite inj_S, inj_Zabs_nat, Zabs_eq in Li; auto.
+    rewrite inj_S, inj_Zabs_nat, Z.abs_eq in Li; auto.
     apply odd_bound_1; auto.
   
-  pose (FL := fun l => Zabs_nat (s (Z_of_nat l) mod p)).
-  pose (FM := fun m => Zabs_nat ((-1 - s (Z_of_nat m)) mod p)).
-  assert (IFL : injective (S (Zabs_nat (p / 2))) FL).
+  pose (FL := fun l => Z.abs_nat (s (Z_of_nat l) mod p)).
+  pose (FM := fun m => Z.abs_nat ((-1 - s (Z_of_nat m)) mod p)).
+  assert (IFL : injective (S (Z.abs_nat (p / 2))) FL).
     intros i j Li Lj E.
     unfold FL in E.
     apply Zabs_nat_inj in E; eauto.
     apply inj_eq_rev.
     apply (Zmod_sqrt_eq_compat p (Z_of_nat i) (Z_of_nat j)); auto with *.
   
-  assert (IFM : injective (S (Zabs_nat (p / 2))) FM).
+  assert (IFM : injective (S (Z.abs_nat (p / 2))) FM).
     intros i j Li Lj E.
     unfold FM in E.
     apply inj_eq_rev.
@@ -198,33 +198,33 @@ Proof.
     rewrite <- E.
     apply eq_eqm; unfold s; ring.
   
-  assert (BFL : bounded (S (Zabs_nat (p / 2))) (Zabs_nat p) FL).
+  assert (BFL : bounded (S (Z.abs_nat (p / 2))) (Z.abs_nat p) FL).
     intros i _.
     unfold FL.
     apply inj_lt_rev; do 2 rewrite inj_Zabs_nat.
-    repeat rewrite Zabs_eq; auto with *.
+    repeat rewrite Z.abs_eq; auto with *.
       apply Z_mod_lt; auto with *.
   
-  assert (BFM : bounded (S (Zabs_nat (p / 2))) (Zabs_nat p) FM).
+  assert (BFM : bounded (S (Z.abs_nat (p / 2))) (Z.abs_nat p) FM).
     intros i _.
     unfold FM.
     apply inj_lt_rev; do 2 rewrite inj_Zabs_nat.
-    repeat rewrite Zabs_eq; auto with *.
+    repeat rewrite Z.abs_eq; auto with *.
     apply Z_mod_lt; auto with *.
   
-  assert (CL := count_image_injective (S (Zabs_nat (p / 2))) np FL IFL BFL).
-  assert (CM := count_image_injective (S (Zabs_nat (p / 2))) np FM IFM BFM).
+  assert (CL := count_image_injective (S (Z.abs_nat (p / 2))) np FL IFL BFL).
+  assert (CM := count_image_injective (S (Z.abs_nat (p / 2))) np FM IFM BFM).
   
-  remember (image FL (S (Zabs_nat (p / 2)))) as L.
-  remember (image FM (S (Zabs_nat (p / 2)))) as M.
+  remember (image FL (S (Z.abs_nat (p / 2)))) as L.
+  remember (image FM (S (Z.abs_nat (p / 2)))) as M.
   
   destruct (count_drawers L M np) as (i, (Bi, (Li, Mi))).
     rewrite CL, CM.
     apply inj_lt_rev.
     rewrite inj_plus, inj_S, inj_Zabs_nat.
-    rewrite Zabs_eq; auto.
-    unfold np; rewrite inj_Zabs_nat, Zabs_eq; auto with *.
-    unfold Zsucc.
+    rewrite Z.abs_eq; auto.
+    unfold np; rewrite inj_Zabs_nat, Z.abs_eq; auto with *.
+    unfold Z.succ.
     ring_simplify.
     pose proof Z_mult_div_bounds p 2.
     omega.
@@ -237,7 +237,7 @@ Proof.
   clear HeqL CL HeqM CM Li Mi IFL IFM BFL BFM FL FM.
   subst.
   apply inj_eq in Hm; do 2 rewrite inj_Zabs_nat in Hm.
-  do 2 rewrite Zabs_eq in Hm; auto.
+  do 2 rewrite Z.abs_eq in Hm; auto.
   symmetry in Hm; apply eqm_minus_0 in Hm.
   rewrite divide_eqm in Hm; notzero.
   pose proof s_pos (Z_of_nat l).
@@ -280,10 +280,10 @@ Lemma square_bound_equality_case : forall a M,
 Proof.
   intros a M Bounds Bsqr.
   destruct (Z_le_dec 0 M); [ | omega ].
-  cut (Zabs M <= Zabs a).
+  cut (Z.abs M <= Z.abs a).
     intro; zify; omega.
     
-    rewrite <- (Zabs_square M), <- (Zabs_square a) in Bsqr.
+    rewrite <- (Z.abs_square M), <- (Z.abs_square a) in Bsqr.
     apply sqrt_le_compat; auto with *.
 Qed.
 
@@ -291,8 +291,8 @@ Lemma square_bound : forall x m, -m <= x <= m -> x * x <= m * m.
 Proof.
   intros x m Bx.
   assert (Pm : 0 <= m) by omega.
-  rewrite <- Zabs_square.
-  apply Zle_trans with (Zabs x * m).
+  rewrite <- Z.abs_square.
+  apply Z.le_trans with (Z.abs x * m).
     apply Zmult_le_compat_l; auto with *.
     zify; omega.
     
@@ -319,10 +319,10 @@ Proof.
   pose proof square_bound _ _ (P _ Bc).
   pose proof square_bound _ _ (P _ Bd).
   assert (Pm : 0 < m) by omega.
-  cut ((Zabs a = m /\ Zabs b = m) /\ (Zabs c = m /\ Zabs d = m)).
+  cut ((Z.abs a = m /\ Z.abs b = m) /\ (Z.abs c = m /\ Z.abs d = m)).
     intros; zify; omega.
     
-    split; split; (rewrite <- (Zabs_eq m); [ | auto with * ]);
+    split; split; (rewrite <- (Z.abs_eq m); [ | auto with * ]);
       apply sqrt_eq_compat_abs;
       omega.
 Qed.
@@ -522,7 +522,7 @@ Lemma foursquare_prime : forall p, prime p -> foursquare p.
 Proof.
   intros p Pp.
   
-  destruct (Z_eq_dec p 2) as [E | E].
+  destruct (Z.eq_dec p 2) as [E | E].
     (* Case p = 2 *)
     do 2 exists 1%Z; do 2 exists 0%Z; auto.
     
@@ -539,9 +539,9 @@ Proof.
       (* .. using the previous lemma *)
       destruct (prime_dividing_sum_of_two_squares_plus_one p Pp Op) as
         (l, (m, (k, (Ep, (Bm, (Bl, (Pk, Plm))))))).
-      assert (tech1 : Z_of_nat (S (Zabs_nat (k - 1))) = k).
-        rewrite inj_S, inj_Zabs_nat, Zabs_eq; [ | omega ]; auto with *.
-      exists (Zabs_nat (k - 1)); split.
+      assert (tech1 : Z_of_nat (S (Z.abs_nat (k - 1))) = k).
+        rewrite inj_S, inj_Zabs_nat, Z.abs_eq; [ | omega ]; auto with *.
+      exists (Z.abs_nat (k - 1)); split.
         (* FS(kp) *)
         exists 0%Z; exists 1%Z; exists l; exists m.
         transitivity (p * k).
@@ -559,7 +559,7 @@ Proof.
           assert (LE : 2 * a + 1 <= b) by omega.
           assert (Pda : 0 <= 2 * a + 1) by omega.
           assert (LE2 := Zmult_le_compat _ _ _ _ LE LE Pda Pda).
-          eapply Zlt_le_trans; [ | apply LE2 ].
+          eapply Z.lt_le_trans; [ | apply LE2 ].
           ring_simplify.
           omega.
         
@@ -568,7 +568,7 @@ Proof.
           assert (LE : 2 * a + 1 <= b) by omega.
           assert (Pda : 0 <= 2 * a + 1) by omega.
           assert (LE2 := Zmult_le_compat _ _ _ _ LE LE Pda Pda).
-          eapply Zlt_le_trans; [ | apply LE2 ].
+          eapply Z.lt_le_trans; [ | apply LE2 ].
           ring_simplify.
           omega.
         
@@ -612,12 +612,12 @@ Proof.
       (* m>1 *)
       assert (LBm : 1 < Z_of_nat (S (S m))) by (zify; omega).
       destruct (foursquare_prime_factor_decreasing p Pp _ (conj LBm UBm) FSm) as (n, ((LBn, UBn), FSn)).
-        apply IH with (Zabs_nat (n - 1)).
+        apply IH with (Z.abs_nat (n - 1)).
           unfold ltof.
           zify; omega.
           
           unfold fs_mult.
-          rewrite inj_S, inj_Zabs_nat, Zabs_eq; auto with *; unfold Zsucc.
+          rewrite inj_S, inj_Zabs_nat, Z.abs_eq; auto with *; unfold Z.succ.
           replace (n - 1 + 1) with n by ring.
           split; auto; omega.
 Defined.
@@ -639,7 +639,7 @@ Defined.
 
 
 Definition lagrange_fun (n : Z) : (Z * Z) * (Z * Z) :=
-  let (a, ha) := lagrange_4_square_theorem (Zabs n) (Zabs_pos n) in
+  let (a, ha) := lagrange_4_square_theorem (Z.abs n) (Zabs_pos n) in
   let (b, hb) := ha in
   let (c, hc) := hb in
   let (d, _ ) := hc in
@@ -647,15 +647,17 @@ Definition lagrange_fun (n : Z) : (Z * Z) * (Z * Z) :=
 
 Lemma lagrange_fun_spec (n : Z) :
   (let (ab, cd) := lagrange_fun n in let (a, b) := ab in let (c, d) := cd in
-  Zabs n = a * a + b * b + c * c + d * d).
+  Z.abs n = a * a + b * b + c * c + d * d).
 Proof.
   unfold lagrange_fun.
-  destruct (lagrange_4_square_theorem (Zabs n) (Zabs_pos n)) as (a, (b, (c, (d, pr)))).
+  destruct (lagrange_4_square_theorem (Z.abs n) (Zabs_pos n)) as (a, (b, (c, (d, pr)))).
   exact pr.
 Qed.
 
+(*
 Require Extraction.
 Extraction "Lagrange_four_square.ml" lagrange_fun.
+*)
 
 (*
 Eval compute in lagrange_fun 0.

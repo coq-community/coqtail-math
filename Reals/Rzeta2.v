@@ -308,7 +308,7 @@ Definition pow1 z := match z with
   | Zpos n | Zneg n => pow1_P n
 end.
 
-Lemma pow1_P_ind : forall p, pow1_P (Psucc (Psucc p)) = pow1_P p.
+Lemma pow1_P_ind : forall p, pow1_P (Pos.succ (Pos.succ p)) = pow1_P p.
 Proof.
 destruct p; trivial.
 Qed.
@@ -368,7 +368,7 @@ intros a b.
 destruct a; destruct b; simpl; ring.
 Qed.
 
-Lemma pow1_succ : forall z, pow1 (Zsucc z) = - pow1 z.
+Lemma pow1_succ : forall z, pow1 (Z.succ z) = - pow1 z.
 Proof.
 destruct z; trivial;
  destruct p; simpl; try ring;
@@ -468,8 +468,8 @@ intros.
 induction n.
  trivial.
  
- replace (bisum f (S (S n))) with (bisum f (S n) + f (Zpos (Psucc (P_of_succ_nat n))) + 
-   f (Zneg (Psucc (P_of_succ_nat n)))) by trivial.
+ replace (bisum f (S (S n))) with (bisum f (S n) + f (Zpos (Pos.succ (P_of_succ_nat n))) + 
+   f (Zneg (Pos.succ (P_of_succ_nat n)))) by trivial.
  rewrite IHn.
  simpl.
  ring.
@@ -562,8 +562,8 @@ Definition bisumsum_strip_diag f N := bisumsum f N - bisum (fun i => (f i i)) N.
 
 (** Double sum in which its diagonal terms are null *)
 
-Definition bisum_strip' f j N := bisum (fun i => if Z_eq_dec i j then 0 else f i) N.
-Definition bisumsum_strip_diag' f N := bisumsum (fun i j => if Z_eq_dec i j then 0 else f i j) N.
+Definition bisum_strip' f j N := bisum (fun i => if Z.eq_dec i j then 0 else f i) N.
+Definition bisumsum_strip_diag' f N := bisumsum (fun i j => if Z.eq_dec i j then 0 else f i j) N.
 
 (** Weak extensional equality *)
 
@@ -591,7 +591,7 @@ induction n.
   trivial.
   
   intros z [H1 H2].
-  apply H; split; eapply Zle_trans; [ | apply H1 | apply H2 | ]; rewrite inj_S; omega.
+  apply H; split; eapply Z.le_trans; [ | apply H1 | apply H2 | ]; rewrite inj_S; omega.
 Qed.
 
 (** Double sum distributivity *)
@@ -605,18 +605,18 @@ Qed.
 
 (** Inequalities *)
 
-Lemma Psucc_lt : forall p, (Zpos p < Zpos (Psucc p))%Z.
+Lemma Psucc_lt : forall p, (Zpos p < Zpos (Pos.succ p))%Z.
 Proof.
 intros.
-replace (Zpos (Psucc p)) with (1 + Zpos p)%Z.
+replace (Zpos (Pos.succ p)) with (1 + Zpos p)%Z.
  omega.
  induction p; trivial.
 Qed.
 
-Lemma Psucc_lt_neg : forall p, (Zneg (Psucc p) < Zneg p)%Z.
+Lemma Psucc_lt_neg : forall p, (Zneg (Pos.succ p) < Zneg p)%Z.
 Proof.
 intros.
-replace (Zneg (Psucc p)) with (- 1 + Zneg p)%Z.
+replace (Zneg (Pos.succ p)) with (- 1 + Zneg p)%Z.
  omega.
  induction p; trivial.
 Qed.
@@ -624,19 +624,19 @@ Qed.
 (** A special term outside the bounds can be ignored *)
 
 Lemma bisum_not_in : forall f g j n, (j < (- Z_of_nat n) \/ Z_of_nat n < j)%Z -> 
-  bisum (fun i : Z => if Z_eq_dec i j then g j else f i) n = bisum f n.
+  bisum (fun i : Z => if Z.eq_dec i j then g j else f i) n = bisum f n.
 Proof.
 intros.
 apply bisum_eq_compat_bounded; intros.
 destruct H.
- destruct (Z_eq_dec z (- Z_of_nat (S n))).
+ destruct (Z.eq_dec z (- Z_of_nat (S n))).
   subst;  destruct H0; rewrite inj_S in * |-; apply False_ind; omega.
-  destruct (Z_eq_dec z j).
+  destruct (Z.eq_dec z j).
    subst; apply False_ind; omega.
    trivial.
- destruct (Z_eq_dec z (Z_of_nat (S n))).
+ destruct (Z.eq_dec z (Z_of_nat (S n))).
   subst;  destruct H0; rewrite inj_S in * |-; apply False_ind; omega.
-  destruct (Z_eq_dec z j).
+  destruct (Z.eq_dec z j).
    subst; apply False_ind; omega.
    trivial.
 Qed.
@@ -644,17 +644,17 @@ Qed.
 (** A special term between the bounds can be extracted *)
 
 Lemma bisum_in : forall f g j n, (- Z_of_nat n <= j <= Z_of_nat n)%Z -> 
-  bisum (fun i : Z => if Z_eq_dec i j then g j else f i) n = bisum f n - f j + g j.
+  bisum (fun i : Z => if Z.eq_dec i j then g j else f i) n = bisum f n - f j + g j.
 Proof.
 intros.
 induction n.
  assert (j = Z0) by (replace (Z_of_nat O) with Z0 in H by trivial; omega); subst; trivial.
  simpl; ring.
  
- set (h := fun i => if Z_eq_dec i j then g j else f i).
+ set (h := fun i => if Z.eq_dec i j then g j else f i).
  simpl bisum; unfold h in *.
- destruct (Z_eq_dec (Zpos (P_of_succ_nat n)) j) as [e|e];
- destruct (Z_eq_dec (Zneg (P_of_succ_nat n)) j) as [e'|e']; subst; try inversion e'.
+ destruct (Z.eq_dec (Zpos (P_of_succ_nat n)) j) as [e|e];
+ destruct (Z.eq_dec (Zneg (P_of_succ_nat n)) j) as [e'|e']; subst; try inversion e'.
   rewrite bisum_not_in.
    ring.
    right; destruct n; simpl.
@@ -692,8 +692,8 @@ intros.
 unfold bisum_strip, bisum_strip'.
 
 replace
-  (bisum (fun i : Z => if Z_eq_dec i j then 0 else f i) n) with
-  (bisum (fun i : Z => if Z_eq_dec i j then Zzero j else f i) n).
+  (bisum (fun i : Z => if Z.eq_dec i j then 0 else f i) n) with
+  (bisum (fun i : Z => if Z.eq_dec i j then Zzero j else f i) n).
  
  rewrite bisum_in.
   unfold Zzero; ring.
@@ -709,10 +709,10 @@ intros.
 unfold bisum_strip'.
 apply bisum_eq_compat_bounded; intros.
 destruct H; subst.
- destruct (Z_eq_dec z (- Z_of_nat (S n))).
+ destruct (Z.eq_dec z (- Z_of_nat (S n))).
   subst; destruct H0; rewrite inj_S in * |- ; apply False_ind; omega.
   trivial.
- destruct (Z_eq_dec z (Z_of_nat (S n))).
+ destruct (Z.eq_dec z (Z_of_nat (S n))).
   subst; destruct H0; rewrite inj_S in * |- ; apply False_ind; omega.
   trivial.
 Qed.
@@ -739,11 +739,11 @@ Qed.
 (** Switching indices *)
 
 Lemma bisum_eq_sym : forall f z n,
-  bisum (fun i : Z => if Z_eq_dec i z then 0 else f z i) n =
-  bisum (fun j : Z => if Z_eq_dec z j then 0 else f z j) n.
+  bisum (fun i : Z => if Z.eq_dec i z then 0 else f z i) n =
+  bisum (fun j : Z => if Z.eq_dec z j then 0 else f z j) n.
 Proof.
 intros; apply bisum_eq_compat; intros.
-destruct (Z_eq_dec z0 z); destruct (Z_eq_dec z z0); try trivial; subst; 
+destruct (Z.eq_dec z0 z); destruct (Z.eq_dec z z0); try trivial; subst; 
   apply False_ind; apply n0; trivial.
 Qed.
 
@@ -763,23 +763,23 @@ induction n.
  rewrite IHn.
  rewrite (bisum_one_step (fun i : Z => f i i)).
  repeat rewrite bisum_one_step.
- destruct (Z_eq_dec (Z_of_nat (S n)) (Z_of_nat (S n))); [ | apply False_ind; omega]; clear e.
- destruct (Z_eq_dec (Z_of_nat (S n)) (- Z_of_nat (S n))); [ apply False_ind; inversion e | ]; clear n0.
- destruct (Z_eq_dec (- Z_of_nat (S n)) (Z_of_nat (S n))); [ apply False_ind; inversion e | ]; clear n0.
- destruct (Z_eq_dec (- Z_of_nat (S n)) (- Z_of_nat (S n))); [ | apply False_ind; omega]; clear e.
+ destruct (Z.eq_dec (Z_of_nat (S n)) (Z_of_nat (S n))); [ | apply False_ind; omega]; clear e.
+ destruct (Z.eq_dec (Z_of_nat (S n)) (- Z_of_nat (S n))); [ apply False_ind; inversion e | ]; clear n0.
+ destruct (Z.eq_dec (- Z_of_nat (S n)) (Z_of_nat (S n))); [ apply False_ind; inversion e | ]; clear n0.
+ destruct (Z.eq_dec (- Z_of_nat (S n)) (- Z_of_nat (S n))); [ | apply False_ind; omega]; clear e.
  ring_simplify.
  assert (H : forall BII FNP FPN A B C D BIJ BIJS BPJS BNJS,
   BIJ + A + B + C + D = BIJS + BPJS + BNJS ->
   BIJ - BII + A + B + C + FNP + D + FPN = - BII + FNP + FPN + BIJS + BPJS + BNJS)
  by (intros; assert (H' : BIJ = - (A + B + C + D) + (BIJS + BPJS + BNJS)) by (rewrite <- H; ring); rewrite H'; ring).
  erewrite H; [reflexivity | ].
- replace (bisum (fun j : Z => if Z_eq_dec (Z_of_nat (S n)) j then 0 else f (Z_of_nat (S n)) j) n)
+ replace (bisum (fun j : Z => if Z.eq_dec (Z_of_nat (S n)) j then 0 else f (Z_of_nat (S n)) j) n)
    with (bisum_strip' (f (Z_of_nat (S n))) (Z_of_nat (S n)) n) by apply bisum_eq_sym.
- replace (bisum (fun j : Z => if Z_eq_dec (- Z_of_nat (S n)) j then 0 else f (- Z_of_nat (S n))%Z j) n)
+ replace (bisum (fun j : Z => if Z.eq_dec (- Z_of_nat (S n)) j then 0 else f (- Z_of_nat (S n))%Z j) n)
    with (bisum_strip' (f (- Z_of_nat (S n)))%Z (- Z_of_nat (S n)) n)%Z by apply bisum_eq_sym.
- replace (bisum (fun i : Z => if Z_eq_dec i (- Z_of_nat (S n)) then 0 else f i (- Z_of_nat (S n))%Z) n)
+ replace (bisum (fun i : Z => if Z.eq_dec i (- Z_of_nat (S n)) then 0 else f i (- Z_of_nat (S n))%Z) n)
    with (bisum_strip' (fun i => f i (- Z_of_nat (S n)))%Z (- Z_of_nat (S n)) n)%Z by trivial.
- replace (bisum (fun i : Z => if Z_eq_dec i (Z_of_nat (S n)) then 0 else f i (Z_of_nat (S n))) n)
+ replace (bisum (fun i : Z => if Z.eq_dec i (Z_of_nat (S n)) then 0 else f i (Z_of_nat (S n))) n)
    with (bisum_strip' (fun i => f i (Z_of_nat (S n)))%Z (Z_of_nat (S n)) n)%Z by trivial.
  repeat rewrite bisum_strip_nothing; [ | left | right | left | right ]; trivial.
  rewrite bisumsum_one_step.
@@ -816,7 +816,7 @@ intros.
 unfold bisumsum_strip_diag'.
 rewrite bisumsum_switch_index.
 apply bisumsum_eq_compat; intros.
-destruct (Z_eq_dec y x); destruct (Z_eq_dec x y); try trivial;
+destruct (Z.eq_dec y x); destruct (Z.eq_dec x y); try trivial;
   subst; apply False_ind; apply n0; trivial.
 Qed.
 
@@ -836,7 +836,7 @@ unfold zr2.
 rewrite <- bisum_plus.
 apply bisum_eq_compat; intros.
 unfold zr2.
-destruct (Z_eq_dec z z0); ring.
+destruct (Z.eq_dec z z0); ring.
 Qed.
 
 (** Switching indices of only one term in a sum in a double sum *)
@@ -861,7 +861,7 @@ Proof.
 intros.
 apply bisum_eq_compat; intros.
 apply bisum_eq_compat; intros.
-destruct (Z_eq_dec z z0).
+destruct (Z.eq_dec z z0).
  trivial.
  apply (H _ _ n0).
 Qed.
@@ -1039,7 +1039,7 @@ rewrite bisumsum_strip_diag'_eq_but_diag_compat with _
   apply d_not_null.
 Qed.
 
-Definition cn n N := bisum (fun m => if Z_eq_dec n m then 0 else pow1 m / (IZR (m - n))) N.
+Definition cn n N := bisum (fun m => if Z.eq_dec n m then 0 else pow1 m / (IZR (m - n))) N.
 
 Lemma calc3 : forall N, (An N) * (An N) - Bn N = bisum (fun n => pow1 n / (d' n) * (cn n N)) N.
 Proof.
@@ -1050,7 +1050,7 @@ unfold cn.
 rewrite <- bisum_scal_mult.
 apply bisum_eq_compat; intros.
 unfold zr.
-destruct (Z_eq_dec z z0); field; [ | split ]; try apply d_not_null.
+destruct (Z.eq_dec z z0); field; [ | split ]; try apply d_not_null.
 discrR; omega.
 Qed.
 
@@ -1063,7 +1063,7 @@ rewrite bisum_reverse.
 rewrite <- bisum_scal_mult.
 apply bisum_eq_compat; intros.
 unfold zr.
-destruct (Z_eq_dec (- n) (- z)); destruct (Z_eq_dec n z); subst; try ring.
+destruct (Z.eq_dec (- n) (- z)); destruct (Z.eq_dec n z); subst; try ring.
  assert (n = z) by omega; subst; apply False_ind; apply n0; trivial.
  apply False_ind; apply n0; trivial.
  replace (- z - - n)%Z with (n - z)%Z by omega.
@@ -1108,27 +1108,27 @@ unfold cn.
 
 replace
   (bisum
-   (fun m : Z => if Z_eq_dec (- Zpos (P_of_succ_nat n)) m then 0
+   (fun m : Z => if Z.eq_dec (- Zpos (P_of_succ_nat n)) m then 0
     else pow1 m / IZR (m - - Zpos (P_of_succ_nat n))) (k + S n))
   with
   (bisum
-   (shiftp (fun j : Z => - (-1) ^ n * if Z_eq_dec 0 j then 0 else pow1 j / IZR j) (S n))
+   (shiftp (fun j : Z => - (-1) ^ n * if Z.eq_dec 0 j then 0 else pow1 j / IZR j) (S n))
    (k + S n)).
  
  rewrite bisum_shifting.
  
- assert (bisum (fun j : Z => - (-1) ^ n * (if Z_eq_dec 0 j then 0 else pow1 j / IZR j)) k = 0).
+ assert (bisum (fun j : Z => - (-1) ^ n * (if Z.eq_dec 0 j then 0 else pow1 j / IZR j)) k = 0).
   induction k.
    simpl; ring.
    rewrite bisum_one_step.
    rewrite IHk.
    change (Z.eq_dec 0) with (Z.eq_dec (Z_of_nat O)).
-   destruct (Z_eq_dec (Z_of_nat 0) (Z_of_nat (S k))).
+   destruct (Z.eq_dec (Z_of_nat 0) (Z_of_nat (S k))).
     apply inj_eq_rev in e.
     inversion e.
    replace (Z.eq_dec (Z_of_nat O)) with (Z.eq_dec (- Z_of_nat O)%Z) by trivial.
-   destruct (Z_eq_dec (- Z_of_nat O)%Z (- Z_of_nat (S k))).
-    apply Zopp_inj in e.
+   destruct (Z.eq_dec (- Z_of_nat O)%Z (- Z_of_nat (S k))).
+    apply Z.opp_inj in e.
     apply inj_eq_rev in e.
     inversion e.
    
@@ -1151,7 +1151,7 @@ replace
     with (Z_of_nat (S i + k)).
   
    replace 0%Z with (Z_of_nat O) by trivial.
-   destruct (Z_eq_dec (Z_of_nat O) (Z_of_nat (S i + k))).
+   destruct (Z.eq_dec (Z_of_nat O) (Z_of_nat (S i + k))).
     apply inj_eq_rev in e.
     inversion e.  
    
@@ -1174,8 +1174,8 @@ replace
  
  apply bisum_eq_compat; intro.
  unfold shiftp.
- destruct (Z_eq_dec 0 (z + Z_of_nat (S n)));
- destruct (Z_eq_dec (- Zpos (P_of_succ_nat n)) z).
+ destruct (Z.eq_dec 0 (z + Z_of_nat (S n)));
+ destruct (Z.eq_dec (- Zpos (P_of_succ_nat n)) z).
   auto with *.
   
   assert (z = - Z_of_nat (S n))%Z by omega.

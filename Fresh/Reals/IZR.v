@@ -69,7 +69,7 @@ Proof.
 Qed.
 
 
-Lemma Zopp_swap : forall a b, Zopp a = b -> a = Zopp b.
+Lemma Zopp_swap : forall a b, Z.opp a = b -> a = Z.opp b.
 Proof.
   intros a b H; rewrite <- H; ring.
 Qed.
@@ -112,7 +112,7 @@ Proof.
     apply Ropp_involutive.
 Qed.
 
-Lemma IPR_psucc : forall a, IPR (Psucc a) == IPR a + R1.
+Lemma IPR_psucc : forall a, IPR (Pos.succ a) == IPR a + R1.
 Proof.
   induction a.
    simpl. rewrite IHa. now ring.

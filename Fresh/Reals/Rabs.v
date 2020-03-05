@@ -8,7 +8,7 @@ Module Rabs (Import T : CReals).
   Module Rsequence := Rsequence T. Import Rsequence.
   Module Rapprox := Rapprox T. Import Rapprox.
   
-  Definition Rseq_abs : R -> Rseq := fun x n => (IZR (Zabs (Rup (x * po n))) / po n) (pop n).
+  Definition Rseq_abs : R -> Rseq := fun x n => (IZR (Z.abs (Rup (x * po n))) / po n) (pop n).
   
   Lemma Rseq_cauchy_abs : forall x, Rseq_Cauchy (Rseq_abs x).
   Admitted.

@@ -124,10 +124,10 @@ Proof.
 int_hierarchy.
 Qed.
 
-Section Z_nZ.
-
 Require Import ZArith.
 Require Import Znumtheory.
+
+Section Z_nZ.
 
 Hypothesis n : Z.
 Definition mod_eq x y := ( n | y - x ).
@@ -294,10 +294,11 @@ Instance ring_commutative_Z_nZ : Ring_Commutative Z mod_eq Zplus Zmult 0%Z 1%Z :
 
 End Z_nZ.
 
-Section Fp.
-
 Require Import ZArith.
 Require Import Znumtheory.
+Require Import ConstructiveEpsilon.
+
+Section Fp.
 
 Hypothesis p : Z.
 Hypothesis p_prime : prime p.
@@ -317,7 +318,6 @@ rewrite Zmult_comm; apply Zmult_iden_l; assumption.
 Qed.
 
 Section ConstructiveZ.
-  Require Import ConstructiveEpsilon.
   Variable P : Z -> Prop.
   Hypothesis P_decidable : forall x, {P x} + {~ P x}.
   
@@ -333,7 +333,7 @@ Section ConstructiveZ.
      pose (fun n => P (Z_of_nat n) \/ P (- Z_of_nat n)) as P'.
      assert (ex P').
       destruct H as [z].
-      exists (Zabs_nat z).
+      exists (Z.abs_nat z).
       destruct z; [contradiction | left | right];
        simpl; rewrite <- Zpos_eq_Z_of_nat_o_nat_of_P; assumption.
      destruct (constructive_indefinite_description_nat P').
@@ -368,9 +368,9 @@ cut (Zis_gcd x p 1).
  rewrite <- H1; ring.
 constructor; try apply Zone_divide.
 intros.
-assert (Zabs x0<=Zabs p) by (apply Zdivide_bounds; trivial; destruct p_prime; omega).
-replace (Zabs p) with p in H2 by (destruct p; trivial; destruct p_prime; inversion H3).
-assert(exists x1, 0<=x1<=p /\ (x1 | x) /\ (x1 | p) /\ Zabs x0 = x1).
+assert (Z.abs x0<=Z.abs p) by (apply Zdivide_bounds; trivial; destruct p_prime; omega).
+replace (Z.abs p) with p in H2 by (destruct p; trivial; destruct p_prime; inversion H3).
+assert(exists x1, 0<=x1<=p /\ (x1 | x) /\ (x1 | p) /\ Z.abs x0 = x1).
  destruct x0.
   destruct H1; ring_simplify in H1; destruct p_prime; subst; inversion H3.
   exists (Zpos p0); repeat split; auto; apply Zle_0_pos.
@@ -394,7 +394,7 @@ destruct (dec_Zle x1 1).
   destruct p_prime.
   apply (H8 x1).
    split; omega.
-   apply Zdivide_refl.
+   apply Z.divide_refl.
    assumption.
   
   apply False_ind; apply H.

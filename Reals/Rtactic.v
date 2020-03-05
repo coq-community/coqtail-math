@@ -367,7 +367,7 @@ match x with
   | (IZR (?a + ?b)) => rewrite (plus_IZR a b)
   | (IZR (?a - ?b)) => rewrite (Z_R_minus a b)
   | (IZR (?a * ?b)) => rewrite (mult_IZR a b)
-  | (IZR (Zsucc ?n)) => rewrite (succ_IZR n)
+  | (IZR (Z.succ ?n)) => rewrite (succ_IZR n)
   | (IZR (Zpower ?z (Z_of_nat ?n))) => rewrite <- (pow_IZR z n) 
   | (IZR (- ?n)) => rewrite (Ropp_Ropp_IZR n)
   | (IZR 0) => rewrite IZR_0

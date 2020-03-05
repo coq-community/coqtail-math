@@ -675,13 +675,11 @@ intros.
 induction n.
 simpl. reflexivity.
 simpl.
-replace (Ndiv_mod_algo (S n) (n0+S n)) with (Ndiv_mod_algo (S n) n0).
-Focus 2.
+replace (Ndiv_mod_algo (S n) (n0+S n)) with (Ndiv_mod_algo (S n) n0); auto.
 symmetry.
 apply H.
 auto with arith.
 auto with arith.
-auto.
 Qed.
 
 (** Correctness of divisibility algorithm *)
@@ -784,16 +782,15 @@ rewrite H3 in H1.
 clear H3.
 rewrite Ndiv_mod_l1 in H1.
 rewrite H2.
-replace (S (S n+x)) with (S n+S x).
-Focus 2.
-auto with arith.
+replace (S (S n+x)) with (S n+S x) by auto with arith.
 replace (S n+S x-r) with (S n+(S x-r)).
-Focus 2.
+2: {
 apply plus_minus.
 replace (r+(S n+(S x-r))) with (S n+r+(S x-r)).
-Focus 2.
+2: {
 rewrite plus_assoc.
 now auto with arith.
+}
 assert (S x=r+(S x-r)).
 symmetry.
 apply le_plus_minus_r.
@@ -809,6 +806,7 @@ rewrite H3.
 rewrite plus_assoc.
 rewrite minus_plus.
 auto.
+}
 apply Ndiv_plus_compat.
 apply Ndiv_n_n.
 apply H.

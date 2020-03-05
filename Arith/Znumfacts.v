@@ -54,18 +54,18 @@ Proof.
   case (prime_dec_aux_inf p p); intros H1.
     case H1; intros n [Hn1 Hn2].
     generalize (Zgcd_is_pos n p); intros Hpos.
-    case (Z_le_lt_eq_dec 0 (Zgcd n p)); auto with zarith; intros H3.
-      case (Z_le_lt_eq_dec 1 (Zgcd n p)); auto with zarith; intros H4.
-        exists (Zgcd n p); split; auto.
+    case (Z_le_lt_eq_dec 0 (Z.gcd n p)); auto with zarith; intros H3.
+      case (Z_le_lt_eq_dec 1 (Z.gcd n p)); auto with zarith; intros H4.
+        exists (Z.gcd n p); split; auto.
           split; auto.
-          apply Zle_lt_trans with n; auto with zarith.
+          apply Z.le_lt_trans with n; auto with zarith.
           generalize (Zgcd_is_gcd n p); intros tmp; inversion_clear tmp as [Hr1 Hr2 Hr3].
           case Hr1; intros q Hq.
           case (Zle_or_lt q 0); auto with zarith; intros Ht.
-            absurd (n <= 0 * Zgcd n p) ; auto with zarith.
+            absurd (n <= 0 * Z.gcd n p) ; auto with zarith.
             pattern n at 1; rewrite Hq; auto with zarith.
             
-            apply Zle_trans with (1 * Zgcd n p); auto with zarith.
+            apply Z.le_trans with (1 * Z.gcd n p); auto with zarith.
             pattern n at 2; rewrite Hq; auto with zarith.
           
           generalize (Zgcd_is_gcd n p); intros Ht; inversion Ht; auto.
@@ -119,7 +119,7 @@ Proof.
   pose (Zcompare_Eq_iff_eq := 
     fun x y => conj (fun E : (x ?= y) = Eq => Zcompare_Eq_eq x y E)
       (fun E : x = y =>
-        eq_ind_r (fun x0 => (x0 ?= y) = Eq) (Zcompare_refl y) E)).
+        eq_ind_r (fun x0 => (x0 ?= y) = Eq) (Z.compare_refl y) E)).
   intro H.
   apply Zcompare_rec with (n := x) (m := y); intros E.
     right. elim (Zcompare_Eq_iff_eq x y); auto with arith.
@@ -137,7 +137,7 @@ Lemma Z_prime_rect : forall P : Z -> Type,
     forall n, 0 <= n -> P n)%Z.
 Proof.
   intros P P0 P1 Pprime Psplit.
-  assert (Hind : forall (N : nat) n, 0 <= n -> (Zabs_nat n < N)%nat -> P n).
+  assert (Hind : forall (N : nat) n, 0 <= n -> (Z.abs_nat n < N)%nat -> P n).
     intro n ; induction n ; intros i ipos imax.
       (* i = n is the only interesting case *)
       exfalso; inversion imax.
@@ -170,7 +170,7 @@ Proof.
       (* Main argument *)
       apply Psplit; apply IHn; zify; omega.
   
-  intros n n_pos ; apply Hind with (S (Zabs_nat n)) ; auto.
+  intros n n_pos ; apply Hind with (S (Z.abs_nat n)) ; auto.
 Defined.
 
 Lemma Z_prime_ind : forall P : Z -> Prop,
@@ -187,7 +187,7 @@ Qed.
 (** Bezout coefficients: a lot easier to use than the stdlib *)
 
 Lemma bezout_inj : forall a b,
-  {u : Z & {v | u * a + v * b = Zgcd a b}}.
+  {u : Z & {v | u * a + v * b = Z.gcd a b}}.
 Proof.
   intros a b.
   destruct (euclid a b) as (u, v, d, E, H).

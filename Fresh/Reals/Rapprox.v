@@ -20,7 +20,7 @@ Module Rapprox (Import T : CReals).
     reflexivity.
   Qed.
   
-  Lemma Zle_S_Ppow2 : forall p, (Zpos (p + 1) <= Zpos (Ppow2 (Zabs_nat (Zpos p))))%Z.
+  Lemma Zle_S_Ppow2 : forall p, (Zpos (p + 1) <= Zpos (Ppow2 (Z.abs_nat (Zpos p))))%Z.
   Proof.
     intros.
     rewrite Zpos_plus_distr.
@@ -28,7 +28,7 @@ Module Rapprox (Import T : CReals).
       simpl.
       induction (nat_of_P p).
         simpl. intuition.
-        rewrite Ppow2_double. apply Zle_trans with (2* (Z_of_nat n + 1))%Z; zify; omega.
+        rewrite Ppow2_double. apply Z.le_trans with (2* (Z_of_nat n + 1))%Z; zify; omega.
         rewrite <- Zpos_eq_Z_of_nat_o_nat_of_P. reflexivity.
   Qed.
   
@@ -36,7 +36,7 @@ Module Rapprox (Import T : CReals).
   Proof.
     intros n m Hnm.
     induction Hnm. omega.
-    eapply Zle_trans; [apply IHHnm | ].
+    eapply Z.le_trans; [apply IHHnm | ].
     simpl. zify; omega.
   Qed.
   
@@ -45,7 +45,7 @@ Module Rapprox (Import T : CReals).
     intros e epos.
     assert (de : e ## R0) by (right; auto).
     pose (e' := Rinv e de).
-    pose (N := Zabs_nat (Rup e')).
+    pose (N := Z.abs_nat (Rup e')).
     exists N; intros n Hn.
     
     apply Rmul_lt_cancel_l with (po n).
@@ -79,7 +79,7 @@ Module Rapprox (Import T : CReals).
                 
                 apply Zle_S_Ppow2.
                 
-                apply Zle_trans with 1%Z; zify; omega.
+                apply Z.le_trans with 1%Z; zify; omega.
               
               change (IZR (Zpos (Ppow2 N)) <= IZR (Zpos (Ppow2 n))); apply IZR_le.
               clearbody N e'; clear -Hn.

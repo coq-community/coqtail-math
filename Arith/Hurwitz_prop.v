@@ -120,7 +120,7 @@ Qed.
 Lemma Zmult_le_reg_l : forall m n p, 0 < p -> p * m <= p * n -> m <= n.
 Proof.
 intros m n p p_pos ; do 2 rewrite (Zmult_comm p) ;
- apply Zmult_le_reg_r, Zlt_gt ; assumption.
+ apply Zmult_le_reg_r, Z.lt_gt ; assumption.
 Qed.
 
 Lemma hnorm2_pos : 0 <= hnorm2 h1.
@@ -130,7 +130,7 @@ destruct h1 ; intros ; unfold hnorm2, hmul, hconj.
  ring_simplify.
  apply Zmult_le_reg_l with 4 ; [omega |].
  transitivity ((h + 2 * i) ^ 2 + (h + 2 * j) ^ 2 + (h + 2 * k) ^ 2 + h ^ 2).
- do 4 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Zge_le, sqr_pos.
+ do 4 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Z.ge_le, sqr_pos.
  apply eq_Zle ; ring.
 Qed.
 
@@ -140,7 +140,7 @@ destruct h1 ; intros ; unfold hnorm2, hmul, hconj.
  cbv delta [Hurwitz_def.h Hurwitz_def.i] ; cbv beta iota.
  apply Zle_0_minus_le ; ring_simplify.
  transitivity ((h + 2 * i) ^ 2 + (h + 2 * j) ^ 2 + (h + 2 * k) ^ 2).
- do 3 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Zge_le, sqr_pos.
+ do 3 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Z.ge_le, sqr_pos.
  apply eq_Zle ; ring.
 Qed.
 
@@ -161,7 +161,7 @@ intros x (y, Ixy).
  assert (H : hnorm2 x  * hnorm2 y = 1).
   etransitivity ; [symmetry ; eapply hnorm2_hmul |].
   rewrite Ixy ; apply hnorm2_IZH.
- eapply Zmult_one ; [apply Zle_ge, hnorm2_pos | eassumption].
+ eapply Zmult_one ; [apply Z.le_ge, hnorm2_pos | eassumption].
 Qed.
 
 Lemma H_unit_dec : forall x, H_unit x + (H_unit x -> False).

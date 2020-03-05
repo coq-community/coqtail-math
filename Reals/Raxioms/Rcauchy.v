@@ -95,7 +95,7 @@ Ltac max_solve trm := match trm with
    end.
 Tactic Notation "max_solve" := max_solve 6%nat. 
 
-Add Morphism Rplus : Rplus_comp. 
+Add Morphism Rplus with signature (Req ==> Req ==> Req) as Rplus_comp.
 intros u₁ u₂ H1 v₁ v₂ H2.
 intros ε Hpos.
 assert (Hε : (ε * (1#2)) > 0).
@@ -163,7 +163,7 @@ assumption.
 apply Qle_refl.
 Qed.
 
-Add Morphism Rmult : Rmult_comp.
+Add Morphism Rmult with signature (Req ==> Req ==> Req) as Rmult_comp.
 intros u₁ u₂ H1 v₁ v₂ H2.
 intros ε Hpos.
 

@@ -21,6 +21,7 @@ USA.
 
 Require Import Ensembles.
 Require Import Powerset.
+Require Import ClassicalFacts.
 
 (** * Infinite Union *)
 
@@ -165,7 +166,6 @@ Section Trivial_Topology.
   Qed.
   
   (* excluded_middle is used because of undecidability of Type *)
-  Require Import ClassicalFacts.
   
   Lemma disjonction_exists : excluded_middle -> forall (X:Type) (P:X->Prop),
     (exists x:X, P x) \/ (forall x:X, ~ P x).

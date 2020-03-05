@@ -60,7 +60,7 @@ Proof.
   intros a b D.
   exists (b / a).
   rewrite Zmult_comm.
-  destruct (Z_eq_dec a 0).
+  destruct (Z.eq_dec a 0).
     subst; destruct D; omega.
     
     apply Z_div_exact_full_2; auto with *.
@@ -123,7 +123,7 @@ Lemma sqrt_eq_compat : forall a b, 0 <= a -> 0 <= b ->
   a * a = b * b -> a = b.
 Proof.
   intros a b Pa Pb E.
-  destruct (Z_eq_dec 0 (a + b)) as [F|F].
+  destruct (Z.eq_dec 0 (a + b)) as [F|F].
     omega.
     
     cut (a - b = 0); [ omega | ].
@@ -133,16 +133,16 @@ Proof.
     ring.
 Qed.
 
-Lemma sqrt_eq_compat_abs : forall a b, a * a = b * b -> Zabs a = Zabs b.
+Lemma sqrt_eq_compat_abs : forall a b, a * a = b * b -> Z.abs a = Z.abs b.
 Proof.
   intros a b E.
-  destruct (Z_eq_dec 0 (Zabs a + Zabs b)) as [F|F].
+  destruct (Z.eq_dec 0 (Z.abs a + Z.abs b)) as [F|F].
     zify; omega.
     
-    cut (Zabs a - Zabs b = 0); [ omega | ].
-    apply (Zmult_reg_l _ _ (Zabs a + Zabs b)); notzero.
+    cut (Z.abs a - Z.abs b = 0); [ omega | ].
+    apply (Zmult_reg_l _ _ (Z.abs a + Z.abs b)); notzero.
     ring_simplify.
-    rewrite <- Zabs_square, <- (Zabs_square b) in E.
+    rewrite <- Z.abs_square, <- (Z.abs_square b) in E.
     rewrite rewrite_power_2, E.
     ring.
 Qed.
@@ -151,7 +151,7 @@ Lemma sqrt_le_compat : forall a b, 0 <= a -> 0 <= b ->
   a * a <= b * b -> a <= b.
 Proof.
   intros a b Pa Pb E.
-  destruct (Z_eq_dec 0 (a + b)) as [F|F].
+  destruct (Z.eq_dec 0 (a + b)) as [F|F].
     omega.
     
     cut (0 <= b - a); [ omega | ].
@@ -161,13 +161,13 @@ Proof.
 Qed.
 
 
-(** About Zabs *)
+(** About Z.abs *)
 
 (* TODO vérifier que ce lemme est utilisé *)
-Lemma Zabs_nat_inj : forall a b, 0 <= a -> 0 <= b -> Zabs_nat a = Zabs_nat b -> a = b.
+Lemma Zabs_nat_inj : forall a b, 0 <= a -> 0 <= b -> Z.abs_nat a = Z.abs_nat b -> a = b.
 Proof.
   intros a b Pa Pb E.
-  rewrite <- (Zabs_eq a), <- (Zabs_eq b); eauto.
+  rewrite <- (Z.abs_eq a), <- (Z.abs_eq b); eauto.
   do 2 rewrite <- inj_Zabs_nat.
   auto.
 Qed.
@@ -177,7 +177,7 @@ Qed.
 Lemma Zdivide_square_rev : forall a b, (a * a | b * b) -> (a | b).
 Proof.
   intros a b D.
-  destruct (Z_eq_dec a 0).
+  destruct (Z.eq_dec a 0).
     subst; simpl in D.
     destruct D as (q, Hq); ring_simplify (q * 0) in Hq.
     destruct b; inversion Hq.
