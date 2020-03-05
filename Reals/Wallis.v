@@ -743,7 +743,7 @@ eapply Rseq_equiv_cv_compat.
  apply Rseq_equiv_trans with (fun n : nat => exp ((2 * n + 1) * (- / (2 * n + 1)))).
   apply Rseq_equiv_eq. exists O. intros n Hn.
   field_simplify ((2 * n + 1) * - / (2 * n + 1))%R. unfold Rseq_constant, Rseq_inv.
-   rewrite <- exp_Ropp. unfold Rdiv. rewrite Rinv_1. rewrite Rmult_1_r. reflexivity.
+   rewrite <- exp_Ropp. unfold Rdiv. try rewrite Rinv_1. try rewrite Rmult_1_r. reflexivity.
    generalize (pos_INR n) ; intuition ; lra.
   apply Rseq_equiv_continuity with ((-1)).
    reg.

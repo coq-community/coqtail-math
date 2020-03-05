@@ -650,7 +650,7 @@ exists ( root_real * Cexp ((0 +i theta ) / INC n))%C.
 rewrite Cpow_mul_distr_l.
 rewrite IRC_pow_compat. rewrite Hreal. rewrite <- Cexp_mult.
 field_simplify (INC n * ((0 +i  theta) / INC n))%C.
-unfold Cdiv. rewrite Cinv_1. rewrite Cmult_1_r.
+unfold Cdiv. try rewrite Cinv_1. try rewrite Cmult_1_r.
 apply Hpol. 
 apply not_0_INC. intuition.
 Qed.

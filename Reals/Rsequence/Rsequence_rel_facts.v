@@ -610,7 +610,7 @@ rewrite Rabs_Rinv; [|apply Hnu].
 apply (Rmult_le_reg_l (Rabs (Un n))); [apply Rabs_pos_lt; apply Hnu|].
 apply (Rmult_le_reg_l (Rabs (Vn n))); [apply Rabs_pos_lt; apply Hnv|].
 field_simplify.
-unfold Rdiv; rewrite Rinv_1; repeat rewrite Rmult_1_r.
+try (unfold Rdiv; rewrite Rinv_1; repeat rewrite Rmult_1_r).
 rewrite Rmult_comm; apply HN; apply Hn.
 apply Rabs_no_R0; apply Hnu.
 apply Rabs_no_R0; apply Hnv.

@@ -114,7 +114,7 @@ intros An r rho r' r'_bd.
  right ; apply Rabs_eq_compat ; unfold An_deriv, Rseq_shift, Rseq_mult ; field_simplify.
  unfold Rdiv ; repeat (rewrite Rmult_assoc) ; repeat (apply Rmult_eq_compat_l).
  rewrite Rpow_mult_distr.
- rewrite Rinv_1 ; rewrite Rmult_1_r.
+ try (rewrite Rinv_1 ; rewrite Rmult_1_r).
  rewrite Rmult_assoc.
  replace ((/ r) ^ S i * (r ^ S i * / r')) with (/ r').
  simpl ; field ; assumption.

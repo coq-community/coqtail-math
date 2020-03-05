@@ -122,7 +122,7 @@ apply Rle_trans with (Cnorm h * eps / 2 + Cnorm h * eps / 2)%R.
   apply Rle_trans with (Rplus (Cnorm (c - z)) ((r - Cnorm (z - c)) / 2)) ;
   [apply Rplus_le_compat_l ; unfold delta ; apply Rmin_l |].
   rewrite Cnorm_minus_sym.
-  field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
+  field_simplify ; unfold Rdiv; try rewrite Rinv_1, Rmult_1_r.
   unfold Boule in z_in ; simpl in z_in ; unfold C_dist in z_in ;
   left ; rewrite Cnorm_minus_sym ;
  apply (proj2 (middle_is_in_the_middle _ _ z_in)).
@@ -565,7 +565,7 @@ intros fn f c r fn_cvu fn_cont z z_in.
  [apply Rplus_lt_compat_l ; assumption |].
  apply Rle_lt_trans with (Cnorm (c - z) +  (r - Cnorm (c - z))/2)%R ;
  [apply Rplus_le_compat_l ; apply Rmin_r |].
- field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
+ field_simplify ; unfold Rdiv ; try rewrite Rinv_1, Rmult_1_r.
  apply (middle_is_in_the_middle _ _ z_in).
  destruct (Ceq_dec x z) as [eq | neq].
  subst ; unfold Cminus ; rewrite Cadd_opp_r, Cnorm_C0 ; lra.

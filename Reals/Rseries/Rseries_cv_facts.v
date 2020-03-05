@@ -188,7 +188,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  left ; apply HN3, le_trans with N ; [apply le_max_r | assumption].
  replace eps with (eps4 * 2 * (Rabs lb + 1)) by (unfold eps4 ; field ;
   apply Rgt_not_eq ; apply Rle_lt_0_plus_1, Rabs_pos).
- field_simplify ; unfold Rdiv ; apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; lra.
+ field_simplify ; unfold Rdiv ; lra || (apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; lra).
  unfold Rseq_prod ; apply Rseq_sum_ext ; intro p ; unfold Rseq_mult, Rseq_minus,
   Rseq_constant, Rseq_plus ; ring.
 Qed.

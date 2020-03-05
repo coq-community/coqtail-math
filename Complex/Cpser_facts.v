@@ -592,7 +592,7 @@ intros An r rho r' r'_bd.
  right ; apply Cnorm_eq_compat ; unfold An_deriv, Cseq_shift, Cseq_mult ; field_simplify.
  unfold Cdiv ; repeat (rewrite Cmult_assoc) ; repeat (apply Cmult_eq_compat_l).
   rewrite Cpow_mul_distr_l.
- rewrite Cinv_1 ; rewrite Cmult_1_r.
+ try (rewrite Cinv_1 ; rewrite Cmult_1_r).
  rewrite Cmult_assoc.
  replace ((/ r) ^ S i * (r ^ S i * / r')) with (/ r').
  simpl ; field ; auto with complex.
@@ -888,7 +888,7 @@ intros An r Pr z z_bd eps eps_pos.
  apply Cnorm_triang.
  apply Rlt_le_trans with (Cnorm z + ((middle (Cnorm z) r - Cnorm z) / 2))%R.
  apply Rplus_lt_compat_l ; apply Rlt_le_trans with delta' ; [assumption | apply Rmin_r].
- unfold Rminus ; field_simplify ; unfold Rdiv ; rewrite Rinv_1, Rmult_1_r.
+ unfold Rminus ; field_simplify ; unfold Rdiv ; try (rewrite Rinv_1, Rmult_1_r).
  left ; do 2 eapply middle_is_in_the_middle ; assumption.
  eapply middle_is_in_the_middle ; assumption.
  assert (F : r < r).

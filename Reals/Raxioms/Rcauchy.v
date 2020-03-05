@@ -56,6 +56,7 @@ Add Parametric Relation : R Req
    transitivity proved by equiv_trans
  as Req_per.
 Instance defaut_relation_Req : DefaultRelation Req.
+Defined.
 
 Program Instance R_partial_setoid : PartialSetoid R := {
   pequiv := Req

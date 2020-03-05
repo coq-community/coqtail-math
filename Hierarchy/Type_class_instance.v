@@ -39,90 +39,54 @@ Ltac int_hierarchy := match goal with
 end.
 (* end hide *)
 
-Instance monoid_nat : Monoid nat eq plus 0 :=
+Program Instance monoid_nat : Monoid nat eq plus 0 :=
 {monoid_iden_l := plus_0_l}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance monoid_commutative_nat : Monoid_Commutative nat eq plus 0 :=
+Program Instance monoid_commutative_nat : Monoid_Commutative nat eq plus 0 :=
 {monoid_comm_monoid := monoid_nat}.
-Proof.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance monoid_nat_mult_1 : Monoid nat eq mult 1 :=
+Program Instance monoid_nat_mult_1 : Monoid nat eq mult 1 :=
 {monoid_iden_l := mult_1_l }.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance semiring_nat : SemiRing nat eq plus mult 0 1 :=
+Program Instance semiring_nat : SemiRing nat eq plus mult 0 1 :=
 {semiring_monoid_comm := monoid_commutative_nat}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance semiring_commutative_nat : SemiRing_Commutative nat eq plus mult 0 1 :=
+Program Instance semiring_commutative_nat : SemiRing_Commutative nat eq plus mult 0 1 :=
 {semiring_comm_semiring := semiring_nat}.
-Proof.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
 (*proof that Z = ring_commutative*)
 
-Instance monoid_Z : Monoid Z eq Zplus 0%Z :=
+Program Instance monoid_Z : Monoid Z eq Zplus 0%Z :=
 {monoid_iden_l := Zplus_0_l}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance monoid_mult_Z : Monoid Z eq Zmult 1%Z :=
+Program Instance monoid_mult_Z : Monoid Z eq Zmult 1%Z :=
 {monoid_iden_l := Zmult_1_l}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance group_Z : Group Z eq Zplus 0%Z :=
+Program Instance group_Z : Group Z eq Zplus 0%Z :=
 {group_monoid := monoid_Z}.
-Proof.
-intro x; exists (-x)%Z.
+Next Obligation.
+exists (-x)%Z.
 int_hierarchy.
 Qed.
 
-Instance group_commutative_Z : Group_Commutative Z eq Zplus 0%Z :=
+Program Instance group_commutative_Z : Group_Commutative Z eq Zplus 0%Z :=
 {group_comm_group := group_Z}.
-Proof.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance ring_Z : Ring Z eq Zplus Zmult 0%Z 1%Z :=
+Program Instance ring_Z : Ring Z eq Zplus Zmult 0%Z 1%Z :=
 {ring_group_comm := group_commutative_Z}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance ring_commutative_Z : Ring_Commutative Z eq Zplus Zmult 0%Z 1%Z :=
+Program Instance ring_commutative_Z : Ring_Commutative Z eq Zplus Zmult 0%Z 1%Z :=
 {ring_comm_ring := ring_Z}.
-Proof.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
 Require Import ZArith.
 Require Import Znumtheory.
@@ -227,41 +191,37 @@ reflexivity.
 Qed.
 
 
-Instance monoid_Z_nZ : Monoid Z mod_eq Zplus 0%Z :=
+Program Instance monoid_Z_nZ : Monoid Z mod_eq Zplus 0%Z :=
 {monoid_iden_l := Zmod_plus_0_l}.
-Proof.
-apply Zmod_plus_0_r.
-apply Zmod_plus_compat_l.
-apply Zmod_plus_compat_r.
-Qed.
+Next Obligation. now apply Zmod_plus_0_r. Qed.
+Next Obligation. now apply Zmod_plus_compat_l. Qed.
+Next Obligation. now apply Zmod_plus_compat_r. Qed.
 
 Instance mod_eq_mult_assoc : Associative mod_eq Zmult.
 Proof.
 repeat intro; ring_simplify; apply mod_eq_refl.
 Qed.
 
-Instance monoid_mult_Z_nZ : Monoid Z mod_eq Zmult 1%Z :=
+Program Instance monoid_mult_Z_nZ : Monoid Z mod_eq Zmult 1%Z :=
 {monoid_iden_l := Zmod_mult_1_l}.
-Proof.
-apply Zmod_mult_1_r.
-apply Zmod_mult_compat_l.
-apply Zmod_mult_compat_r.
-Qed.
+Next Obligation. now apply Zmod_mult_1_r. Qed.
+Next Obligation. now apply Zmod_mult_compat_l. Qed.
+Next Obligation. now apply Zmod_mult_compat_r. Qed.
 
 Lemma mod_eq_plus_invert : forall x : Z, sig (fun y => (x + y) %= 0).
 Proof.
 intros; exists (-x); ring_simplify; apply mod_eq_refl.
 Qed.
 
-Instance group_Z_nZ : Group Z mod_eq Zplus 0%Z :=
+Program Instance group_Z_nZ : Group Z mod_eq Zplus 0%Z :=
 {group_monoid := monoid_Z_nZ}.
-Proof.
+Next Obligation.
 apply mod_eq_plus_invert.
 Qed.
 
 Instance Zmod_plus_comm : Commutative mod_eq Zplus.
 Proof.
-repeat intro; rewrite Zplus_comm; apply mod_eq_refl.
+  exists 0. ring.
 Qed.
 
 Instance group_commutative_Z_nZ : Group_Commutative Z mod_eq Zplus 0%Z :=
@@ -277,12 +237,10 @@ Proof.
 intros; ring_simplify; apply mod_eq_refl.
 Qed.
 
-Instance ring_Z_nZ : Ring Z mod_eq Zplus Zmult 0%Z 1%Z :=
+Program Instance ring_Z_nZ : Ring Z mod_eq Zplus Zmult 0%Z 1%Z :=
 {ring_group_comm := group_commutative_Z_nZ}.
-Proof.
-apply Zmod_mult_plus_distr_r.
-apply Zmod_mult_plus_distr_l.
-Qed.
+Next Obligation. apply Zmod_mult_plus_distr_r. Qed.
+Next Obligation. apply Zmod_mult_plus_distr_l. Qed.
 
 Instance Zmod_mult_comm : Commutative mod_eq Zmult.
 Proof.
@@ -429,28 +387,22 @@ rewrite Zmult_assoc.
 reflexivity.
 Qed.
 
-Instance group_multiplicative_Fp : Group_Multiplicative Z rel Zmult 0 1 :=
+Program Instance group_multiplicative_Fp : Group_Multiplicative Z rel Zmult 0 1 :=
 {group_setoid := mod_eq_equiv p}.
-Proof.
-apply Zmult_iden_l.
-apply Zmult_iden_r.
-apply Zmult_reverse.
-apply mod_eq_mult_assoc.
-apply Zmult_compat_l.
-apply Zmult_compat_r.
-Qed.
+Next Obligation. now apply Zmult_iden_l. Qed.
+Next Obligation. now apply Zmult_iden_r. Qed.
+Next Obligation. now apply Zmult_reverse. Qed.
+Next Obligation. now apply mod_eq_mult_assoc. Qed.
+Next Obligation. now apply Zmult_compat_l. Qed.
+Next Obligation. now apply Zmult_compat_r. Qed.
 
-Instance field_Fp : Field Z rel Zplus Zmult 0%Z 1%Z :=
+Program Instance field_Fp : Field Z rel Zplus Zmult 0%Z 1%Z :=
 {field_group_comm := group_commutative_Z_nZ p}.
-Proof.
-apply Zmod_mult_plus_distr_r.
-apply Zmod_mult_plus_distr_l.
-Qed.
+Next Obligation. apply Zmod_mult_plus_distr_r. Qed.
+Next Obligation. apply Zmod_mult_plus_distr_l. Qed.
 
-Instance field_commutative_Fp : Field_Commutative Z rel Zplus Zmult 0%Z 1%Z :=
+Program Instance field_commutative_Fp : Field_Commutative Z rel Zplus Zmult 0%Z 1%Z :=
 {field_comm_field := field_Fp}.
-Proof.
-apply Zmod_mult_comm.
-Qed.
+Next Obligation. apply Zmod_mult_comm. Qed.
 
 End Fp.

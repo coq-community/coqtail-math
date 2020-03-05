@@ -933,7 +933,7 @@ Proof.
        apply Rinv_0_lt_compat. now apply H2.
        
        field_simplify.
-        unfold Rdiv. rewrite Rinv_1. rewrite Rmult_1_r. now apply Zg3.
+        unfold Rdiv. try rewrite Rinv_1. try rewrite Rmult_1_r. now apply Zg3.
         
         intro. now lra.
         
@@ -2170,7 +2170,7 @@ Proof.
        apply Rinv_0_lt_compat. now apply H2.
        
        field_simplify.
-        unfold Rdiv. rewrite Rinv_1. rewrite Rmult_1_r. now apply Zg3.
+        unfold Rdiv. try rewrite Rinv_1. try rewrite Rmult_1_r. now apply Zg3.
         
         intro. now lra.
         
@@ -2519,7 +2519,7 @@ Proof.
        apply Rinv_0_lt_compat. now apply H2.
        
        field_simplify.
-        unfold Rdiv. rewrite Rinv_1. rewrite Rmult_1_r. now apply Zg3.
+        unfold Rdiv. try rewrite Rinv_1. try rewrite Rmult_1_r. now apply Zg3.
         
         intro. now lra.
         

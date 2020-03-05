@@ -49,20 +49,13 @@ intros.
 exact (plus_0_l x).
 Qed.
 
-Instance monoid_nat : Monoid nat (fun n:nat => True) eq plus 0 :=
+Program Instance monoid_nat : Monoid nat (fun n:nat => True) eq plus 0 :=
 {monoid_iden_l := aux_plus_0_l}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance monoid_commutative_nat : Monoid_Commutative nat (fun n:nat => True) eq plus 0 :=
+Program Instance monoid_commutative_nat : Monoid_Commutative nat (fun n:nat => True) eq plus 0 :=
 {monoid_comm_monoid := monoid_nat}.
-Proof.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
 Lemma aux_mult_1_l : forall x : nat, (fun _ : nat => True) x -> 1 * x = x.
 Proof.
@@ -70,26 +63,14 @@ intros.
 exact (mult_1_l x).
 Qed.
 
-Instance monoid_nat_mult_1 : Monoid nat (fun n:nat => True) eq mult 1 :=
+Program Instance monoid_nat_mult_1 : Monoid nat (fun n:nat => True) eq mult 1 :=
 {monoid_iden_l := aux_mult_1_l }.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance semiring_nat : SemiRing nat (fun n:nat => True) eq plus mult 0 1 :=
+Program Instance semiring_nat : SemiRing nat (fun n:nat => True) eq plus mult 0 1 :=
 {semiring_monoid_comm := monoid_commutative_nat}.
-Proof.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.
 
-Instance semiring_commutative_nat : SemiRing_Commutative nat (fun n:nat => True) eq plus mult 0 1 :=
+Program Instance semiring_commutative_nat : SemiRing_Commutative nat (fun n:nat => True) eq plus mult 0 1 :=
 {semiring_comm_semiring := semiring_nat}.
-Proof.
-int_hierarchy.
-Qed.
+Solve All Obligations with int_hierarchy.

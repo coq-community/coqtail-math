@@ -340,7 +340,7 @@ exists (INR 4 * / x * / x)%R; split.
   replace 1%R with (INR 1) by reflexivity.
   rewrite <- minus_INR; [|omega].
   change 2 with (INR 2).
-  rewrite <- mult_INR.
+  rewrite <- 2mult_INR.
   apply le_INR; omega.
   replace 1%R with (INR 1) by reflexivity.
   rewrite <- minus_INR; [apply Rle_ge; apply pos_INR|omega].
