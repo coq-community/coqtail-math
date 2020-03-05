@@ -355,23 +355,14 @@ Proof.
 intro z ; assert (z_bd : Cnorm z < Cnorm z + 1) by intuition ;
  destruct (Cpser_abel2_prelim _ _ (exp_infinite_cv_radius (Cnorm z + 1)%R) _ z_bd) as [l Hl].
  unfold Cpser_norm in Hl.
- exists (Cnorm l) ; unfold Cser_abs_cv.
+ exists (Cre l) ; unfold Cser_abs_cv.
 apply Rseq_cv_eq_compat with 
       (fun n => Cre (sum_f_C0 (fun n : nat => Cnorm (gt_pser exp_seq z n)) n)).
 intro n ; rewrite <- sum_f_C0_Cre_compat ; simpl ; reflexivity.
-replace (Cnorm l) with (Cre (Cnorm l)) by auto ; apply Cseq_cv_re_compat.
-Admitted.
-(*
-eapply Cseq_cv_eq_compat ; [| apply H].
-intro n ; induction n.
-simpl ; unfold gt_pser ; rewrite Cnorm_Cmult ;
-rewrite Cmult_IRC_Rmult, Cnorm_pow ; reflexivity.
-do 2 rewrite sum_f_C0_simpl ; rewrite IHn ; apply Cadd_eq_compat_l.
-simpl ; unfold gt_pser ; rewrite Cnorm_Cmult ;
-rewrite Cmult_IRC_Rmult, Cnorm_pow, IRC_pow_compat ;
-reflexivity.
+apply Cseq_cv_re_compat.
+auto.
 Qed.
-*)
+
 Lemma binomial_diag : forall n, Binomial.C n n = 1.
 Proof.
 intros n.

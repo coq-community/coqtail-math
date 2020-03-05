@@ -33,6 +33,7 @@ Require Import Rpser_sums Rpser_derivative Rpser_derivative_facts.
 Require Import Rfunction_def Functions Rextensionality Rpow_facts.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
+Require Rzeta2.
 
 Open Scope R_scope.
 
@@ -530,19 +531,17 @@ Lemma arctan_sum_sums : forall x, - 1 < x <= 1 -> Rpser arctan_seq x (arctan_sum
 Proof.
 intros x [x_lb x_ub] ; unfold arctan_sum ; destruct (MyRIneq.Req_dec x 1) as [Heq | Hneq].
  subst ; rewrite <- Rmult_1_l ; apply Rpser_zip_compat_0_r.
-  unfold PI ; destruct exist_PI as [v Hv].
-Admitted. (*
-  rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc, Rinv_r, Rmult_1_r.
-  eapply Rseq_cv_eq_compat, Hv.
-  unfold Rseq_pps ; intro n ; apply Rseq_sum_ext ; clear n.
-  intro n ; unfold gt_pser, tg_alt, PI_tg, Rseq_mult.
-  do 2 rewrite pow1 ; rewrite unfold_plus1, Rmult_1_r ; reflexivity.
-  apply Rgt_not_eq ; lra.
+ eapply Rseq_cv_eq_compat. 2: apply Rzeta2.PI_tg_PI.
+ apply sum_f_R0_ext; intros n.
+ change ((-1) ^ n * / INR (S (2 * n)) * (1 ^ 2) ^ n = (-1) ^ n * / INR (2 * n + 1)).
+ rewrite 2 Rfunctions.pow1.
+ rewrite plus_comm; simpl plus; simpl mult.
+ ring.
+
  apply sum_r_sums, Rabs_def1.
   apply Rneq_le_lt ; assumption.
   assumption.
 Qed.
-*)
 
 Require Import Rpser_sums_facts.
 

@@ -61,5 +61,4 @@ Lemma Rexp_mult_simpl : forall a b x,
   Rexp (a * x) * Rexp (b * x) = Rexp ((a + b) * x).
 Proof.
 intros a b ; unfold Rexp ; solve_diff_equa.
-admit.
 Abort.

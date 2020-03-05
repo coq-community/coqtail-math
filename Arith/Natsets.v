@@ -271,7 +271,6 @@ Proof.
       rewrite (plus_comm _ 1).
       rewrite <- (plus_assoc 1), <- IHdomain.
         simpl.
-        admit.
     remember (f domain) as y0.
         
         intros i; auto.
@@ -295,7 +294,6 @@ Proof.
       rewrite IHdomain.
       rewrite plus_comm.
       f_equal.
-      admit.
       destruct (eq_nat_dec (f bound) domain).
 *)    
   intros domain bound f Bf; induction domain.
@@ -325,7 +323,6 @@ Il faut faire une partie "count outside" qui parle de la bornitude
       
       destruct (eq_nat_dec (f domain) bound).
         exfalso.
-        admit.
         
         simpl.
         auto.
@@ -472,6 +469,5 @@ Proof.
     simpl.
     unfold nat_dec_bool.
     (* arf *)
-Admitted.
 
 *)

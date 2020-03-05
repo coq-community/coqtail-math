@@ -163,7 +163,6 @@ Qed.
 
 (** About Z.abs *)
 
-(* TODO vérifier que ce lemme est utilisé *)
 Lemma Zabs_nat_inj : forall a b, 0 <= a -> 0 <= b -> Z.abs_nat a = Z.abs_nat b -> a = b.
 Proof.
   intros a b Pa Pb E.
@@ -185,6 +184,7 @@ Proof.
     
     exists (b / a).
     rewrite Zmult_comm, Z_mult_div_mod; auto.
-    admit (* TODO déplacer et prouver : inutile ici mais intéressant.
-    un peu intéressant, c'est dur environ comme sqrt(n)∈Q => sqrt(n)∈N *).
+
+    (* TODO déplacer et prouver : inutilisé mais intéressant.
+    un peu intéressant, c'est dur environ comme sqrt(n)∈Q => sqrt(n)∈N *)
 Abort.

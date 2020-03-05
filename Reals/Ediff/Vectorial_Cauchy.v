@@ -19,7 +19,6 @@ Lemma Cauchy_autonomous : forall (f : V -> V) (I : R -> Prop) (K : V -> Prop) (o
   {x : R -> V & {C : VC vect_space 1 I x | forall (t : R), I t -> (K (x t)) /\ (Vderive (VC_derivable C)) t = f (x t) /\ x t0 = x0}}.
 Proof.
 intros f I K openK t0 x0 Hx0K Hfcont lipschitzf.
-admit.
-Admitted.
+Abort.
 
 End Vectorial_Cauchy.

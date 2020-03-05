@@ -544,7 +544,7 @@ split; intros x Hx.
  destruct (Cpser_abel2_prelim An x Hf z) as [l' Hl'].
  assumption.
  apply (Hncv (Cnorm l')).
-Admitted.
+Abort.
 
 Lemma Cpser_infinite_cv_radius_caracterization :
   forall An, (forall x, {l | Cpser An x l}) ->

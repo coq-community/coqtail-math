@@ -124,6 +124,10 @@ assumption.
 auto with qarith.
 Qed.
 
-Lemma Qplus_le_lt_compat : 
-  forall a b c d, a <= b -> c < d -> a+c < b + d.
-Admitted.
+Lemma Qplus_le_lt_compat : forall a b c d : Q, a <= b -> c < d -> a + c < b + d.
+Proof.
+  intros.
+  apply Qle_lt_trans with (b + c).
+    apply Qplus_le_l; auto.
+    apply Qplus_lt_r; auto.
+Qed.

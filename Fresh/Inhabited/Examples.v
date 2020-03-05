@@ -59,8 +59,7 @@ Qed.
 Lemma unlift_example3  : forall (P Q R : Type), [ P ] -> [ P -> Q ] -> [ Q -> R ] -> R.
 Proof.
 intros P Q R p pq qr.
-intuition.
-Admitted.
+Abort.
 
 Lemma stronger_inhabited_in_hypothese : forall A B, ([A] -> [B]) -> (A -> [B]).
 Proof.

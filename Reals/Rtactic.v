@@ -703,7 +703,6 @@ Section examples.
   Proof.
   assert (1 <> 0) by (intro Hc; lra).
   elim_ident.
-  admit.
   Abort.
   
   Example njfkl : forall y, Rabs (INR 5) * y + IZR 10 = 5 * y + 10.

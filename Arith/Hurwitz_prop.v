@@ -246,5 +246,5 @@ intros x Hx ; assert (Nx := is_H_unit_hnorm2_1 _ Hx) ; destruct Hx as [y Ixy].
   (* idée : on peut énumérer les x, y de norme bornée (par 1), et après
   on peut vérifier que si xy=1 c'est que H_unit x. Peut-être avoir la 
   décidabilité de H_unit aidera. *)
-Admitted.
+Abort.
 

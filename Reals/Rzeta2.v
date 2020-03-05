@@ -154,36 +154,37 @@ Qed.
 Definition antg : nat -> R := fun n => (- 1)^n / (2 * (INR n) + 1).
 Definition antg_neg : nat -> R := fun n => (- 1)^n / (- 2 * (INR n) + 1).
 
+Lemma PI_tg_PI : Rseq_cv (sum_f_R0 (tg_alt PI_tg)) (PI / 4).
+Proof.
+  generalize PI_ineq, exist_PI.
+  generalize (sum_f_R0 (tg_alt PI_tg)) as u.
+  generalize (PI / 4) as x.
+  intros x u Hu [y Hy].
+  rewrite <-Rseq_cv_Un_cv_equiv in Hy.
+  change (fun N : nat => u N) with u in Hy.
+  pose proof Rseq_sandwich_theorem.
+  assert (uy : Rseq_cv (fun N : nat => u (2 * N)%nat) y).
+  { eapply Rseq_subseq_cv_compat; eauto.
+    apply subsequence_helper with (mult 2). lia. reflexivity. }
+  assert (uy' : Rseq_cv (fun N : nat => u (S (2 * N))%nat) y).
+  { eapply Rseq_subseq_cv_compat; [ | apply Hy].
+    apply subsequence_helper with (fun n => S (2 * n)). lia. reflexivity. }
+  pose proof Rseq_sandwich_theorem _ _ _ y uy' uy Hu as xy.
+  pose proof Rseq_constant_cv x as xx.
+  pose proof Rseq_cv_unique _ _ _ xx xy.
+  now subst.
+Qed.
+
 Lemma Sum_antg : Rser_cv antg (PI / 4).
 Proof.
-unfold Rser_cv.
-eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
- apply Rseq_sum_ext.
- intros n.
- unfold tg_alt, PI_tg, antg.
- INR_group (2 * INR n + 1).
- field.
- INR_solve.
-
- generalize PI_ineq, exist_PI.
- generalize (sum_f_R0 (tg_alt PI_tg)) as u.
- generalize (PI / 4) as x.
- intros x u Hu [y Hy].
- rewrite <-Rseq_cv_Un_cv_equiv in Hy.
- change (fun N : nat => u N) with u in Hy.
- pose proof Rseq_sandwich_theorem.
- assert (uy : Rseq_cv (fun N : nat => u (2 * N)%nat) y). {
-   eapply Rseq_subseq_cv_compat; eauto.
-   apply subsequence_helper with (mult 2). lia. reflexivity.
- }
- assert (uy' : Rseq_cv (fun N : nat => u (S (2 * N))%nat) y). {
-   eapply Rseq_subseq_cv_compat; [ | apply Hy].
-   apply subsequence_helper with (fun n => S (2 * n)). lia. reflexivity.
- }
- pose proof Rseq_sandwich_theorem _ _ _ y uy' uy Hu as xy.
- pose proof Rseq_constant_cv x as xx.
- pose proof Rseq_cv_unique _ _ _ xx xy.
- now subst; auto.
+  unfold Rser_cv.
+  eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)). 2: apply PI_tg_PI.
+  apply Rseq_sum_ext.
+  intros n.
+  unfold tg_alt, PI_tg, antg.
+  INR_group (2 * INR n + 1).
+  field.
+  INR_solve.
 Qed.
 
 Lemma antg_shift_neg_compat : Rseq_shift antg_neg == antg.
