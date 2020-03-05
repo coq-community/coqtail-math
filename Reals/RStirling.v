@@ -48,14 +48,14 @@ match n with
 | _ => ln (Un (S n) / Un n)
 end.
 
-Hint Resolve lt_0_INR.
-Hint Resolve sqrt_lt_R0.
-Hint Resolve exp_pos.
-Hint Resolve lt_O_fact.
-Hint Resolve pow_lt.
-Hint Resolve Rmult_lt_0_compat.
-Hint Resolve Rinv_0_lt_compat.
-Hint Resolve Rgt_not_eq.
+Hint Resolve lt_0_INR : stirling.
+Hint Resolve sqrt_lt_R0 : stirling.
+Hint Resolve exp_pos : stirling.
+Hint Resolve lt_O_fact : stirling.
+Hint Resolve pow_lt : stirling.
+Hint Resolve Rmult_lt_0_compat : stirling.
+Hint Resolve Rinv_0_lt_compat : stirling.
+Hint Resolve Rgt_not_eq : stirling.
 
 Lemma Vn_O : Vn 0 = 0.
 Proof.
@@ -102,7 +102,7 @@ Lemma Un_pos : forall n, (0 < n)%nat -> 0 < Un n.
 Proof.
 intros n Hn; unfold Un.
 unfold Rseq_fact.
-repeat apply Rmult_lt_0_compat; auto.
+repeat apply Rmult_lt_0_compat; auto with stirling.
 Qed.
 
 Lemma Vn_simpl :
@@ -114,13 +114,13 @@ assert (Hnpos : 0 < INR n).
   apply lt_0_INR; assumption.
 assert (HSnpos : 0 < INR (S n)).
   apply lt_0_INR; constructor; assumption.
-replace (1 + / INR n) with ((INR n + 1) * / INR n) by (field; auto).
+replace (1 + / INR n) with ((INR n + 1) * / INR n) by (field; auto with stirling).
 rewrite fact_simpl.
 repeat rewrite mult_INR.
-repeat (rewrite ln_mult || rewrite ln_Rinv); auto 6.
-repeat rewrite ln_exp; auto.
-repeat rewrite ln_pow; auto.
-repeat rewrite ln_sqrt; auto.
+repeat (rewrite ln_mult || rewrite ln_Rinv); auto 6 with stirling.
+repeat rewrite ln_exp; auto with stirling.
+repeat rewrite ln_pow; auto with stirling.
+repeat rewrite ln_sqrt; auto with stirling.
 repeat rewrite S_INR.
 field.
 lra.
@@ -228,7 +228,7 @@ repeat apply Rseq_big_O_plus_compat_l.
     replace (1 + n)%nat with (S n) by auto.
     rewrite S_INR.
     assert (H := pos_INR n); lra.
-  cutrewrite (Qn 4 (1 + n) = Qn 1 (1 + n) * Qn 3 (1 + n)).
+  assert (Qn 4 (1 + n) = Qn 1 (1 + n) * Qn 3 (1 + n)) as ->; swap 1 2.
   rewrite Rabs_mult.
   rewrite <- Rmult_1_l.
   apply Rmult_le_compat_r; [apply Rabs_pos|].
@@ -255,7 +255,7 @@ repeat apply Rseq_big_O_plus_compat_l.
   repeat apply Rmult_le_compat_l; auto with real.
   rewrite Rmult_1_r.
   apply (Rmult_le_reg_l (INR (1 + n))); auto.
-  rewrite Rinv_r; [|auto].
+  rewrite Rinv_r; [|auto with stirling].
   rewrite Rmult_1_r.
   replace (1 + n)%nat with (S n) by auto.
   rewrite S_INR.

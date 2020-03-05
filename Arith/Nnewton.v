@@ -89,6 +89,7 @@ intros.
 rewrite <- Nbinomial_pascal.
 ring.
 exact H.
+simpl in H.
 rewrite H. clear H.
 rewrite <- Nfinite_sum_plus_compat.
 
@@ -140,6 +141,7 @@ rewrite Nbinomial_outside.
 simpl.
 reflexivity.
 auto with arith.
+simpl in H.
 rewrite H. clear H.
 reflexivity.
 
@@ -151,6 +153,7 @@ assert (b ^ S n +
   (Nfinite_sum_0_n n (fun k : nat => Nbinomial n k * a ^ S k * b ^ (n - k))))).
 rewrite plus_assoc.
 auto with arith.
+simpl in H0, H.
 rewrite H0. clear H0.
 rewrite H. clear H.
 
@@ -161,6 +164,6 @@ rewrite Nbinomial_outside.
 simpl.
 auto with arith.
 auto with arith.
-rewrite H.
-auto with arith.
+rewrite Nbinomial_outside; auto.
+ring.
 Qed.

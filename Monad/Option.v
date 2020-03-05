@@ -1,19 +1,19 @@
-Definition Return : forall {A : Type}, A -> option A := @Some.
+Definition Return {A : Type} : A -> option A := @Some A.
 
-Definition Bind : forall {A B : Type}, option A -> (A -> option B) -> option B :=
-fun A B Oa f => match Oa with
+Definition Bind {A B : Type} : option A -> (A -> option B) -> option B :=
+fun Oa f => match Oa with
   | None   => None
   | Some a => f a
 end.
 
-Definition Map : forall {A B : Type} (f : A -> B), option A -> option B :=
-fun A B f Oa => match Oa with
+Definition Map {A B : Type} (f : A -> B) : option A -> option B :=
+fun Oa => match Oa with
   | None   => None
   | Some a => Some (f a)
 end.
 
-Definition Join : forall {A : Type}, option (option A) -> option A :=
-fun A OOa => match OOa with
+Definition Join {A : Type} : option (option A) -> option A :=
+fun OOa => match OOa with
   | None          => None
   | Some None     => None
   | Some (Some a) => Some a

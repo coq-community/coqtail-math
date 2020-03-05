@@ -6,6 +6,7 @@ Module Type CReals.
 
 Parameter R : Type.
 
+Declare Scope R_scope.
 Delimit Scope R_scope with R.
 Bind Scope R_scope with R.
 Local Open Scope R_scope.

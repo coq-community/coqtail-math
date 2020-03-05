@@ -40,6 +40,7 @@ Definition comp f1 f2 (x:C) : C := f1 (f2 x).
 Definition inv_fct f (x:C) : C := / f x.
 Definition constant f : Prop := forall x y, f x = f y.
 
+Declare Scope Cfun_scope.
 Delimit Scope Cfun_scope with F.
 
 Arguments plus_fct f1%Cfun_scope f2%Cfun_scope x%C_scope.

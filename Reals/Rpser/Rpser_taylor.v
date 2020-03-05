@@ -97,7 +97,7 @@ assert (Hsum : forall x, Rabs x < r -> St x = Sp x + Sr x).
     assert (Hcvv := weaksum_r_sums Vn r prv x Hx).
     intros eps Heps; destruct (Hcvv eps Heps) as [n0 Hn0].
     exists (Max.max N n0); intros n Hn.
-    cutrewrite (Rseq_pps Un x n = Rseq_pps Un x N + Rseq_pps Vn x n).
+    assert (Rseq_pps Un x n = Rseq_pps Un x N + Rseq_pps Vn x n) as ->; swap 1 2.
     assert (Hrw : exists p, n = (N + p)%nat).
       exists (n - N)%nat.
       assert (n >= N)%nat.
@@ -126,7 +126,7 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
       rewrite Hz.
       intros eps Heps.
       exists 0%nat; intros n _.
-      cutrewrite (Rseq_pps Vn 0 n = 0).
+      assert (Rseq_pps Vn 0 n = 0) as ->; swap 1 2.
       rewrite pow_ne_zero; [|omega].
       rewrite Rmult_0_l.
       rewrite R_dist_eq.
@@ -145,7 +145,7 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
           apply Rinv_0_lt_compat.
           apply Rabs_pos_lt; apply pow_nonzero; assumption.
       exists (n0 + S N)%nat; intros n Hn.
-      cutrewrite (Rseq_pps Vn x n = x ^ S N * Rseq_pps Wn x (n - (S N))).
+      assert (Rseq_pps Vn x n = x ^ S N * Rseq_pps Wn x (n - (S N))) as ->; swap 1 2.
       unfold R_dist; rewrite <- Rmult_minus_distr_l.
       rewrite Rabs_mult.
       apply (Rmult_lt_reg_l (/ Rabs (x ^ S N))).

@@ -69,6 +69,7 @@ Definition interp_in_N e rho : Prop :=
 Definition interp_in_R e rho : Prop :=
   interp e rho interp_side_equa_in_R Rfun_eq.
 
+Declare Scope de_scope.
 Delimit Scope de_scope with de.
 
 (* Automatically open scope de_scope for arguments of type diff_equa *)

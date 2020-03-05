@@ -262,7 +262,7 @@ apply pow_lt_1_zero; [rewrite Rabs_right|]; try apply Rle_ge; assumption.
 destruct Hk as [N HN].
 exists N; intros n Hn.
 replace r1 with (k * r2)%R.
-cutrewrite ((k * r2) ^ n = k ^ n * r2 ^ n)%R.
+assert ((k * r2) ^ n = k ^ n * r2 ^ n)%R as ->; swap 1 2.
 rewrite Rabs_mult.
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 left; apply HN; apply Hn.

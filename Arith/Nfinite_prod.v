@@ -92,7 +92,7 @@ Proof.
 induction n.
 intros.
 unfold Nfinite_prod_0_n.
-unfold Npower. unfold Ntools.iter_nat.
+unfold Nat.pow.
 rewrite mult_1_r.
 apply H.
 auto with arith.

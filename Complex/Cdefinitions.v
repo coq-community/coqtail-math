@@ -32,6 +32,7 @@ Definition R_R_to_C (a : R) (b : R) : C := (a, b).
 
 (* Scope for complex (taken from the reals one for coherence reasons)*)
 
+Declare Scope C_scope.
 Delimit Scope C_scope with C.
 
 (* Automatically open scope C_scope for arguments of type C *)

@@ -62,6 +62,7 @@ Program Instance R_partial_setoid : PartialSetoid R := {
   pequiv := Req
 }.
 
+Declare Scope R_scope.
 Delimit Scope R_scope with R.
 Local Open Scope R_scope.
 

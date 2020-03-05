@@ -21,6 +21,7 @@ USA.
 
 Require Export Cbase Cfunctions.
 
+Declare Scope Cseq_scope.
 Delimit Scope Cseq_scope with Cseq.
 
 Local Open Scope C_scope.
@@ -36,14 +37,11 @@ Implicit Type An Bn : Cseq.
 
 Definition Cseq_constant z := (fun n => z).
 
-Coercion Cseq_constant : C >-> Funclass.
-
 Definition Cseq_add An Bn n := An n + Bn n.
 Definition Cseq_mult An Bn n := An n * Bn n.
 Definition Cseq_opp An n := Copp (An n).
 Definition Cseq_inv An n := Cinv (An n).
 Definition Cseq_sum := sum_f_C0.
-     
 
 Infix "+" := Cseq_add : Cseq_scope.
 Infix "*" := Cseq_mult : Cseq_scope.

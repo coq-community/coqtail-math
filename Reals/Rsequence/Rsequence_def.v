@@ -22,6 +22,7 @@ USA.
 (** Common definitions of real sequences. *)
 Require Export Reals.
 
+Declare Scope Rseq_scope.
 Delimit Scope Rseq_scope with Rseq.
 
 Local Open Scope R_scope.

@@ -25,15 +25,14 @@ Require Export Nle.
 Open Scope nat_scope.
 
 (** * Definition of power over [nat] *)
-(** Definition using [iter_nat] *)
-Definition Npower a n := iter_nat n nat (fun _ x => a * x) 1.
-(** Notation *)
-Infix "^" := Npower : nat_scope.
+(** Using the standard library's definition instead *)
+Definition Npower := Nat.pow.
 
 (** * Simplification *)
 
 (** Simplification of [n ^ 1] *)
 Lemma Npower_n_1: forall x, x ^ 1 = x.
+Proof.
 intros.
 unfold Npower.
 unfold iter_nat.
@@ -52,13 +51,7 @@ Qed.
 (** Simplification of [1 ^ n] *)
 Lemma Npower_1_n : forall n, 1 ^ n = 1.
 Proof.
-induction n.
-compute. reflexivity.
-unfold Npower.
-unfold iter_nat. fold iter_nat.
-unfold Npower in IHn.
-rewrite IHn.
-auto with arith.
+apply Nat.pow_1_l.
 Qed.
 
 (** Simplification of [0 ^ n] *)
@@ -136,3 +129,4 @@ auto.
 auto.
 ring.
 Qed.
+

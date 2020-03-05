@@ -116,8 +116,6 @@ intros [a b] ; destruct (total_order_T a R0) as [[a_neg | a_eq] | a_pos].
    lra.
 Qed.
 
-SearchAbout ["modulu"].
-
 Lemma x_modulo_2PI : forall x, { k | 0 < IZR (k) * (2 * PI) + x <= 2 * PI }.
 Proof.
 intros x ; pose (k := - x / (2 * PI)) ; exists (up k) ;

@@ -23,6 +23,7 @@ USA.
 Require Import Reals.
 Require Import Rsequence_def.
 
+Declare Scope RFseq_scope.
 Delimit Scope RFseq_scope with Rseq.
 
 Local Open Scope R_scope.

@@ -25,6 +25,7 @@ Require Import Cfunctions.
 Require Import Csequence.
 Require Import Canalysis_def.
 
+Declare Scope CFseq_scope.
 Delimit Scope CFseq_scope with Cseq_scope.
 
 Local Open Scope C_scope.

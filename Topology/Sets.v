@@ -71,21 +71,21 @@ Section Sets.
   Axiom Set_Extensionality : forall A B:set, Set_same A B -> A = B.
 End Sets.
 
-Arguments set [U].
-Arguments In [U] A x.
-Arguments Set_included [U] A B.
-Arguments Set_inter [U] A B _.
-Arguments Set_union [U] A B _.
-Arguments Set_empty [U] _.
-Arguments Set_full [U] _.
-Arguments Set_singleton [U] x _.
-Arguments Set_couple [U] x y _.
-Arguments Set_triple [U] x y z _.
-Arguments Set_complement [U] A _.
-Arguments Set_minus [U] B C _.
-Arguments Set_subtract [U] B x _.
-Arguments Set_disjoint [U] B C.
-Arguments Set_inhabited [U] B.
-Arguments Set_strict_included [U] B C.
-Arguments Set_same [U] B C.
-Arguments Set_Extensionality [U] A B _.
+Arguments set {U}.
+Arguments In {U} A x.
+Arguments Set_included {U} A B.
+Arguments Set_inter {U} A B _.
+Arguments Set_union {U} A B _.
+Arguments Set_empty {U} _.
+Arguments Set_full {U} _.
+Arguments Set_singleton {U} x _.
+Arguments Set_couple {U} x y _.
+Arguments Set_triple {U} x y z _.
+Arguments Set_complement {U} A _.
+Arguments Set_minus {U} B C _.
+Arguments Set_subtract {U} B x _.
+Arguments Set_disjoint {U} B C.
+Arguments Set_inhabited {U} B.
+Arguments Set_strict_included {U} B C.
+Arguments Set_same {U} B C.
+Arguments Set_Extensionality {U} A B _.

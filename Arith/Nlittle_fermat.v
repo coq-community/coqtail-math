@@ -22,6 +22,7 @@ USA.
 Require Import Arith.
 Require Export Nnewton.
 Require Export Ndiv.
+Require Export Lia.
 Open Scope nat_scope.
 
 Lemma minus_L0: forall p q x, p>=q -> p+x-q=p-q+x.
@@ -218,26 +219,10 @@ auto with arith.
 auto with arith.
 auto with arith.
 rewrite H0 in H1.
-auto.
-rewrite minus_L2.
-auto.
-apply le_trans with (a^(S(S p))+1^(S(S p))).
-apply plus_le_compat.
-destruct a.
-rewrite Npower_0_n.
-auto.
-auto with arith.
-apply le_trans with ((S a)^1).
-rewrite Npower_n_1.
-auto.
-apply Npower_le_compat_r.
-auto with arith.
-auto with arith.
-rewrite Npower_1_n.
-auto.
-apply Npower_plus_le_compat.
-auto with arith.
-ring.
+revert H1; match goal with |- (?a | ?b) -> (?a | ?c) => cut (b = c) end. now intros ->.
+replace (a + 1) with (1 + a) by ring; simpl. repeat rewrite <-plus_assoc. lia.
+lia.
+lia.
 Qed.
 
 (* end hide *)
