@@ -29,7 +29,7 @@ Open Scope C_scope.
 
 (** ** Tactics ring and field in the Complex field *)
 
-Lemma Cring : @ring_theory C 0 1 Cadd Cmult Cminus Copp (eq(A:=C)).
+Lemma Cring : @ring_theory C C0 C1 Cadd Cmult Cminus Copp (eq(A:=C)).
 Proof.
   constructor.
   exact Cadd_0_l.
@@ -44,7 +44,7 @@ Proof.
 Qed.
 
 Lemma Cfield :
-  @field_theory C 0 1 Cadd Cmult Cminus Copp Cdiv Cinv (eq(A:=C)).
+  @field_theory C C0 C1 Cadd Cmult Cminus Copp Cdiv Cinv (eq(A:=C)).
 Proof.
   constructor.
   exact Cring.
@@ -53,7 +53,7 @@ Proof.
   exact Cinv_l.
 Qed.
 
-Lemma C_power_theory : power_theory 1 Cmult (eq (A:=C)) nat_of_N Cpow.
+Lemma C_power_theory : power_theory C1 Cmult (eq (A:=C)) nat_of_N Cpow.
 Proof.
 constructor. 
 intros z n ; elim n ; clear n.

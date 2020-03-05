@@ -19,15 +19,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Canalysis_def.
 Require Import Cprop_base.
 Require Import Cnorm.
 Require Import Ctacfield.
+Require Import Canalysis_def.
 
 Open Scope C_scope.
 
 (**********)
-Lemma uniqueness_step1 : forall f x v l1 l2, v <> 0 ->
+Lemma uniqueness_step1 : forall f (x v l1 l2 : C), v <> 0 ->
     limit1_in (fun u => (f (x + u) - f x) / u) (fun u => u <> 0 /\ exists h:R, h * u = v) l1 0 ->
     limit1_in (fun u => (f (x + u) - f x) / u) (fun u => u <> 0 /\ exists h:R, h * u = v) l2 0 ->
     l1 = l2.
@@ -73,16 +73,16 @@ intros f x v l1 l2 v_neq Hl1 Hl2 ;
   apply IRC_neq_0_compat ; apply Rgt_not_eq ; lra.
 Qed.
 
-Lemma uniqueness_step2 : forall f x v l, v <> 0 ->
+Lemma uniqueness_step2 : forall f (x : C) (v : C) (l : C), v <> 0 ->
     differentiable_pt_lim f x v l ->
     limit1_in (fun u => (f (x + u) - f x) / u) (fun u => u <> 0 /\ exists h:R, h * u = v) l 0.
 Proof. 
 unfold derivable_pt_lim, limit1_in, limit_in.
 intros f x v l v_neq Hf_deriv eps eps_pos ; destruct (Hf_deriv v_neq eps eps_pos) as
  ([alpha alpha_pos], Halpha) ; clear Hf_deriv ; exists (alpha * Cnorm v)%R ; split.
- apply Rmult_lt_0_compat ; [| apply Cnorm_pos_lt] ; assumption.
+ apply Rmult_lt_0_compat ; [| apply Cnorm_pos_lt]; eauto with *.
  intros h [[h_neq [u h_rew]] Hh] ; simpl in * ; unfold C_dist in *.
- assert (u_neq : u <> 0%R).
+ assert (u_neq : (u <> 0)%R).
   intro Hf ; apply v_neq ; rewrite <- h_rew, Hf ; CusingR_f.
  replace h with ((/u)%R * v).
  apply (Halpha (/u)%R).
@@ -128,7 +128,7 @@ intros f x v l Hf_lim v_neq eps eps_pos ; destruct (Hf_lim eps eps_pos) as
  assumption.
  exists (/h)%R.
  rewrite <- Cmult_assoc.
- replace ((/ h)%R * h) with 1.
+ replace ((/ h)%R * h) with C1.
  apply Cmult_1_l.
  CusingR_f ; assumption.
  rewrite Cnorm_Cmult ; apply Rlt_le_trans with (alpha / Cnorm v * Cnorm v)%R.
@@ -138,7 +138,7 @@ intros f x v l Hf_lim v_neq eps eps_pos ; destruct (Hf_lim eps eps_pos) as
  right ; field ; apply Cnorm_no_R0 ; assumption.
 Qed.
 
-Lemma uniqueness_limite : forall f x v l1 l2, v <> 0 ->
+Lemma uniqueness_limite : forall f (x v l1 l2 : C), v <> 0 ->
     differentiable_pt_lim f x v l1 -> differentiable_pt_lim f x v l2 -> l1 = l2.
 Proof.
 intros f x v l1 l2 v_neq Hf_deriv1 Hf_deriv2 ;
@@ -176,15 +176,15 @@ Qed.
 (** * differentiability -> continuity along an axis *)
 (***********************************)
 
-Lemma differentiable_continuous_along_axis : forall f x v,
+Lemma differentiable_continuous_along_axis : forall f (x v : C),
       differentiable_pt f x v -> continuity_along_axis_pt f v x.
 Proof.
 intros f x v f_diff.
- destruct (Ceq_dec v 0) as [v_eq | v_neq] ; intros eps eps_pos.
+ destruct (Ceq_dec v C0) as [v_eq | v_neq] ; intros eps eps_pos.
   exists (mkposreal R1 Rlt_0_1) ;
    intros h h_ub ; simpl ; unfold C_dist, Cminus ; rewrite v_eq, Cmult_0_r,
     Cadd_0_r, Cadd_opp_r, Cnorm_C0 ; assumption.
-   destruct f_diff as (l, f_diff) ; destruct (Ceq_dec l 0) as [l_eq | l_neq].
+   destruct f_diff as (l, f_diff) ; destruct (Ceq_dec l C0) as [l_eq | l_neq].
   assert (eps_2_pos : eps / 2 > 0) by lra ;
   destruct (f_diff v_neq (eps / 2)%R eps_2_pos) as ([alpha alpha_pos], Halpha).
   assert (delta_pos : 0 < Rmin (/ (2 * Cnorm v)) alpha).
@@ -301,7 +301,7 @@ Qed.
 (** *                    Main rules                             *)
 (****************************************************************)
 
-Lemma differentiable_pt_lim_plus : forall f1 f2 x v l1 l2, v <> 0 ->
+Lemma differentiable_pt_lim_plus : forall f1 f2 x v l1 l2, v <> C0 ->
     differentiable_pt_lim f1 x v l1 -> differentiable_pt_lim f2 x v l2 ->
     differentiable_pt_lim (f1 + f2) x v (l1 + l2).
 Proof.
@@ -329,7 +329,7 @@ intros f1 f2 x v l1 l2 v_neq H H0.
 Qed.
 
 Lemma differentiable_pt_lim_opp : forall f x v l,
-     v <> 0 -> differentiable_pt_lim f x v l ->
+     v <> C0 -> differentiable_pt_lim f x v l ->
      differentiable_pt_lim (- f) x v (- l).
 Proof. 
 intros f x v l v_neq H.
@@ -352,7 +352,7 @@ intros f x v l v_neq H.
   intro; unfold Cdiv in |- *; ring.
 Qed.
 
-Lemma differentiable_pt_lim_minus : forall f1 f2 x v l1 l2, v <> 0 ->
+Lemma differentiable_pt_lim_minus : forall f1 f2 x v l1 l2, v <> C0 ->
     differentiable_pt_lim f1 x v l1 -> differentiable_pt_lim f2 x v l2 ->
     differentiable_pt_lim (f1 - f2) x v (l1 - l2).
 Proof.
@@ -529,7 +529,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
   rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [lra |].
-  apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) 0) ; [right ; simpl ; unfold C_dist ;
+  apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) C0) ; [right ; simpl ; unfold C_dist ;
   rewrite Cminus_0_r ; reflexivity | apply Hdelta3].
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rle_trans with (Rmin delta2 delta3) ;
   [apply Rmin_r | apply Rmin_r]].
@@ -631,7 +631,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   rewrite Cnorm_Cmult ; apply Rle_trans with (Cnorm l1 * ((eps / 2) / Cnorm l1))%R.
   apply Rmult_le_compat_l ; [apply Cnorm_pos |].
   apply Rle_trans with (Rmin 1 (eps / 2 / Cnorm l1)) ; [| apply Rmin_r].
-  apply Rle_trans with (dist C_met (f2 (x + h * v)) 0) ; [simpl ; unfold C_dist ; right ;
+  apply Rle_trans with (dist C_met (f2 (x + h * v)) C0) ; [simpl ; unfold C_dist ; right ;
   rewrite Cminus_0_r ; reflexivity | left ; apply Hdelta2].
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_r].
   right ; field ; apply Cnorm_no_R0 ; assumption.
@@ -643,7 +643,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
   rewrite <- Rmult_1_r ; apply Rmult_lt_compat_l ; [lra |].
-  apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) 0) ; [simpl ; unfold C_dist ;
+  apply Rle_lt_trans with (dist C_met (f2 (x + h * v)) C0) ; [simpl ; unfold C_dist ;
   rewrite Cminus_0_r ; right ; reflexivity |].
   apply Rlt_le_trans with (Rmin 1 (eps / 2 / Cnorm l1)) ; [apply Hdelta2 |
   apply Rmin_l].
@@ -740,7 +740,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   assumption.
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rmin_l].
   rewrite <- Rmult_1_r ; apply Rmult_le_compat_l ; [lra |] ;
-  apply Rle_trans with (dist C_met (f2 (x + h * v)) 0) ; [simpl ; unfold C_dist ; rewrite
+  apply Rle_trans with (dist C_met (f2 (x + h * v)) C0) ; [simpl ; unfold C_dist ; rewrite
   Cminus_0_r ; right ; reflexivity |] ; apply Rle_trans with (Rmin 1 (eps / 3 / Cnorm l1)) ;
   [left ; apply Hdelta3 | apply Rmin_l].
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rle_trans with (Rmin delta2 delta3) ;
@@ -750,7 +750,7 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   [apply Rplus_le_compat_r ; apply Rplus_le_compat_l |].
   rewrite Cnorm_Cmult ; apply Rle_trans with (Cnorm l1 * (eps / 3 / Cnorm l1))%R ;
   [apply Rmult_le_compat_l ; [apply Cnorm_pos|] |].
-  apply Rle_trans with (dist C_met (f2 (x + h * v)) 0) ; [simpl ; unfold C_dist ; rewrite
+  apply Rle_trans with (dist C_met (f2 (x + h * v)) C0) ; [simpl ; unfold C_dist ; rewrite
   Cminus_0_r ; right ; reflexivity |] ; apply Rle_trans with (Rmin 1 (eps / 3 / Cnorm l1)) ;
   [left ; apply Hdelta3 | apply Rmin_r].
   apply Rlt_le_trans with delta ; [apply h_ub | apply Rle_trans with (Rmin delta2 delta3) ;
@@ -845,13 +845,13 @@ intros f1 f2 x v l1 l2 Hf1 Hf2 v_neq eps eps_pos.
   (Rmin delta2 delta3) ; [apply Rmin_r | apply Rmin_l]].
 Qed.
 
-Lemma differentiable_pt_lim_scal : forall f a x v l, v <> 0 ->
+Lemma differentiable_pt_lim_scal : forall f a x v l, v <> C0 ->
     differentiable_pt_lim f x v l -> differentiable_pt_lim (fun x => a * f x) x v (a * l).
 Proof.
   intros f a x v l v_neq f_diff.
   assert (H0 := differentiable_pt_lim_const a x v).
   replace (mult_real_fct a f) with (fct_cte a * f)%F.
-  replace (a * l) with (0 * f x + a * l); [ idtac | ring ].
+  replace (a * l) with (C0 * f x + a * l); [ idtac | ring ].
   apply (differentiable_pt_lim_mult (fct_cte a) f x v 0 l) ; assumption.
   unfold mult_real_fct, mult_fct, fct_cte in |- *; reflexivity.
 Qed.
@@ -860,10 +860,10 @@ Lemma differentiable_pt_lim_id : forall x v, differentiable_pt_lim id x v C1.
 Proof.
   intros x v v_neq ; unfold differentiable_pt_lim in |- *.
   intros eps Heps; exists (mkposreal eps Heps); intros h H1 H2;
-    unfold id in |- *; replace ((x + h * v - x) / (h * v) - 1) with 0.
+    unfold id in |- *; replace ((x + h * v - x) / (h * v) - C1) with C0.
     rewrite Cnorm_C0 ; assumption.
     replace (x + h * v - x) with (h * v) by ring.
-  replace (h *v / (h *v)) with 1.
+  replace (h *v / (h *v)) with C1.
   unfold Cminus ; rewrite Cadd_opp_r ; reflexivity.
   unfold Cdiv ; rewrite Cinv_r ; trivial.
   apply Cmult_integral_contrapositive_currified ; [apply IRC_neq_0_compat |] ;

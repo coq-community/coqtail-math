@@ -19,12 +19,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Cmet.
 Require Import Ctacfield.
 Require Import Cnorm.
 Require Import Cprop_base.
 Require Import Classical_Prop.
 Require Import Classical_Pred_Type.
+Require Import Cmet.
 
 Local Open Scope C_scope.
 
@@ -50,8 +50,8 @@ intros f d D z Hf_D eps eps_pos ; unfold continue_in, D_in, limit1_in,
   apply Rmin_pos ; auto with real.
   intros x [Hx x_bd] ; simpl in Hf_D ; unfold C_dist in *.
    destruct (Ceq_dec x z) as [x_eq_z | x_neq_z].
-   rewrite x_eq_z ; unfold Cminus ; rewrite Cadd_opp_r ; rewrite Cnorm_C0 ;
-   assumption.
+   rewrite x_eq_z ; unfold Cminus ; rewrite Cadd_opp_r.
+   rewrite Cnorm_C0 ; assumption.
    replace (Cnorm (f x - f z)) with ((Cnorm (f x - f z)) * Cnorm (x - z) * / Cnorm (x - z))%R.
    apply Rlt_le_trans with (eps * Cnorm (x - z))%R.
    rewrite Rmult_assoc ; rewrite Rmult_comm ; rewrite Rmult_assoc ;
@@ -160,13 +160,13 @@ Proof.
 Qed.
 
 (*********)
-Lemma Dconst : forall (D:C -> Prop) (y x0:C), D_in (fun x:C => y) (fun x:C => 0) D x0.
+Lemma Dconst : forall (D:C -> Prop) (y x0:C), D_in (fun x:C => y) (fun x:C => C0) D x0.
 Proof.
   unfold D_in in |- *; intros; unfold limit1_in in |- *;
     unfold limit_in in |- *; unfold Cdiv in |- *; intros; 
       simpl in |- *; split with eps; split; auto.
   intros; rewrite (Cminus_diag_eq y y (refl_equal y)) ; rewrite Cmult_0_l;
-    unfold C_dist in |- *; rewrite (Cminus_diag_eq 0 0 (refl_equal 0)).
+    unfold C_dist in |- *; rewrite (Cminus_diag_eq C0 C0 (refl_equal _)).
     rewrite Cnorm_C0 ; assumption.
 Qed.
 
@@ -178,7 +178,7 @@ Proof.
       split; auto.
   intros; elim H0; clear H0; intros; unfold D_x in H0; elim H0; intros;
     rewrite (Cinv_r (x - x0) (Cminus_eq_contra x x0 (sym_not_eq H3)));
-      unfold C_dist in |- *; rewrite (Cminus_diag_eq 1 1 (refl_equal 1)).
+      unfold C_dist in |- *; rewrite (Cminus_diag_eq _ _ (refl_equal _)).
     rewrite Cnorm_C0 ; assumption.
 Qed.
 
@@ -210,7 +210,7 @@ Lemma Dmult_const : forall (D:C -> Prop) (f df:C -> C) (x0 a:C),
     D_in f df D x0 -> D_in (fun x:C => a * f x) (fun x:C => a * df x) D x0.
 Proof.
   intros;
-    generalize (Dmult D (fun _:C => 0) df (fun _:C => a) f x0 (Dconst D a x0) H);
+    generalize (Dmult D (fun _:C => C0) df (fun _:C => a) f x0 (Dconst D a x0) H);
       unfold D_in in |- *; intros; rewrite (Cmult_0_l (f x0)) in H0.
       rewrite Cadd_0_l in H0.
 assumption.

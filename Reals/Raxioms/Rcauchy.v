@@ -1,4 +1,4 @@
-Require Import ZArith_base.
+Require Import ZArith_base Lia.
 Require Import QArith Qabs.
 Require Import Setoid SetoidClass Morphisms.
 
@@ -123,17 +123,18 @@ end.
 
 Lemma bounded_correct: 
   forall u N n, (n < N)%nat -> (Qabs (u n) <= (bounded_abs_max u N))%Q.
+intros u N n Hn.
 induction N; simpl.
-intuition.
-intros. 
-inversion H.
+inversion Hn.
+
+inversion Hn.
 rewrite Qmax_comm.
 
 apply le_Qmax.
 apply Qle_refl.
 apply le_Qmax.
 apply IHN.
-omega.
+lia.
 Qed.
 
 Lemma bounded : 
@@ -146,7 +147,7 @@ intros n.
 elim (le_lt_dec n N); intros Hdec.
 apply le_Qmax.
 apply bounded_correct.
-omega.
+lia.
 rewrite Qmax_comm.
 apply le_Qmax.
 assert (Qabs (u n) - Qabs(u (S N)) <= 1).
@@ -155,7 +156,7 @@ apply Qabs_triangle_reverse.
 apply Qlt_le_weak.
 apply HN.
 assumption.
-omega.
+lia.
 rewrite Qplus_comm.
 setoid_replace (Qabs (u n)) with 
                ((Qabs (u n) - Qabs (u (S N))) + Qabs (u (S N)))%Q;[|ring].

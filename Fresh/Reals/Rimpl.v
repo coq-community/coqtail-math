@@ -62,7 +62,7 @@ Module Rimpl <: Raxiom.CReals.
   Lemma neq_Rdiscr : forall {a b}, a <> b -> Rdiscr a b.
   Proof.
     intros a b Nab.
-    destruct (RA.total_order_T a b) as [[|]|].
+    destruct (RD.total_order_T a b) as [[|]|].
      left; assumption.
      elimtype False; auto.
      right; auto.
@@ -250,10 +250,10 @@ Module Rimpl <: Raxiom.CReals.
   Proof.
   intros.
   unfold Rdist. unfold Rfunctions.R_dist in H. 
-  destruct (RA.total_order_T (Rdefinitions.Rminus a b) R0) as [[H1 | H1] | H1]. 
+  destruct (RD.total_order_T (Rdefinitions.Rminus a b) R0) as [[H1 | H1] | H1]. 
   rewrite Rbasic_fun.Rabs_left in H; try assumption.
   split. unfold Rsub. 
-  destruct (RA.total_order_T x R0) as [[H2 | H2] | H2]; intuition.
+  destruct (RD.total_order_T x R0) as [[H2 | H2] | H2]; intuition.
   apply RA.Rlt_trans with (Rdefinitions.Ropp (Rdefinitions.Rminus a b)).
   apply RA.Rlt_trans with R0. apply H1.
   intuition.
@@ -267,7 +267,7 @@ Module Rimpl <: Raxiom.CReals.
   split. apply H. apply RI.Ropp_lt_gt_0_contravar. intuition.
   
   rewrite Rbasic_fun.Rabs_right in H; intuition.
-  destruct (RA.total_order_T x R0) as [[H2 | H2] | H2]. 
+  destruct (RD.total_order_T x R0) as [[H2 | H2] | H2]. 
   assert (RD.Rlt x x). apply RA.Rlt_trans with ((Rdefinitions.Rminus a b)).
   apply RA.Rlt_trans with R0; intuition.
   intuition.
@@ -302,7 +302,7 @@ Module Rimpl <: Raxiom.CReals.
      specialize (Hu (RD.Rdiv eps (Radd R1 R1)) Heps2).
      destruct Hu as (N, Hu).
      exists N. intros. specialize (Hl (RD.Rdiv eps (Radd R1 R1)) Heps2). 
-     destruct (RA.total_order_T eps (Rbasic_fun.Rabs (Rsub (u n) l))) as [H3 | H3]. 
+     destruct (RD.total_order_T eps (Rbasic_fun.Rabs (Rsub (u n) l))) as [H3 | H3]. 
      assert (H4 : RD.Rle eps (Rbasic_fun.Rabs (Rsub (u n) l))).
      destruct H3. intuition.
      rewrite <- e. intuition.

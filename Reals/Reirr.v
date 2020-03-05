@@ -59,7 +59,7 @@ destruct b.
  field_simplify.
   simpl. rewrite <- minus_n_O. reflexivity.
  
- intuition.
+ INR_solve.
 Qed.
 (* end hide *)
 
@@ -401,14 +401,14 @@ eapply Rlt_le_trans with (/ INR (S b) * (1 / (1 - / INR (S b)))).
   
   rewrite S_INR. ring.
   
-  intuition.
+  INR_solve.
 
 split. 
  apply not_0_INR. 
   intuition.
   
   rewrite S_INR. unfold Rminus. rewrite Rplus_assoc.
-  intro H2. ring_simplify in H2. intuition.
+  intro H2. ring_simplify in H2. revert H2. change (INR b <> 0). INR_solve.
 Qed.
 
 Lemma inv_inf_1 : forall x, x <> 0%nat -> /INR x <= 1.

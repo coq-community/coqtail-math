@@ -51,9 +51,10 @@ Lemma derivable_pt_lim_Cpow : forall  (z : C) (n:nat),
       derivable_pt_lim (fun z => z ^ (S n)) z (INC (S n) * z ^ n).
 Proof.
  intros z n ; induction n.
- simpl ; rewrite Cmult_1_r ; intros eps eps_pos ;
- exists (mkposreal 1 Rlt_0_1) ; intros ; apply Rle_lt_trans with (Cnorm 0) ;
- [right ; apply Cnorm_eq_compat ; field | rewrite Cnorm_C0] ; assumption.
+ simpl ; rewrite Cmult_1_r ; intros eps eps_pos.
+ exists (mkposreal 1 Rlt_0_1) ; intros ; apply Rle_lt_trans with (Cnorm C0).
+ right ; apply Cnorm_eq_compat. field; auto.
+ rewrite Cnorm_C0. assumption.
  replace (fun z0 : C => z0 ^ S (S n)) with (fun z0 : C => z0 * (z0 ^ (S n))).
  replace  (INC (S (S n)) * z ^ S n) with ((1 * (z ^ (S n))) + z * ((INC (S n) * z ^ n))).
  assert (H' := derivable_pt_lim_id z).
@@ -69,7 +70,7 @@ Lemma derivable_pt_lim_gt_pser : forall An z n,
 Proof.
 intros An z n ; unfold An_deriv, gt_pser, Cseq_mult, Cseq_shift ; induction n.
  simpl ; intros eps eps_pos ; exists  (mkposreal 1 Rlt_0_1) ;
-   intros ; apply Rle_lt_trans with (Cnorm 0) ; [right ;
+   intros ; apply Rle_lt_trans with (Cnorm C0) ; [right ;
    apply Cnorm_eq_compat ; field | rewrite Cnorm_C0] ; assumption.
  assert (Main := derivable_pt_lim_mult (fun _ => An (S (S n))) (fun z => Cpow z (S (S n)))
  z 0 (INC (S (S n)) * z ^ (S n)) (derivable_pt_lim_const _ _) (derivable_pt_lim_Cpow _ _)).
@@ -100,7 +101,7 @@ Proof.
    simpl ; rewrite <- Cadd_0_l ; apply derivable_pt_lim_add ; [apply IHn |].
    unfold gt_pser, An_deriv, Cseq_mult, Cseq_shift ; simpl ;  rewrite Cmult_1_r, Cmult_1_l.
    intros eps eps_pos ; exists  (mkposreal 1 Rlt_0_1) ;
-   intros ; apply Rle_lt_trans with (Cnorm 0) ; [right ;
+   intros ; apply Rle_lt_trans with (Cnorm C0) ; [right ;
    apply Cnorm_eq_compat ; field | rewrite Cnorm_C0] ; assumption.
    simpl ; apply derivable_pt_lim_add.
    apply IHn.

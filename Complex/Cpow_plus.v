@@ -178,6 +178,6 @@ replace (S n - S n)%nat with O by intuition.
 replace (S (S n) - S (S n))%nat with O by intuition.
 repeat rewrite fact_simpl.
 repeat rewrite mult_INC. simpl (INC 0).
-field_simplify. unfold Cdiv. repeat rewrite Cmult_0_l.  reflexivity.
+field_simplify. unfold Cdiv. repeat rewrite Cmult_0_r. rewrite Cmult_0_l. reflexivity.
 split ; try split ; try split ; try split ; try apply not_0_INC ; try apply fact_neq_0 ; intuition.
 Qed.

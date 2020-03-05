@@ -33,6 +33,21 @@ intros D f [Hd | Hi] ;
  right ; apply strictly_increasing_in_increasing_in] ; assumption.
 Qed.
 
+Lemma strictly_increasing_increasing f : strictly_increasing f -> increasing f.
+Proof.
+  apply strictly_increasing_in_increasing_in.
+Qed.
+
+Lemma strictly_decreasing_decreasing f : strictly_decreasing f -> decreasing f.
+Proof.
+  apply strictly_decreasing_in_decreasing_in.
+Qed.
+
+Lemma strictly_monotonous_monotonous f : strictly_monotonous f -> monotonous f.
+Proof.
+  apply strictly_monotonous_in_monotonous_in.
+Qed.
+
 (** Strict monotonicity implies injectivity *)
 
 Lemma strictly_increasing_in_injective_in : forall D f,
@@ -67,6 +82,21 @@ Proof.
 intros D f [f_dec | f_inc] ;
  [apply strictly_decreasing_in_injective_in |
   apply strictly_increasing_in_injective_in] ; assumption.
+Qed.
+
+Lemma strictly_increasing_injective f : strictly_increasing f -> injective f.
+Proof.
+  apply strictly_increasing_in_injective_in.
+Qed.
+
+Lemma strictly_decreasing_injective f : strictly_decreasing f -> injective f.
+Proof.
+  apply strictly_decreasing_in_injective_in.
+Qed.
+
+Lemma strictly_monotonous_injective f : strictly_monotonous f -> injective f.
+Proof.
+  apply strictly_monotonous_in_injective_in.
 Qed.
 
 (** It also helps simplify Rmin / Rmax statements *)

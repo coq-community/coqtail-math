@@ -24,7 +24,7 @@ Require Import Cpow.
 
 (** * Cnorm comparisons to zero *)
 
-Lemma Cnorm_0 : forall z : C, Cnorm z = 0%R -> z = 0.
+Lemma Cnorm_0 : forall z : C, Cnorm z = 0%R -> z = C0.
 Proof.
 intros z Hz ; destruct z as (a, b) ; apply (proj2 (C0_norm_R0 _)).
 apply sqrt_eq_0 ; [| assumption] ;
@@ -37,14 +37,14 @@ destruct z as (r, r0) ; unfold Cnorm ; apply sqrt_positivity ;
 apply Rplus_le_le_0_compat ; apply Rle_0_sqr.
 Qed.
 
-Lemma Cnorm_pos_lt : forall z, z <> 0 -> 0 < Cnorm z.
+Lemma Cnorm_pos_lt : forall z : C, z <> 0 -> 0 < Cnorm z.
 Proof.
 intros z Hz ; case (Cnorm_pos z) ; intro H.
  apply H.
  destruct Hz ; apply Cnorm_0 ; symmetry ; assumption.
 Qed.
 
-Lemma Cnorm_C0 : Cnorm 0 = 0%R.
+Lemma Cnorm_C0 : Cnorm C0 = 0%R.
 Proof.
 unfold Cnorm, Cnorm_sqr ; simpl.
 replace (0 * 0 + 0 * 0)%R with 0%R by ring.
@@ -76,7 +76,7 @@ intros z Hz Hrew ; apply (Rlt_irrefl 0) ;
  rewrite Hrew in Hz ; intuition.
 Qed.
 
-Lemma Cnorm_no_R0 : forall z, z <> 0 -> Cnorm z <> 0%R.
+Lemma Cnorm_no_R0 : forall z : C, z <> 0 -> Cnorm z <> 0%R.
 Proof.
 intros z Hz ; apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
 Qed.
@@ -96,9 +96,9 @@ apply Rabs_right.
 apply Rle_ge ; apply Cnorm_pos.
 Qed.
 
-Lemma Cnorm_C1 : Cnorm 1 = 1%R.
+Lemma Cnorm_C1 : Cnorm C1 = 1%R.
 Proof.
-replace 1 with (IRC 1) by trivial ;
+replace C1 with (IRC 1) by trivial ;
  rewrite Cnorm_IRC_Rabs ; exact Rabs_R1.
 Qed.
 
@@ -155,7 +155,7 @@ Proof.
 intro z ; apply Rabs_right ; apply Rle_ge ; apply Cnorm_pos.
 Qed.
 
-Lemma Cnorm_inv : forall z, z <> 0 -> Cnorm (/z) = (/(Cnorm z))%R.
+Lemma Cnorm_inv : forall z : C, z <> 0 -> Cnorm (/z) = (/(Cnorm z))%R.
 Proof.
 intros z Hz ; unfold Cnorm, Cnorm_sqr ; destruct z as (a,b).
 simpl.

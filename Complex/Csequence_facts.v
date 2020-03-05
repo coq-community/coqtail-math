@@ -243,9 +243,10 @@ Qed.
 Lemma Cseq_cst_cv : forall (c : C), Cseq_cv (fun _ => c) c.
 intros c eps Heps; exists O; intros n Hn.
 unfold R_dist.
-assert (c - c = 0)%C.
+assert (c - c = C0)%C.
 ring.
 rewrite H.
+change (Cnorm C0 < eps).
 rewrite Cnorm_C0; apply Heps.
 Qed.
 
@@ -392,6 +393,7 @@ unfold Rdiv ; rewrite Rmult_comm ; replace (/2)%R with (Rabs (/2)) by
   apply Cnorm_gt_not_eq ; rewrite Cnorm_mult ; apply Rmult_lt_0_compat.
   rewrite Rabs_right ; lra.
   apply Cnorm_pos_lt ; assumption.
+Set Printing All.
   apply Rle_trans with (Cnorm (Un n)) ; [assumption | rewrite HUn ;
   rewrite Cnorm_C0 ; right ; trivial].
   assumption.

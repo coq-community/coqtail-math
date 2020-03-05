@@ -1,4 +1,4 @@
-Require Import QArith Qabs.
+Require Import QArith Qabs Lia.
 
 Local Open Scope Q_scope.
 
@@ -32,9 +32,8 @@ replace ((a₁ * Z.pos c₂ + c₁ * Z.pos a₂) * (Z.pos b₂ * Z.pos d₂))%Z 
 replace ((b₁ * Z.pos d₂ + d₁ * Z.pos b₂) * (Z.pos a₂ * Z.pos c₂))%Z with 
         ((b₁ * Z.pos a₂) * (Z.pos d₂ * Z.pos c₂) + (d₁ * Z.pos c₂) * (Z.pos a₂ * Z.pos b₂))%Z;[|ring].
 apply Zplus_le_lt_compat.
-apply Zmult_le_compat_r; auto with zarith.
-apply Zmult_lt_compat_r; auto with zarith.
-constructor.
+apply Zmult_le_compat_r; auto with zarith. now apply Z.lt_le_incl.
+apply Zmult_lt_compat_r; auto with zarith. lia.
 Qed.
 
 Add Morphism Qplus with signature Qle ++> Qle ++> Qle as Qplus_le_morphism.

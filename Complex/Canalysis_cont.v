@@ -19,10 +19,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Canalysis_def.
 Require Import Cfunctions.
 Require Import Cprop_base.
 Require Import Cbase.
+Require Import Canalysis_def.
 
 Open Scope C_scope.
 

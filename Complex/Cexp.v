@@ -30,9 +30,10 @@ Require Import Cprop_base.
 Require Import Csequence.
 Require Import Csequence_facts.
 Require Import Cpser_def Cpser_base_facts Cpser_facts.
-Require Import Canalysis_def.
 Require Import Cseries.
 Require Import Cseries_facts.
+Require Import Cdefinitions.
+Require Import Canalysis_def.
 
 
 Open Scope C_scope.

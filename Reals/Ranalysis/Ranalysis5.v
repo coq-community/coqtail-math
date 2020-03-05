@@ -312,9 +312,9 @@ intros f g lb ub x Df Dg x_in_I local_recip Df_neq.
   ((derive_pt g x Dg) * (derive_pt f (g x) Df) * / (derive_pt f (g x) Df))
   by (field ; assumption).
  unfold Rdiv ; apply Rmult_eq_compat_r.
- rewrite <- derive_pt_comp with (pr := derivable_pt_comp _ _ _ Dg Df).
- erewrite pr_nu_var2_interv with (pr2 := derivable_id _) ;
- [eapply derive_pt_id | |] ; eassumption.
+ rewrite Rmult_comm, <- derive_pt_comp.
+ erewrite pr_nu_var2_interv.
+ eapply derive_pt_id. eassumption. auto.
 Qed.
 
 Lemma derive_pt_recip_interv_prelim1_0 : forall f g lb ub x, lb <= ub ->

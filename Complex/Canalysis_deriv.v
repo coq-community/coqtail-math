@@ -22,12 +22,13 @@ USA.
 Require Import MyRIneq.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_continuity.
 Require Import Ranalysis_derivability Ranalysis_usual Ranalysis_facts Ranalysis_MVT.
-Require Import Canalysis_def.
 Require Import Canalysis_diff.
 Require Import Cprop_base.
 Require Import Cnorm.
-Require Import Cderiv.
 Require Import Ctacfield.
+Require Import Cmet.
+Require Import Canalysis_def.
+Require Import Cderiv.
 
 Open Scope C_scope.
 
@@ -48,13 +49,13 @@ Qed.
 
 Lemma uniqueness_step2 : forall f x l,
     derivable_pt_lim f x l ->
-    limit1_in (fun h => (f (x + h) - f x) / h) (fun h => h <> 0) l 0.
+    limit1_in (fun h => (f (x + h) - f x) / h) (fun h : C => h <> C0) l C0.
 Proof. 
 unfold derivable_pt_lim, limit1_in, limit_in.
 intros f x l Hf_deriv eps eps_pos ; destruct (Hf_deriv eps eps_pos)
  as ([alpha alpha_pos], Halpha) ; clear Hf_deriv ; exists alpha ; split ;
  [assumption |] ; intros h [h_neq Hh] ; simpl in * ; unfold C_dist in Hh ;
- rewrite Cminus_0_r in Hh ; apply Halpha ; intuition.
+ rewrite Cminus_0_r in Hh. unfold C_dist. apply Halpha ; intuition.
 Qed.
 
 Lemma uniqueness_step3 : forall f x l,
@@ -190,8 +191,7 @@ intros f x Hf_deriv eps eps_pos ; destruct Hf_deriv as (l, Hl).
    replace ((f (x + h) - f x) * / h) with ((f (x + h) - f x) / h - l). 
    apply Rlt_trans with (eps / 2)%R ; [apply Halpha ; intuition | lra].
    subst ; apply Rlt_le_trans with (Rmin (1/2) alpha) ; [apply x'_bd | apply Rmin_r].
-   rewrite Hl_0 ; field ; assumption.
-   assumption.
+   rewrite Hl_0. rewrite Cminus_0_r. auto. assumption.
    apply Rlt_trans with ((Rmin (1/2) alpha) * eps)%R.
    apply Rmult_lt_compat_r ; assumption.
    apply Rle_lt_trans with (eps / 2)%R.
@@ -407,7 +407,7 @@ Proof.
   intros.
   assert (H0 := derivable_pt_lim_const a x).
   replace (mult_real_fct a f) with (fct_cte a * f)%F.
-  replace (a * l) with (0 * f x + a * l); [ idtac | ring ].
+  replace (a * l) with (C0 * f x + a * l); [ idtac | ring ].
   apply (derivable_pt_lim_mult (fct_cte a) f x 0 l); assumption.
   unfold mult_real_fct, mult_fct, fct_cte in |- *; reflexivity.
 Qed.
@@ -416,11 +416,11 @@ Lemma derivable_pt_lim_id : forall x:C, derivable_pt_lim id x C1.
 Proof.
   intro; unfold derivable_pt_lim in |- *.
   intros eps Heps; exists (mkposreal eps Heps); intros h H1 H2;
-    unfold id in |- *; replace ((x + h - x) / h - 1) with 0.
+    unfold id in |- *; replace ((x + h - x) / h - C1) with C0.
   rewrite Cnorm_C0 ; assumption.
   fold C in h.
   replace (x + h - x) with h by ring.
-  replace (h / h) with 1.
+  replace (h / h) with C1.
   unfold Cminus ; rewrite Cadd_opp_r ; reflexivity.
   unfold Cdiv ; rewrite Cinv_r ; trivial.
 Qed.
@@ -654,9 +654,9 @@ intro H.
    assert (H2 := derivable_differentiable_pt_abs Cnorm_sqr 1 l Hl (1,0)%R).
    assert (H2' := Main R1 R0).
    unfold differentiable_pt_abs in *.
-   assert (H1_neq : (R0, R1) <> 0).
+   assert (H1_neq : (R0, R1) <> C0).
     apply HintC0_neq_R0_neq ; right ; simpl ; apply Rgt_not_eq ; apply Rlt_0_1.
-   assert (H2_neq : (R1, R0) <> 0).
+   assert (H2_neq : (R1, R0) <> C0).
     apply HintC0_neq_R0_neq ; left ; simpl ; apply Rgt_not_eq ; apply Rlt_0_1.
    assert (Hf1 := Canalysis_diff.uniqueness_limite _ _ _ _ _ H1_neq H1 H1').
    assert (Hf2 := Canalysis_diff.uniqueness_limite _ _ _ _ _ H2_neq H2 H2').

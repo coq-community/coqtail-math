@@ -24,13 +24,13 @@ Require Import Lra.
 Require Import Ranalysis Rfunctions Rtrigo_facts.
 Require Import Rseries_def.
 Require Import SeqProp.
-Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts Ranalysis5.
 Require Import Rextensionality Rpser_usual.
 Require Import RIVT.
 Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
 Require Import MyRIneq.
 Require Import Ass_handling.
+Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts Ranalysis5.
 
 Open Scope R_scope.
 
@@ -206,12 +206,12 @@ Qed.
 
 Lemma increasing_atan : increasing atan.
 Proof.
-apply strictly_increasing_in_increasing_in, strictly_increasing_atan.
+apply strictly_increasing_increasing, strictly_increasing_atan.
 Qed.
 
 Lemma injective_atan : injective atan.
 Proof.
-apply strictly_increasing_in_injective_in, strictly_increasing_atan.
+apply strictly_increasing_injective, strictly_increasing_atan.
 Qed.
 
 Lemma continuity_atan : continuity atan.

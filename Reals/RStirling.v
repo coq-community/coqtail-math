@@ -32,6 +32,7 @@ Require Import Rintegral.
 Require Import RTaylor.
 Require Import Lra.
 Require Import Wallis.
+Open Scope R_scope.
 
 (** printing ~	~ *)
 (** Partial result : De Moivre approximation. *)

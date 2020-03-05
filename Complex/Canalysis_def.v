@@ -91,8 +91,8 @@ Definition growth_rate f x := (fun y => (f y - f x) / (y - x)).
 (** * Derivative's definition using Landau's kernel  *)
 (*****************************************************)
 
-Definition derivable_pt_lim f x l : Prop := forall eps:R, 0 < eps ->
-    exists delta : posreal, forall h, h <> 0 ->
+Definition derivable_pt_lim f (x l : C) : Prop := forall eps:R, 0 < eps ->
+    exists delta : posreal, forall h : C, h <> 0 ->
     Cnorm h < delta -> Cnorm ((f (x + h) - f x) / h - l) < eps.
 
 Definition derivable_pt_abs f x l : Prop := derivable_pt_lim f x l.
@@ -115,7 +115,7 @@ Arguments derive f%Cfun_scope pr x.
 (** * Differentiability *)
 (*****************************************************)
 
-Definition differentiable_pt_lim f x v l : Prop := v <> 0 -> forall eps:R, 0 < eps ->
+Definition differentiable_pt_lim f (x v l : C) : Prop := v <> 0 -> forall eps:R, 0 < eps ->
     exists delta:posreal, forall h:R, h <> 0%R ->
     Rabs h < delta -> Cnorm ((f (x + h*v) - f x) / (h*v) - l) < eps.
 

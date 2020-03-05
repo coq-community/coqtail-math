@@ -26,8 +26,6 @@ Require Import Rinterval Ranalysis_def.
 Require Import Rsequence_cv_facts.
 Require Import Rsequence_tactics.
 Require Import MyRIneq.
-Require Import Canalysis_def.
-Require Import Canalysis_deriv.
 Require Import Cfunctions.
 Require Import Csequence.
 Require Import Csequence_facts.
@@ -37,6 +35,9 @@ Require Import Cprop_base.
 Require Import Ctacfield.
 Require Import Lra.
 Require Import Max.
+Require Import Cmet.
+Require Import Canalysis_def.
+Require Import Canalysis_deriv.
 
 Open Scope C_scope.
 

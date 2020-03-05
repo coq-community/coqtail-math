@@ -268,11 +268,11 @@ destruct (Cv_radius_weak_prod_prelim An Bn r1 r2 rAn rBn) as [B HB] ;
  rewrite (Rmult_comm (Rmin (Rabs r1) (Rabs r2))), <- Rmult_assoc, Rabs_mult,
   (Rabs_pos_eq (Rmin (Rabs r1) (Rabs r2))).
   apply Rmult_le_compat_r.
-  apply Rmin_pos ; apply Rabs_pos.
+  apply MyRIneq.Rmin_pos ; apply Rabs_pos.
   apply HB ; exists j ; reflexivity.
-  apply Rmin_pos ; apply Rabs_pos.
+  apply MyRIneq.Rmin_pos ; apply Rabs_pos.
   rewrite (Rabs_pos_eq (Rmin (Rabs r1) (Rabs r2))) ;
-  [assumption | apply Rmin_pos ; apply Rabs_pos].
+  [assumption | apply MyRIneq.Rmin_pos ; apply Rabs_pos].
 Qed.
 
 Lemma infinite_cv_radius_prod_compat: forall (An Bn : Rseq),

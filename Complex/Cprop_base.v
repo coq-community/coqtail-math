@@ -35,7 +35,7 @@ destruct Req_or_neq with (r1- r3)%R; destruct Req_or_neq with (r2 - r4)%R.
 right ; intro Habs ; apply Ceq in Habs ; destruct Habs ; auto with real.
 Qed.
 
-Lemma Ceq_or_neq_C0 : forall z, {z = 0} + {z <> 0}.
+Lemma Ceq_or_neq_C0 : forall z : C, {z = C0} + {z <> C0}.
 Proof.
 intro z ; apply Ceq_dec.
 Qed.
@@ -107,7 +107,7 @@ Hint Resolve IRC_eq_compat: complex.
 
 (** * Addition *)
 
-Lemma Cadd_ne : forall z, z + 0 = z /\ 0 + z = z.
+Lemma Cadd_ne : forall z, z + C0 = z /\ C0 + z = z.
 Proof.
 intros.
 rewrite Cadd_0_r.
@@ -160,13 +160,13 @@ Hint Resolve Cadd_eq_reg_r : complex.
 
 (** * Multiplication *)
 
-Lemma Cmult_0_r : forall z, z * 0 = 0.
+Lemma Cmult_0_r : forall z, z * C0 = C0.
 Proof.
 CusingR_f.
 Qed.
 Hint Resolve Cmult_0_r: complex.
 
-Lemma Cmult_0_l : forall z, 0 * z = 0.
+Lemma Cmult_0_l : forall z, C0 * z = C0.
 Proof.
 intro.
 rewrite Cmult_comm; apply Cmult_0_r.
@@ -187,7 +187,7 @@ rewrite H ; reflexivity.
 Qed.
 Hint Resolve Cmult_eq_compat_r : complex.
 
-Lemma Cmult_eq_reg_l : forall z z1 z2 : C, z <> 0 -> z * z1 = z * z2 -> z1 = z2.
+Lemma Cmult_eq_reg_l : forall z z1 z2 : C, z <> C0 -> z * z1 = z * z2 -> z1 = z2.
 Proof.
 intros z z1 z2 H0 H.
 assert (H1 : (/ z * z * z1 = z1)).
@@ -199,7 +199,7 @@ rewrite Cmult_assoc. rewrite H.
 rewrite <- Cmult_assoc; apply H2.
 Qed.
 
-Lemma Cmult_eq_reg_r : forall z z1 z2 : C, z <> 0 -> z1 * z = z2 * z -> z1 = z2.
+Lemma Cmult_eq_reg_r : forall z z1 z2 : C, z <> C0 -> z1 * z = z2 * z -> z1 = z2.
 Proof.
 intros z z1 z2 H H1.
 apply Cmult_eq_reg_l with z.
@@ -207,10 +207,10 @@ exact H.
 rewrite Cmult_comm ; rewrite H1 ; apply Cmult_comm.
 Qed.
 
-Lemma Cmult_integral : forall z1 z2, z1 * z2 = 0 -> z1 = 0 \/ z2 = 0.
+Lemma Cmult_integral : forall z1 z2, z1 * z2 = C0 -> z1 = C0 \/ z2 = C0.
 Proof.
 intros z1 z2 H.
-elim (Ceq_dec z1 0) ; elim (Ceq_dec z2 0) ; intros H2 H1.
+elim (Ceq_dec z1 C0) ; elim (Ceq_dec z2 C0) ; intros H2 H1.
     left ; exact H1.
    left ; exact H1.
   right ; exact H2.
@@ -219,7 +219,7 @@ elim (Ceq_dec z1 0) ; elim (Ceq_dec z2 0) ; intros H2 H1.
  assumption.
 Qed.
 
-Lemma Cmult_eq_0_compat : forall z1 z2 : C, z1 = 0 \/ z2 = 0 -> z1 * z2 = 0.
+Lemma Cmult_eq_0_compat : forall z1 z2 : C, z1 = C0 \/ z2 = C0 -> z1 * z2 = C0.
 Proof.
 intros z1 z2 H; elim H ; intros H1.
  rewrite H1 ; rewrite Cmult_0_l ; reflexivity.
@@ -227,23 +227,23 @@ rewrite H1 ; rewrite Cmult_0_r ; reflexivity.
 Qed.
 Hint Resolve Cmult_eq_0_compat: complex.
 
-Lemma Cmult_eq_0_compat_r : forall z1 z2 : C, z1 = 0 -> z1 * z2 = 0.
+Lemma Cmult_eq_0_compat_r : forall z1 z2 : C, z1 = C0 -> z1 * z2 = C0.
 Proof.
 auto with complex.
 Qed.
 
-Lemma Cmult_eq_0_compat_l : forall z1 z2 : C, z2 = 0 -> z1 * z2 = 0.
+Lemma Cmult_eq_0_compat_l : forall z1 z2 : C, z2 = C0 -> z1 * z2 = C0.
 Proof.
 auto with complex.
 Qed.
 
-Lemma Cmult_neq_0_reg : forall z1 z2 : C, z1 * z2 <> 0 -> z1 <> 0 /\ z2 <> 0.
+Lemma Cmult_neq_0_reg : forall z1 z2 : C, z1 * z2 <> C0 -> z1 <> C0 /\ z2 <> C0.
 Proof.
 auto 6 with complex.
 Qed.
 
 Lemma Cmult_integral_contrapositive : 
-   forall z1 z2 : C, z1 <> 0 /\ z2 <> 0 -> z1 *  z2 <> 0.
+   forall z1 z2 : C, z1 <> C0 /\ z2 <> C0 -> z1 *  z2 <> C0.
 Proof.
 intros z1 z2 H.
 destruct H as (H1, H2).
@@ -254,7 +254,7 @@ Qed.
 Hint Resolve Cmult_integral_contrapositive: complex.
 
 Lemma Cmult_integral_contrapositive_currified : 
-  forall z1 z2 : C, z1 <> 0 -> z2 <> 0 -> z1 * z2 <> 0.
+  forall z1 z2 : C, z1 <> C0 -> z2 <> C0 -> z1 * z2 <> C0.
 Proof.
 auto with complex.
 Qed.
@@ -267,13 +267,13 @@ auto with complex.
 Qed.
 Hint Resolve Copp_eq_compat: complex.
 
-Lemma Copp_0 : -0 = 0.
+Lemma Copp_0 : -C0 = C0.
 Proof.
 rewrite <- Ceq ; simpl ; rewrite Ropp_0 ; split ; trivial.
 Qed.
 Hint Resolve Copp_0: complex.
 
-Lemma Copp_eq_0_compat : forall z : C, z = 0 -> - z = 0.
+Lemma Copp_eq_0_compat : forall z : C, z = C0 -> - z = C0.
 Proof.
 intros z H; rewrite H ; apply Copp_0.
 Qed.
@@ -285,7 +285,7 @@ CusingR.
 Qed.
 Hint Resolve Copp_involutive: complex.
 
-Lemma Copp_neq_0_compat : forall z : C, z <> 0 -> - z <> 0.
+Lemma Copp_neq_0_compat : forall z : C, z <> C0 -> - z <> C0.
 Proof.
 intros z H Habs.
 apply Copp_eq_0_compat in Habs.
@@ -327,13 +327,13 @@ Qed.
 
 (** * Minus *)
 
-Lemma Cminus_0_r : forall z : C, z - 0 = z.
+Lemma Cminus_0_r : forall z : C, z - C0 = z.
 Proof.
 CusingR_f.
 Qed.
 Hint Resolve Cminus_0_r: complex.
 
-Lemma Cminus_0_l : forall z : C, 0 - z = - z.
+Lemma Cminus_0_l : forall z : C, C0 - z = - z.
 Proof.
 CusingR.
 Qed.
@@ -350,13 +350,13 @@ Proof.
 CusingR_f.
 Qed.
 
-Lemma Cminus_diag_eq : forall z1 z2 : C, z1 = z2 -> z1 - z2 = 0.
+Lemma Cminus_diag_eq : forall z1 z2 : C, z1 = z2 -> z1 - z2 = C0.
 Proof.
 intros z1 z2 H ; destruct H ; CusingR.
 Qed.
 Hint Resolve Cminus_diag_eq: complex.
 
-Lemma Cminus_diag_uniq : forall z1 z2 : C, z1 - z2 = 0 -> z1 = z2.
+Lemma Cminus_diag_uniq : forall z1 z2 : C, z1 - z2 = C0 -> z1 = z2.
 Proof.
 intros z1 z2 H.
 destruct z1 as (r, r0) ; destruct z2 as (r1, r2) ; rewrite <-Ceq in H ; rewrite <-Ceq ; simpl in *.
@@ -364,7 +364,7 @@ elim H ; intro H1 ; split ; apply Rminus_diag_uniq ; assumption.
 Qed.
 Hint Immediate Cminus_diag_uniq: complex.
 
-Lemma Cminus_diag_uniq_sym : forall z1 z2 : C, z2 - z1 = 0 -> z1 = z2.
+Lemma Cminus_diag_uniq_sym : forall z1 z2 : C, z2 - z1 = C0 -> z1 = z2.
 Proof.
 intros ; apply Cminus_diag_uniq.
 apply Cminus_diag_uniq in H.
@@ -378,7 +378,7 @@ CusingR_f.
 Qed.
 Hint Resolve Cadd_minus: complex.
 
-Lemma Cminus_eq_contra : forall z1 z2 : C, z1 <> z2 -> z1 - z2 <> 0.
+Lemma Cminus_eq_contra : forall z1 z2 : C, z1 <> z2 -> z1 - z2 <> C0.
 Proof.
 intros z1 z2 H Habs.
 apply Cminus_diag_uniq in Habs.
@@ -387,14 +387,14 @@ apply H ; reflexivity.
 Qed.
 Hint Resolve Cminus_eq_contra: complex.
 
-Lemma Cminus_not_eq : forall z1 z2 : C, z1 - z2 <> 0 -> z1 <> z2.
+Lemma Cminus_not_eq : forall z1 z2 : C, z1 - z2 <> C0 -> z1 <> z2.
 Proof.
 intros z1 z2 H Habs.
 rewrite Habs in H ; apply H ; auto with complex.
 Qed.
 Hint Resolve Cminus_not_eq: complex.
 
-Lemma Cminus_not_eq_right : forall z1 z2 : C, z2 - z1 <> 0 -> z1 <> z2.
+Lemma Cminus_not_eq_right : forall z1 z2 : C, z2 - z1 <> C0 -> z1 <> z2.
 Proof.
 auto with complex.
 Qed.
@@ -412,18 +412,18 @@ Qed.
 
 (** * Inversion *)
 
-Lemma Cinv_1 : /1 = 1.
+Lemma Cinv_1 : /C1 = C1.
 Proof.
 field.
 auto with complex.
 Qed.
 
-Lemma Cinv_R1 : /R1 = 1.
+Lemma Cinv_R1 : /R1 = C1.
 Proof.
 CusingR_f.
 Qed.
 
-Lemma Cinv_neq_0_compat : forall z : C, z <> 0 -> / z <> 0.
+Lemma Cinv_neq_0_compat : forall z : C, z <> C0 -> / z <> C0.
 Proof.
 intros z H.
 intro H0.
@@ -434,43 +434,43 @@ apply C1_neq_C0 ; exact H0.
 Qed.
 Hint Resolve Cinv_neq_0_compat: complex.
 
-Lemma Cinv_involutive : forall z : C, z <> 0 -> / / z = z.
+Lemma Cinv_involutive : forall z : C, z <> C0 -> / / z = z.
 Proof.
 intros z H ; field ; auto with complex.
 Qed.
 Hint Resolve Cinv_involutive: complex.
 
 Lemma Cinv_mult_distr :
-  forall z1 z2 : C, z1 <> 0 -> z2 <> 0 -> / (z1 * z2) = / z1 * / z2.
+  forall z1 z2 : C, z1 <> C0 -> z2 <> C0 -> / (z1 * z2) = / z1 * / z2.
 Proof.
 intros z1 z2 H1 H2 ; field ; split ; assumption.
 Qed.
 
-Lemma Copp_inv_permute : forall z : C, z <> 0 -> - / z = / - z.
+Lemma Copp_inv_permute : forall z : C, z <> C0 -> - / z = / - z.
 Proof.
 intros z H ; field ; auto with complex.
 Qed.
 
-Lemma Cinv_r_simpl_r : forall z1 z2 : C, z1 <> 0 -> z1 * / z1 * z2 = z2.
+Lemma Cinv_r_simpl_r : forall z1 z2 : C, z1 <> C0 -> z1 * / z1 * z2 = z2.
 Proof.
 intros z1 z2 H ; field ; assumption.
 Qed.
 Hint Resolve Cinv_r_simpl_r : complex.
 
-Lemma Cinv_r_simpl_l : forall z1 z2 : C, z1 <> 0 -> z2 * z1 * / z1 = z2.
+Lemma Cinv_r_simpl_l : forall z1 z2 : C, z1 <> C0 -> z2 * z1 * / z1 = z2.
 Proof.
 intros z1 z2 H ; field ; assumption.
 Qed.
 Hint Resolve Cinv_r_simpl_l : complex.
 
-Lemma Cinv_r_simpl_m : forall z1 z2 : C, z1 <> 0 -> z1 * z2 * / z1 = z2.
+Lemma Cinv_r_simpl_m : forall z1 z2 : C, z1 <> C0 -> z1 * z2 * / z1 = z2.
 Proof.
 intros z1 z2 H ; field ; assumption.
 Qed.
 Hint Resolve Cinv_r_simpl_m: complex.
 
 Lemma Cinv_mult_simpl :
-  forall z1 z2 z3 : C, z1 <> 0 -> z1 * / z2 * (z3 * / z1) = z3 * / z2.
+  forall z1 z2 z3 : C, z1 <> C0 -> z1 * / z2 * (z3 * / z1) = z3 * / z2.
 Proof.
 intros z1 z2 z3 H.
 rewrite Cmult_assoc ; rewrite Cmult_comm ; rewrite Cmult_assoc.
@@ -478,7 +478,7 @@ replace (z3 * /z1 * z1) with z3 by (field ; assumption).
 apply Cmult_comm.
 Qed.
 
-Lemma Cpow_inv : forall z n, z <> 0 -> /(z ^ n) = (/z) ^ n.
+Lemma Cpow_inv : forall (z : C) n, z <> C0 -> /(z ^ n) = (/z) ^ n.
 Proof.
 intros z n z_neq ; induction n.
  repeat (rewrite Cpow_0) ; CusingR_f.
@@ -491,7 +491,7 @@ Qed.
 
 (** * Power *)
 
-Lemma Cpow_neq_compat : forall z n, z <> 0 -> z ^ n <> 0.
+Lemma Cpow_neq_compat : forall (z : C) n, z <> C0 -> z ^ n <> C0.
 Proof.
 intros z n z_neq ; induction n.
  simpl ; auto with complex.
@@ -512,15 +512,15 @@ intros r s r_neq_s Hf.
  simpl in Hf' ; intuition.
 Qed.
 
-Lemma IRC_neq_0_compat : forall r:R, r <> 0%R -> IRC r <> 0.
+Lemma IRC_neq_0_compat : forall r:R, r <> 0%R -> IRC r <> C0.
 Proof.
-intros r r_neq_0 ; replace 0 with (IRC 0%R) by intuition ;
+intros r r_neq_0 ; replace C0 with (IRC 0%R) by intuition ;
  apply IRC_neq_compat ; assumption.
 Qed.
 
 (** * Injection from [N] to [C]*)
 
-Lemma S_INC : forall n:nat, INC (S n) = INC n + 1.
+Lemma S_INC : forall n:nat, INC (S n) = INC n + C1.
 Proof.
 intro n . simpl. destruct n ; auto with complex. 
 Qed.
@@ -537,7 +537,8 @@ Lemma S_O_add_INC : forall n:nat, INC (1 + n) = INC 1 + INC n.
 Proof.
 destruct n . auto with complex.
 replace (1 + S n)%nat with (S (S n))%nat by (simpl ; reflexivity).
-do 3 (rewrite S_INC) ; replace (INC 0%nat) with 0 by (simpl ; reflexivity).
+do 3 (rewrite S_INC) ; replace (INC 0%nat) with C0 by (simpl ; reflexivity).
+rewrite Cadd_0_l.
 ring.
 Qed.
 
@@ -561,11 +562,11 @@ replace (n-0)%nat with n by intuition ; auto with complex.
 destruct n.
  inversion H1.
 replace (S n - S m)%nat with (n - m)%nat by intuition.
-do 2 rewrite S_INC. replace (INC n + 1 - (INC m + 1)) with (INC n - INC m) by ring.
-replace (INC (S n) - INC m) with (1 + INC n - INC m) in IHm.
- replace (INC (S n - m)) with (1 + INC (n - m)) in IHm.
-  assert ( H :( 1 + INC (n - m) = 1 + INC n - INC m) -> (INC (n - m) = INC n - INC m)).
-   unfold Cminus ; rewrite Cadd_assoc ; apply (Cadd_eq_reg_l 1).
+do 2 rewrite S_INC. replace (INC n + C1 - (INC m + C1)) with (INC n - INC m) by ring.
+replace (INC (S n) - INC m) with (C1 + INC n - INC m) in IHm.
+ replace (INC (S n - m)) with (C1 + INC (n - m)) in IHm.
+  assert ( H :( C1 + INC (n - m) = C1 + INC n - INC m) -> (INC (n - m) = INC n - INC m)).
+   unfold Cminus ; rewrite Cadd_assoc ; apply (Cadd_eq_reg_l C1).
   apply H. apply IHm. intuition.
  replace (S n - m)%nat with (S (n - m))%nat.
   rewrite S_INC. auto with complex.
@@ -615,7 +616,7 @@ Proof.
 intros. apply Rplus_le_le_0_compat ; apply Rle_0_sqr. 
 Qed.
 
-Lemma Cnorm_sqr_pos_lt : forall r r1 : R, (r,r1) <> 0 -> 0 < r * r + r1 * r1.
+Lemma Cnorm_sqr_pos_lt : forall r r1 : R, (r,r1) <> C0 -> 0 < r * r + r1 * r1.
 Proof.
 intros r r1 z_neq_0.
  case (proj1 (C0_neq_R0_neq _) z_neq_0) ; simpl ; intro H.
@@ -762,7 +763,7 @@ intros n1 H1 H2. intro H. apply H2. rewrite S_INC in H.
 generalize (Cre_INC_pos n1). intro H3. destruct (INC n1). simpl in *.
 apply Ceq in H. elim H. intros H5 H6. simpl in *. lra.
 intros n0 H1 n1 H3 H4.
-do 2 rewrite S_INC. assert ( H : (INC n1 <> INC n0 -> INC n1 + 1 <> INC n0 + 1)).
+do 2 rewrite S_INC. assert ( H : (INC n1 <> INC n0 -> INC n1 + C1 <> INC n0 + C1)).
 intros temp1 temp2. 
 apply Cadd_eq_reg_r in temp2.
 apply temp1.
@@ -879,7 +880,7 @@ Qed.
 
 (** * Cneq results*)
 
-Lemma Cadd_neq_compat_l : forall z z', z' <> 0 -> z + z' <> z.
+Lemma Cadd_neq_compat_l : forall z z' : C, z' <> C0 -> z + z' <> z.
 Proof.
 intros z z' z'_neq Hf ; apply z'_neq.
  assert (H := Cadd_eq_compat_l (- z) _ _ Hf).
@@ -887,7 +888,7 @@ intros z z' z'_neq Hf ; apply z'_neq.
  assumption.
 Qed.
 
-Lemma Cadd_neq_compat_r : forall z z', z' <> 0 -> z' + z <> z.
+Lemma Cadd_neq_compat_r : forall z z' : C, z' <> C0 -> z' + z <> z.
 Proof.
 intros z z' z'_neq ; rewrite Cadd_comm ;
  apply Cadd_neq_compat_l ; assumption.

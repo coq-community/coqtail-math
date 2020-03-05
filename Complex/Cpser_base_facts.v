@@ -75,7 +75,7 @@ intros An r r' r'_bd Rho.
  case (Req_or_neq r') ; intro r_eq.
   rewrite r_eq ; exists (Cnorm (An 0%nat)) ; intros x Hx ; destruct Hx as (u, Hu) ;
   rewrite Hu ; unfold_gt ; clear ; induction u.
-  apply Req_le ; apply Cnorm_eq_compat ; rewrite Cpow_0 ; ring.
+  apply Req_le ; apply Cnorm_eq_compat ; rewrite Cpow_0. apply Cmult_1_r.
   rewrite C0_pow ; [| intuition] ; rewrite Cmult_0_r ;
   rewrite Cnorm_C0 ; apply Cnorm_pos.
   assert (r_pos : 0 < Rabs r).

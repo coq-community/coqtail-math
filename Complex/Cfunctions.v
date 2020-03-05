@@ -72,8 +72,8 @@ Qed.
 Definition q_pow_i (q : C) (n : nat) : C := q ^ n.
 
 Lemma sum_q_pow_i : forall (q : C) (m k : nat),
-  q <> 1 ->
-  sum_f_C0 (fun n : nat => q_pow_i q (m + n)) k = q^m * (1 - q ^ S k) / (1 - q).
+  q <> C1 ->
+  sum_f_C0 (fun n : nat => q_pow_i q (m + n)) k = q^m * (C1 - q ^ S k) / (C1 - q).
 Proof.
 intros q m k q_neq_1.
  induction k.
@@ -87,14 +87,14 @@ intros q m k q_neq_1.
  replace (q ^ (m + S k)) with (q ^ m * (q ^ (S k))).
  repeat rewrite Cmult_assoc ; rewrite <- Cmult_add_distr_l ;
  apply Cmult_eq_compat_l.
- replace (q ^ S k) with ((q ^ S k * (1 - q)) * / (1 - q)).
+ replace (q ^ S k) with ((q ^ S k * (C1 - q)) * / (C1 - q)).
  simpl ; auto with complex.
  field ; intro Hf ; apply q_neq_1 ; intuition.
  rewrite Cmult_assoc, Cinv_r, Cmult_1_r.
  reflexivity.
  intro Hf ; apply q_neq_1 ; intuition.
 induction k.
- replace (m + 1)%nat with (S m) by ring ; simpl ; field.
+ replace (m + 1)%nat with (S m) by ring ; simpl. rewrite Cmult_1_r. field.
  replace (m + S (S k))%nat with (S (m + S k)) by ring ; simpl ;
  rewrite <- IHk ; simpl ; field.
 Qed.
@@ -112,7 +112,7 @@ a * INC (S n)  = sum_f_C0 (fun _ => a) (n).
 Proof.
 intros n a.
 induction n.
-simpl. field.
+simpl. eauto with *.
 rewrite S_INC. rewrite sum_f_C0_simpl. rewrite <- IHn. field.
 Qed.
 

@@ -48,7 +48,7 @@ assert (lb_lt_x : - middle (Rabs x) (Rabs r) < x).
   apply Rlt_le_trans with (- Rabs x).
   apply Ropp_gt_lt_contravar ; apply Rlt_gt ;
    apply middle_is_in_the_middle ; assumption.
-   apply Rabs_le.
+   apply MyRIneq.Rabs_le.
  assert (x_lt_ub : x < middle (Rabs x) (Rabs r)).
   apply Rle_lt_trans with (Rabs x) ; [apply Rle_abs |
   apply middle_is_in_the_middle] ; assumption.
@@ -226,7 +226,7 @@ Proof.
 intros An r r' rho rho' x x_in x_in'.
  assert (r_pos : 0 < r) by (eapply Rball_radius_pos ; eassumption) ;
  assert (r'_pos : 0 < r') by (eapply Rball_radius_pos ; eassumption) ;
- assert (min_pos: 0 <= Rmin r r') by (apply Rmin_pos ; left ; assumption).
+ assert (min_pos: 0 <= Rmin r r') by (apply MyRIneq.Rmin_pos ; left ; assumption).
  assert (x_in_min: Rball 0 (Rmin r r') x).
   unfold Rmin, Rball ; destruct (Rle_dec r r') ; assumption.
  assert (rho'': Cv_radius_weak An (Rmin r r')).

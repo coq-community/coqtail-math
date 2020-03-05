@@ -676,7 +676,7 @@ intros An r Rho z.
   apply Cnorm_pos.
   apply (middle_is_in_the_middle _ _ z_bd).
  apply (weaksum_r_derive _ _ (proj1 Rho (middle (Cnorm z) r) H) z).
- apply 0.
+ apply C0.
 Defined.
 
 Definition sum_derive : forall (An : nat -> C) (Rho : infinite_cv_radius An) (z : C), C.
@@ -824,7 +824,7 @@ assert (cv : forall z : C, Boule 0 r' z ->  {l : C |  Cseq_cv (fun N : nat =>
   (apply Rlt_le_trans with r' ; assumption) ; elim (Rlt_irrefl _ Hf2).
 
  assert (g_cont : (forall x : C, Boule 0 r' x -> continuity_pt g x)).
-  intros a a_in ; apply CVU_continuity_boule with fn' 0 r'.
+  intros a a_in ; apply CVU_continuity_boule with fn' C0 r'.
   apply fn'_cvu2.
   intros N y y_in ; unfold fn'.
   unfold Cpser_partial_sum_derive ; induction N.
