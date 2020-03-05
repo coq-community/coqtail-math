@@ -525,10 +525,8 @@ intros lb ub x lb_lb x_in.
   apply derivable_pt_lim_in_minus.
    apply derivable_pt_lim_in_const.
    eapply derivable_pt_lim_in_contravariant ; [eapply included_open_interval_Rball |].
-   apply derivable_pt_lim_Rball_comp with 0 1.
-    apply included_open_interval_Rball ; assumption.
-    unfold Rball in *.
-(*
+   apply derivable_pt_lim_Rball_comp with (cg := 0) (rg := 1) (f := Rinv).
+    apply included_open_interval_Rball; assumption.
     assumption.
     apply derivable_pt_lim_in_inv.
      apply included_open_interval_Rball ; assumption.
@@ -539,7 +537,6 @@ intros lb ub x lb_lb x_in.
   apply Rgt_not_eq, One_plus_sqr_pos_lt.
   apply Rgt_not_eq ; assumption.
 Qed.
-*) Admitted.
 
 (** *)
 
