@@ -26,6 +26,7 @@ Require Import Rsequence_facts.
 Require Export Rseries.
 Require Import Rsequence_subsequence.
 Require Import Rtactic.
+Require Import Lia.
 
 Open Scope R_scope.
 
@@ -163,12 +164,27 @@ eapply Rseq_cv_eq_compat with (sum_f_R0 (tg_alt PI_tg)).
  INR_group (2 * INR n + 1).
  field.
  INR_solve.
- 
- unfold PI.
- destruct exist_PI as [pi H].
- replace (4 * pi / 4) with pi by field.
- apply H || admit.
-Admitted.
+
+ generalize PI_ineq, exist_PI.
+ generalize (sum_f_R0 (tg_alt PI_tg)) as u.
+ generalize (PI / 4) as x.
+ intros x u Hu [y Hy].
+ rewrite <-Rseq_cv_Un_cv_equiv in Hy.
+ change (fun N : nat => u N) with u in Hy.
+ pose proof Rseq_sandwich_theorem.
+ assert (uy : Rseq_cv (fun N : nat => u (2 * N)%nat) y). {
+   eapply Rseq_subseq_cv_compat; eauto.
+   apply subsequence_helper with (mult 2). lia. reflexivity.
+ }
+ assert (uy' : Rseq_cv (fun N : nat => u (S (2 * N))%nat) y). {
+   eapply Rseq_subseq_cv_compat; [ | apply Hy].
+   apply subsequence_helper with (fun n => S (2 * n)). lia. reflexivity.
+ }
+ pose proof Rseq_sandwich_theorem _ _ _ y uy' uy Hu as xy.
+ pose proof Rseq_constant_cv x as xx.
+ pose proof Rseq_cv_unique _ _ _ xx xy.
+ now subst; auto.
+Qed.
 
 Lemma antg_shift_neg_compat : Rseq_shift antg_neg == antg.
 Proof.

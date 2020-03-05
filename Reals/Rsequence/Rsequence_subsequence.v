@@ -40,6 +40,17 @@ Notation "Un ⋅ phi" := (extracted phi Un) (at level 40, left associativity) : 
 Definition subsequence {X : Type} (Un Vn : nat -> X) :=
   {phi | forall n, Un n = (Vn ⋅ phi) n}.
 
+Lemma subsequence_helper {u v : Rseq} (f : nat -> nat) :
+  (forall n, f n < f (1 + n))%nat ->
+  (forall n, u n = v (f n)) ->
+  subsequence u v.
+Proof.
+  intros Hf.
+  hnf. unfold extractor.
+  exists (exist is_extractor f Hf).
+  eauto.
+Qed.
+
 (** Properties on nat -> nat sequences *)
 
 (* Growing sequence *)
