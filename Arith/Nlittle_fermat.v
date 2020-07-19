@@ -227,8 +227,8 @@ Qed.
 
 (* end hide *)
 (** * Alternative formulation of Fermat's little theorem *)
-Theorem Nlittle_fermat_alt : 
-  forall a p, Nprime p -> Nrel_prime a p -> 
+Theorem Nlittle_fermat_alt :
+  forall a p, Nprime p -> Nrel_prime a p ->
   (p | a ^ (pred p) - 1).
 Proof.
 intros.
@@ -245,7 +245,7 @@ replace (a * a ^ S p - a) with (a * a ^ S p - a*1) in H1.
 rewrite <- mult_minus_distr_l in H1.
 apply Ngauss in H1.
 auto.
-apply Nrel_prime_comm. auto.
+apply Nrel_prime_sym. auto.
 rewrite mult_1_r.
 auto.
 Qed.

@@ -395,7 +395,7 @@ simpl.
 apply Nrel_prime_1.
 
 apply Nrel_prime_mult_compat.
-apply Nrel_prime_comm.
+apply Nrel_prime_sym.
 apply Nprime_le_rel_prime.
 auto.
 split.

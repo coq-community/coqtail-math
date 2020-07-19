@@ -433,8 +433,8 @@ auto.
 auto.
 Qed.
 
-(** Commutativity *)
-Lemma Nrel_prime_comm : forall a b, Nrel_prime a b -> Nrel_prime b a.
+(** Symmetry *)
+Lemma Nrel_prime_sym : forall a b, Nrel_prime a b -> Nrel_prime b a.
 Proof.
 intros.
 intro.
@@ -563,7 +563,7 @@ apply Ndivide_intro with r0.
 rewrite mult_comm.
 rewrite <- H2.
 ring.
-apply Nrel_prime_comm.
+apply Nrel_prime_sym.
 auto.
 assert (S(S n)*r | r*r0).
 rewrite H2.
