@@ -19,11 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Arith.
-Require Import Euclid.
-Require Export Nle.
-Require Export Nk_ind.
-Require Export Compare.
+From Coq Require Import Arith Euclid Compare Lia.
+From Coqtail Require Export Nle Nk_ind.
 Open Scope nat_scope.
 
 (** * Definitions *)
@@ -445,7 +442,7 @@ auto.
 Qed.
 
 (** Weakening from primality to coprimality *)
-Lemma Nprime_le_rel_prime : forall n p, Nprime p -> 1 < n < p -> Nrel_prime n p.
+Lemma Nprime_le_rel_prime : forall n p, Nprime p -> 0 < n < p -> Nrel_prime n p.
 Proof.
 intros.
 destruct H0.
@@ -1765,4 +1762,88 @@ inversion H.
 auto with arith.
 
 apply le_antisym; auto.
+Qed.
+
+Lemma div_mod a b : a <> 0 -> (a | b) <-> b mod a = 0.
+Proof.
+  intros az; split.
+  - intros (k, ->). apply Nat.mod_mul, az.
+  - intros e. exists (b / a).
+    etransitivity. apply (Nat.div_mod _ a), az.
+    lia.
+Qed.
+
+Lemma eqmod_div m a b : m <> 0 -> a <= b -> a mod m = b mod m <-> (m | b - a).
+Proof.
+  intros mz l; split.
+  - intros e. exists ((b / m) - (a / m)).
+    rewrite Nat.mul_comm, Nat.mul_sub_distr_l.
+    rewrite (Nat.div_mod a m mz) at 1.
+    rewrite (Nat.div_mod b m mz) at 1.
+    lia.
+  - intros (k, e).
+    assert (b = a + k * m) by lia.
+    assert (b mod m = (a + k * m) mod m) as -> by congruence.
+    rewrite Nat.mod_add; auto.
+Qed.
+
+Lemma Nrel_prime_eqmod m a b :
+  m <> 0 ->
+  a mod m = b mod m ->
+  Nrel_prime m a ->
+  Nrel_prime m b.
+Proof.
+  intros mz ab ma x xm xb.
+  apply (ma x xm); clear ma.
+  destruct (le_lt_dec a b) as [le|lt].
+  - rewrite eqmod_div in ab; auto.
+    destruct xb as (k & ->).
+    destruct xm as (l & ->).
+    destruct ab as (m & em).
+    exists (k - m * l).
+    replace ((k - m * l) * x) with (k * x - m * (l * x)). lia.
+    rewrite Nat.mul_sub_distr_r. lia.
+  - symmetry in ab.
+    rewrite eqmod_div in ab; auto. 2:lia.
+    destruct xb as (k & ->).
+    destruct xm as (l & ->).
+    destruct ab as (m & em).
+    exists (m * l + k).
+    replace ((m * l + k) * x) with (k * x + m * (l * x)). lia.
+    rewrite Nat.mul_add_distr_r. lia.
+Qed.
+
+Lemma Ndivide_eqmod m a b :
+  m <> 0 ->
+  a mod m = b mod m ->
+  (m | a) <-> (m | b).
+Proof.
+  intros mz ab.
+  rewrite 2 div_mod; auto.
+  split; lia.
+Qed.
+
+Lemma Nrel_prime_prime (a p : nat) :
+  Nprime p ->
+  Nrel_prime a p <-> ~ (p | a).
+Proof.
+  intros Pp.
+  pose proof Nprime_ge_2 _ Pp as p2.
+  split; intros ap.
+  - intros pa.
+    specialize (ap p pa (Ndiv_n_n _)).
+    lia.
+  - apply Nrel_prime_sym.
+    eapply Nrel_prime_eqmod with (a mod p).
+    lia.
+    now rewrite Nat.mod_mod; lia.
+    apply Nrel_prime_sym, Nprime_le_rel_prime; auto.
+    split.
+    + rewrite (Ndivide_eqmod _ _ (a mod p)) in ap.
+      2: lia.
+      2: now rewrite Nat.mod_mod; lia.
+      enough (0 <> a mod p) by lia.
+      intros e. apply ap. rewrite <-e.
+      apply Ndiv_0.
+    + apply Nat.mod_upper_bound. lia.
 Qed.

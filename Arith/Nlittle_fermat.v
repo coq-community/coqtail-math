@@ -19,10 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Arith.
-Require Export Nnewton.
-Require Export Ndiv.
-Require Export Lia.
+From Coq Require Import Arith Lia.
+From Coqtail Require Export Nnewton Ndiv.
 Open Scope nat_scope.
 
 Lemma minus_L0: forall p q x, p>=q -> p+x-q=p-q+x.
@@ -248,4 +246,13 @@ auto.
 apply Nrel_prime_sym. auto.
 rewrite mult_1_r.
 auto.
+Qed.
+
+Theorem Nlittle_fermat_alt2 :
+  forall a p, Nprime p -> ~(p | a) ->
+  (p | a ^ (pred p) - 1).
+Proof.
+  intros a p Pp pa.
+  apply Nlittle_fermat_alt; auto.
+  now apply Nrel_prime_prime.
 Qed.
