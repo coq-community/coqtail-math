@@ -1,21 +1,16 @@
 From Coq Require Import ZArith Znumtheory Lia Psatz.
-From Coqtail Require Import Zlittle_fermat.
-
-Open Scope Z_scope.
-
-Definition congruent_mod m a b := (m | a - b).
-
-Notation "a ≡ b [ m ]" := (congruent_mod m a b) (at level 40).
+From Coqtail Require Import Ztools Zeqm Zlittle_fermat.
 
 Theorem square_roots_of_unity (x p : Z) :
   prime p ->
   x ^ 2 ≡ 1 [p] ->
   x ≡ 1 [p] \/ x ≡ -1 [p].
 Proof.
-  intros Pp.
-  unfold congruent_mod.
+  intros pp.
+  rewrite !eqm_divide.
   replace (x ^ 2 - 1) with ((x - 1) * (x + 1)) by lia.
   now intros H % prime_mult.
+  all: apply prime_not_0, pp.
 Qed.
 
 Lemma miller_rabin_step (p a r d : Z) :
@@ -26,9 +21,9 @@ Lemma miller_rabin_step (p a r d : Z) :
   a ^ (2 ^ r * d) ≡ 1 [p] \/
   a ^ (2 ^ r * d) ≡ - 1 [p].
 Proof.
-  intros Pp Hd Hr H.
+  intros pp Hd Hr H.
   apply square_roots_of_unity; auto.
-  unfold congruent_mod in *.
+  rewrite eqm_divide in *; try apply prime_not_0, pp.
   enough ((a ^ (2 ^ r * d)) ^ 2 = a ^ (2 ^ (r + 1) * d)) by congruence.
   assert (2 ^ (r + 1) * d = (2 ^ r * d) * 2) as ->
       by now rewrite Z.pow_add_r; lia || auto.
@@ -103,6 +98,18 @@ Proof.
     destruct d. exists k; lia.
 Qed.
 
+Lemma Even_not_Odd x : Z.Even x <-> ~Z.Odd x.
+Proof.
+  rewrite Even_div, Odd_div.
+  destruct (Zdivide_dec 2 x); tauto.
+Qed.
+
+Lemma Odd_not_Even x : Z.Odd x <-> ~Z.Even x.
+Proof.
+  rewrite Even_div, Odd_div.
+  destruct (Zdivide_dec 2 x); tauto.
+Qed.
+
 Theorem miller_rabin_criterion (p : Z) :
   p > 2 ->
   prime p ->
@@ -134,6 +141,7 @@ Proof.
     + intros a zap.
       pose proof Fermat's_little_theorem_Z_pZ p a pp zap as f.
       rewrite psd in f. clear psd.
+      apply eqm_divide in f; try now apply prime_not_0.
       change (a ^ (2 ^ s * d) ≡ 1 [p]) in f.
       (* main recurrence *)
       assert (s0 : 0 <= s) by lia.
@@ -159,4 +167,3 @@ Qed.
  relies on the generalized Riemann hypothesis. Maybe more useful would
  be to prove that the set {2,3,5,7,11} suffices for p<=10^14. Note
  that AKS is ~O(log^6). *)
-

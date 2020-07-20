@@ -351,7 +351,8 @@ Proof.
   assert (Dm : (m | y1 * y1 + y2 * y2 + y3 * y3 + y4 * y4)).
     apply divide_eqm; auto.
     rewrite eqm1, eqm2, eqm3, eqm4.
-    eapply multiple_eqm; eauto.
+    rewrite <-Hx, divide_eqm; auto.
+    apply Z.divide_factor_l.
   
   assert (Dmp : ~ (m | p)).
     intros D.
@@ -473,7 +474,8 @@ Proof.
     assert (D1 : (m | t1)).
       rewrite <- divide_eqm; auto; rewrite Et1.
       unfold y1, y2, y3, y4; repeat rewrite modsym_eqm.
-      eapply multiple_eqm; eauto.
+      rewrite <-Hx, divide_eqm; auto.
+      apply Z.divide_factor_l.
     
     assert (D2 : (m | t2)).
       rewrite <- divide_eqm; auto; rewrite Et2.

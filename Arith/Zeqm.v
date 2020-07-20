@@ -31,23 +31,18 @@ Proof.
   intros; red; rewrite Z_mod_same_full; reflexivity.
 Qed.
 
-(* TODO beuarf, ce lemme est moche. Il est comme ça pour être pratique,
-mais quand même.. *)
-Lemma multiple_eqm : forall x m k, (x = k * m \/ x = m * k) -> x ≡ 0 [m].
-Proof.
-  intros x m k EE.
-  rewrite Zmult_comm in EE; assert (E : x = m * k) by tauto; clear EE.
-  eapply eq_eqm in E.
-  rewrite (eqm_diag m) in E; rewrite E.
-  ring_simplify (0 * k).
-  reflexivity.
-Qed.
-
 Lemma eqm_minus_0 : forall a b m, a ≡ b [m] <-> a - b ≡ 0 [m].
 Proof.
   intros a b m; split; intros E.
     rewrite E; red; f_equal; ring.
     rewrite <- (Zminus_0_r a), <- E; red; f_equal; ring.
+Qed.
+
+Lemma eqm_divide m a b : m <> 0 -> a ≡ b [ m ] <-> (m | a - b).
+Proof.
+  intros mz.
+  rewrite eqm_minus_0.
+  rewrite <-Z.mod_divide; tauto.
 Qed.
 
 Lemma eqm_mult_compat_l : forall k a b m, a ≡ b [m] -> k * a ≡ k * b [k * m].

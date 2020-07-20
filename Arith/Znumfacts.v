@@ -235,7 +235,6 @@ Proof.
   notzero.
 Qed.
 
-
 (** Computing the modular inverse in Z_pZ *)
 
 Lemma modular_inverse : forall p x, prime p -> ~(x ≡ 0 [p]) -> { y | x * y ≡ 1 [p] }.
@@ -254,5 +253,6 @@ Proof.
     rewrite REW.
     apply eqm_minus_0.
     ring_simplify.
-    apply multiple_eqm with (- v); auto.
+    apply divide_eqm. notzero.
+    exists (- v); auto.
 Qed.

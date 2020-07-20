@@ -45,12 +45,30 @@ Ltac notzero :=
   | |- 0 > Zneg _ => reflexivity
   | |- 0 <> Zpos _ => let I := fresh "I" in intros I; inversion I
   | |- 0 <> Zneg _ => let I := fresh "I" in intros I; inversion I
-  | Pp : prime ?p |- 0 < ?p => pose proof prime_ge_2 p Pp; omega
-  | Pp : prime ?p |- 0 <> ?p => pose proof prime_ge_2 p Pp; omega
+  | Pp : prime ?p |- 0 < ?p => pose proof prime_ge_2 p Pp; lia
+  | Pp : prime ?p |- 0 <> ?p => pose proof prime_ge_2 p Pp; lia
+  | Pp : prime ?p |- 1 <> ?p => pose proof prime_ge_2 p Pp; lia
+  | Pp : prime ?p |- ?p <> 0 => pose proof prime_ge_2 p Pp; lia
+  | Pp : prime ?p |- ?p <> 1 => pose proof prime_ge_2 p Pp; lia
+  | Pp : prime ?p |- ?p > 0 => pose proof prime_ge_2 p Pp; lia
   | |- 0 < _  => auto with *; try (zify; omega)
   | |- 0 <> _ => auto with *; try (zify; omega)
   | |- _ => idtac
   end.
+
+
+(** Subsumed by tactic [notzero] but also useful, since it shows up in
+Search *)
+
+Lemma prime_not_0 p : prime p -> p <> 0.
+Proof.
+  intro; notzero.
+Qed.
+
+Lemma prime_not_1 p : prime p -> p <> 1.
+Proof.
+  intro; notzero.
+Qed.
 
 
 (** Extraction from the Zdivide predicate *)
