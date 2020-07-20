@@ -167,3 +167,78 @@ Qed.
  relies on the generalized Riemann hypothesis. Maybe more useful would
  be to prove that the set {2,3,5,7,11} suffices for p<=10^14. Note
  that AKS is ~O(log^6). *)
+
+(* First step to implement the primality test: remove 0 bits *)
+
+Fixpoint remove_twos (x : positive) : (nat * positive) :=
+  match x with
+  | xO p => let (k, d) := remove_twos p in (S k, d)
+  | _ => (O, x)
+  end.
+
+Lemma Odd_xI x : Z.Odd (Z.pos x~1).
+Proof.
+  exists (Z.pos x). auto.
+Qed.
+
+Lemma remove_twos_spec x k d :
+  remove_twos x = (k, d) <->
+  Zpos x = 2 ^ (Z.of_nat k) * Zpos d /\ Z.Odd (Zpos d).
+Proof.
+  revert k d; induction x; intros k d; split.
+  - intros [=<-<-]. simpl; split; auto. apply Odd_xI.
+  - intros [e _]. simpl.
+    assert (k = O) as ->. {
+      destruct k. easy. exfalso.
+      eapply Odd_not_Even. eapply (Odd_xI x).
+      rewrite e. rewrite <-Zpower_nat_Z. exists (Zpower_nat 2 k * Z.pos d).
+      change (Zpower_nat 2 (S k)) with (2 * Zpower_nat 2 k).
+      lia.
+    }
+    change (2 ^ Z.of_nat 0) with 1 in e.
+    f_equal. lia.
+  - simpl. destruct (remove_twos x) as (k_, d_).
+    intros [=<-->]. rename k_ into k.
+    specialize (IHx k d). apply proj1 in IHx. specialize IHx; auto.
+    destruct IHx as [e od]. split; auto.
+    rewrite <-Zpower_nat_Z in *.
+    change (Zpower_nat 2 (S k)) with (2 * Zpower_nat 2 k).
+    lia.
+  - simpl. destruct (remove_twos x) as (k_, d_).
+    specialize (IHx k_ d_). apply proj1 in IHx.
+    destruct IHx as [ex hd_]; auto.
+    change (Z.pos x~0) with (2 * Z.pos x).
+    rewrite ex.
+    intros [ex' hd].
+    assert (k <= k_ \/ k > S k_ \/ k = S k_)%nat as [lk | [lk | ->]] by lia.
+    + enough (Z.Even (Z.pos d)) by now apply Odd_not_Even in hd.
+      exists (2 ^ Z.of_nat (k_ - k) * Z.pos d_).
+      rewrite <-(Z.mul_cancel_l _ _ (2 ^ Z.of_nat k)). 2:lia.
+      rewrite <-ex'. replace k_ with (k + (k_ - k))%nat at 1 by lia.
+      rewrite <-!Zpower_nat_Z, Zpower_nat_is_exp. lia.
+    + enough (Z.Even (Z.pos d_)) by now apply Odd_not_Even in hd_.
+      exists (2 ^ Z.of_nat (k - k_ - 2) * Z.pos d).
+      rewrite <-(Z.mul_cancel_l _ _ (2 * 2 ^ Z.of_nat k_)). 2:lia.
+      rewrite <-!Zpower_nat_Z in *.
+      transitivity (Zpower_nat 2 k_ * Zpower_nat 2 (k - k_ - 2) * 4 * Z.pos d).
+      2: lia.
+      change 4 with (Zpower_nat 2 2).
+      rewrite Z.mul_assoc in ex'. rewrite ex'.
+      rewrite <-2Zpower_nat_is_exp.
+      repeat f_equal. lia.
+    + enough (d_ = d) by congruence.
+      rewrite <-!Zpower_nat_Z in *.
+      change (Zpower_nat 2 (S k_)) with (2 * Zpower_nat 2 k_) in ex'.
+      enough (Z.pos d_ = Z.pos d) by congruence.
+      rewrite <-(Z.mul_cancel_l _ _ (2 * Zpower_nat 2 k_)). lia. lia.
+  - simpl. intros [=<-<-]. intuition. exists 0; lia.
+  - intros (ek, od).
+    assert (k = O). {
+      destruct k; auto.
+      pose proof Z.pow_le_mono_r 2 1 (Z.of_nat (S k)) ltac:(lia) ltac:(lia).
+      nia.
+    }
+    simpl. subst. f_equal.
+    enough (Z.pos d = 1) by congruence.
+    auto.
+Qed.
