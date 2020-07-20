@@ -16,6 +16,7 @@
 Arith/Hurwitz_def.v
 Arith/Hurwitz_prop.v
 Arith/Lagrange_four_square.v
+Arith/MillerRabin.v
 Arith/Modulo.v
 Arith/Natsets.v
 Arith/Nbinomial.v
