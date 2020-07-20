@@ -32,6 +32,7 @@ Arith/Npow.v
 Arith/Ntools.v
 Arith/PI.v
 Arith/Zeqm.v
+Arith/Zlittle_fermat.v
 Arith/Znumfacts.v
 Arith/Ztools.v
 Complex/Canalysis_basic_facts.v
