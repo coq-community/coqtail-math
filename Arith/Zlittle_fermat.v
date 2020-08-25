@@ -1,5 +1,5 @@
 From Coq Require Import ZArith Znumtheory Lia Psatz.
-From Coqtail Require Import Nlittle_fermat.
+From Coqtail Require Import Nlittle_fermat Ztools.
 
 Open Scope Z_scope.
 
@@ -44,14 +44,6 @@ Proof.
     apply Nprime_ge_2 in pp. lia.
 Qed.
 
-(* When we already have a proof [pr] of [P] and the goal is [Q], it is
-enough to prove [P = Q] *)
-Ltac exact_eq pr :=
-  generalize pr;
-  let A := fresh in
-  assert (A : forall P Q : Prop, P = Q -> P -> Q) by congruence;
-  apply A; clear A.
-
 Lemma Nat2Z_pow (a b : nat) : Z.of_nat (a ^ b) = Z.of_nat a ^ Z.of_nat b.
 Proof.
   rewrite <-Zpower_nat_Z.
@@ -95,13 +87,6 @@ Proof.
   lia.
 Qed.
 
-Tactic Notation "specialize" hyp(H) :=
-  match type of H with
-  | ?P -> _ =>
-    let h := fresh in
-    assert (h : P); [ | specialize (H h); clear h ]
-  end.
-
 Lemma primes_are_often_odd p : 3 <= p -> prime p -> Z.Odd p.
 Proof.
   intros p3 pp.
@@ -109,19 +94,6 @@ Proof.
   apply prime_alt in pp.
   destruct pp as (_, pp).
   apply (pp 2). lia. exists n. lia.
-Qed.
-
-Lemma Zpow_mod (a b m : Z) : (a ^ b) mod m = ((a mod m) ^ b) mod m.
-Proof.
-  assert (b < 0 \/ 0 <= b) as [bz | bz] by lia.
-  - rewrite 2 Z.pow_neg_r; auto.
-  - rewrite <-(Z2Nat.id b); auto.
-    rewrite <-2Zpower_nat_Z.
-    generalize (Z.to_nat b); intros n. clear b bz.
-    destruct (Z.eq_dec m 0).
-    + subst. now rewrite !Zmod_0_r.
-    + induction n. easy. simpl.
-      rewrite Z.mul_mod, IHn, Z.mul_mod_idemp_r; auto.
 Qed.
 
 Theorem Fermat's_little_theorem (p a : Z) :
@@ -134,7 +106,7 @@ Proof.
   - apply Fermat's_little_theorem_aux, pa.
   - intros pp pa.
     pose proof (Fermat's_little_theorem_aux p (- a) ltac:(lia) pp) as F.
-    specialize F.
+    spec F.
     { intro h; apply pa. apply Zdivide_opp_r_rev in h. auto. }
     assert (p = 2 \/ p > 2) as [-> | p3]
         by now pose proof prime_ge_2 _ pp; lia.

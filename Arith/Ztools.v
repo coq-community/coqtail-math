@@ -206,3 +206,43 @@ Proof.
     (* TODO déplacer et prouver : inutilisé mais intéressant.
     un peu intéressant, c'est dur environ comme sqrt(n)∈Q => sqrt(n)∈N *)
 Abort.
+
+Lemma Zpow_mod (a b m : Z) : (a ^ b) mod m = ((a mod m) ^ b) mod m.
+Proof.
+  assert (b < 0 \/ 0 <= b) as [bz | bz] by lia.
+  - rewrite 2 Z.pow_neg_r; auto.
+  - rewrite <-(Z2Nat.id b); auto.
+    rewrite <-2Zpower_nat_Z.
+    generalize (Z.to_nat b); intros n. clear b bz.
+    destruct (Z.eq_dec m 0).
+    + subst. now rewrite !Zmod_0_r.
+    + induction n. easy. simpl.
+      rewrite Z.mul_mod, IHn, Z.mul_mod_idemp_r; auto.
+Qed.
+
+(* When we already have a proof [pr] of [P] and the goal is [Q], it is
+   enough to prove [P = Q] *)
+
+Ltac exact_eq pr :=
+  generalize pr;
+  let A := fresh in
+  assert (A : forall P Q : Prop, P = Q -> P -> Q) by congruence;
+  apply A; clear A.
+
+(* If [H] is a hypothesis of the form [P -> Q], assert a proof of [P]
+   and remove the [P ->] from [H] *)
+
+Tactic Notation "spec" hyp(H) :=
+  match type of H with
+  | ?P -> _ =>
+    let h := fresh in
+    assert (h : P); [ | specialize (H h); clear h ]
+  end.
+
+Tactic Notation "spec" hyp(H) "by" tactic(t) :=
+  match type of H with
+  | ?P -> _ =>
+    let h := fresh in
+    assert (h : P) by t;
+    specialize (H h); clear h
+  end.
