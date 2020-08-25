@@ -12,11 +12,18 @@
 -I Tactics
 -I Topology
 -I Vec
+-arg -async-proofs
+-arg on
+-arg -async-proofs-j
+-arg 8
+-arg -async-proofs-tac-j
+-arg 8
 
 Arith/Hurwitz_def.v
 Arith/Hurwitz_prop.v
 Arith/Lagrange_four_square.v
 Arith/MillerRabin.v
+Arith/MillerRabinCheck.v
 Arith/Modulo.v
 Arith/Natsets.v
 Arith/Nbinomial.v
