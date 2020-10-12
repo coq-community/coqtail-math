@@ -2,28 +2,16 @@
 -I Arith
 -I Complex
 -I Fresh
--I Graphs
 -I Hierarchy
 -I Monad
 -I mytheories
 -I Reals
--I Sets
--I Subseq
 -I Tactics
--I Topology
--I Vec
--arg -async-proofs
--arg on
--arg -async-proofs-j
--arg 8
--arg -async-proofs-tac-j
--arg 8
 
 Arith/Hurwitz_def.v
 Arith/Hurwitz_prop.v
 Arith/Lagrange_four_square.v
 Arith/MillerRabin.v
-Arith/MillerRabinCheck.v
 Arith/Modulo.v
 Arith/Natsets.v
 Arith/Nbinomial.v
@@ -79,25 +67,9 @@ Fresh/Inhabited/Examples.v
 Fresh/Inhabited/Functions.v
 Fresh/Inhabited/InhabitedTactics.v
 Fresh/Inhabited/Monad.v
-Fresh/Reals/IZR.v
-Fresh/Reals/Rabs.v
-Fresh/Reals/Rapprox.v
-Fresh/Reals/Raxiom.v
-Fresh/Reals/Rconvenient.v
-Fresh/Reals/Repsilon.v
-Fresh/Reals/Rfun.v
-Fresh/Reals/Rimpl_template.v
-Fresh/Reals/Rimpl.v
-Fresh/Reals/Rorder.v
-Fresh/Reals/Rrealize.v
-Fresh/Reals/Rseq.v
-Graphs/definitions.v
 Hierarchy/Commutative_ring_binomial.v
-Hierarchy/Type_class_definition_beta.v
 Hierarchy/Type_class_definition.v
-Hierarchy/Type_class_instance_beta.v
 Hierarchy/Type_class_instance.v
-Hierarchy/Vector_space_facts.v
 Monad/Option.v
 mytheories/MyNat.v
 mytheories/MyNeq.v
@@ -200,19 +172,4 @@ Reals/Rtrigo_facts.v
 Reals/Rzeta2.v
 Reals/Triangular.v
 Reals/Wallis.v
-Sets/Cartesian_product_facts.v
-Sets/Cartesian_product.v
-Sets/My_Finite_sets_facts.v
-Sets/My_Sets_facts.v
-Subseq/Subseq.v
 Tactics/Ass_handling.v
-Topology/Inner_product.v
-Topology/Metrics.v
-Topology/Sets.v
-Topology/TContinuity.v
-Topology/TFunctions.v
-Topology/Topology.v
-Topology/Vectors.v
-Vec/Vec_def.v
-Vec/VecDep_def.v
-Vec/Vec_prop.v

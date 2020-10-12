@@ -13,11 +13,10 @@ witnesses:
 - below 10000 for the set {2,3}
 - below 1373653 for the set {2,3}
 
-The last item is proved in file MillerRabinCheck.v with some parallelism.
-
-Parallelism is enabled for all files, which is problematic since it
-makes coqc slower on some files, especially if several instances of
-coqc running at the same time already make use of multithreading.
+The last item can be checked but it takes a lot of time. Without
+parallelism, it is even worse, and enabling parallelism for all files
+makes compiling most other files more slowly, so we removed this
+exhaustive check.
 *)
 
 Theorem square_roots_of_unity (x p : Z) :
