@@ -4,6 +4,10 @@
 mathematical theorems and tools proved inside the Coq proof assistant.
 Results range mostly from arithmetic to real and complex analysis.
 
+Note that this project is distinct from [this other project named
+Coqtail](https://github.com/whonore/Coqtail), which helps using Coq in
+Vim.
+
 ## Requirements
 
 `master` is developed with Coq 8.12.0, which is its only requirement,
