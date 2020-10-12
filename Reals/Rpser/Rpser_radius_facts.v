@@ -164,7 +164,7 @@ intros An r [B HB] ; exists (Rmax (B * Rabs r) (Rabs (An O))) ;
   rewrite <- (Rmult_1_l (gt_abs_pser (Rseq_shift An) r i)).
   unfold gt_abs_pser, gt_pser, An_deriv, Rseq_shift, Rseq_abs, Rseq_mult.
   rewrite Rmult_assoc, (Rabs_mult (INR (S i))) ; apply Rmult_le_compat_r ;
-  [apply Rabs_pos |] ; rewrite <- INR_1, Rabs_INR ; apply le_INR ; omega.
+  [apply Rabs_pos |] ; rewrite <- INR_1, Rabs_INR ; apply le_INR ; lia.
 Qed.
 
 Lemma finite_cv_radius_derivable_compat : forall An r,
@@ -252,7 +252,7 @@ unfold An_deriv, Rseq_shift, Rseq_mult, Rseq_div, Rdiv ; intro n ; simpl.
 rewrite <- Rmult_assoc, Rmult_comm, <- Rmult_assoc, Rinv_l, Rmult_1_l.
  reflexivity.
  apply Rgt_not_eq ; unfold Rgt ; replace (match n with | 0%nat => 1 | S _ => INR n + 1 end)
- with (INR (S n)) by auto ; apply lt_0_INR ; omega.
+ with (INR (S n)) by auto ; apply lt_0_INR ; lia.
 apply Cv_radius_weak_derivable_compat with (Rmin (Rabs r1) (Rabs r2)).
 
 destruct (Cv_radius_weak_prod_prelim An Bn r1 r2 rAn rBn) as [B HB] ;

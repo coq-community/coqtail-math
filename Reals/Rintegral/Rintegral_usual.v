@@ -25,7 +25,7 @@ USA.
 Require Import Reals.
 Require Import MyRfunctions.
 Require Import Rintegral.
-Require Import Coq.omega.Omega.
+Require Import Lia.
 
 Open Scope R_scope.
 
@@ -65,7 +65,7 @@ destruct n.
   unfold fct_cte; auto with *.
   apply Rint_constant.
 apply Rint_derive2 with (f := fun x => x ^ (S n)); intros.
-apply derivable_pt_lim_pow_pos; omega.
+apply derivable_pt_lim_pow_pos; lia.
 apply continuity_pt_mult.
 apply continuity_pt_const; intros u v ; reflexivity.
 

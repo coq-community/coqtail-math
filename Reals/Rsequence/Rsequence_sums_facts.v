@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_cv_facts Rsequence_rewrite_facts.
 Require Import Rpser_def Rpser_def_simpl.
 Require Import MyRIneq MyNat Lra.
@@ -129,7 +129,7 @@ Lemma Rseq_sum_split_compat : forall Un k n, (k < n)%nat ->
   (Rseq_sum Un n = Rseq_sum Un k + Rseq_sum (Rseq_shifts Un (S k)) (n - S k))%R.
 Proof.
 intros Un k n kltn ; rewrite Rseq_sum_shifts_compat ; ring_simplify.
- unfold Rseq_shifts ; rewrite le_plus_minus_r ; [reflexivity | omega].
+ unfold Rseq_shifts ; rewrite le_plus_minus_r ; [reflexivity | lia].
 Qed.
 
 Lemma Rseq_sum_reindex_compat : forall Un n,
@@ -141,7 +141,7 @@ intros Un n ; revert Un ; induction n ; intro Un.
  rewrite (IHn (fun i => Un (S n - i)%nat)), minus_diag.
  rewrite (Rseq_sum_ext_strong (fun i => Un (S n - (n - i))%nat) (Rseq_shift Un)).
  rewrite Rseq_sum_shift_compat ; unfold Rseq_shift ; simpl ; ring.
- intros m m_bd ; unfold Rseq_shift ; replace (S n - (n - m))%nat with (S m) by omega ;
+ intros m m_bd ; unfold Rseq_shift ; replace (S n - (n - m))%nat with (S m) by lia ;
  reflexivity.
 Qed.
 
@@ -149,7 +149,7 @@ Lemma Rseq_prod_comm: forall An Bn, (An # Bn == Bn # An)%Rseq.
 Proof.
 intros An Bn n ; unfold Rseq_prod, Rseq_mult ;
  rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ;
- intros p p_ub ; replace (n - (n - p))%nat with p by omega ;
+ intros p p_ub ; replace (n - (n - p))%nat with p by lia ;
  ring.
 Qed.
 
@@ -164,17 +164,17 @@ intros An Bn n ; induction n.
  rewrite Rseq_sum_plus_compat, Rseq_sum_simpl, IHn ; unfold Rseq_plus ;
  rewrite Rplus_assoc ; apply Rplus_eq_compat.
  rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ;
-  intros p p_ub ; replace (n - (n - p))%nat with p by omega ; apply Rmult_comm.
- replace O with ((S n) - S n)%nat by omega ; unfold Rseq_prod ;
+  intros p p_ub ; replace (n - (n - p))%nat with p by lia ; apply Rmult_comm.
+ replace O with ((S n) - S n)%nat by lia ; unfold Rseq_prod ;
   rewrite Rseq_sum_simpl ; apply Rplus_eq_compat_r ; apply Rseq_sum_ext_strong ;
-  intros p p_ub ; unfold Rseq_mult ; replace (S n - p)%nat with (S (n - p)) by omega ;
+  intros p p_ub ; unfold Rseq_mult ; replace (S n - p)%nat with (S (n - p)) by lia ;
   reflexivity.
  transitivity (Rseq_sum (fun i => (An i * (Rseq_sum Bn (S n - i)))%R) (S n)).
  rewrite Rseq_sum_simpl, minus_diag ; apply Rplus_eq_compat ; [| trivial].
  apply Rseq_sum_ext_strong ; intros p p_ub ; unfold Rseq_plus ;
- replace (S n - p)%nat with (S (n - p)) by omega ; rewrite Rseq_sum_simpl ; ring.
+ replace (S n - p)%nat with (S (n - p)) by lia ; rewrite Rseq_sum_simpl ; ring.
  rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ; intros p p_ub ;
- replace (S n - (S n - p))%nat with p by omega ; apply Rmult_comm.
+ replace (S n - (S n - p))%nat with p by lia ; apply Rmult_comm.
 Qed.
 
 Lemma two_Sn : forall n, (2 * S n = S (S (2 * n)))%nat.
@@ -187,16 +187,16 @@ Lemma Rseq_sum_zip_compat_odd : forall An Bn n,
 Proof.
 intros An Bn ; induction n.
  unfold Rseq_zip ; simpl.
-  case (n_modulo_2 0) ; intros [p Hp] ; [| apply False_ind ; omega].
-  case (n_modulo_2 1) ; intros [q Hq] ; [apply False_ind ; omega |].
-  assert (Hp' : p = O) by omega ; assert (Hq' : q = O) by omega ; subst ; reflexivity.
+  case (n_modulo_2 0) ; intros [p Hp] ; [| apply False_ind ; lia].
+  case (n_modulo_2 1) ; intros [q Hq] ; [apply False_ind ; lia |].
+  assert (Hp' : p = O) by lia ; assert (Hq' : q = O) by lia ; subst ; reflexivity.
  rewrite two_Sn ; do 2 rewrite Rseq_sum_simpl ; rewrite IHn ; do 2 rewrite Rseq_sum_simpl.
   repeat rewrite Rplus_assoc ; apply Rplus_eq_compat_l.
   rewrite (Rplus_comm (An (S n))), Rplus_assoc ; apply Rplus_eq_compat_l.
   rewrite Rplus_comm, <- two_Sn ; apply Rplus_eq_compat ; unfold Rseq_zip ;
-   [ case (n_modulo_2 (S (2 * S n))) ; intros [p Hp] ; [apply False_ind ; omega |] |
-     case (n_modulo_2 (2 * S n)) ; intros [p Hp] ; [| apply False_ind ; omega] ] ;
-   assert (Hp' : p = S n) by omega ; subst ; reflexivity.
+   [ case (n_modulo_2 (S (2 * S n))) ; intros [p Hp] ; [apply False_ind ; lia |] |
+     case (n_modulo_2 (2 * S n)) ; intros [p Hp] ; [| apply False_ind ; lia] ] ;
+   assert (Hp' : p = S n) by lia ; subst ; reflexivity.
 Qed.
 
 Lemma Rseq_sum_zip_compat_even : forall An Bn n,
@@ -204,8 +204,8 @@ Lemma Rseq_sum_zip_compat_even : forall An Bn n,
 Proof.
 intros An Bn n ; rewrite two_Sn, Rseq_sum_simpl, Rseq_sum_zip_compat_odd,
  Rseq_sum_simpl, <- two_Sn ; unfold Rseq_zip.
- case (n_modulo_2 (2 * S n)) ; intros [p Hp] ; [| apply False_ind ; omega].
- assert (Hp' : p = S n) by omega ; subst ; ring.
+ case (n_modulo_2 (2 * S n)) ; intros [p Hp] ; [| apply False_ind ; lia].
+ assert (Hp' : p = S n) by lia ; subst ; ring.
 Qed.
 
 (** Compatibility with the orders *)
@@ -217,7 +217,7 @@ Proof.
 intros An n ; induction n ; intro Hpos.
  simpl ; apply Hpos ; trivial.
  rewrite Rseq_sum_simpl ; apply Rplus_le_le_0_compat ;
- [apply IHn ; intros p p_bd |] ; apply Hpos ; omega.
+ [apply IHn ; intros p p_bd |] ; apply Hpos ; lia.
 Qed.
 
 Lemma Rseq_sum_pos: forall An n,
@@ -278,7 +278,7 @@ intros An n lb HAn ; induction n.
  simpl ; rewrite Rmult_1_l ; apply HAn ; reflexivity.
  rewrite S_INR, Rmult_plus_distr_r, Rmult_1_l, Rseq_sum_simpl ;
   apply Rplus_le_compat ; [apply IHn | apply HAn ; reflexivity].
-  intros m m_lb ; apply HAn ; omega.
+  intros m m_lb ; apply HAn ; lia.
 Qed.
 
 Lemma Rseq_sum_upper_bound : forall An n ub,
@@ -289,7 +289,7 @@ intros An n ub HAn ; induction n.
  simpl ; rewrite Rmult_1_l ; apply HAn ; reflexivity.
  rewrite S_INR, Rmult_plus_distr_r, Rmult_1_l, Rseq_sum_simpl ;
   apply Rplus_le_compat ; [apply IHn | apply HAn ; reflexivity].
-  intros m m_lb ; apply HAn ; omega.
+  intros m m_lb ; apply HAn ; lia.
 Qed.
 
 (** Convergence to infinity *)
@@ -311,7 +311,7 @@ intros An d d_pos An_pos HAn.
        [| symmetry ; eapply Rseq_shifts_0 ] ; assumption.
      apply Rseq_sum_pos ; intros ; apply An_pos.
     destruct IHM as [N HN] ; destruct (HAn (S (S N))) as [N' [N'_lb HN']] ; exists N' ;
-     assert (N'_lb' : (S N < N')%nat) by omega.
+     assert (N'_lb' : (S N < N')%nat) by lia.
     intros n n_lb ; rewrite S_INR, Rmult_plus_distr_r, Rmult_1_l,
      (Rseq_sum_split_compat _ _ _ n_lb), (Rseq_sum_split_compat _ _ _ N'_lb'),
      Rplus_assoc.
@@ -325,7 +325,7 @@ intros An d d_pos An_pos HAn.
    apply le_IZR ; simpl ; eapply Rle_trans ; [| left ; eassumption].
    apply Rle_mult_inv_pos ; [apply Rabs_pos | assumption].
   destruct (IZN _ M_pos) as [M' HM'] ; destruct (HAn' M') as [N HN] ; exists (S N) ; intros n n_lb.
-   apply Rlt_le_trans with (INR M' * d)%R ; [| apply HN ; omega].
+   apply Rlt_le_trans with (INR M' * d)%R ; [| apply HN ; lia].
    apply Rle_lt_trans with (Rabs B) ; [apply Rle_abs |].
    rewrite <- (Rmult_1_r (Rabs B)), <- (Rinv_l d), <- Rmult_assoc, INR_IZR_INZ, <- HM'.
    apply Rmult_lt_compat_r ; [assumption | apply HB].
@@ -391,7 +391,7 @@ Proof.
 intros An n ; induction n.
  unfold Rseq_pps, gt_pser, Rseq_mult ; simpl ;
   rewrite Rmult_1_r ; reflexivity.
- rewrite Rseq_pps_simpl, IHn, pow_i ; [ring | omega].
+ rewrite Rseq_pps_simpl, IHn, pow_i ; [ring | lia].
 Qed.
 
 Lemma Rseq_pps_O_simpl : forall An x,
@@ -465,8 +465,8 @@ intros An Bn x n ; induction n.
  symmetry ; eapply (Rseq_sum_scal_compat_r _ _ (S n)).
  apply Rseq_sum_ext_strong ; fold (pow x (S n)) ; intros p p_lb ;
  unfold gt_pser, Rseq_mult, Rseq_constant.
- replace (S n) with (p + (S n - p))%nat by omega ; rewrite pow_add ;
- replace (p + (S n - p) -p)%nat with (S n - p)%nat by omega ; ring.
+ replace (S n) with (p + (S n - p))%nat by lia ; rewrite pow_add ;
+ replace (p + (S n - p) -p)%nat with (S n - p)%nat by lia ; ring.
 Qed.
 
 Lemma Rseq_pps_zip_compat_odd : forall An Bn x n,

@@ -69,7 +69,7 @@ destruct (Ucv e epos) as [N Hu].
 exists N; intros n nN.
 replace (Rseq_sum (fun n0 : nat => Un (2 * n0)%nat + Un (S (2 * n0))) n)
  with (Rseq_sum Un (S (2 * n))).
- intros; apply Hu; omega.
+ intros; apply Hu; lia.
  
  clear nN.
  induction n.
@@ -119,7 +119,7 @@ apply Rseq_cv_eq_compat with ((fun n => sum_f_R0 Un (S (2 * n))) - sum_f_R0 (eve
 
  eapply Rseq_subseq_cv_compat; [|apply Hu].
   assert (Hex : is_extractor (fun i => S (2 * i))).
-    intros n; omega.
+    intros n; lia.
   exists (exist _ _ Hex).
   reflexivity.
   assumption.
@@ -141,7 +141,7 @@ apply Rseq_cv_eq_compat with ((fun n => sum_f_R0 Un (S (2 * n))) - sum_f_R0 (odd
  apply Rseq_cv_minus_compat.
   eapply Rseq_subseq_cv_compat; [|apply Hu].
    assert (Hex : is_extractor (fun i => S (2 * i))).
-     intros n; omega.
+     intros n; lia.
    exists (exist _ _ Hex).
    
    reflexivity.
@@ -209,7 +209,7 @@ field; split;
  rewrite <- mult_INR in H.
  generalize dependent H.
  apply not_INR.
- omega.
+ lia.
 Qed.
 
 Lemma Sum_antg_neg : Rser_cv antg_neg (PI / 4 + 1).
@@ -303,8 +303,7 @@ eapply Rser_pos_maj_cv.
  intro; apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
  
  intro n; apply Rle_Rinv; unfold Rseq_shift ; try (apply pow_lt; INR_solve).
- unfold pow; INR_solve.
- apply mult_le_compat; omega.
+ unfold pow; INR_solve; try (apply mult_le_compat; lia).
 Qed.
 
 (** * Sums indexed by relative integers (from -N to N) *)
@@ -396,7 +395,7 @@ Lemma pow1_plus_nat : forall a b, pow1 (a + Z_of_nat b) = (pow1 a) * (-1) ^ b.
 Proof.
 intros.
 induction b.
- simpl; ring_simplify; inject; omega.
+ simpl; ring_simplify; inject; lia.
  
  rewrite inj_S; rewrite <- Zplus_succ_r_reverse; rewrite pow1_succ.
  rewrite IHb.
@@ -599,16 +598,16 @@ Lemma bisum_eq_compat_bounded : forall f g n, (forall z, ((-Z_of_nat n) <= z <= 
 Proof.
 intros.
 induction n.
- simpl; apply H; simpl; omega.
+ simpl; apply H; simpl; lia.
  
  simpl.
- rewrite H; [ | simpl; split; [apply Zle_neg_pos | omega]].
- rewrite H; [ | simpl; split; [omega | apply Zle_neg_pos]].
+ rewrite H; [ | simpl; split; [apply Zle_neg_pos | lia]].
+ rewrite H; [ | simpl; split; [lia | apply Zle_neg_pos]].
  rewrite IHn.
   trivial.
   
   intros z [H1 H2].
-  apply H; split; eapply Z.le_trans; [ | apply H1 | apply H2 | ]; rewrite inj_S; omega.
+  apply H; split; eapply Z.le_trans; [ | apply H1 | apply H2 | ]; rewrite inj_S; lia.
 Qed.
 
 (** Double sum distributivity *)
@@ -626,7 +625,7 @@ Lemma Psucc_lt : forall p, (Zpos p < Zpos (Pos.succ p))%Z.
 Proof.
 intros.
 replace (Zpos (Pos.succ p)) with (1 + Zpos p)%Z.
- omega.
+ lia.
  induction p; trivial.
 Qed.
 
@@ -634,7 +633,7 @@ Lemma Psucc_lt_neg : forall p, (Zneg (Pos.succ p) < Zneg p)%Z.
 Proof.
 intros.
 replace (Zneg (Pos.succ p)) with (- 1 + Zneg p)%Z.
- omega.
+ lia.
  induction p; trivial.
 Qed.
 
@@ -647,14 +646,14 @@ intros.
 apply bisum_eq_compat_bounded; intros.
 destruct H.
  destruct (Z.eq_dec z (- Z_of_nat (S n))).
-  subst;  destruct H0; rewrite inj_S in * |-; apply False_ind; omega.
+  subst;  destruct H0; rewrite inj_S in * |-; apply False_ind; lia.
   destruct (Z.eq_dec z j).
-   subst; apply False_ind; omega.
+   subst; apply False_ind; lia.
    trivial.
  destruct (Z.eq_dec z (Z_of_nat (S n))).
-  subst;  destruct H0; rewrite inj_S in * |-; apply False_ind; omega.
+  subst;  destruct H0; rewrite inj_S in * |-; apply False_ind; lia.
   destruct (Z.eq_dec z j).
-   subst; apply False_ind; omega.
+   subst; apply False_ind; lia.
    trivial.
 Qed.
 
@@ -665,7 +664,7 @@ Lemma bisum_in : forall f g j n, (- Z_of_nat n <= j <= Z_of_nat n)%Z ->
 Proof.
 intros.
 induction n.
- assert (j = Z0) by (replace (Z_of_nat O) with Z0 in H by trivial; omega); subst; trivial.
+ assert (j = Z0) by (replace (Z_of_nat O) with Z0 in H by trivial; lia); subst; trivial.
  simpl; ring.
  
  set (h := fun i => if Z.eq_dec i j then g j else f i).
@@ -675,13 +674,13 @@ induction n.
   rewrite bisum_not_in.
    ring.
    right; destruct n; simpl.
-    omega.
+    lia.
     apply Psucc_lt.
   
   rewrite bisum_not_in.
    ring.
    left; destruct n; simpl.
-    omega.
+    lia.
     apply Psucc_lt_neg.
   
   rewrite IHn.
@@ -690,12 +689,12 @@ induction n.
     destruct (Z_le_gt_dec (- Z_of_nat n) j); trivial.
     replace (Zneg (P_of_succ_nat n)) with (- Z_of_nat (S n))%Z in e' by trivial.
     rewrite inj_S in *.
-    omega.
+    lia.
     
     destruct (Z_le_gt_dec j (Z_of_nat n)); trivial.
     replace (Zpos (P_of_succ_nat n)) with (Z_of_nat (S n))%Z in e by trivial.
     rewrite inj_S in *.
-    omega.
+    lia.
 Qed.
 
 (** Stripping terms *)
@@ -727,10 +726,10 @@ unfold bisum_strip'.
 apply bisum_eq_compat_bounded; intros.
 destruct H; subst.
  destruct (Z.eq_dec z (- Z_of_nat (S n))).
-  subst; destruct H0; rewrite inj_S in * |- ; apply False_ind; omega.
+  subst; destruct H0; rewrite inj_S in * |- ; apply False_ind; lia.
   trivial.
  destruct (Z.eq_dec z (Z_of_nat (S n))).
-  subst; destruct H0; rewrite inj_S in * |- ; apply False_ind; omega.
+  subst; destruct H0; rewrite inj_S in * |- ; apply False_ind; lia.
   trivial.
 Qed.
 
@@ -780,10 +779,10 @@ induction n.
  rewrite IHn.
  rewrite (bisum_one_step (fun i : Z => f i i)).
  repeat rewrite bisum_one_step.
- destruct (Z.eq_dec (Z_of_nat (S n)) (Z_of_nat (S n))); [ | apply False_ind; omega]; clear e.
+ destruct (Z.eq_dec (Z_of_nat (S n)) (Z_of_nat (S n))); [ | apply False_ind; lia]; clear e.
  destruct (Z.eq_dec (Z_of_nat (S n)) (- Z_of_nat (S n))); [ apply False_ind; inversion e | ]; clear n0.
  destruct (Z.eq_dec (- Z_of_nat (S n)) (Z_of_nat (S n))); [ apply False_ind; inversion e | ]; clear n0.
- destruct (Z.eq_dec (- Z_of_nat (S n)) (- Z_of_nat (S n))); [ | apply False_ind; omega]; clear e.
+ destruct (Z.eq_dec (- Z_of_nat (S n)) (- Z_of_nat (S n))); [ | apply False_ind; lia]; clear e.
  ring_simplify.
  assert (H : forall BII FNP FPN A B C D BIJ BIJS BPJS BNJS,
   BIJ + A + B + C + D = BIJS + BPJS + BNJS ->
@@ -917,7 +916,7 @@ induction a.
    a + b + c = c' + a' + b') by (intros; subst; ring);
    apply AP; clear AP;
    inject;
-   simpl (0 + b)%nat; simpl (Z_of_nat 1); repeat rewrite inj_S; omega.
+   simpl (0 + b)%nat; simpl (Z_of_nat 1); repeat rewrite inj_S; lia.
  rewrite bisum_one_step.
  rewrite IHa; clear IHa.
  rewrite bisum_one_step.
@@ -929,8 +928,8 @@ induction a.
    a + b + c + d = a' + d' + b' + c') by (intros; subst; ring);
    apply AP; clear AP;
    inject;
-   try (simpl (0 + b)%nat; simpl (Z_of_nat 1); repeat rewrite inj_S; omega);
-   repeat rewrite inj_S; rewrite inj_plus; repeat rewrite inj_S; omega.
+   try (simpl (0 + b)%nat; simpl (Z_of_nat 1); repeat rewrite inj_S; lia);
+   repeat rewrite inj_S; rewrite inj_plus; repeat rewrite inj_S; lia.
 Qed.
 
 Lemma bisum_shifting : forall u n p, 
@@ -941,12 +940,12 @@ Proof.
 intros.
 induction p.
  rewrite bisum_eq_compat with _ u _; 
-   [| intro; unfold shiftp; inject; simpl Z_of_nat; omega].
+   [| intro; unfold shiftp; inject; simpl Z_of_nat; lia].
  simpl.
- ring_simplify; inject; omega.
+ ring_simplify; inject; lia.
  
  rewrite <- plus_n_Sm.
- replace (mult 2 (S p)) with (S (S (2 * p))) by omega.
+ replace (mult 2 (S p)) with (S (S (2 * p))) by lia.
  replace (sum1 (shiftp u n) (S (S (2 * p))))
    with (sum1 (shiftp u n) (2 * p) + 
      (shiftp u n) (Z_of_nat (S (2 * p))) + 
@@ -961,12 +960,12 @@ induction p.
      ; [trivial | ].
  rewrite bisum_shifting_S.
  unfold shiftp.
- replace (mult 2 p) with (plus p p) by omega.
+ replace (mult 2 p) with (plus p p) by lia.
  assert (AP : forall a b c a' b' c', a = a' -> b = b' -> c = c' ->
    a + b + c = a' + b' + c') by (intros; subst; ring);
    apply AP; clear AP; trivial;
    inject;
-   repeat (repeat rewrite inj_S; repeat rewrite inj_plus); omega.
+   repeat (repeat rewrite inj_S; repeat rewrite inj_plus); lia.
 Qed.
 
 (** * Rewriting An * An - Bn *)
@@ -990,7 +989,7 @@ Lemma d_not_null : forall z, d' z <> 0.
 Proof.
 intros.
 unfold d', d.
-discrR; omega.
+discrR; lia.
 Qed.
 
 Lemma calc1 : forall N, (An N) * (An N) - Bn N =
@@ -998,7 +997,7 @@ Lemma calc1 : forall N, (An N) * (An N) - Bn N =
     (pow1 m * pow1 n) * / (2 * (IZR (m - n))) * (/ (d' n) - / (d' m))
   ) N.
 Proof.
-assert (forall z, 2 * IZR z + 1 <> 0) by (intro; discrR; omega).
+assert (forall z, 2 * IZR z + 1 <> 0) by (intro; discrR; lia).
 intros N.
 unfold An.
 rewrite <- bisumsum_square.
@@ -1016,17 +1015,17 @@ replace (Bn N) with (bisum (fun i => anz i * anz i) N).
    
    replace (2 * IZR i + 1) with (d (IZR i)) by trivial.
    replace (2 * IZR j + 1) with (d (IZR j)) by trivial.
-   rewrite splitmn; try apply d_not_null; try (discrR; omega).
+   rewrite splitmn; try apply d_not_null; try (discrR; lia).
     unfold d'.
     rewrite Z_R_minus.
-    field; repeat split; try apply d_not_null; discrR; omega.
+    field; repeat split; try apply d_not_null; discrR; lia.
  
  apply bisum_eq_compat.
  intro.
  unfold bnz, anz; field_simplify; try apply H.
  rewrite pow1_squared; field.
  unfold pow.
- discrR; omega.
+ discrR; lia.
 Qed.
 
 Lemma calc2 : forall N, (An N) * (An N) - Bn N = bisumsum_strip_diag'  (fun n m =>
@@ -1047,12 +1046,12 @@ rewrite bisumsum_strip_diag'_eq_but_diag_compat with _
  replace (IZR (i - j)) with (- IZR (j - i)).
   field; split.
    apply d_not_null.
-   discrR; omega.
+   discrR; lia.
   repeat rewrite <- Z_R_minus; ring.
  intros.
  field; repeat split.
   apply d_not_null.
-  discrR; omega.
+  discrR; lia.
   apply d_not_null.
 Qed.
 
@@ -1068,7 +1067,7 @@ rewrite <- bisum_scal_mult.
 apply bisum_eq_compat; intros.
 unfold zr.
 destruct (Z.eq_dec z z0); field; [ | split ]; try apply d_not_null.
-discrR; omega.
+discrR; lia.
 Qed.
 
 Lemma cn_odd : forall n N, cn (- n)%Z N = - (cn n N).
@@ -1081,14 +1080,14 @@ rewrite <- bisum_scal_mult.
 apply bisum_eq_compat; intros.
 unfold zr.
 destruct (Z.eq_dec (- n) (- z)); destruct (Z.eq_dec n z); subst; try ring.
- assert (n = z) by omega; subst; apply False_ind; apply n0; trivial.
+ assert (n = z) by lia; subst; apply False_ind; apply n0; trivial.
  apply False_ind; apply n0; trivial.
- replace (- z - - n)%Z with (n - z)%Z by omega.
+ replace (- z - - n)%Z with (n - z)%Z by lia.
  replace (pow1 (- z)) with (pow1 z).
   replace (IZR (n - z)) with (- IZR (z - n)).
    field.
-   discrR; omega.
-  rewrite <- Ropp_Ropp_IZR; apply IZR_eq; omega.
+   discrR; lia.
+  rewrite <- Ropp_Ropp_IZR; apply IZR_eq; lia.
   induction z; trivial.
 Qed.
 
@@ -1120,7 +1119,7 @@ assert (odd' : forall a b, cn a b = - (cn (- a) b))
   by (intros; rewrite cn_odd; ring).
 rewrite odd'.
 pose (N - S n)%nat as k.
-replace N with (k + S n)%nat by (unfold k; omega).
+replace N with (k + S n)%nat by (unfold k; lia).
 unfold cn.
 
 replace
@@ -1157,7 +1156,7 @@ replace
   
   rewrite H0; clear H0.
   rewrite Rplus_0_l.
-  replace (mult 2 (S n)) with (S (S (2 * n))) by omega.
+  replace (mult 2 (S n)) with (S (S (2 * n))) by lia.
   rewrite sum_f_R0_sum1.
   assert (RE : forall x, - x = -1 * x) by (intro; ring);
     rewrite RE; clear RE.
@@ -1174,7 +1173,7 @@ replace
    
    rewrite pow1_nat.
    rewrite <- INR_IZR_INZ.
-   replace (i + (k + S n) - n)%nat with (S i + k)%nat by omega.
+   replace (i + (k + S n) - n)%nat with (S i + k)%nat by lia.
    simpl pow.
    field; INR_solve.
   
@@ -1187,7 +1186,7 @@ replace
    simpl (S i + k)%nat.
    do 2 rewrite inj_S.
    rewrite IHi.
-   omega.
+   lia.
  
  apply bisum_eq_compat; intro.
  unfold shiftp.
@@ -1195,13 +1194,13 @@ replace
  destruct (Z.eq_dec (- Zpos (P_of_succ_nat n)) z).
   auto with *.
   
-  assert (z = - Z_of_nat (S n))%Z by omega.
+  assert (z = - Z_of_nat (S n))%Z by lia.
   assert (- Zpos (P_of_succ_nat n) = (- Z_of_nat (S n)))%Z by trivial.
   subst; tauto.
   
   subst.
   assert (- Zpos (P_of_succ_nat n) = (- Z_of_nat (S n)))%Z by trivial.
-  apply False_ind; omega.
+  apply False_ind; lia.
   
   repeat rewrite <- Rmult_assoc.
   assert (AP : forall a b a' a'' b', a = a' * a'' -> b = b' -> (b' <> 0)%Z ->
@@ -1212,7 +1211,7 @@ replace
    ring_simplify.
    assert ((-1) ^ n * (-1) ^ S n = -1).
     rewrite <- Rdef_pow_add.
-    replace (n + S n)%nat with (S (2 * n)) by omega.
+    replace (n + S n)%nat with (S (2 * n)) by lia.
     apply pow_1_odd.
    
    rewrite Rmult_assoc.
@@ -1247,11 +1246,11 @@ induction p.
 destruct (even_odd_cor n) as [p [he|ho]]; subst; split.
  destruct p.
  unfold Sn; simpl; unfold tg_alt, pow; ring_simplify; apply pos.
- replace (2 * S p)%nat with (S (S (2 * p))) by omega.
+ replace (2 * S p)%nat with (S (S (2 * p))) by lia.
  unfold Sn; rewrite tech5; fold Sn.
  apply Rplus_le_le_0_compat.
   apply Ho0.
-  replace (S (S (2 * p))) with (2 * S p)%nat by omega.
+  replace (S (S (2 * p))) with (2 * S p)%nat by lia.
   unfold tg_alt.
   rewrite pow_1_even.
   rewrite Rmult_1_l.
@@ -1288,22 +1287,22 @@ destruct n.
    with ((-1) ^ (N - n) * sum_f_R0 (fun j : nat => (-1) ^ j * / INR (j + N - n)) (S (2 * n))).
   2:rewrite scal_sum.
   2:apply Rseq_sum_ext; intro.
-  2:replace (n0 + N - n)%nat with (n0 + (N - n))%nat by omega.
+  2:replace (n0 + N - n)%nat with (n0 + (N - n))%nat by lia.
   2:rewrite Rdef_pow_add; ring.
   
  rewrite Rabs_mult; rewrite pow_1_abs; rewrite Rmult_1_l.
  cut (forall i, Rabs (sum_f_R0 (fun j : nat => (-1) ^ j * / INR (j + N - n)) i) <= / INR (N - S n + 1))
    ;[intuition | ].
- replace (N - S n + 1)%nat with (N - n)%nat by omega.
+ replace (N - S n + 1)%nat with (N - n)%nat by lia.
  
  pose (N - n)%nat as k; fold k.
- assert (kpos : (0 < k)%nat) by (unfold k; omega).
+ assert (kpos : (0 < k)%nat) by (unfold k; lia).
  pose (fun j => / INR (j + k)) as Un.
  
  intro i;
  replace (sum_f_R0 (fun j => (-1) ^ j * / INR (j + N - n)) i)
    with (sum_f_R0 (fun j => (-1) ^ j * / INR (j + k)) i)
-   by (apply Rseq_sum_ext; intro; trivial; inject; unfold k; omega).
+   by (apply Rseq_sum_ext; intro; trivial; inject; unfold k; lia).
  replace (sum_f_R0 (fun j => (-1) ^ j * / INR (j + k)) i)
    with (sum_f_R0 (tg_alt Un) i)
    by (apply Rseq_sum_ext; intro; trivial).
@@ -1376,7 +1375,7 @@ destruct N.
    apply Rseq_sum_ext; intro n;
    field; INR_solve
  ).
- rewrite decomp_sum by omega; simpl pred; simpl (Z_of_nat 0);
+ rewrite decomp_sum by lia; simpl pred; simpl (Z_of_nat 0);
    rewrite cn_zero_zero; rewrite Rmult_0_r; rewrite Rplus_0_l.
  
  apply Rplus_le_compat.
@@ -1388,7 +1387,7 @@ destruct N.
   rewrite pow1_Rabs; rewrite Rmult_1_l.
   rewrite Rmult_comm.
   apply Rmult_le_compat; try apply Rabs_pos.
-   apply (cn_maj (S n) (S N)); omega.
+   apply (cn_maj (S n) (S N)); lia.
    unfold d', d; rewrite <- INR_IZR_INZ.
    rewrite Rabs_pos_eq; try apply Rle_Rinv;
      try (apply Rlt_le; apply Rinv_0_lt_compat);
@@ -1404,7 +1403,7 @@ destruct N.
   apply Rmult_le_compat; try apply Rabs_pos.
    eapply Rle_trans.
     rewrite cn_odd; rewrite Rabs_Ropp.
-    apply (cn_maj (S n) (S N)); omega.
+    apply (cn_maj (S n) (S N)); lia.
     apply Rle_Rinv; INR_solve.
    unfold d', d; rewrite Ropp_Ropp_IZR; rewrite <- INR_IZR_INZ.
    rewrite <- Rabs_Ropp; rewrite Ropp_inv_permute.
@@ -1425,9 +1424,9 @@ erewrite sum_eq.
  apply sum_plus.
  
  intros n H.
- replace (S N - S n + 1)%nat with (S N - n)%nat by omega.
- rewrite abound_eq; try omega.
- replace (S N - S n + 1)%nat with (S N - n)%nat by omega.
+ replace (S N - S n + 1)%nat with (S N - n)%nat by lia.
+ rewrite abound_eq; try lia.
+ replace (S N - S n + 1)%nat with (S N - n)%nat by lia.
  field; INR_solve.
 Qed.
 
@@ -1438,7 +1437,7 @@ Definition inverse_mean n := sum_f_R0 (fun i => / INR (S i)) n / INR (S n).
 Lemma inverse_cv_0 : Rseq_cv (fun i => / INR (S i)) 0.
 Proof.
 apply Rseq_cv_pos_infty_inv_compat.
-assert (H01 : (1 > 0)%nat) by omega.
+assert (H01 : (1 > 0)%nat) by lia.
 pose proof (Rseq_poly_cv 1 H01).
 unfold Rseq_poly in H; simpl in H.
 eapply Rseq_cv_pos_infty_eq_compat in H; [ | intro; apply Rmult_1_r].
@@ -1526,7 +1525,7 @@ assert (Rseq_cv
  apply (half_mean_0 _ 2).
   lra.
   
-  omega.
+  lia.
   
   intro; unfold Rdiv; apply Rle_mult_inv_pos; [lra | INR_solve].
   
@@ -1536,7 +1535,7 @@ assert (Rseq_cv
  
  intros e epos; destruct (H e epos) as [N J]; exists N; intros n nN.
  simpl pred.
- apply J; omega.
+ apply J; lia.
 Qed.
 
 Lemma bound2'_cv : Rseq_cv bound2' 0.
@@ -1550,7 +1549,7 @@ assert (Rseq_cv
  apply (half_mean_0 _ 2).
   lra.
   
-  omega.
+  lia.
   
   intro; unfold Rdiv; apply Rle_mult_inv_pos; [lra | INR_solve].
   
@@ -1560,7 +1559,7 @@ assert (Rseq_cv
  
  intros e epos; destruct (H e epos) as [N J]; exists N; intros n nN.
  simpl pred.
- apply J; omega.
+ apply J; lia.
 Qed.
 
 Lemma Rsum_switch_index : forall Un N, sum_f_R0 (fun n => Un (N - n)%nat) N = sum_f_R0 Un N.
@@ -1569,7 +1568,7 @@ intros Un N.
 induction N.
  trivial.
  
- rewrite decomp_sum by omega; simpl.
+ rewrite decomp_sum by lia; simpl.
  rewrite IHN.
  ring.
 Qed.
@@ -1585,7 +1584,7 @@ assert (Rseq_cv
  apply (half_mean_0 _ 1).
   lra.
   
-  omega.
+  lia.
   
   intro; apply Rlt_le; apply Rinv_0_lt_compat; INR_solve.
   
@@ -1596,8 +1595,8 @@ assert (Rseq_cv
  unfold bound1c.
  replace (sum_f_R0 (fun n0 : nat => / INR (S n - S n0 + 1)) (pred (S n)))
    with (sum_f_R0 (fun n0 : nat => / INR (S n0)) (pred (S n)))
-   by (rewrite <- Rsum_switch_index; apply Rseq_sum_ext; intro; inject; omega).
- apply J; omega.
+   by (rewrite <- Rsum_switch_index; apply Rseq_sum_ext; intro; inject; lia).
+ apply J; lia.
 Qed.
 
 Lemma bound2c_cv : Rseq_cv bound2c 0.
@@ -1611,7 +1610,7 @@ assert (Rseq_cv
  apply (half_mean_0 _ 1).
   lra.
   
-  omega.
+  lia.
   
   intro; apply Rlt_le; apply Rinv_0_lt_compat; INR_solve.
   
@@ -1622,8 +1621,8 @@ assert (Rseq_cv
  unfold bound2c.
  replace (sum_f_R0 (fun n0 : nat => / INR (S n - S n0 + 1)) (pred (S n)))
    with (sum_f_R0 (fun n0 : nat => / INR (S n0)) (pred (S n)))
-   by (rewrite <- Rsum_switch_index; apply Rseq_sum_ext; intro; inject; omega).
- apply J; omega.
+   by (rewrite <- Rsum_switch_index; apply Rseq_sum_ext; intro; inject; lia).
+ apply J; lia.
 Qed.
 
 Lemma bound1_cv : Rseq_cv bound1 0.
@@ -1675,8 +1674,8 @@ unfold R_dist; rewrite Rminus_0_r.
 unfold Rseq_minus, Rseq_mult, Rseq_abs.
 eapply Rle_lt_trans.
  apply An_squared_Bn_maj.
- omega.
- assert (nN' : (n >= N)%nat) by omega.
+ lia.
+ assert (nN' : (n >= N)%nat) by lia.
  pose proof (H n nN') as T.
  unfold R_dist in T; rewrite Rminus_0_r in T.
  eapply Rle_lt_trans.
@@ -1810,7 +1809,7 @@ apply Rser_cv_ext with bntg.
  replace (S n) with (1 + n)%nat by reflexivity.
  INR_solve.
  do 2 (try rewrite <- plus_INR; try rewrite <- mult_INR).
- inject; omega.
+ inject; lia.
  
  apply odd_zeta.
 Qed.
@@ -1836,11 +1835,11 @@ assert (REW : forall a, (/4 * (4 * a))%Rseq == a).
    
    intro n.
    unfold Rseq_mult, odds, Rseq_shift, Rseq_square_inv, Rseq_constant.
-   replace (S (S (2 * n))) with (mult 2 (S n)) by omega.
+   replace (S (S (2 * n))) with (mult 2 (S n)) by lia.
    replace (INR (2 * (S n))) with (2 * INR (S n)) by (rewrite mult_INR; trivial).
    unfold Rseq_square_inv_s.
    field.
-   apply not_0_INR; omega.
+   apply not_0_INR; lia.
 Qed.
 
 (** Final result with free variables *)

@@ -22,7 +22,7 @@ USA.
 Require Import Type_class_definition.
 Require Import Type_class_instance.
 Require Import Coq.Relations.Relation_Definitions.
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Arith.
 Require Import Nbinomial.
 Require Import Setoid.
@@ -307,7 +307,7 @@ Section Commutative_Ring.
     apply CRadd_eq_compat.
      simpl; repeat rewrite binomial_zero; ring.
      apply CRsum_eq_compat; intros j Hj.
-     rewrite <- minus_Sn_m with (S n) _; [|omega].
+     rewrite <- minus_Sn_m with (S n) _; [|lia].
      simpl.
      rewrite <- CRmul_scal_compat.
      apply CRscal_eq_compat.
@@ -318,7 +318,7 @@ Section Commutative_Ring.
    rewrite <- (CRscal_mult_scal_one _ (Nbinomial (S n) (S j))).
    rewrite <- ring_distributive_l.
    rewrite CRadd_scal_eq_compat.
-   rewrite Nbinomial_pascal; [ | omega].
+   rewrite Nbinomial_pascal; [ | lia].
    rewrite CRscal_mult_scal_one.
    reflexivity.
   Qed.

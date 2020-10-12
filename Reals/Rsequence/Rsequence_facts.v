@@ -21,7 +21,7 @@ USA.
 
 (** Properties of real sequences. *)
 
-Require Export Coq.omega.Omega.
+Require Export Omega Lia.
 Require Export Reals.
 Require Export Rsequence_def.
 Require Export Rsequence_base_facts.
@@ -168,8 +168,8 @@ Proof.
 intros N Un l H eps eps_pos.
 destruct (H eps eps_pos) as [M HM].
 exists (N + M)%nat; intros n nSN.
-assert (Hrew: (n = N + (n - N))%nat) by omega.
-rewrite Hrew ; apply HM ; omega.
+assert (Hrew: (n = N + (n - N))%nat) by lia.
+rewrite Hrew ; apply HM ; lia.
 Qed.
 
 Lemma Rseq_cv_shifts_compat_reciprocal : forall N Un l,
@@ -187,8 +187,8 @@ Proof.
 intros Un N H M.
 destruct (H M) as [P HP].
 exists (N + P)%nat; intros n nSN.
-assert (Hrew: (n = N + (n - N))%nat) by omega.
-rewrite Hrew ; apply HP ; omega.
+assert (Hrew: (n = N + (n - N))%nat) by lia.
+rewrite Hrew ; apply HP ; lia.
 Qed.
 
 (** * Results which need classical *)

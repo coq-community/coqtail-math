@@ -1,4 +1,4 @@
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts Rsequence_sums_facts.
 Require Import Rsequence_rewrite_facts.
@@ -50,14 +50,14 @@ Lemma Rseq_bound_sum : Rseq_bound (Rseq_sum Un / Rseq_shift INR) lu.
 Proof.
 intro n ; induction n ; unfold Rseq_div, Rseq_shift, Rdiv.
  simpl ; rewrite Rinv_1, Rmult_1_r ; apply Un_bd.
- rewrite Rabs_mult, Rabs_Rinv ; [| apply not_0_INR ; omega].
- apply Rmult_Rinv_le_compat ; [apply Rabs_pos_lt ; apply not_0_INR ; omega |].
+ rewrite Rabs_mult, Rabs_Rinv ; [| apply not_0_INR ; lia].
+ apply Rmult_Rinv_le_compat ; [apply Rabs_pos_lt ; apply not_0_INR ; lia |].
  rewrite (Rabs_pos_eq (INR (S (S n)))), Rseq_sum_simpl, S_INR,
  Rmult_plus_distr_r, Rmult_1_l ; [| apply pos_INR].
  eapply Rle_trans ; [eapply Rabs_triang |] ; apply Rplus_le_compat.
  rewrite <- (Rabs_pos_eq (INR (S n))) ; [| apply pos_INR].
- apply Rmult_Rinv_le_compat_contravar ; [apply Rabs_pos_lt ; apply not_0_INR ; omega |].
- rewrite <- Rabs_Rinv, <- Rabs_mult ; [apply IHn | apply not_0_INR ; omega].
+ apply Rmult_Rinv_le_compat_contravar ; [apply Rabs_pos_lt ; apply not_0_INR ; lia |].
+ rewrite <- Rabs_Rinv, <- Rabs_mult ; [apply IHn | apply not_0_INR ; lia].
  apply Un_bd.
 Qed.
 

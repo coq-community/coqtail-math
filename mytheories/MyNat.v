@@ -1,4 +1,4 @@
-Require Import Omega.
+Require Import Omega Lia.
 
 Lemma lt_S_lt_eq_dec : forall m n, S m < n ->
   { m < n } + { m = n }.
@@ -6,7 +6,7 @@ Proof.
 intros m n H ; destruct (lt_eq_lt_dec m n) as [[ | ] | ].
  left ; assumption.
  right ; assumption.
- exfalso ; omega.
+ exfalso ; lia.
 Qed.
 
 Lemma ge_refl : forall m, ge m m.
@@ -24,7 +24,7 @@ Lemma lt_exist : forall m n, m < n ->
 Proof.
 intro m ; induction m ; intros n mltn.
  exists n ; trivial.
- destruct n as [| n] ; [exfalso ; omega |] ;
+ destruct n as [| n] ; [exfalso ; lia |] ;
  destruct (IHm n (lt_S_n m n mltn)) as [p Hp] ;
  exists p ; intuition.
 Qed.

@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import Lia.
 Require Import Rsequence_def.
 Require Import Rsequence_facts.
 Require Import Rsequence_cv_facts.
@@ -209,7 +210,7 @@ intros a ; rewrite <- Ceq ; split ; simpl ;
  destruct (n_modulo_2 n) as [H|H] ; destruct H as [p Hp] ; rewrite Hp.
  replace (Cre (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (2 * p))) with
   (sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i)) * a² ^ i)%R) p).
- apply HN ; omega.
+ apply HN ; lia.
 
 clear ; induction p.
  simpl ; field.
@@ -235,7 +236,7 @@ clear ; induction p.
 
  replace (Cre (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (S (2 * p)))) with
   (sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i)) * a² ^ i)%R) p).
- apply HN ; omega.
+ apply HN ; lia.
 
 clear ; induction p.
  simpl ; field.
@@ -281,11 +282,11 @@ destruct (Hl' _ eps'_pos) as [N HN] ; exists (S (2 * N))%nat ;
 
  destruct (n_modulo_2 n) as [H|H] ; destruct H as [p Hp] ; rewrite Hp.
  destruct p.
- apply False_ind ; clear -n_lb Hp ; omega.
+ apply False_ind ; clear -n_lb Hp ; lia.
  replace (Cim (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (2 * S p))) with
   (a * sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i + 1)) * a² ^ i)%R) p)%R.
   rewrite <- Rmult_minus_distr_l, Rabs_mult ; apply Rlt_le_trans with (Rabs a * eps')%R.
-  apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption|] ; apply HN ; omega. 
+  apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption|] ; apply HN ; lia. 
   unfold eps' ; right ; field ; apply Rabs_no_R0 ; assumption.
   rewrite scal_sum.
   clear ; induction p.
@@ -318,7 +319,7 @@ apply fact_neq_0.
  replace (Cim (sum_f_C0 (gt_pser exp_seq (0 +i  a)) (S (2 * p)))) with
   (a * sum_f_R0 (fun i : nat => ((-1) ^ i / INR (fact (2 * i + 1)) * a² ^ i)%R) p)%R.
   rewrite <- Rmult_minus_distr_l, Rabs_mult ; apply Rlt_le_trans with (Rabs a * eps')%R.
-  apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption|] ; apply HN ; omega. 
+  apply Rmult_lt_compat_l ; [apply Rabs_pos_lt ; assumption|] ; apply HN ; lia. 
   unfold eps' ; right ; field ; apply Rabs_no_R0 ; assumption.
   rewrite scal_sum.
   clear ; induction p.
@@ -421,12 +422,12 @@ induction n.
     apply Cadd_eq_compat.
      simpl; repeat rewrite binomial_zero; ring.
      apply Csum_eq_compat; intros j Hj.
-     rewrite <- minus_Sn_m with (S n) _; [|omega].
+     rewrite <- minus_Sn_m with (S n) _; [|lia].
      simpl; ring.
    
    intros j Hj.
    repeat rewrite <- Cmult_add_distr_r.
-   rewrite <- Binomial.pascal; [|omega].
+   rewrite <- Binomial.pascal; [|lia].
    rewrite Cadd_IRC_Rplus; trivial.
 Qed.
 

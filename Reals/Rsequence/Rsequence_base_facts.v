@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Rsequence_def.
 Require Import Morphisms Setoid.
 Require Import Lra.
@@ -237,7 +237,7 @@ exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.
 
 (**********)
@@ -255,8 +255,8 @@ rewrite HN at 1.
 unfold Rminus at 1.
 rewrite Rplus_opp_r, Rabs_R0, Rplus_0_l.
 apply HN'.
-intuition.
-intuition.
+lia.
+lia.
 Qed.
 
 (**********)
@@ -272,7 +272,7 @@ exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.
 
 (**********)
@@ -288,7 +288,7 @@ exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.
 
 (** * Landau relations are asymptotic. *)
@@ -308,7 +308,7 @@ exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.
 
 (**********)
@@ -325,7 +325,7 @@ exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.
 
 (**********)
@@ -343,5 +343,5 @@ destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 unfold Rseq_minus in HN.
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.

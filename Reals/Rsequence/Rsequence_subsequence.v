@@ -23,7 +23,7 @@ Require Import Reals.
 Require Import Rsequence_def.
 Require Import Rsequence_facts.
 
-Require Import Lra.
+Require Import Lia Lra.
 Open Scope Rseq_scope.
 Open Scope nat_scope.
 (** printing ~	~ *)
@@ -204,7 +204,7 @@ Qed.
 
 Lemma is_extractor_mult_2 : is_extractor (mult 2).
 Proof.
-intros n; omega.
+intros n; lia.
 Qed.
 
 Definition extractor_mult_2 := exist _ (mult 2) is_extractor_mult_2.
@@ -216,8 +216,8 @@ Lemma Rseq_zip_extract_evens : forall Un Vn,
 Proof.
 intros Un Vn n ; unfold Rseq_zip, extracted, extractor_mult_2 ;
  simpl ; case (n_modulo_2 (n + (n + 0))) ; intros [p Hp].
-  f_equal ; omega.
-  apply False_ind ; omega.
+  f_equal ; lia.
+  apply False_ind ; lia.
 Qed.
 
 (** Convergence of subsequence implies convergence of the growing sequence *)
@@ -303,7 +303,7 @@ Proof.
 intros.
 apply Rseq_subseq_growing_cv_compat with (fun i : nat => un (2 * i)%nat).
  assert (Hex : is_extractor (mult 2)).
-   intros n; omega.
+   intros n; lia.
  pose (phi := exist _ (mult 2) Hex).
  exists phi; reflexivity.
  assumption.

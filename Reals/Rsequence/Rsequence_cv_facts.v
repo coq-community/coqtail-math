@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
 Require Import Max Rinterval MyRIneq Ranalysis_def Lra.
@@ -288,8 +288,8 @@ intros Un l Heven Hodd eps eps_pos ;
  destruct (Hodd _ eps_pos) as [N2 HN2] ;
  exists (max (2 * N1) (S (2 * N2))) ; intros n n_lb ;
  destruct (n_modulo_2 n) as [[p Hp] | [p Hp]] ; subst.
-  apply HN1 ; assert (H := max_lub_l _ _ _ n_lb) ; omega.
-  apply HN2 ; assert (H := max_lub_r _ _ _ n_lb) ; omega.
+  apply HN1 ; assert (H := max_lub_l _ _ _ n_lb) ; lia.
+  apply HN2 ; assert (H := max_lub_r _ _ _ n_lb) ; lia.
 Qed.
 
 End Rseq_cv.
@@ -342,8 +342,8 @@ rewrite Rplus_comm.
 fold (Rminus l (Un n)).
 fold (R_dist l (Un n)).
 rewrite R_dist_sym.
-apply HN; omega.
-apply HN0; omega.
+apply HN; lia.
+apply HN0; lia.
 Qed.
 
 (**********)
@@ -359,7 +359,7 @@ intros n Hn.
 apply Rle_lt_trans with ((m-(l-1))+ (l-1))%R.
 ring_simplify; apply Rle_refl.
 apply Rplus_lt_compat.
-apply HN0; omega.
+apply HN0; lia.
 apply Rminus_lt.
 unfold Rminus.
 rewrite Rplus_comm.
@@ -373,7 +373,7 @@ rewrite Rplus_comm.
 fold (Rminus l (Un n)).
 fold (R_dist l (Un n)).
 rewrite R_dist_sym.
-apply HN; omega.
+apply HN; lia.
 Qed.
 
 (**********)
@@ -474,8 +474,8 @@ replace 0 with (-1 + 1)%R by ring.
 apply Rplus_lt_compat_l.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
-apply HN0; omega.
+apply HN; lia.
+apply HN0; lia.
 ring_simplify; apply Rle_refl.
 Qed.
 
@@ -491,7 +491,7 @@ exists (N+N0)%nat.
 intros n Hn.
 apply Rlt_le_trans with ((M-(l+1)) +(l+1))%R.
 apply Rplus_lt_compat.
-apply HN0; omega.
+apply HN0; lia.
 apply Rminus_lt.
 unfold Rminus.
 rewrite Ropp_plus_distr.
@@ -501,7 +501,7 @@ replace 0 with (-1 + 1)%R by ring.
 apply Rplus_lt_compat_l.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 ring_simplify; apply Rle_refl.
 Qed.
 
@@ -531,9 +531,9 @@ rewrite Rplus_comm.
 fold (Rminus l (Un n)).
 fold (R_dist l (Un n)).
 rewrite R_dist_sym.
-apply HN; omega.
+apply HN; lia.
 apply Ropp_gt_lt_contravar.
-apply HN0; omega.
+apply HN0; lia.
 Qed.
 
 (**********)
@@ -557,9 +557,9 @@ replace 0 with (-1 + 1)%R by ring.
 apply Rplus_lt_compat_l.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 apply Ropp_gt_lt_contravar.
-apply HN0; omega.
+apply HN0; lia.
 ring_simplify; apply Rle_refl.
 Qed.
 
@@ -575,9 +575,9 @@ intros n Hn.
 apply Rle_lt_trans with (M+-0)%R.
 ring_simplify; apply Rle_refl.
 apply Rplus_lt_compat.
-apply HN; omega.
+apply HN; lia.
 apply Ropp_gt_lt_contravar.
-apply HN0; omega.
+apply HN0; lia.
 Qed.
 
 (**********)
@@ -591,9 +591,9 @@ exists (N+N0)%nat.
 intros n Hn.
 apply Rlt_le_trans with (M+-0)%R.
 apply Rplus_lt_compat.
-apply HN; omega.
+apply HN; lia.
 apply Ropp_gt_lt_contravar.
-apply HN0; omega.
+apply HN0; lia.
 ring_simplify; apply Rle_refl.
 Qed.
 
@@ -633,9 +633,9 @@ apply Rle_lt_trans with (Rabs (Un n+ - l)).
 rewrite <- Rabs_Ropp.
 rewrite Ropp_plus_distr, Ropp_involutive.
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 rewrite (Rmult_comm 2 (/l)).
-apply HN0; omega.
+apply HN0; lia.
 Qed.
 
 (**********)
@@ -675,9 +675,9 @@ replace 0 with (- (l * /2) + (l * /2))%R by ring.
 apply Rplus_lt_compat_r.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 rewrite (Rmult_comm 2 (/l)).
-apply HN0; omega.
+apply HN0; lia.
 replace (l * /2 * (- Rabs M *(2 * /l)))%R with (- Rabs M)%R.
 rewrite <- (Ropp_involutive M).
 apply Ropp_ge_le_contravar.
@@ -723,10 +723,10 @@ apply Rplus_lt_compat_l.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 rewrite <- Rabs_Ropp, Ropp_plus_distr, Ropp_involutive.
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 apply Ropp_lt_cancel.
 rewrite (Rmult_comm 2 (/l)), <- Ropp_mult_distr_l_reverse, Ropp_involutive.
-apply HN0; omega.
+apply HN0; lia.
 replace (l * /2 * (- Rabs M *(2 * /l)))%R with (- Rabs M)%R.
 rewrite <- (Ropp_involutive M).
 apply Ropp_ge_le_contravar.
@@ -778,12 +778,12 @@ replace 0 with (- (l * /2) + (l * /2))%R by ring.
 apply Rplus_lt_compat_r.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 rewrite Ropp_mult_distr_l_reverse.
 apply Ropp_gt_lt_contravar.
 apply Rlt_gt.
 rewrite (Rmult_comm 2 (/l)).
-apply HN0; omega.
+apply HN0; lia.
 Qed.
 
 
@@ -827,9 +827,9 @@ rewrite <- Rabs_Ropp.
 rewrite Ropp_plus_distr.
 rewrite Ropp_involutive.
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 rewrite (Rmult_comm 2 (/l)).
-apply HN0; omega.
+apply HN0; lia.
 Qed.
 
 (**********)
@@ -873,9 +873,9 @@ replace 0 with (- (l * /2) + (l * /2))%R by ring.
 apply Rplus_lt_compat_r.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 rewrite (Rmult_comm 2 (/l)).
-apply HN0; omega.
+apply HN0; lia.
 replace (l * /2 * (- Rabs M *(2 * /l)))%R with (- Rabs M)%R.
 rewrite <- (Ropp_involutive M).
 apply Ropp_ge_le_contravar.
@@ -923,10 +923,10 @@ apply Rplus_lt_compat_l.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 rewrite <- Rabs_Ropp, Ropp_plus_distr, Ropp_involutive.
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 apply Ropp_lt_cancel.
 rewrite (Rmult_comm 2 (/l)), <- Ropp_mult_distr_l_reverse, Ropp_involutive.
-apply HN0; omega.
+apply HN0; lia.
 replace (l * /2 * (- Rabs M *(2 * /l)))%R with (- Rabs M)%R.
 rewrite <- (Ropp_involutive M).
 apply Ropp_ge_le_contravar.
@@ -978,12 +978,12 @@ replace 0 with (- (l * /2) + (l * /2))%R by ring.
 apply Rplus_lt_compat_r.
 apply Rle_lt_trans with (Rabs (Un n+ - l)).
 apply RRle_abs.
-apply HN; omega.
+apply HN; lia.
 rewrite Ropp_mult_distr_l_reverse.
 apply Ropp_gt_lt_contravar.
 apply Rlt_gt.
 rewrite (Rmult_comm 2 (/l)).
-apply HN0; omega.
+apply HN0; lia.
 Qed.
 
 (**********)

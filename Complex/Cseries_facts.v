@@ -23,7 +23,7 @@ USA.
 Require Import Max.
 Require Export Rseries_facts.
 Require Export Rsequence_facts.
-Require Import Lra.
+Require Import Lia Lra.
 Require Import Complex.
 Require Import Csequence_facts.
 Require Import Cseries.
@@ -146,11 +146,11 @@ Lemma Csum_eq_compat : forall Un Vn n,
 Proof.
 intros Un Vn n H.
 induction n.
- apply H; omega.
- simpl; rewrite H; try omega.
+ apply H; lia.
+ simpl; rewrite H; try lia.
  rewrite IHn; trivial.
  intros j Hj.
- apply H; omega.
+ apply H; lia.
 Qed.
 
 Lemma Cser_cv_eq_compat : forall Un Vn l,

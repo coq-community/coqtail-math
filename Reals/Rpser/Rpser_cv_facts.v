@@ -60,13 +60,13 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
   intros m n m_neq_n ; unfold R_dist ; apply Rabs_eq_compat ;
    replace (max m n) with n. replace (min m n) with m.
    rewrite Rseq_sum_shifts_compat ; unfold Rseq_shifts ;
-   replace (S m + (n - S m))%nat with n by omega ; reflexivity.
+   replace (S m + (n - S m))%nat with n by lia ; reflexivity.
    symmetry ; apply min_l ; intuition.
    symmetry ; apply max_r ; intuition.
  assert (Hrew : forall m n, m <> n -> R_dist (Rseq_pps An x n) (Rseq_pps An x m)
   = Rabs (Rseq_sum (Rseq_shifts (gt_pser An x) (S (min m n))) ((max m n) - S (min m n)))).
   intros m n m_neq_n ; unfold R_dist ; destruct (le_lt_dec m n) as [mlen | nltm].
-   assert (mltn : (m < n)%nat) by (clear -m_neq_n mlen ; omega) ;
+   assert (mltn : (m < n)%nat) by (clear -m_neq_n mlen ; lia) ;
     apply Temp ; assumption.
    rewrite Rabs_minus_sym, min_comm, max_comm ; apply Temp ; assumption.
  clear Temp.
@@ -469,7 +469,7 @@ Lemma max_explicit : forall m n, { p | max m n = (m + p)%nat}.
 Proof.
 intros m n ; destruct (lt_dec m n) ;
  [exists (n - m)%nat | exists 0%nat] ;
- destruct (max_spec m n) ; omega.
+ destruct (max_spec m n) ; lia.
 Qed.
 
 Lemma Rpser_alembert_infinite : forall (An : Rseq),
@@ -493,7 +493,7 @@ intro n ; unfold Rseq_shifts ; rewrite max_comm ;
  assert (Hyp := HN2 (N2 + p + n)%nat) ; unfold R_dist, Rminus in Hyp ;
  change R0 with (IZR 0) in Hyp;
  rewrite Ropp_0, Rplus_0_r in Hyp ; left ; apply Hyp.
-omega.
+lia.
 rewrite Rinv_involutive ; [intuition |].
 apply Rgt_not_eq ; apply Rlt_le_trans with (0 + 1) ;
  [| apply Rplus_le_compat_r ; apply Rabs_pos] ; intuition.
@@ -514,7 +514,7 @@ intros An x l Hxl.
    transitivity (Rabs (Rseq_pps An x (S n) - l) + Rabs (- (Rseq_pps An x n - l))).
     apply Rabs_triang.
    transitivity 2 ; [| apply RmaxLess1] ; rewrite Rabs_Ropp.
-    apply Rplus_le_compat ; left ; apply HN ; omega.
+    apply Rplus_le_compat ; left ; apply HN ; lia.
    destruct (Rseq_partial_bound (gt_pser An x) (S N)) as (B,HB).
    exists (Rmax B (Rmax 2 (Rabs (An O)))).
    intros y [i Hi] ; subst ; destruct (le_lt_dec i (S N)) as [Hi_b | Hi_b].

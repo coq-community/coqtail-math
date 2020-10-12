@@ -84,7 +84,7 @@ Notation "/ x H" := (Rinv x H) (at level 100) : R_scope.
 Infix "<" := Rlt : R_scope.
 
 
-(* A bit too much... why omega can't do that ? *)
+(* A bit too much... why can't lia do that ? *)
 Ltac max_solve trm := match trm with 
     O => fail
  | S ?p => 

@@ -24,7 +24,7 @@ Require Import Max.
 Require Import Rsequence_def.
 Require Import Rsequence_facts.
 Require Import Rsequence_base_facts.
-Require Import Lra.
+Require Import Lia Lra.
 Require Import Complex.
 Require Import Csequence_def.
 
@@ -75,7 +75,7 @@ exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
 rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
-rewrite Hn0; apply HN; omega.
+rewrite Hn0; apply HN; lia.
 Qed.
 
 End Cseq_asymptotic.

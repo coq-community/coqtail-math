@@ -1,4 +1,4 @@
-Require Import ZArith Omega Znumtheory.
+Require Import ZArith Lia Znumtheory.
 Require Import Natsets MyNat Ztools Zeqm Znumfacts.
 
 (** Definition of the predicate : being the sum of four squares *)
@@ -37,16 +37,16 @@ Lemma Zmod_sqrt_eq_compat : forall p i j, prime p ->
 Proof.
   intros p i j Pp Pi Pj Bi Bj ES.
   destruct (Z.eq_dec ((i + j) mod p) 0) as [ E | E ].
-    cut (i + j = 0); [ omega | ].
-    cut (i + j < p); [ intros H | omega ].
+    cut (i + j = 0); [ lia | ].
+    cut (i + j < p); [ intros H | lia ].
     rewrite <- E; symmetry; apply Zmod_small.
-    omega.
+    lia.
   
   destruct (modular_inverse _ _ Pp E) as (a, Ha).
   
   cut (i ≡ j [p]).
     intros M; red in M.
-    rewrite (Zmod_small i p), (Zmod_small j p) in M; omega.
+    rewrite (Zmod_small i p), (Zmod_small j p) in M; lia.
   
   apply eqm_minus_0.
   replace (i - j) with ((i - j) * 1) by ring.
@@ -61,12 +61,12 @@ Lemma prime_odd : forall p, 2 <> p -> prime p -> p mod 2 = 1.
 Proof.
   intros p N2 Pp.
   rem (p mod 2) r Er.
-  pose proof Z_mod_lt p 2 as help_omega.
+  pose proof Z_mod_lt p 2 as help_lia.
   cut (r <> 0).
-    omega.
+    lia.
     
-    clear help_omega; intros Rn; subst.
-    apply Zmod_divide in Rn; [ | omega ].
+    clear help_lia; intros Rn; subst.
+    apply Zmod_divide in Rn; [ | lia ].
     refine (N2 (prime_div_prime _ _ _ _ _)); auto.
     apply prime_2.
 Qed.
@@ -76,7 +76,7 @@ Proof.
   intros p i Op Bi.
   unfold Z.succ in Bi.
   apply Z.le_lt_trans with (2 * (p / 2)).
-    omega.
+    lia.
     
     rewrite Z_mult_div_mod; [ | auto with * ].
     rewrite Op; auto with *.
@@ -92,7 +92,7 @@ Proof.
   intros x m Pm; unfold modsym.
   pose proof Z_mod_lt (x + m / 2) m.
   pose proof Z_mod_lt m 2.
-  split; ring_simplify; rewrite Z_mult_div_mod; omega.
+  split; ring_simplify; rewrite Z_mult_div_mod; lia.
 Qed.
 
 Lemma modsym_mod_compat : forall x m, (modsym x m) mod m = x mod m.
@@ -129,7 +129,7 @@ Qed.
 Lemma prime_div_false : forall a p, prime p -> (a | p) -> 1 < a < p -> False.
 Proof.
   intros a p Pp D Bp.
-  destruct (prime_divisors p Pp a D) as [|[|[|]]]; omega.
+  destruct (prime_divisors p Pp a D) as [|[|[|]]]; lia.
 Qed.
 
 Lemma Zbounding_square : forall x m, 0 < m -> -m <= x <= m -> x ^ 2 <= m ^ 2.
@@ -140,10 +140,10 @@ Proof.
   rewrite <- Z.abs_square.
   apply Z.le_trans with (Z.abs x * m).
     rewrite <- Zmult_assoc.
-    apply Zmult_le_compat_l; zify; omega.
+    apply Zmult_le_compat_l; lia.
     
     rewrite Zmult_comm.
-    apply Zmult_le_compat_l; zify; omega.
+    apply Zmult_le_compat_l; lia.
 Qed.
 
 
@@ -159,7 +159,7 @@ Proof.
   
   pose (np := Z.abs_nat p).
   
-  assert (p_odd : p mod 2 = 1) by (apply prime_odd; auto || omega).
+  assert (p_odd : p mod 2 = 1) by (apply prime_odd; auto || lia).
   
   pose (s := fun x : Z => x * x).
   assert (s_pos : forall x, 0 <= s x).
@@ -167,9 +167,9 @@ Proof.
     apply Zmult_le_0_compat; auto with *.
   
   assert (mod_pos : forall x, 0 <= x mod p).
-    intros; apply Z_mod_lt; destruct Pp; omega.
+    intros; apply Z_mod_lt; destruct Pp; lia.
   
-  assert (hp_pos : 0 <= p / 2) by (apply Z_div_pos; omega).
+  assert (hp_pos : 0 <= p / 2) by (apply Z_div_pos; lia).
   
   assert (autobound : forall i, (i < S (Z.abs_nat (p / 2)))%nat -> 2 * Z_of_nat i < p).
     intros i Li.
@@ -227,7 +227,7 @@ Proof.
     unfold Z.succ.
     ring_simplify.
     pose proof Z_mult_div_bounds p 2.
-    omega.
+    lia.
   
   rewrite HeqL in Li; rewrite HeqM in Mi.
   destruct (image_true _ _ _ Li) as (l, (Bl, Hl)).
@@ -244,24 +244,24 @@ Proof.
   pose proof s_pos (Z_of_nat m).
   destruct (Zdivide_inf _ _ Hm) as (k, Hk).
   exists k.
-  assert (0 < k * p) by omega.
-  assert (0 < k) by (apply Zmult_lt_0_reg_r with p; assumption || omega).
+  assert (0 < k * p) by lia.
+  assert (0 < k) by (apply Zmult_lt_0_reg_r with p; assumption || lia).
   assert (3 <= k * p).
     (* TODO Zle transitif dans MyZ *)
     replace 3 with (1 * 3) by reflexivity.
-    apply Zmult_le_compat; omega.
+    apply Zmult_le_compat; lia.
   repeat split; auto with *.
     rewrite Zmult_comm, <- Hk.
     unfold s; ring.
     
     rem (Z_of_nat l) lz Elz.
     rem (Z_of_nat m) mz Emz.
-    cut (0 <> lz \/ 0 <> mz); [ omega | ].
+    cut (0 <> lz \/ 0 <> mz); [ lia | ].
     cut (0 <> s lz \/ 0 <> s mz).
       cut (forall a, 0 <> s a -> 0 <> a). (* TODO : MyZ (?) *)
         intros Hyp [?|?]; [left|right]; apply Hyp; auto.
         clear; intros [] H; tauto || zify; auto with *.
-      omega.
+      lia.
 Defined.
 
 
@@ -272,16 +272,16 @@ Lemma egality_case_sum_of_four : forall a b c d M,
   a + b + c + d = 4 * M -> ((a = M) /\ (b = M)) /\ ((c = M) /\ (d = M)).
 Proof.
   intros.
-  omega.
+  lia.
 Qed.
 
 Lemma square_bound_equality_case : forall a M,
   -M <= a < M -> M * M <= a * a -> a = - M.
 Proof.
   intros a M Bounds Bsqr.
-  destruct (Z_le_dec 0 M); [ | omega ].
+  destruct (Z_le_dec 0 M); [ | lia ].
   cut (Z.abs M <= Z.abs a).
-    intro; zify; omega.
+    intro; lia.
     
     rewrite <- (Z.abs_square M), <- (Z.abs_square a) in Bsqr.
     apply sqrt_le_compat; auto with *.
@@ -290,12 +290,12 @@ Qed.
 Lemma square_bound : forall x m, -m <= x <= m -> x * x <= m * m.
 Proof.
   intros x m Bx.
-  assert (Pm : 0 <= m) by omega.
+  assert (Pm : 0 <= m) by lia.
   rewrite <- Z.abs_square.
   apply Z.le_trans with (Z.abs x * m).
-    apply Zmult_le_compat_l; auto with *; try (zify; omega).
+    apply Zmult_le_compat_l; auto with *; try lia.
 
-    apply Zmult_le_compat_r; auto with *; try (zify; omega).
+    apply Zmult_le_compat_r; auto with *; try lia.
 Qed.
 
 Lemma square_bound_opp : forall x m, m <= x <= -m -> x * x <= m * m.
@@ -311,18 +311,18 @@ Lemma egality_case_sum_of_four_squares : forall a b c d M,
     ((a = -M) /\ (b = -M)) /\ ((c = -M) /\ (d = -M)).
 Proof.
   intros a b c d m Ba Bb Bc Bd E.
-  assert (P : forall x, -m <= x < m -> -m <= x <= m) by (intros; omega).
+  assert (P : forall x, -m <= x < m -> -m <= x <= m) by (intros; lia).
   pose proof square_bound _ _ (P _ Ba).
   pose proof square_bound _ _ (P _ Bb).
   pose proof square_bound _ _ (P _ Bc).
   pose proof square_bound _ _ (P _ Bd).
-  assert (Pm : 0 < m) by omega.
+  assert (Pm : 0 < m) by lia.
   cut ((Z.abs a = m /\ Z.abs b = m) /\ (Z.abs c = m /\ Z.abs d = m)).
-    intros; zify; omega.
+    intros; lia.
     
     split; split; (rewrite <- (Z.abs_eq m); [ | auto with * ]);
       apply sqrt_eq_compat_abs;
-      omega.
+      lia.
 Qed.
 
 
@@ -367,7 +367,7 @@ Proof.
       pose proof Zle_0_square y2.
       pose proof Zle_0_square y3.
       pose proof Zle_0_square y4.
-      omega.
+      lia.
     
     assert (Nr : 0 <> r).
       (* otherwise yi=0  ⇒  m|xi  ⇒  m²|xi²  ⇒  m²|mp  ⇒  m|p  ⇒  baad *)
@@ -384,7 +384,7 @@ Proof.
         pose proof Zeq_0_square y3.
         pose proof Zle_0_square y4.
         pose proof Zeq_0_square y4.
-        omega.
+        lia.
       
       apply Dmp.
       apply Zmult_divide_compat_rev_l with m; auto.
@@ -415,7 +415,7 @@ Proof.
       pose proof B x2 as Ey2; fold y2 in Ey2.
       pose proof B x3 as Ey3; fold y3 in Ey3.
       pose proof B x4 as Ey4; fold y4 in Ey4.
-      omega.
+      lia.
     
     assert (Nmr : r <> m).
       (* like for 0 <> r but harder : yi=-m/2 → xi≡m²/4 [m²] → m²|m*p*)
@@ -426,7 +426,7 @@ Proof.
           apply egality_case_sum_of_four_squares;
             try (apply modsym_bounds; notzero).
           rewrite <- Hr; ring.
-        omega.
+        lia.
         
         destruct Eyi as ((Ey1, Ey2), (Ey3, Ey4)).
         apply Dmp.
@@ -458,7 +458,7 @@ Proof.
           apply divide_eqm; notzero.
           exists 1; ring.
     
-    omega.
+    lia.
     
     (* FS(r*p) *)
     assert (Erpm : (r * p) * (m * m) = (r * m) * (m * p)) by ring.
@@ -529,7 +529,7 @@ Proof.
     (* Case p >= 3 *)
     
     assert (3 <= p) as Op by
-      (pose proof (prime_ge_2 p Pp); zify; omega); clear E.
+      (pose proof (prime_ge_2 p Pp); lia); clear E.
     
     (* We prove : ∃m>0 FS(kp) *)
     pose (fs_mult := fun p m =>
@@ -540,7 +540,7 @@ Proof.
       destruct (prime_dividing_sum_of_two_squares_plus_one p Pp Op) as
         (l, (m, (k, (Ep, (Bm, (Bl, (Pk, Plm))))))).
       assert (tech1 : Z_of_nat (S (Z.abs_nat (k - 1))) = k).
-        rewrite inj_S, inj_Zabs_nat, Z.abs_eq; [ | omega ]; auto with *.
+        rewrite inj_S, inj_Zabs_nat, Z.abs_eq; [ | lia ]; auto with *.
       exists (Z.abs_nat (k - 1)); split.
         (* FS(kp) *)
         exists 0%Z; exists 1%Z; exists l; exists m.
@@ -556,26 +556,26 @@ Proof.
         rewrite Ep.
         assert (tech2 : forall a b, 0 < a -> 2 * a < b -> 4 * a * a + 4 < b * b). 
           clear; intros a b Pa LT.
-          assert (LE : 2 * a + 1 <= b) by omega.
-          assert (Pda : 0 <= 2 * a + 1) by omega.
+          assert (LE : 2 * a + 1 <= b) by lia.
+          assert (Pda : 0 <= 2 * a + 1) by lia.
           assert (LE2 := Zmult_le_compat _ _ _ _ LE LE Pda Pda).
           eapply Z.lt_le_trans; [ | apply LE2 ].
           ring_simplify.
-          omega.
+          lia.
         
         assert (tech3 : forall a b, 0 <= a -> 2 * a < b -> 4 * a * a < b * b). 
           clear; intros a b Pa LT.
-          assert (LE : 2 * a + 1 <= b) by omega.
-          assert (Pda : 0 <= 2 * a + 1) by omega.
+          assert (LE : 2 * a + 1 <= b) by lia.
+          assert (Pda : 0 <= 2 * a + 1) by lia.
           assert (LE2 := Zmult_le_compat _ _ _ _ LE LE Pda Pda).
           eapply Z.lt_le_trans; [ | apply LE2 ].
           ring_simplify.
-          omega.
+          lia.
         
         assert (p2_pos : 0 < p * p).
           transitivity (1 * p).
-            omega.
-            apply Zmult_lt_compat_r; omega.
+            lia.
+            apply Zmult_lt_compat_r; lia.
         
         rem (l * l) ll Ell.
         rem (m * m) mm Emm.
@@ -586,14 +586,14 @@ Proof.
           rewrite <- Zmult_assoc, <-Ell, <-Emm, <-Epp in *.
           clear -tech2 tech3 p2_pos.
           ring_simplify.
-          omega.
+          lia.
           
           specialize (tech2 _ p Pm Bm).
           specialize (tech3 _ p NNl Bl).
           rewrite <- Zmult_assoc, <-Ell, <-Emm, <-Epp in *.
           clear -tech2 tech3 p2_pos.
           ring_simplify.
-          omega.
+          lia.
           
           (* De "k<p" à ici : majoration beaucoup trop fine ! (2p² au
           lieu de 4p²) Donc partie potentiellement beaucoup plus courte
@@ -610,16 +610,16 @@ Proof.
       destruct p; assumption.
       
       (* m>1 *)
-      assert (LBm : 1 < Z_of_nat (S (S m))) by (zify; omega).
+      assert (LBm : 1 < Z_of_nat (S (S m))) by lia.
       destruct (foursquare_prime_factor_decreasing p Pp _ (conj LBm UBm) FSm) as (n, ((LBn, UBn), FSn)).
         apply IH with (Z.abs_nat (n - 1)).
           unfold ltof.
-          zify; omega.
+          lia.
           
           unfold fs_mult.
           rewrite inj_S, inj_Zabs_nat, Z.abs_eq; auto with *; unfold Z.succ.
           replace (n - 1 + 1) with n by ring.
-          split; auto; omega.
+          split; auto; lia.
 Defined.
 
 

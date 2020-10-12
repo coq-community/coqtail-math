@@ -1,4 +1,4 @@
-Require Import ZArith Znumtheory Zpow_facts MyZ.
+Require Import ZArith Znumtheory Lia Zpow_facts MyZ.
 Require Import Hurwitz_def.
 
 Section basic_lemmas.
@@ -128,7 +128,7 @@ Proof.
 destruct h1 ; intros ; unfold hnorm2, hmul, hconj.
  cbv delta [Hurwitz_def.i] ; cbv beta iota.
  ring_simplify.
- apply Zmult_le_reg_l with 4 ; [omega |].
+ apply Zmult_le_reg_l with 4 ; [lia |].
  transitivity ((h + 2 * i) ^ 2 + (h + 2 * j) ^ 2 + (h + 2 * k) ^ 2 + h ^ 2).
  do 4 rewrite Zpower_2 ; repeat apply Zplus_le_0_compat ; apply Z.ge_le, sqr_pos.
  apply eq_Zle ; ring.
@@ -234,7 +234,7 @@ Lemma H_unit_characterization : forall x, is_H_unit x -> H_unit x.
 Proof.
 intros x Hx ; assert (Nx := is_H_unit_hnorm2_1 _ Hx) ; destruct Hx as [y Ixy].
  assert (Ny : hnorm2 y = 1).
-  apply Zmult_reg_l with 1 ; [omega |] ; rewrite <- Zpower_2,
+  apply Zmult_reg_l with 1 ; [lia |] ; rewrite <- Zpower_2,
    <- hnorm2_IZH, <- Ixy, <- Nx ; symmetry ; apply hnorm2_hmul.
 
   (* Une fois qu'on a ça, c'est pas si facile. Chez les quaternions

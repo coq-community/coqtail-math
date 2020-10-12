@@ -116,7 +116,8 @@ split ; reflexivity.
 Qed.
 Hint Resolve Cadd_ne: complex.
 
-Hint Resolve (f_equal (A:=C)): complex.
+Definition f_equal_C := f_equal (A:=C).
+Hint Resolve f_equal_C: complex.
 
 Lemma Cadd_eq_compat_l : forall z z1 z2, z1 = z2 -> z + z1 = z + z2.
 Proof.

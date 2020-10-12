@@ -30,6 +30,7 @@ Require Import Rseries_usual.
 Require Import Rpser.
 Require Import Rintegral.
 Require Import RTaylor.
+Require Import Lia.
 Require Import Lra.
 Require Import Wallis.
 Open Scope R_scope.
@@ -66,7 +67,7 @@ Lemma Vn_S : forall n, (0 < n)%nat -> Vn n = ln (Un (S n) / Un n).
 Proof.
 intros n Hn.
 unfold Vn.
-destruct n; [apply False_ind; omega|].
+destruct n; [apply False_ind; lia|].
 reflexivity.
 Qed.
 
@@ -141,7 +142,7 @@ Let Qn d n := Rseq_inv_poly d n.
 Lemma Qn_S : forall d n, (0 < n)%nat -> Qn d n = (/ INR n) ^ d.
 Proof.
 intros d n H; unfold Qn.
-destruct n; [apply False_ind; omega|reflexivity].
+destruct n; [apply False_ind; lia|reflexivity].
 Qed.
 Lemma ln_taylor_3 : Sn = O(Qn 4).
 Proof.
@@ -165,17 +166,17 @@ eapply Rseq_big_O_eq_compat.
     rewrite <- Rinv_1.
     apply Rinv_1_lt_contravar; [apply Rle_refl|].
     rewrite Rabs_right; [|apply Rle_ge; apply pos_INR].
-    replace (2 + n)%nat with (S (S n)) by omega.
+    replace (2 + n)%nat with (S (S n)) by lia.
     repeat rewrite S_INR.
     assert (H := pos_INR n); lra.
-    replace (2 + n)%nat with (S (S n)) by omega.
+    replace (2 + n)%nat with (S (S n)) by lia.
     repeat rewrite S_INR.
     intros Hc; assert (H := pos_INR n); lra.
   apply Rseq_eq_refl.
   lra.
   apply Rseq_cv_pos_infty_inv_compat.
   apply Rseq_cv_pos_infty_eq_compat with (Un := fun n => 2 + Rseq_poly 1 n).
-    intros n; replace (2 + n)%nat with (S (S n)) by omega.
+    intros n; replace (2 + n)%nat with (S (S n)) by lia.
     do 2 rewrite S_INR; unfold Rseq_poly; ring.
   eapply Rseq_cv_finite_plus_pos_infty_r.
     apply Rseq_constant_cv.
@@ -195,9 +196,9 @@ assert (Hp : INR p <> 0).
   unfold p.
   replace (1 + n)%nat with (S n) by auto.
   auto with real.
-rewrite Vn_simpl; [|unfold p; omega].
+rewrite Vn_simpl; [|unfold p; lia].
 replace (ln (1 + / INR p)) with (Sn p + Rn p).
-repeat (rewrite Qn_S; [|unfold p; omega]).
+repeat (rewrite Qn_S; [|unfold p; lia]).
 unfold Rn.
 field; assumption.
 unfold Sn, Rn; field; assumption.
@@ -205,7 +206,7 @@ apply Rseq_eq_refl.
 repeat apply Rseq_big_O_plus_compat_l.
   eapply Rseq_big_O_eq_compat with (Vn := fun n => INR (1 + n) * Qn 3 (1 + n)) (Un := fun n => (INR (1 + n) + / 2) * Sn (1 + n)).
     reflexivity.
-    intros n; unfold Rseq_shifts ; repeat (rewrite Qn_S; [|omega]).
+    intros n; unfold Rseq_shifts ; repeat (rewrite Qn_S; [|lia]).
     rewrite <- tech_pow_Rmult.
     field; replace (1 + n)%nat with (S n) by auto; auto with real.
   apply Rseq_big_O_mult_compat.
@@ -222,7 +223,7 @@ repeat apply Rseq_big_O_plus_compat_l.
   exists K; split; [assumption|].
   exists (S N); intros n Hn.
   eapply Rle_trans.
-  apply HN; omega.
+  apply HN; lia.
   apply Rmult_le_compat_l; [lra|].
   assert (Hle : 1 <= INR (1 + n)).
     replace (1 + n)%nat with (S n) by auto.
@@ -232,12 +233,12 @@ repeat apply Rseq_big_O_plus_compat_l.
   rewrite Rabs_mult.
   rewrite <- Rmult_1_l.
   apply Rmult_le_compat_r; [apply Rabs_pos|].
-  rewrite Qn_S; [|omega]; rewrite pow_1.
+  rewrite Qn_S; [|lia]; rewrite pow_1.
   rewrite Rabs_right; [|left; apply Rinv_0_lt_compat; lra].
   apply (Rmult_le_reg_l (INR (1 + n))); [lra|].
   rewrite Rinv_r; [|intros Hc; lra].
   rewrite Rmult_1_r; assumption.
-  repeat (rewrite Qn_S; [|omega]).
+  repeat (rewrite Qn_S; [|lia]).
   repeat rewrite <- tech_pow_Rmult.
   field; intros Hc; lra.
   apply Rseq_big_O_Rmult_compat_l; apply Rseq_big_O_refl.
@@ -246,9 +247,9 @@ repeat apply Rseq_big_O_plus_compat_l.
   exists 0%nat; intros n _ ; unfold Rseq_shifts.
   rewrite Rmult_1_l.
   assert (HINR : 0 < INR (1 + n)).
-    replace (1 + n)%nat with (S n) by omega.
+    replace (1 + n)%nat with (S n) by lia.
     rewrite S_INR; assert (H := pos_INR n); lra.
-  repeat (rewrite Qn_S; [|omega]).
+  repeat (rewrite Qn_S; [|lia]).
   rewrite Rabs_right; [|apply Rle_ge; apply pow_le; auto with real].
   rewrite Rabs_right; [|apply Rle_ge; apply pow_le; auto with real].
   repeat rewrite <- tech_pow_Rmult; rewrite pow_O.
@@ -264,7 +265,7 @@ Qed.
 
 Lemma Rser_cv_Riemann : {l | Rser_abs_cv (Qn 2) l}.
 Proof.
-apply Rser_cv_inv_poly; omega.
+apply Rser_cv_inv_poly; lia.
 Qed.
 
 Lemma Rser_cv_Vn : {l | Rser_cv Vn l}.
@@ -283,9 +284,9 @@ induction n.
   simpl sum_f_R0; rewrite IHn.
   unfold Rdiv; rewrite ln_mult.
   rewrite ln_Rinv; [ring|].
-  apply Un_pos; omega.
-  apply Un_pos; omega.
-  apply Rinv_0_lt_compat; apply Un_pos; omega.
+  apply Un_pos; lia.
+  apply Un_pos; lia.
+  apply Rinv_0_lt_compat; apply Un_pos; lia.
 Qed.
 
 Lemma Un_cv : {l | Rseq_cv Un l & 0 < l}.
@@ -299,7 +300,7 @@ assert (Hcv : {l | Rseq_cv (fun n => ln (Un n)) l}).
   destruct (Hl eps Heps) as [N HN].
   exists N; intros n Hn.
   unfold R_dist, Rseq_shifts.
-  replace (1 + n)%nat with (S n) by omega.
+  replace (1 + n)%nat with (S n) by lia.
   replace (ln (Un (S n)) - (l + (ln (Un 1))))
     with (ln (Un (S n)) - ln (Un 1) - l) by ring.
   rewrite <- Vn_ser_eq.
@@ -311,13 +312,13 @@ eapply Rseq_cv_asymptotic.
 exists 1%nat.
 eapply Rseq_cv_eq_compat with (fun n => exp (ln (Un (S n)))).
   intros n; rewrite exp_ln.
-  replace (S n) with (1 + n)%nat by omega; reflexivity.
-  apply Un_pos; omega.
+  replace (S n) with (1 + n)%nat by lia; reflexivity.
+  apply Un_pos; lia.
 apply Rseq_cv_continuity_compat.
 intros eps Heps.
 destruct (Hl eps Heps) as [N HN].
 exists N; intros n Hn.
-apply HN; omega.
+apply HN; lia.
 apply derivable_continuous_pt.
 apply derivable_exp.
 apply exp_pos.
@@ -366,7 +367,7 @@ induction n.
  rewrite Rmult_0_r, exp_0; reflexivity.
 
  simpl pow.
- replace (S n)%R with (n+1)%nat by omega.
+ replace (S n)%R with (n+1)%nat by lia.
  rewrite plus_INR.
  replace (INR 1) with R1 by trivial.
  ring_simplify (x * (INR n + R1)).

@@ -56,7 +56,7 @@ intros An Bn n ; induction n.
    + (An # Bn) (S n)).
    apply Rplus_eq_compat_r ; rewrite Rseq_sum_reindex_compat ;
    apply Rseq_sum_ext_strong ; intros p p_lb ; unfold Rseq_mult ;
-   replace (n - (n - p))%nat with p by omega ; apply Rmult_comm.
+   replace (n - (n - p))%nat with p by lia ; apply Rmult_comm.
   transitivity (Rseq_sum (An * (fun i => Rseq_sum Bn (S n - i)))%Rseq (S n)).
    unfold Rseq_prod ; do 2 rewrite Rseq_sum_simpl ; rewrite <- Rplus_assoc.
    apply Rplus_eq_compat.
@@ -64,10 +64,10 @@ intros An Bn n ; induction n.
    ((An * (fun i => Rseq_sum Bn (n - i))) + (An * (fun i => Bn (S n - i)%nat)))%Rseq).
    symmetry ; apply Rseq_sum_plus_compat.
     intros p p_ub ; unfold Rseq_mult, Rseq_plus ;
-    replace (S n - p)%nat with (S (n - p)) by omega ; simpl ; ring.
+    replace (S n - p)%nat with (S (n - p)) by lia ; simpl ; ring.
     unfold Rseq_mult ; rewrite minus_diag ; reflexivity.
    rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ; intros p Hp ;
-    unfold Rseq_mult ; replace (S n - (S n - p))%nat with p by omega ;
+    unfold Rseq_mult ; replace (S n - (S n - p))%nat with p by lia ;
     apply Rmult_comm.
 Qed.
 
@@ -132,7 +132,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  assert (HNn: (S N1 <= n)%nat).
   transitivity (max (S N1) (N1 + N2)) ; [| transitivity N ;
   [| assumption]] ; apply le_max_l.
- replace (S N1 + (n - S N1))%nat with n by omega ; reflexivity.
+ replace (S N1 + (n - S N1))%nat with n by lia ; reflexivity.
  apply Rle_lt_trans with (Rseq_sum Un N1 + Rseq_sum (Rseq_shifts Un (S N1)) (n - S N1)).
  rewrite Rseq_sum_shifts_compat ; right ; ring.
  apply Rplus_lt_compat.
@@ -155,10 +155,10 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
   assert ((N1 + N2 <= n)%nat).
    transitivity (max (S N1) (N1 + N2)) ; [apply le_max_r |
    transitivity N ; [apply le_max_l | assumption]].
- unfold Rseq_abs ; apply HN2 ; omega.
+ unfold Rseq_abs ; apply HN2 ; lia.
  right ; rewrite Rmult_comm ; apply Rseq_sum_constant_compat.
  apply Rmult_lt_compat_r ; [| apply Rmult_lt_compat_l].
-  apply lt_0_INR ; omega.
+  apply lt_0_INR ; lia.
   assumption.
   lra.
  right ; unfold eps3 ; field ; split.
@@ -170,13 +170,13 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  unfold Un ; apply Rseq_sum_le_compat_strong.
   intros p p_lb ; unfold Rseq_shifts, Rseq_mult, Rseq_abs, Rseq_minus, Rseq_constant ;
   rewrite Rabs_mult ; apply Rmult_le_compat_r ; [apply Rabs_pos |].
-  left ; apply HN1 ; omega.
+  left ; apply HN1 ; lia.
  rewrite Rseq_sum_scal_compat_l ; unfold Rseq_mult, Rseq_constant ;
   apply Rmult_lt_compat_l ; [assumption |].
  eapply Rle_lt_trans; [|apply Rlt_plus_1].
  transitivity (Rseq_sum (fun i => Rabs (An ((n - S N1) - i)%nat)) (n - S N1)).
  right ; apply Rseq_sum_ext_strong ; intros p p_lb ; unfold Rseq_abs, Rseq_shifts.
- replace (n - (S N1 + p))%nat with ((n - S N1) - p)%nat by omega ; reflexivity.
+ replace (n - (S N1 + p))%nat with ((n - S N1) - p)%nat by lia ; reflexivity.
  rewrite <- (Rseq_sum_reindex_compat (fun i => Rabs (An i))).
 (* TODO: remove growing_ineq from std_lib *)
  apply growing_ineq.

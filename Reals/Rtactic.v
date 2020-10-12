@@ -21,7 +21,7 @@ USA.
 
 Require Import ZArith.
 Require Import Reals.
-Require Import Lra.
+Require Import Lia Lra.
 Require Import DiscrR.
 Require Import Rfunctions.
 Open Scope R_scope.
@@ -669,7 +669,7 @@ Ltac INR_group term := match term with
   | INR ?a - INR ?b => rewrite <- minus_INR
   | ?a * ?b => try INR_group a; try INR_group b; try rewrite <- mult_INR
   | ?a + ?b => try INR_group a; try INR_group b; try rewrite <- plus_INR
-  | ?a - ?b => try INR_group a; try INR_group b; try rewrite <- minus_INR; [|omega]
+  | ?a - ?b => try INR_group a; try INR_group b; try rewrite <- minus_INR; [|lia]
   | INR ?a => idtac
 end.
 
@@ -691,7 +691,7 @@ Ltac INR_solve := match goal with
   | |- ?a = ?b => INR_group a; INR_group b; let H := fresh in cut (H : a = b); [rewrite H; reflexivity | ]
   | |- ?a ?op ?b => INR_group a; INR_group b
   | |- ?a /\ ?b => split; try INR_solve
-end; nat_solve; try omega.
+end; nat_solve; try lia.
 
 Section examples.
   
@@ -751,7 +751,7 @@ Section examples.
   intros.
   prove_sup.
   discrR.
-  omega.
+  lia.
   Qed.
   
 End examples.

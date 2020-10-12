@@ -357,7 +357,7 @@ Proof.
 Qed.
 
 Lemma miller_rabin_more_tests l l' :
-  (forall x, In x l -> In x l') -> forall n, leb (miller_rabin l' n) (miller_rabin l n).
+  (forall x, In x l -> In x l') -> forall n, implb (miller_rabin l' n) (miller_rabin l n) = true.
 Proof.
   intros s n.
   unfold miller_rabin in *.
@@ -366,7 +366,7 @@ Proof.
   destruct (Z.odd _). 2: reflexivity.
   destruct (remove_twos _).
   rewrite 2andb_true_l.
-  assert (a : forall a b, (a = true -> b = true) -> leb a b)
+  assert (a : forall a b, (a = true -> b = true) -> implb a b = true)
     by now intros [|] [|]; try discriminate || tauto. apply a.
   rewrite 2forallb_forall. eauto.
 Qed.

@@ -309,14 +309,14 @@ Proof.
 intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult,
  Rseq_opp, Rseq_zip, zero_seq, Rseq_constant ;
  case (n_modulo_2 n) ; intros [p Hp] ; case (n_modulo_2 (S n)) ; intros [q Hq].
-  apply False_ind ; omega.
+  apply False_ind ; lia.
   ring.
- replace q with (S p) by omega ; rewrite Hp, two_Sn, <- Hp.
+ replace q with (S p) by lia ; rewrite Hp, two_Sn, <- Hp.
  rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc.
  replace (/ INR (fact (S n)) * INR (S n)) with (/ INR (fact n)).
  simpl ; ring.
  rewrite fact_simpl, mult_INR ; field ; split ; apply not_0_INR ; [apply fact_neq_0 | intuition].
- apply False_ind ; omega.
+ apply False_ind ; lia.
 Qed.
 
 Lemma Deriv_sin_seq_simpl : (An_deriv sin_seq == cos_seq)%Rseq.
@@ -324,14 +324,14 @@ Proof.
 intro n ; unfold cos_seq, sin_seq, An_deriv, Rseq_shift, Rseq_mult, Rseq_zip,
  zero_seq, Rseq_constant ;
  case (n_modulo_2 n) ; intros [p Hp] ; case (n_modulo_2 (S n)) ; intros [q Hq].
- apply False_ind ; omega.
- rewrite <- Hq ; replace q with p by omega ; rewrite <- Hp.
+ apply False_ind ; lia.
+ rewrite <- Hq ; replace q with p by lia ; rewrite <- Hp.
  rewrite Rmult_comm ; unfold Rdiv ; rewrite Rmult_assoc.
  replace (/ INR (fact (S n)) * INR (S n)) with (/ INR (fact n)).
  simpl ; ring.
  rewrite fact_simpl, mult_INR ; field ; split ; apply not_0_INR ; [apply fact_neq_0 | intuition].
  ring.
- apply False_ind ; omega.
+ apply False_ind ; lia.
 Qed.
 
 (** Definition of the derivatives *)
@@ -476,7 +476,7 @@ Lemma Rseq_shifts_poly_neq : forall d n k, (0 < k)%nat ->
   Rseq_shifts (Rseq_poly d) k n <> 0.
 Proof.
 intros d k n Hk ; unfold Rseq_shift, Rseq_poly ;
- apply pow_nonzero, not_0_INR ; omega.
+ apply pow_nonzero, not_0_INR ; lia.
 Qed.
 
 (** Preliminary definition: the part of arctan that computes! *)
@@ -487,21 +487,21 @@ Lemma arct_cv_radius : finite_cv_radius arct_seq 1.
 Proof.
 rewrite <- Rinv_1 ; apply Rpser_alembert_finite.
  apply Rgt_not_eq ; lra.
- intro n ; apply Rinv_neq_0_compat, not_0_INR ; omega.
- assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; omega) ;
+ intro n ; apply Rinv_neq_0_compat, not_0_INR ; lia.
+ assert (Hf : is_extractor (fun n => S (2 * n))) by (intro ; lia) ;
   pose (phi := exist _ _ Hf) ; rewrite Rseq_cv_eq_compat with
   (Vn := (Rseq_poly 1 ⋅ phi / (Rseq_shifts (Rseq_poly 1) 2 ⋅ phi))%Rseq).
  apply Rseq_equiv_cv_div.
   eapply Rseq_equiv_subseq_compat, Rseq_poly_shifts_equiv.
-  intro ; apply Rseq_shifts_poly_neq ; omega.
+  intro ; apply Rseq_shifts_poly_neq ; lia.
  intro n ; unfold Rseq_shift, Rseq_shifts, Rseq_abs, Rseq_div, Rseq_poly,
   extracted, arct_seq, Rdiv ; do 2 rewrite pow_1 ;
   rewrite Rinv_involutive, Rabs_right.
   simpl proj1_sig ; simpl mult ; simpl plus ; rewrite <- plus_n_Sm ; apply Rmult_comm.
   rewrite Rmult_comm ; apply Rle_ge, Rle_mult_inv_pos.
    apply pos_INR.
-   apply lt_0_INR ; omega.
-  apply not_0_INR ; omega.
+   apply lt_0_INR ; lia.
+  apply not_0_INR ; lia.
 Qed.
 
 Definition arctan_seq : Rseq.
@@ -557,7 +557,7 @@ Qed.
 Lemma Rpow_lt_1_compat : forall r n, 0 <= r -> r < 1 -> r ^ S n < 1.
 Proof.
 intros r n r_pos r_lt ; rewrite <- (pow1 (S n)) ;
- apply pow_lt_compat ; auto ; omega.
+ apply pow_lt_compat ; auto ; lia.
 Qed.
 
 Lemma sum_r_arctan_explicit : forall x, Rball 0 1 x ->
@@ -628,7 +628,7 @@ eapply Rpser_unique ; [eapply arctan_sum_sums |].
  split ; lra.
  apply Rseq_cv_eq_compat with (fun _ => 0).
  intro ; rewrite Rseq_pps_0_simpl ; unfold arctan_seq, Rseq_zip.
-  case (n_modulo_2 0) ; intros [p Hp] ; [reflexivity | apply False_ind ; omega ].
+  case (n_modulo_2 0) ; intros [p Hp] ; [reflexivity | apply False_ind ; lia ].
  apply Rseq_constant_cv.
 Qed.
 
@@ -645,12 +645,12 @@ Lemma An_deriv_arctan_seq_explicit :
 Proof.
 intro n ; unfold An_deriv, arctan_seq, Rseq_zip, Rseq_shift, Rseq_mult.
  case (n_modulo_2 n) ; intros [p Hp] ; case (n_modulo_2 (S n)) ; intros [q Hq].
-  apply False_ind ; omega.
-  assert (Hpq : (p = q)%nat) by omega ; rewrite Hq, Hpq.
+  apply False_ind ; lia.
+  assert (Hpq : (p = q)%nat) by lia ; rewrite Hq, Hpq.
    fold (((fun q => INR (S (2 * q))) * Rseq_alt arct_seq)%Rseq q) ; rewrite <- Rseq_alt_mult_r.
-   apply Rmult_eq_compat_l, Rinv_r, not_0_INR ; omega.
+   apply Rmult_eq_compat_l, Rinv_r, not_0_INR ; lia.
   unfold zero_seq, Rseq_constant ; ring.
-  apply False_ind ; omega.
+  apply False_ind ; lia.
 Qed.
 
 Lemma derivable_pt_lim_Rball_arctan_sum : forall x, Rball 0 1 x ->

@@ -442,7 +442,7 @@ Lemma integer_0_1 : forall x, 0 < IZR x < 1 -> False.
 Proof.
   intros x [H0 H1].
   apply lt_IZR in H0; apply lt_IZR in H1.
-  omega.
+  lia.
 Qed.
 
 Lemma eirr : forall a b, b <> 0%nat -> e = (INR a) / (INR b) -> False.

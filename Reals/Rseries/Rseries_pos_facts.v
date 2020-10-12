@@ -77,7 +77,7 @@ Lemma Rser_cv_growing_even_compat: forall An l,
   (forall n, 0 <= An n) ->  Rseq_cv (fun n => (Rseq_sum An (2*n))) l ->
   Rser_cv An l.
 Proof.
-intros An l An_pos Hcv ; assert (Hex : is_extractor (mult 2)) by (intro n ; omega) ;
+intros An l An_pos Hcv ; assert (Hex : is_extractor (mult 2)) by (intro n ; lia) ;
 apply Rser_cv_growing_subseq_compat with (exist _ _ Hex) ; assumption.
 Qed.
 
@@ -85,6 +85,6 @@ Lemma Rser_cv_growing_odd_compat: forall An l,
   (forall n, 0 <= An n) ->  Rseq_cv (fun n => (Rseq_sum An (S (2*n)))) l ->
   Rser_cv An l.
 Proof.
-intros An l An_pos Hcv ; assert (Hex : is_extractor (fun n => S (2 * n))) by (intro n ; omega) ;
+intros An l An_pos Hcv ; assert (Hex : is_extractor (fun n => S (2 * n))) by (intro n ; lia) ;
 apply Rser_cv_growing_subseq_compat with (exist _ _ Hex) ; assumption.
 Qed.

@@ -27,9 +27,9 @@ intros N x ; assert (Hrec : forall n, (n <= N)%nat ->
    rewrite Rseq_pps_simpl, IHn, Rplus_0_l ;
    destruct (le_lt_dec (S n) N) as [H | Hf].
     apply Rmult_0_l.
-    exfalso ; omega.
-   omega.
-   exfalso ; omega.
+    exfalso ; lia.
+   lia.
+   exfalso ; lia.
 apply Hrec ; trivial.
 Qed.
 
@@ -42,7 +42,7 @@ intros N x Vn n Hle ; induction Hle.
 unfold Vn ; rewrite partial_sum_null ; ring.
 do 2 rewrite Rseq_pps_simpl ; rewrite IHHle ; unfold Vn at 3.
 destruct (le_lt_dec (S m ) N).
-  exfalso ; omega.
+  exfalso ; lia.
   apply Rplus_assoc.
 Qed.
 (* end hide *)
@@ -102,7 +102,7 @@ assert (Hsum : forall x, Rabs x < r -> St x = Sp x + Sr x).
       exists (n - N)%nat.
       assert (n >= N)%nat.
         eapply le_trans; [apply Max.le_max_l|eexact Hn].
-      omega.
+      lia.
     destruct Hrw as [p Hp]; subst n.
     unfold R_dist.
     rewrite Rplus_comm.
@@ -127,17 +127,17 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
       intros eps Heps.
       exists 0%nat; intros n _.
       assert (Rseq_pps Vn 0 n = 0) as ->; swap 1 2.
-      rewrite pow_ne_zero; [|omega].
+      rewrite pow_ne_zero; [|lia].
       rewrite Rmult_0_l.
       rewrite R_dist_eq.
       assumption.
       induction n; simpl.
         rewrite Rseq_pps_0_simpl ; unfold Vn.
-        destruct le_lt_dec; [field|apply False_ind; omega].
+        destruct le_lt_dec; [field|apply False_ind; lia].
         rewrite Rseq_pps_simpl.
         rewrite pow_i, Rmult_0_r, Rplus_0_r.
         assumption.
-        omega.
+        lia.
       intros eps Heps.
       destruct (Hcvw (eps / Rabs (x ^ (S N)))) as [n0 Hn0].
         unfold Rdiv; apply Rmult_gt_0_compat.
@@ -155,24 +155,24 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
       rewrite Rinv_l.
       rewrite Rmult_1_l.
       rewrite Rmult_comm.
-      apply Hn0; omega.
+      apply Hn0; lia.
       apply Rgt_not_eq.
       apply Rabs_pos_lt; apply pow_nonzero; assumption.
     assert (Hrw : exists p, (n = N + S p)%nat).
-      exists (n - (S N))%nat; omega.
+      exists (n - (S N))%nat; lia.
     destruct Hrw as [p Hp]; subst n.
     clear - p.
       induction p; simpl.
-        replace (N + 1)%nat with (S N) by omega.
-        replace (S N - S N)%nat with 0%nat by omega.
+        replace (N + 1)%nat with (S N) by lia.
+        replace (S N - S N)%nat with 0%nat by lia.
         unfold Vn, Wn.
         rewrite Rseq_pps_simpl, Rseq_pps_O_simpl, partial_sum_null.
-        destruct le_lt_dec as [H|_]; [apply False_ind; omega|].
+        destruct le_lt_dec as [H|_]; [apply False_ind; lia|].
         simpl ; ring.
         rewrite <- plus_n_Sm.
-        replace (S (N + S p) - S N)%nat with (S (N + S p - S N))%nat by omega.
+        replace (S (N + S p) - S N)%nat with (S (N + S p - S N))%nat by lia.
         rewrite Rseq_pps_simpl, IHp.
-        replace (S (N + S p)) with ((S N) + (S p))%nat by omega ;
+        replace (S (N + S p)) with ((S N) + (S p))%nat by lia ;
         rewrite (pow_add _ (S N)).
         transitivity (x ^ S N * (Rseq_pps Wn x (N + S p - S N) +
          x ^ S p * Vn (S N + S p)%nat)).
@@ -180,9 +180,9 @@ assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
         simpl ; do 2 (repeat rewrite Rmult_assoc ; apply Rmult_eq_compat_l).
         rewrite Rseq_pps_simpl ; apply Rplus_eq_compat_l.
         unfold Vn, Wn.
-        destruct le_lt_dec as [H|_]; [apply False_ind; omega|].
-        replace (S (N + S p - S N) + S N)%nat with (S (N + S p))%nat by omega.
-        replace (N + S p - S N)%nat with p by omega.
+        destruct le_lt_dec as [H|_]; [apply False_ind; lia|].
+        replace (S (N + S p - S N) + S N)%nat with (S (N + S p))%nat by lia.
+        replace (N + S p - S N)%nat with p by lia.
         simpl ; ring.
 assert (Hct : continuity_pt Ss 0).
   apply continuity_pt_weaksum_r.

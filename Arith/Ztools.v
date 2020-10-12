@@ -1,5 +1,4 @@
-Require Import ZArith Omega Znumtheory.
-Require Import Coq.micromega.Lia.
+Require Import ZArith Omega Lia Znumtheory.
 
 (** * Contains some useful lemmas not in stdlib and a tactic *)
 
@@ -15,17 +14,17 @@ Qed.
 Lemma Zmult_le_1_compat : forall a b, 1 <= a -> 1 <= b -> 1 <= a * b.
 Proof.
   intros a b.
-  replace a with (1 + (a - 1)) by omega.
-  replace b with (1 + (b - 1)) by omega.
+  replace a with (1 + (a - 1)) by lia.
+  replace b with (1 + (b - 1)) by lia.
   generalize (a - 1).
   generalize (b - 1).
   intros c d.
   intros.
-  assert (0 <= c) by omega.
-  assert (0 <= d) by omega.
+  assert (0 <= c) by lia.
+  assert (0 <= d) by lia.
   ring_simplify.
   assert (0 <= d * c) by auto with *.
-  omega.
+  lia.
 Qed.
 
 Lemma Zsquare_pos : forall x, 0 <> x -> 0 < x * x.
@@ -51,8 +50,8 @@ Ltac notzero :=
   | Pp : prime ?p |- ?p <> 0 => pose proof prime_ge_2 p Pp; lia
   | Pp : prime ?p |- ?p <> 1 => pose proof prime_ge_2 p Pp; lia
   | Pp : prime ?p |- ?p > 0 => pose proof prime_ge_2 p Pp; lia
-  | |- 0 < _  => auto with *; try (zify; omega)
-  | |- 0 <> _ => auto with *; try (zify; omega)
+  | |- 0 < _  => auto with *; try lia
+  | |- 0 <> _ => auto with *; try lia
   | |- _ => idtac
   end.
 
@@ -79,7 +78,7 @@ Proof.
   exists (b / a).
   rewrite Zmult_comm.
   destruct (Z.eq_dec a 0).
-    subst; destruct D; omega.
+    subst; destruct D; lia.
     
     apply Z_div_exact_full_2; auto with *.
     apply Zdivide_mod; auto.
@@ -91,7 +90,7 @@ Defined.
 Lemma Z_mult_div_mod : forall a b, b <> 0 -> b * (a / b) = a - a mod b.
 Proof.
   intros a b N.
-  pose proof Z_div_mod_eq_full a b N; omega.
+  pose proof Z_div_mod_eq_full a b N; lia.
 Qed.
 
 Lemma Zdivide_square : forall a b, (a | b) -> (a * a | b * b).
@@ -112,9 +111,9 @@ Lemma Z_mult_div_bounds : forall a b, 0 < b -> a - b < b * (a / b) <= a.
 Proof.
   intros a b N; split.
     pose proof Z_mod_lt a b.
-    rewrite Z_mult_div_mod; omega.
+    rewrite Z_mult_div_mod; lia.
     
-    apply Z_mult_div_ge; omega.
+    apply Z_mult_div_ge; lia.
 Qed.
 
 
@@ -141,9 +140,9 @@ Lemma sqrt_eq_compat : forall a b, 0 <= a -> 0 <= b ->
 Proof.
   intros a b Pa Pb E.
   destruct (Z.eq_dec 0 (a + b)) as [F|F].
-    omega.
+    lia.
     
-    cut (a - b = 0); [ omega | ].
+    cut (a - b = 0); [ lia | ].
     apply (Zmult_reg_l _ _ (a + b)); notzero.
     ring_simplify.
     rewrite rewrite_power_2, E.
@@ -154,9 +153,9 @@ Lemma sqrt_eq_compat_abs : forall a b, a * a = b * b -> Z.abs a = Z.abs b.
 Proof.
   intros a b E.
   destruct (Z.eq_dec 0 (Z.abs a + Z.abs b)) as [F|F].
-    zify; omega.
+    lia.
     
-    cut (Z.abs a - Z.abs b = 0); [ omega | ].
+    cut (Z.abs a - Z.abs b = 0); [ lia | ].
     apply (Zmult_reg_l _ _ (Z.abs a + Z.abs b)); notzero.
     ring_simplify.
     rewrite <- Z.abs_square, <- (Z.abs_square b) in E.
@@ -169,12 +168,12 @@ Lemma sqrt_le_compat : forall a b, 0 <= a -> 0 <= b ->
 Proof.
   intros a b Pa Pb E.
   destruct (Z.eq_dec 0 (a + b)) as [F|F].
-    omega.
+    lia.
     
-    cut (0 <= b - a); [ omega | ].
+    cut (0 <= b - a); [ lia | ].
     apply Zmult_le_reg_r with (a + b); notzero.
     ring_simplify.
-    do 2 rewrite rewrite_power_2; omega.
+    do 2 rewrite rewrite_power_2; lia.
 Qed.
 
 

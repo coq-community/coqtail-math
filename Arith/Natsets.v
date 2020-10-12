@@ -1,4 +1,4 @@
-Require Import ZArith Omega MyNat Div2.
+Require Import ZArith Omega Lia MyNat Div2.
 
 (** Finite and computable subsets of [nat], by functions in [nat -> bool] *)
 
@@ -24,11 +24,11 @@ Ltac auto_if :=
   | H : ?T |- _ => destruct_if T
   end.
 
-Ltac impossible := exfalso; discriminate || omega || tauto.
+Ltac impossible := exfalso; discriminate || lia || tauto.
 
 Ltac dumb_aux :=
   auto || auto with * || discriminate
-  || intuition || tauto || omega.
+  || intuition || tauto || lia.
 
 Ltac dumb :=
   try solve
@@ -105,7 +105,7 @@ Proof.
   induction n; auto; simpl.
   unfold IBN, union, inter in *.
   remember (P n) as Pn; remember (Q n) as Qn.
-  destruct Pn; destruct Qn; simpl; omega.
+  destruct Pn; destruct Qn; simpl; lia.
 Qed.
 
 Lemma not_empty P n : O < count n P -> { i | i < n /\ P i = true }.
@@ -150,7 +150,7 @@ Proof.
   destruct (not_empty (inter P Q) n) as (i, Hi).
     rewrite count_inter.
     pose proof count_bound (union P Q) n.
-    omega.
+    lia.
     
     exists i; intuition; unfold inter in *;
       destruct (P i); destruct (Q i); intuition.
@@ -451,7 +451,7 @@ Next Obligation.
           auto.
           destruct (eq_nat_dec x n) as [G|G].
             subst; tauto.
-            omega.
+            lia.
 Defined.
 
 Definition card (S : natset) := count (natset_bound S) (natset_charact S).

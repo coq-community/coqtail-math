@@ -85,16 +85,16 @@ intros An k l Hl An_pos [n [nk Hn]] ; apply Rlt_Rminus, Rlt_le_trans with (Rseq_
  destruct n ; [inversion nk |].
   rewrite Rseq_sum_simpl ;apply Rle_lt_trans with (Rseq_sum An n) ; [| lra].
   clear Hn ; induction n.
-   assert (k = O) by omega ; subst ; reflexivity.
+   assert (k = O) by lia ; subst ; reflexivity.
    destruct (eq_nat_dec k (S n)).
     subst ; reflexivity.
-    assert (S n > k)%nat by omega ; assert (0 <= An (S n)) by (apply Rge_le, An_pos ; auto) ;
+    assert (S n > k)%nat by lia ; assert (0 <= An (S n)) by (apply Rge_le, An_pos ; auto) ;
     rewrite Rseq_sum_simpl ; transitivity (Rseq_sum An n) ; [intuition | lra].
    eapply Rseq_limit_comparison with (Rseq_sum An n) (Rseq_shifts (Rseq_sum An) n).
    intro p ; induction p ; unfold Rseq_constant, Rseq_shifts in *.
     rewrite plus_0_r ; reflexivity.
     rewrite <- plus_n_Sm, Rseq_sum_simpl ; assert (0 <= An (S (n +p)))
-     by (apply Rge_le, An_pos ; omega) ; lra.
+     by (apply Rge_le, An_pos ; lia) ; lra.
    apply Rseq_constant_cv.
    apply Rseq_cv_shifts_compat_reciprocal ; assumption.
 Qed.

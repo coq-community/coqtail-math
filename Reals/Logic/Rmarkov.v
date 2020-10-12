@@ -19,9 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Reals.
-Require Import Coq.omega.Omega.
-Require Import Lra.
+Require Import Reals Lia Lra.
 
 Open Scope R_scope.
 
@@ -100,7 +98,7 @@ Proof.
 intros n N.
 induction N.
   simpl; apply Rle_refl.
-  replace (S N + n)%nat with (S (N + n))%nat by omega.
+  replace (S N + n)%nat with (S (N + n))%nat by lia.
   eapply Rle_trans.
     apply IHN.
     apply Bn_growing.
@@ -220,12 +218,12 @@ apply l_lub; intros m.
 destruct (le_ge_dec m n) as [Hd|Hd].
   pattern (Bn m); rewrite <- Rplus_0_r.
   apply Rplus_le_compat.
-    replace n with ((n - m) + m)%nat by omega.
+    replace n with ((n - m) + m)%nat by lia.
     apply Bn_growing_trans.
     apply pow_le; apply Rle_0_inv_2.
   replace (Bn m) with (Bn n + (Bn m - Bn n)) by ring.
   apply Rplus_le_compat_l.
-  replace m with ((m - n) + n)%nat by omega.
+  replace m with ((m - n) + n)%nat by lia.
   eapply Rle_trans.
     apply Bn_dist_trans.
     rewrite <- Rmult_1_r.
@@ -245,12 +243,12 @@ assert (forall n, (n <= N)%nat -> Bn n = 0).
     reflexivity.
     replace (Bn (S n))
       with (Bn n + fp (f n) n) by reflexivity.
-    rewrite IHn; [|omega].
+    rewrite IHn; [|lia].
     unfold fp.
     destruct (Bool.bool_dec (f n) true) as [Hd|Hd].
       destruct (Bool.eq_true_false_abs (f n)).
       assumption.
-      apply HN; omega.
+      apply HN; lia.
     destruct (f n) as [|].
       elim Hd; reflexivity.
       ring.
@@ -374,7 +372,7 @@ induction N.
     apply HN; intros n Hn.
     destruct (eq_nat_dec n (S N)) as [Hd|Hd].
       rewrite Hd; assumption.
-      apply Hneg; omega.
+      apply Hneg; lia.
 Qed.
 
 End l_not_zero.

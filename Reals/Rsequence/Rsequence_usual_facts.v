@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import Reals.
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
@@ -63,9 +63,9 @@ intros d k eps eps_pos.
    unfold Rseq_poly, Rseq_minus, Rseq_shift ; ring_simplify.
    rewrite Rplus_comm, Ropp_mult_distr_l_reverse, <- Rpow_mult_distr.
    apply Rplus_eq_compat_l, Ropp_eq_compat, Rpow_eq_compat.
-   rewrite plus_INR ; field ; apply not_0_INR ; omega.
+   rewrite plus_INR ; field ; apply not_0_INR ; lia.
   apply Rmult_le_compat_r ; [apply Rabs_pos |].
-  rewrite <- (Rminus_0_r (1 - _)) ; left ; apply HN ; omega.
+  rewrite <- (Rminus_0_r (1 - _)) ; left ; apply HN ; lia.
 Qed.
 
 Lemma Rseq_poly_shift_equiv : forall d,
@@ -94,8 +94,8 @@ destruct n; auto with real.
 destruct n; auto with real.
 left; rewrite <- Rmult_1_r.
 apply Rmult_gt_compat_l.
-apply lt_0_INR; omega.
-apply lt_1_INR; omega.
+apply lt_0_INR; lia.
+apply lt_1_INR; lia.
 destruct (IZN (up (Rmax 0 (M + 1)))) as [N Hz].
 apply le_0_IZR.
 destruct (archimed (Rmax 0 (M + 1))) as [Hp _].
@@ -178,7 +178,7 @@ apply mult_le_compat_l.
 induction n.
 simpl; constructor.
 rewrite fact_simpl; pattern 1%nat; rewrite <- mult_1_r.
-apply mult_le_compat; omega.
+apply mult_le_compat; lia.
 destruct (IZN (up (Rmax 0 (M + 1)))) as [N Hz].
 apply le_0_IZR.
 destruct (archimed (Rmax 0 (M + 1))) as [Hp _].
@@ -201,12 +201,12 @@ intros d1 d2 Hd.
 intros eps Heps.
 unfold Rseq_poly.
 pose (k := (d2 - d1)%nat).
-assert (Hk : (k > 0)%nat); [unfold k; omega|].
+assert (Hk : (k > 0)%nat); [unfold k; lia|].
 assert (HM : exists N, forall n, (n >= N)%nat -> /eps < Rseq_poly k n).
 apply Rseq_poly_cv; assumption.
 destruct HM as [N HN].
 exists N; intros n Hn.
-replace d2 with (d1 + k)%nat by (unfold k; omega).
+replace d2 with (d1 + k)%nat by (unfold k; lia).
 rewrite pow_add; rewrite Rabs_mult.
 rewrite Rmult_comm.
 rewrite Rmult_assoc.
@@ -228,15 +228,15 @@ exists 1%nat.
 eapply Rseq_little_O_eq_compat
   with (Un := fun n => / (INR (S n) ^ d2)) (Vn := fun n => (/ INR (S n) ^ d1)).
 intros n; unfold Rseq_inv_poly.
-replace (1 + n)%nat with (S n) by omega.
+replace (1 + n)%nat with (S n) by lia.
 rewrite Rinv_pow; [reflexivity|auto with real].
 intros n; unfold Rseq_inv_poly.
-replace (1 + n)%nat with (S n) by omega.
+replace (1 + n)%nat with (S n) by lia.
 rewrite Rinv_pow; [reflexivity|auto with real].
 apply Rseq_little_O_inv_contravar.
 intros eps Heps.
 destruct (Rseq_poly_little_O d1 d2 Hd eps Heps) as [N HN].
-exists N; intros n Hn; apply HN; omega.
+exists N; intros n Hn; apply HN; lia.
 intros n; apply pow_nonzero; auto with real.
 intros n; apply pow_nonzero; auto with real.
 Qed.
@@ -295,7 +295,7 @@ apply Rmult_ge_compat_l; [lra|apply IHle].
 repeat rewrite S_INR.
 field_simplify.
 unfold Rdiv; apply Rmult_ge_compat_r; [lra|].
-assert (HINR : 1 < INR m); [apply lt_1_INR; omega|].
+assert (HINR : 1 < INR m); [apply lt_1_INR; lia|].
 rewrite <- Rplus_0_l.
 unfold Rminus; repeat rewrite Rplus_assoc.
 rewrite <- Rplus_assoc.
@@ -317,7 +317,7 @@ replace r with (1 + x)%R by (unfold x; field).
 rewrite <- Rplus_0_l.
 eapply Rlt_le_trans; [|apply Rge_le; apply Hdev; assumption].
 apply Rplus_lt_compat_r.
-assert (HINR: 0 <= INR n); [apply pos_INR; omega|].
+assert (HINR: 0 <= INR n); [apply pos_INR; lia|].
 pattern 0; rewrite <- Rplus_0_l.
 apply Rplus_lt_le_compat; [lra|].
 apply Rmult_le_pos; lra.
@@ -338,12 +338,12 @@ exists (INR 4 * / x * / x)%R; split.
   replace (INR n ^ 2 / 1)%R with (INR n * INR n)%R by field.
   apply Rmult_le_compat_l; [apply pos_INR|].
   replace 1%R with (INR 1) by reflexivity.
-  rewrite <- minus_INR; [|omega].
+  rewrite <- minus_INR; [|lia].
   change 2 with (INR 2).
   rewrite <- 2mult_INR.
-  apply le_INR; omega.
+  apply le_INR; lia.
   replace 1%R with (INR 1) by reflexivity.
-  rewrite <- minus_INR; [apply Rle_ge; apply pos_INR|omega].
+  rewrite <- minus_INR; [apply Rle_ge; apply pos_INR|lia].
   apply Rle_ge; apply pos_INR.
   apply Rle_ge; apply pow_le; apply pos_INR.
 assert (HO2 : (fun n => INR n * (INR n - 1) * / 2 * x * x)%R = O(Rseq_pow r)).
@@ -353,11 +353,11 @@ assert (HO2 : (fun n => INR n * (INR n - 1) * / 2 * x * x)%R = O(Rseq_pow r)).
   left; rewrite Rmult_1_l; apply Hmin; assumption.
   apply Rle_ge; apply pow_le; lra.
   apply Rle_ge; left; repeat apply Rmult_lt_0_compat; try lra.
-  apply lt_0_INR; omega.
-  replace 1 with (INR 1) by reflexivity; rewrite <- minus_INR; [|omega].
-  apply lt_0_INR; omega.
+  apply lt_0_INR; lia.
+  replace 1 with (INR 1) by reflexivity; rewrite <- minus_INR; [|lia].
+  apply lt_0_INR; lia.
 eapply Rseq_little_O_big_O_trans.
-  apply (Rseq_poly_little_O 1 2); omega.
+  apply (Rseq_poly_little_O 1 2); lia.
   eapply Rseq_big_O_trans.
     apply HO.
     apply HO2.
@@ -384,7 +384,7 @@ pose (m :=
 assert (Hm : (n <= 2 * m /\ 2 * m <= S n)%nat).
 destruct (Even.even_odd_dec n) as [Hm|Hm];
 [destruct (Div2.even_2n n Hm) as [p Hp]|destruct (Div2.odd_S2n n Hm) as [p Hp]];
-simpl in m; unfold Div2.double in Hp; unfold m; omega.
+simpl in m; unfold Div2.double in Hp; unfold m; lia.
 destruct Hm as [Hml Hmr].
 apply Rle_trans with (Rabs (INR (2 * m) ^ (2 * kk))).
 repeat rewrite Rabs_right.
@@ -400,8 +400,8 @@ apply Rmult_le_compat; (apply Rle_refl || apply Rabs_pos).
 replace 0 with (0 * 0)%R by field;
 apply Rmult_le_compat; (apply Rle_refl || apply Rabs_pos).
 change (1 + 1) with 2.
-apply Rmult_le_compat_l; [apply Rabs_pos|]; apply HN; omega.
-apply Rmult_le_compat_l; [apply Rabs_pos|]; apply HN; omega.
+apply Rmult_le_compat_l; [apply Rabs_pos|]; apply HN; lia.
+apply Rmult_le_compat_l; [apply Rabs_pos|]; apply HN; lia.
 unfold Rseq_pow.
 change (1 + 1) with 2.
 field_simplify.
@@ -433,11 +433,11 @@ apply Rabs_pos_lt; apply pow_nonzero; apply Rgt_not_eq; lra.
 assert (Hp : (forall n, exists p, n < npow 2 p)%nat).
 intros n.
 destruct (zerop n) as [H|H].
-exists 0%nat; simpl; omega.
+exists 0%nat; simpl; lia.
 induction H.
-exists 1%nat; simpl; omega.
+exists 1%nat; simpl; lia.
 destruct IHle as [p Hp].
-exists (S p); simpl; omega.
+exists (S p); simpl; lia.
 destruct (Hp d) as [dm Hdm].
 apply Rseq_little_O_trans with (Rseq_poly (npow 2 dm)%nat).
 apply Rseq_poly_little_O; assumption.
@@ -454,12 +454,12 @@ exists 1%nat.
 apply Rseq_little_O_eq_compat
   with (Un := fun n => / ((/ r) ^ (S n))) (Vn := fun n => (/ INR (S n) ^ d)).
 intros n; unfold Rseq_pow.
-replace (1 + n)%nat with (S n) by omega.
+replace (1 + n)%nat with (S n) by lia.
 rewrite Rinv_pow; [|auto with real].
 rewrite Rinv_involutive; [|auto with real].
 reflexivity.
 intros n; unfold Rseq_inv_poly.
-replace (1 + n)%nat with (S n) by omega.
+replace (1 + n)%nat with (S n) by lia.
 rewrite Rinv_pow; [|auto with real].
 reflexivity.
 apply Rseq_little_O_inv_contravar.
@@ -471,7 +471,7 @@ destruct (Rseq_poly_pow_gt_1_little_O d (/ r)) with (eps := eps) as [N HN].
   assumption.
   assumption.
 exists N; intros n Hn.
-apply HN; omega.
+apply HN; lia.
 intros n; apply pow_nonzero; auto with real.
 intros n; apply pow_nonzero; auto with real.
 Qed.
@@ -509,7 +509,7 @@ assert (HO : forall n, Rseq_pow (INR n) = O(Rseq_fact)).
       by field.
     apply Rmult_le_compat; try apply Rabs_pos.
     repeat rewrite Rabs_right; try (apply Rle_ge; apply pos_INR).
-    apply le_INR; omega.
+    apply le_INR; lia.
     apply IHHm.
 intros r Hr.
 destruct (IZN (up r)) as [d Hd].
@@ -544,7 +544,7 @@ Qed.
 Lemma Rseq_ln_cv : Rseq_cv_pos_infty (fun n => ln (INR n)).
 Proof.
 intro m.
-destruct (Rseq_poly_cv 1) with (M := Rabs m) as [N HN]; [omega|].
+destruct (Rseq_poly_cv 1) with (M := Rabs m) as [N HN]; [lia|].
 destruct (IZN(up (exp (INR N)))) as [N1 HN1].
   apply le_IZR; simpl.
   apply Rle_trans with (exp (INR N)).

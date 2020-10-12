@@ -1,4 +1,4 @@
-Require Import Coq.omega.Omega.
+Require Import Lia.
 Require Import MyRIneq Rpow_facts.
 Require Import Rsequence_def Rsequence_rewrite_facts.
 Require Import Rpser_def.
@@ -44,7 +44,7 @@ Lemma gt_abs_pser_0_ub : forall An n,
 Proof.
 intros An [ |i] ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
 rewrite pow_O, Rmult_1_r ; reflexivity.
-rewrite pow_i ; [rewrite Rmult_0_r, Rabs_R0 ; apply Rabs_pos | omega].
+rewrite pow_i ; [rewrite Rmult_0_r, Rabs_R0 ; apply Rabs_pos | lia].
 Qed.
 
 Lemma gt_abs_pser_le_compat : forall An r r' n,
@@ -120,8 +120,8 @@ Proof.
 assert (Hrew : forall n, / Rseq_fact n = INR (S n) * / Rseq_fact (S n)).
  intro n ; unfold Rseq_fact ; rewrite fact_simpl, mult_INR, Rinv_mult_distr,
  <- Rmult_assoc.
- symmetry ; apply Rinv_r_simpl_r ; apply not_0_INR ; omega.
- apply not_0_INR ; omega.
+ symmetry ; apply Rinv_r_simpl_r ; apply not_0_INR ; lia.
+ apply not_0_INR ; lia.
  apply INR_fact_neq_0.
 intros An k n ; unfold An_nth_deriv, An_deriv, Rseq_shift, Rseq_shifts,
  Rseq_div, Rseq_mult, Rdiv ; rewrite Hrew, <- plus_n_Sm.

@@ -1,4 +1,4 @@
-Require Import ZArith Omega Znumtheory.
+Require Import ZArith Omega Lia Znumtheory.
 Require Import Natsets MyNat Ztools Zeqm.
 
 (** * Number theory : factorisation, computation of Bezout coefficients and modular inverse *)
@@ -28,9 +28,9 @@ Definition prime_dec_aux_inf:
 Proof.
   intros p m.
   case (Z_lt_dec 1 m); intros H1;
-    [ | right; intros; exfalso; omega ].
+    [ | right; intros; exfalso; lia ].
   pattern m; apply natlike_rec; auto with zarith;
-    [ right; intros; exfalso; omega | ].
+    [ right; intros; exfalso; lia | ].
   intros x Hx IH; destruct IH as [E|F].
     left; destruct E as (n,((H0,H2),H3));exists n; auto with zarith.
     
@@ -145,7 +145,7 @@ Proof.
     intro n ; induction n ; intros i ipos imax.
       (* i = n is the only interesting case *)
       exfalso; inversion imax.
-      destruct (Z_le_lt_eq_dec i (Z_of_nat n)) as [|E]. zify; omega. apply IHn; zify; omega.
+      destruct (Z_le_lt_eq_dec i (Z_of_nat n)) as [|E]. lia. apply IHn; lia.
       rewrite E in *; clear E i ipos imax.
       
       (* Case: n is prime *)
@@ -157,22 +157,19 @@ Proof.
       
       (* Case: n = a * b *)
       set (z := Z_of_nat (S (S n))).
-      assert (n_big : 1 < z) by (unfold z; zify; omega).
+      assert (n_big : 1 < z) by (unfold z; lia).
       destruct (not_prime_divide_inf _ n_big Hnprime) as [a [[amin amax] b_eqz]].
       destruct (Zdivide_inf _ _ b_eqz) as [b eqz]; clear b_eqz; rewrite eqz.
       
       (* Bounds on b come from bounds on a *)
       assert (Bb : 1 < b < z).
-        assert (1 < b) by (apply Zmult_lt_reg_r with a; omega).
+        assert (1 < b) by (apply Zmult_lt_reg_r with a; lia).
         split; auto.
         rewrite <- (Zmult_1_r b), eqz.
-        apply Zmult_lt_compat_l; try omega.
-      
-      (* Empêche un bug d'omega (uncaught exception) *)
-      assert (z = Z_of_nat (S (S n))) by auto; clearbody z.
+        apply Zmult_lt_compat_l; try lia.
       
       (* Main argument *)
-      apply Psplit; apply IHn; zify; omega.
+      apply Psplit; apply IHn; lia.
   
   intros n n_pos ; apply Hind with (S (Z.abs_nat n)) ; auto.
 Defined.
@@ -201,7 +198,7 @@ Proof.
     auto.
     
     exists (- u); exists (- v).
-    assert (L2 : 0 <= - d) by omega.
+    assert (L2 : 0 <= - d) by lia.
     rewrite (Zis_gcd_gcd _ _ _ L2).
       rewrite <- E; ring.
       apply Zis_gcd_opp, Zis_gcd_sym; auto.
@@ -245,7 +242,7 @@ Proof.
     apply Pp.
     assert (A : p > 0) by notzero; pose proof Z_mod_lt x p A.
     unfold eqm in Nd; rewrite Zmod_0_l in Nd.
-    omega.
+    lia.
     
     destruct (rel_prime_bezout _ _ H) as (u, (v, Huv)).
     exists u.

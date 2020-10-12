@@ -24,7 +24,7 @@ Require Import Reals.
 Require Import Rintegral.
 Require Import Rintegral_usual.
 Require Import Rintegral_tactic.
-Require Import Lra.
+Require Import Lia Lra.
 Require Import Rsequence_facts.
 Require Import Rsequence_subsequence.
 Require Import Rpser.
@@ -330,7 +330,7 @@ field; repeat split.
   apply PI_neq0.
   apply not_0_INR; apply fact_neq_0.
   apply pow_nonzero; intros H; lra.
-  replace (4 * n)%nat with (2 * n + 2 * n)%nat by omega.
+  replace (4 * n)%nat with (2 * n + 2 * n)%nat by lia.
   rewrite pow_add.
   reflexivity.
 Qed.
@@ -504,7 +504,7 @@ apply Rseq_cv_eq_compat with (fun n => (2*2 ^ (4*n) * (fact n) ^ 4)/(PI*fact (2 
   intro; rewrite Wallis_quotient; reflexivity.
 assert (H2n : (fun n => fact (2 * n)) ~ (fun n => (2 * n / exp 1) ^ (2 * n) * sqrt (2 * n) * l)).
   assert (Hex : is_extractor (mult 2)).
-    intros n; omega.
+    intros n; lia.
   pose (exist _ _ Hex) as db.
   assert (Hrw1 : extracted db fact == (fun n => fact (2 * n))).
     intros n; reflexivity.
@@ -518,7 +518,7 @@ assert (H2n : (fun n => fact (2 * n)) ~ (fun n => (2 * n / exp 1) ^ (2 * n) * sq
   assumption.
 assert (H2n1 : (fun n : nat => fact (S(2*n))) ~ (fun n : nat => (S(2*n) / exp 1) ^ (S(2*n)) * sqrt (S(2*n)) * l)).
   assert (Hex : is_extractor (fun n => S (mult 2 n))).
-    intros n; omega.
+    intros n; lia.
   pose (exist _ _ Hex) as db.
   apply Rseq_equiv_eq_compat with (extracted db fact) (extracted db (fun n : nat => (n / exp 1) ^ n * sqrt n * l)).
     intro n; unfold db; reflexivity.

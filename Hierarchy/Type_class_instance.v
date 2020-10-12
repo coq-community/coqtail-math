@@ -22,6 +22,7 @@ USA.
 Require Import RelationClasses.
 Require Import Type_class_definition.
 Require Import Omega.
+Require Import Lia.
 
 (*proof that nat = semiring_commutative*)
 
@@ -31,7 +32,7 @@ Ltac int_hierarchy := match goal with
   | |- ?a = ?b => rewrite mult_plus_distr_l; int_hierarchy
   | |- ?a = ?b => rewrite mult_plus_distr_r; int_hierarchy
   | |- ?a = ?b => progress auto
-  | |- ?a = ?b => omega
+  | |- ?a = ?b => lia
   | |- ?a = ?b => progress auto with *
   | |- ?a = ?b => subst; progress trivial
   | |- _ => constructor; int_hierarchy
@@ -326,7 +327,7 @@ cut (Zis_gcd x p 1).
  rewrite <- H1; ring.
 constructor; try apply Zone_divide.
 intros.
-assert (Z.abs x0<=Z.abs p) by (apply Zdivide_bounds; trivial; destruct p_prime; omega).
+assert (Z.abs x0<=Z.abs p) by (apply Zdivide_bounds; trivial; destruct p_prime; lia).
 replace (Z.abs p) with p in H2 by (destruct p; trivial; destruct p_prime; inversion H3).
 assert(exists x1, 0<=x1<=p /\ (x1 | x) /\ (x1 | p) /\ Z.abs x0 = x1).
  destruct x0.
@@ -351,14 +352,14 @@ destruct (dec_Zle x1 1).
  destruct (dec_Zlt x1 p).
   destruct p_prime.
   apply (H8 x1).
-   split; omega.
+   split; lia.
    apply Z.divide_refl.
    assumption.
   
   apply False_ind; apply H.
   ring_simplify.
   apply Zdivide_opp_r.
-  replace p with x1 by (apply Zle_antisym; omega).
+  replace p with x1 by (apply Zle_antisym; lia).
   assumption.
 Qed.
 

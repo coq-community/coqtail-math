@@ -137,7 +137,7 @@ intros Un Vn x n ; unfold gt_pser, Rseq_prod, Rseq_mult.
  rewrite <- Hrew ; apply Rseq_sum_ext_strong.
  intros p p_bd ; replace (x ^ n) with (x ^ ((p + (n - p))%nat)).
  rewrite pow_add ; ring.
- replace (p + (n - p))%nat with n by omega ; reflexivity.
+ replace (p + (n - p))%nat with n by lia ; reflexivity.
 Qed.
 
 (** Compatibility of gt_abs_pser with common operations. *)
@@ -257,7 +257,7 @@ intro An ; exists (Rabs(An O)) ; intros x [n Hn] ; subst ;
 unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult.
 destruct n.
  simpl ; rewrite Rmult_1_r ; reflexivity.
- rewrite pow_i ; [| omega] ; rewrite Rmult_0_r, Rabs_R0 ;
+ rewrite pow_i ; [| lia] ; rewrite Rmult_0_r, Rabs_R0 ;
  apply Rabs_pos.
 Qed.
 
@@ -493,8 +493,8 @@ intros An Bn r [B HB] ; exists B ; intros x [i Hi] ; subst.
  transitivity (gt_abs_pser (Rseq_zip An Bn) r (2 * i)).
  right ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, Rseq_zip.
   case (n_modulo_2 (2 * i)) ; intros [p Hp].
-   assert (Hip : i = p) by omega ; rewrite Hip, pow_mult ; reflexivity.
-   apply False_ind ; omega.
+   assert (Hip : i = p) by lia ; rewrite Hip, pow_mult ; reflexivity.
+   apply False_ind ; lia.
  apply HB ; exists (2 * i)%nat ; reflexivity.
 Qed.
 
@@ -519,8 +519,8 @@ intros An Bn r [B HB] ; destruct (Req_dec (Rabs r) 0) as [r_eq | r_neq].
  transitivity (gt_abs_pser (Rseq_zip An Bn) r (S (2 * i)) / Rabs r).
  right ; unfold gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult, Rseq_zip.
   case (n_modulo_2 (S (2 * i))) ; intros [p Hp].
-   apply False_ind ; omega.
-   assert (Hip : i = p) by omega ; rewrite Hip , <- pow_mult, <- tech_pow_Rmult.
+   apply False_ind ; lia.
+   assert (Hip : i = p) by lia ; rewrite Hip , <- pow_mult, <- tech_pow_Rmult.
    replace (Bn p * (r * r ^ (2 * p))) with (Bn p * r ^ (2 * p) * r) by ring.
    unfold Rdiv ; rewrite (Rabs_mult _ r), Rmult_assoc, Rinv_r, Rmult_1_r.
     reflexivity.

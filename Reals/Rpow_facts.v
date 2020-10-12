@@ -1,4 +1,4 @@
-Require Import Reals MyRIneq Fourier Lra.
+Require Import Reals MyRIneq Fourier Omega Lia Lra.
 Require Import Rsequence_usual_facts.
 
 Local Open Scope R_scope.
@@ -8,7 +8,7 @@ Lemma pow_lt_compat : forall x y, 0 <= x -> x < y ->
 Proof.
 intros x y x_pos x_lt_y n n_lb.
  induction n.
- apply False_ind ; intuition.
+ apply False_ind ; intuition; try lia.
  destruct n.
  simpl ; repeat (rewrite Rmult_1_r) ; assumption.
  assert (Hrew : forall a n, a ^ S (S n) = a * a ^ S n).
@@ -153,7 +153,7 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
         (1 + Rabs x) / 2 * Rabs (INR (i + M) * x ^ (i + M))).
  intros M i M_lb.
  apply Rle_lt_trans with (Rabs ((INR (i + S M) / (INR (i + M))) * ((INR (i + M)) * x ^ (i + S M)))).
- right ; apply Rabs_eq_compat ; field ; apply Rgt_not_eq ; intuition.
+ right ; apply Rabs_eq_compat ; field ; apply Rgt_not_eq ; intuition; try lia.
  replace (i + S M)%nat with (S (i + M))%nat by intuition ;
  rewrite <- tech_pow_Rmult.
  repeat (rewrite Rabs_mult ; rewrite <- Rmult_assoc).

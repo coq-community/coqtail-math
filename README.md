@@ -6,9 +6,9 @@ Results range mostly from arithmetic to real and complex analysis.
 
 ## Requirements
 
-`master` is developed with Coq 8.11.0, which is its only requirement,
+`master` is developed with Coq 8.12.0, which is its only requirement,
 but the following git tags point to snapshots for different versions
-of Coq, which should cover most versions from 8.5 to 8.11.
+of Coq, which should cover most versions from 8.5 to 8.12.0.
 
 - tag `v8.6.1` for Coq 8.5pl3 and Coq 8.6.1
 - tag `v8.7.2` for Coq 8.7.2
@@ -16,6 +16,7 @@ of Coq, which should cover most versions from 8.5 to 8.11.
 - tag `v8.9.1` for Coq 8.9.1
 - tag `v8.10.2` for Coq 8.10.2
 - tag `v8.11.0` for Coq 8.11.0
+- tag `v8.11.2` for Coq 8.11.2
 
 Use e.g. `git checkout v8.10.2` if you want to use Coq 8.10.2. Note
 that those tags are for backward compatibility only, there is no

@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import NArith.
-Require Import Omega.
+Require Import Omega Lia.
 Require Import Max.
 
 Inductive eqmod (n:nat) : nat -> nat -> Prop :=
@@ -36,7 +36,7 @@ intros n n_pos m ; induction m.
  left ; exists 0 ; assumption.
  right ; exists 0 ; rewrite Hyp ; trivial.
  case IHm ; intro H.
- left ; exists 0 ; apply False_ind ; destruct H as (_,Hf) ; omega.
+ left ; exists 0 ; apply False_ind ; destruct H as (_,Hf) ; lia.
  destruct H as (k,Hk) ; right ; exists (S k).
  rewrite <- plus_n_Sm ; rewrite Hk ; simpl ; reflexivity.
 Qed.
@@ -178,10 +178,10 @@ Qed.
 Lemma surjectif : forall n m p, m < n -> eqmod n m (n * p + m).
 Proof.
 intros n m p m_ub ; induction p.
- replace (n * 0) with 0 by omega ; constructor ; assumption.
+ replace (n * 0) with 0 by lia ; constructor ; assumption.
  replace ((n * S p) + m) with (n + ((n * p) + m)).
  constructor ; assumption.
- rewrite Mult.mult_succ_r ; omega.
+ rewrite Mult.mult_succ_r ; lia.
 Qed.
 
 Lemma n_decomp : forall N n m p, 0 < n -> p < (S N) * n -> eqmod n m p -> {k | p = k * n + m}.

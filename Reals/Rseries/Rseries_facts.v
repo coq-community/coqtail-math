@@ -86,7 +86,7 @@ intro n ; destruct (le_lt_dec n N) as [HnN | HNn].
  transitivity (Rseq_sum (| Un |) N).
  destruct (eq_nat_dec n N) as [Heq | Hneq].
   subst ; reflexivity.
-  unfold Rseq_sum ; rewrite tech2 with (| Un |) n N ; [| omega] ;
+  unfold Rseq_sum ; rewrite tech2 with (| Un |) n N ; [| lia] ;
   apply Rplus_le_simpl_l, Rseq_sum_pos ; intros ; apply Rabs_pos.
   apply Rplus_le_simpl_r, Rmult_le_pos, Rseq_sum_pos ; assumption.
   unfold Rseq_sum ; rewrite tech2 with (|Un|) N n, Rplus_comm.
@@ -96,7 +96,7 @@ intro n ; destruct (le_lt_dec n N) as [HnN | HNn].
   unfold Rseq_shifts, Rseq_abs, Rseq_mult, Rseq_constant ; intros ;
   rewrite <- (Rabs_right (Vn _)), HN.
    reflexivity.
-   omega.
+   lia.
    apply Rle_ge ; apply Vn_pos.
   apply Rplus_le_simpl_r, Rmult_le_pos, Rseq_sum_pos, Vn_pos.
   assumption.
@@ -164,7 +164,7 @@ exists (sum_f_R0 (|Un|) N).
 intro n; case (le_lt_dec n N); intro Hn.
 apply Rle_trans with (sum_f_R0 (|Un|) N).
 assert (n = N \/ n < N)%nat.
-omega.
+lia.
 case H ; intro HnN.
 rewrite HnN; apply Rle_refl.
 rewrite tech2 with (|Un|) n N.
@@ -186,7 +186,7 @@ intros n0 Hn0.
 rewrite <- Rabs_pos_eq.
 rewrite Rmult_comm; rewrite Rabs_mult.
 rewrite Rabs_pos_eq with eps.
-apply HN; omega.
+apply HN; lia.
 apply Heps_pos.
 apply Rmult_le_pos; [apply Vn_pos | apply Heps_pos].
 apply Rplus_le_simpl_r.
@@ -415,7 +415,7 @@ apply sum_Rle.
 intros k Hk.
  rewrite <- Rabs_pos_eq with (Vn (S n + k)).
 rewrite Rmult_comm.
-apply HN; omega.
+apply HN; lia.
 apply Vn_pos.
 apply cond_pos_sum; intro.
 apply Rge_le in K_pos.
@@ -453,7 +453,7 @@ apply sum_Rle.
 intros k Hk.
  rewrite <- Rabs_pos_eq with (Vn (S n + k)).
 rewrite Rmult_comm.
-apply HN; omega.
+apply HN; lia.
 apply Vn_pos.
 apply cond_pos_sum; intro.
 apply Rmult_le_pos; [ apply Vn_pos| apply eps_pos].
