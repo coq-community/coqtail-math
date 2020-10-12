@@ -330,7 +330,7 @@ assert (Z.abs x0<=Z.abs p) by (apply Zdivide_bounds; trivial; destruct p_prime; 
 replace (Z.abs p) with p in H2 by (destruct p; trivial; destruct p_prime; inversion H3).
 assert(exists x1, 0<=x1<=p /\ (x1 | x) /\ (x1 | p) /\ Z.abs x0 = x1).
  destruct x0.
-  destruct H1; ring_simplify in H1; destruct p_prime; subst; inversion H3.
+  now destruct H1; ring_simplify in H1; destruct p_prime; clear H; subst; inversion H3.
   exists (Zpos p0); repeat split; auto; apply Zle_0_pos.
   exists (-Zneg p0); repeat split; try rewrite Zopp_neg; auto with *.
 clear H0 H1 H2.

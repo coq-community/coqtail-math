@@ -52,33 +52,34 @@ Theorem not_prime_divide_inf:
 Proof.
   intros p Hp Hp1.
   case (prime_dec_aux_inf p p); intros H1.
-    case H1; intros n [Hn1 Hn2].
+  - case H1; intros n [Hn1 Hn2].
     generalize (Zgcd_is_pos n p); intros Hpos.
     case (Z_le_lt_eq_dec 0 (Z.gcd n p)); auto with zarith; intros H3.
-      case (Z_le_lt_eq_dec 1 (Z.gcd n p)); auto with zarith; intros H4.
-        exists (Z.gcd n p); split; auto.
-          split; auto.
+    + case (Z_le_lt_eq_dec 1 (Z.gcd n p)); auto with zarith; intros H4.
+      * exists (Z.gcd n p); split; auto.
+        { split; auto.
           apply Z.le_lt_trans with n; auto with zarith.
           generalize (Zgcd_is_gcd n p); intros tmp; inversion_clear tmp as [Hr1 Hr2 Hr3].
           case Hr1; intros q Hq.
-          case (Zle_or_lt q 0); auto with zarith; intros Ht.
-            absurd (n <= 0 * Z.gcd n p) ; auto with zarith.
-            pattern n at 1; rewrite Hq; auto with zarith.
+          case (Zle_or_lt q 0); auto with zarith; intros Ht;
+          try solve [
+            absurd (n <= 0 * Z.gcd n p) ; auto with zarith;
+            pattern n at 1; rewrite Hq; auto with zarith ].
             
             apply Z.le_trans with (1 * Z.gcd n p); auto with zarith.
             pattern n at 2; rewrite Hq; auto with zarith.
-          
-          generalize (Zgcd_is_gcd n p); intros Ht; inversion Ht; auto.
+          }
+        { generalize (Zgcd_is_gcd n p); intros Ht; inversion Ht; auto. }
         
-        case Hn2; red.
+      * case Hn2; red.
         rewrite H4; apply Zgcd_is_gcd.
       
-      generalize (Zgcd_is_gcd n p); rewrite <- H3; intros tmp;
+    + generalize (Zgcd_is_gcd n p); rewrite <- H3; intros tmp;
         inversion_clear tmp as [Hr1 Hr2 Hr3].
       absurd (n = 0); auto with zarith.
       case Hr1; auto with zarith.
     
-    elim Hp1; constructor; auto.
+  - elim Hp1; constructor; auto.
     intros n [Hn1 Hn2].
     case Zle_lt_or_eq with ( 1 := Hn1 ); auto with zarith.
     intros H2; subst n; red; apply Zis_gcd_intro; auto with zarith.

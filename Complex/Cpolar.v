@@ -75,14 +75,14 @@ intros [a b] ; destruct (total_order_T a R0) as [[a_neg | a_eq] | a_pos].
    apply sqr_pos_lt, Rgt_not_eq ; lra.
  exists (- Cnorm (a +i b))%R ; exists (Ratan.atan (Cim (a +i b) / Cre (a +i b))) ;
  CusingR_simpl.
- rewrite cos_atan ; unfold Cnorm, Cnorm_sqr ;
+ rewrite Ratan.cos_atan ; unfold Cnorm, Cnorm_sqr ;
   rewrite Hrew ; simpl ; rewrite sqrt_square.
   field ; split ; [apply Rlt_not_eq | apply sqrt_no_R0].
    assumption.
    apply Rplus_lt_le_0_compat ; [apply sqr_pos_lt, Rlt_not_eq ; assumption |
     apply sqr_pos].
    lra.
- rewrite sin_atan ; unfold Cnorm, Cnorm_sqr ;
+ rewrite Ratan.sin_atan ; unfold Cnorm, Cnorm_sqr ;
   rewrite Hrew ; simpl ; rewrite sqrt_square.
   field ; split ; [apply Rlt_not_eq | apply sqrt_no_R0].
    assumption.
@@ -100,14 +100,14 @@ intros [a b] ; destruct (total_order_T a R0) as [[a_neg | a_eq] | a_pos].
    apply sqr_pos_lt, Rgt_not_eq ; lra.
  exists (Cnorm (a +i b))%R ; exists (Ratan.atan (Cim (a +i b) / Cre (a +i b))) ;
  CusingR_simpl.
- rewrite cos_atan ; unfold Cnorm, Cnorm_sqr ;
+ rewrite Ratan.cos_atan ; unfold Cnorm, Cnorm_sqr ;
   rewrite Hrew ; simpl ; rewrite sqrt_square.
   field ; split ; [apply Rgt_not_eq | apply sqrt_no_R0].
    assumption.
    apply Rplus_lt_le_0_compat ; [apply sqr_pos_lt, Rgt_not_eq ; assumption |
     apply sqr_pos].
    lra.
- rewrite sin_atan ; unfold Cnorm, Cnorm_sqr ;
+ rewrite Ratan.sin_atan ; unfold Cnorm, Cnorm_sqr ;
   rewrite Hrew ; simpl ; rewrite sqrt_square.
   field ; split ; [apply Rgt_not_eq | apply sqrt_no_R0].
    assumption.

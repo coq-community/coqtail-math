@@ -293,11 +293,9 @@ Proof.
   assert (Pm : 0 <= m) by omega.
   rewrite <- Z.abs_square.
   apply Z.le_trans with (Z.abs x * m).
-    apply Zmult_le_compat_l; auto with *.
-    zify; omega.
-    
-    apply Zmult_le_compat_r; auto with *.
-    zify; omega.
+    apply Zmult_le_compat_l; auto with *; try (zify; omega).
+
+    apply Zmult_le_compat_r; auto with *; try (zify; omega).
 Qed.
 
 Lemma square_bound_opp : forall x m, m <= x <= -m -> x * x <= m * m.

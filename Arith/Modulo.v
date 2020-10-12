@@ -210,9 +210,9 @@ intro N ; induction N ; intros n m p n_pos p_ub p_eqmodn.
   apply Plus.plus_comm.
   assert (Hrew : p = n + (p - n)).
   apply Minus.le_plus_minus.
-  apply Le.le_trans with (S N * n) ; intuition.
-  apply Le.le_trans with (S 0 * n) ; intuition ; apply Mult.mult_le_compat_r ;
-  intuition.
+  apply Le.le_trans with (S N * n) ; intuition;
+  try (apply Le.le_trans with (S 0 * n) ; intuition ; apply Mult.mult_le_compat_r ;
+  intuition).
   destruct (IHN n m (p-n) n_pos) as (k, Hk).
   apply Plus.plus_lt_reg_l with n.
   rewrite <- Hrew ; intuition.

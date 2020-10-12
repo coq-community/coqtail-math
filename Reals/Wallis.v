@@ -347,8 +347,8 @@ exists (max N m).
 intros n Hn. 
 assert (Hm : (n >= m)%nat). apply le_trans with (max N m) ; intuition.
 unfold R_dist in *.
-rewrite <- (Heq n) ; intuition.
-apply Hseq2; intuition. apply le_trans with (max N m) ; intuition.
+rewrite <- (Heq n) ; intuition;
+try (apply Hseq2; intuition; apply le_trans with (max N m) ; intuition).
 Qed.
 
 Lemma sqrt_id : forall n : nat, (INR n <> 0)%R -> sqrt (2 * n) / (2 * n) = /sqrt (2 * n).
