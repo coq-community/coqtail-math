@@ -13,7 +13,9 @@ with coqPackages;
 
 pkgs.stdenv.mkDerivation {
 
-  name = "coqtail-math";
+  name = "coqtail";
+
+  buildInputs = with coq.ocamlPackages; [ ocaml findlib ];
 
   propagatedBuildInputs = [
     coq
