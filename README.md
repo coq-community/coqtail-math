@@ -1,44 +1,60 @@
 # Coqtail
 
-[Coqtail](https://coqtail.github.io/index.html) is a library of
-mathematical theorems and tools proved inside the Coq proof assistant.
-Results range mostly from arithmetic to real and complex analysis.
+[![Travis][travis-shield]][travis-link]
+[![Contributing][contributing-shield]][contributing-link]
+[![Code of Conduct][conduct-shield]][conduct-link]
+[![Zulip][zulip-shield]][zulip-link]
+
+[travis-shield]: https://travis-ci.com/coq-community/coqtail-math.svg?branch=master
+[travis-link]: https://travis-ci.com/coq-community/coqtail-math/builds
+
+[contributing-shield]: https://img.shields.io/badge/contributions-welcome-%23f7931e.svg
+[contributing-link]: https://github.com/coq-community/manifesto/blob/master/CONTRIBUTING.md
+
+[conduct-shield]: https://img.shields.io/badge/%E2%9D%A4-code%20of%20conduct-%23f15a24.svg
+[conduct-link]: https://github.com/coq-community/manifesto/blob/master/CODE_OF_CONDUCT.md
+
+[zulip-shield]: https://img.shields.io/badge/chat-on%20zulip-%23c1272d.svg
+[zulip-link]: https://coq.zulipchat.com/#narrow/stream/237663-coq-community-devs.20.26.20users
+
+
+
+Coqtail is a library of mathematical theorems and tools proved inside
+the Coq proof assistant. Results range mostly from arithmetic to real
+and complex analysis.
+
+## Meta
+
+- Author(s):
+  - Guillaume Allais
+  - Jean-Marie Madiot
+  - Pierre-Marie Pédrot
+- Coq-community maintainer(s):
+  - Jean-Marie Madiot ([**@jmadiot**](https://github.com/jmadiot))
+- License: [GNU Lesser General Public License v3.0 only](LICENSE)
+- Compatible Coq versions: 8.11 or later
+- Additional dependencies: none
+- Coq namespace: `Coqtail`
+- Related publication(s): none
+
+## Building instructions
+
+``` shell
+git clone https://github.com/coq-community/coqtail-math
+cd coqtail-math
+make   # or make -j <number-of-cores-on-your-machine>
+```
+
+## Coqtail and Vim
 
 Note that this project is distinct from [this other project named
-Coqtail](https://github.com/whonore/Coqtail), which helps using Coq in
-Vim.
-
-## Requirements
-
-`master` is developed with Coq 8.12.0, which is its only requirement,
-but the following git tags point to snapshots for different versions
-of Coq, which should cover most versions from 8.5 to 8.12.0.
-
-- tag `v8.6.1` for Coq 8.5pl3 and Coq 8.6.1
-- tag `v8.7.2` for Coq 8.7.2
-- tag `v8.8.2` for Coq 8.8.2
-- tag `v8.9.1` for Coq 8.9.1
-- tag `v8.10.2` for Coq 8.10.2
-- tag `v8.11.0` for Coq 8.11.0
-- tag `v8.11.2` for Coq 8.11.2
-
-Use e.g. `git checkout v8.10.2` if you want to use Coq 8.10.2. Note
-that those tags are for backward compatibility only, there is no
-intention of maintaining them as branches: use master instead for
-development.
-
-## Compiling
-
-Running `make` should suffice. It uses a `_CoqProject` file, which
-should also allow you to use coqide and proofgeneral with no further
-configuration.
+Coqtail](https://github.com/whonore/Coqtail), which helps using Coq in Vim.
 
 ## Developer's todo list
 
 Big things:
 
-- prove linear and non-linear theory of ℂ is decidable (using Groebner
-  basis)
+- prove linear and non-linear theory of ℂ is decidable (using Groebner basis)
 
 Lemmas to prove:
 
@@ -47,9 +63,8 @@ Lemmas to prove:
 
 Maintenance:
 
-- Use -Q instead of -R and fix the resulting loadpath problems
-- Opam package for `make install`
+- Use `-Q` instead of `-R` and fix the resulting loadpath problems
 - Check for commented lemmas (and admits)
-- Remove useless "Require"s
-- Check for admits (run "./todos.sh").
-- Check for commented results (run "./todos.sh comments")
+- Remove useless `Require`s
+- Check for admits (run `./todos.sh`).
+- Check for commented results (run `./todos.sh comments`)

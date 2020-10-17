@@ -1,0 +1,87 @@
+---
+fullname: Coqtail
+shortname: coqtail-math
+opam_name: coq-coqtail
+organization: coq-community
+community: true
+travis: true
+
+synopsis: Library of mathematical theorems and tools proved inside the Coq
+
+description: |-
+  Coqtail is a library of mathematical theorems and tools proved inside
+  the Coq proof assistant. Results range mostly from arithmetic to real
+  and complex analysis.
+
+authors:
+- name: Guillaume Allais
+- name: Jean-Marie Madiot
+- name: Pierre-Marie Pédrot
+
+maintainers:
+- name: Jean-Marie Madiot
+  nickname: jmadiot
+
+opam-file-maintainer: palmskog@gmail.com
+
+opam-file-version: dev
+
+license:
+  fullname: GNU Lesser General Public License v3.0 only
+  identifier: LGPL-3.0-only
+
+supported_coq_versions:
+  text: 8.11 or later
+  opam: '{(>= "8.11" & < "8.13~") | (= "dev")}'
+
+tested_coq_nix_versions:
+- version_or_url: https://github.com/coq/coq-on-cachix/tarball/master
+- version_or_url: '8.12'
+- version_or_url: '8.11'
+
+tested_coq_opam_versions:
+- version: dev
+
+namespace: Coqtail
+
+build: |-
+ ## Building instructions
+
+ ``` shell
+ git clone https://github.com/coq-community/coqtail-math
+ cd coqtail-math
+ make   # or make -j <number-of-cores-on-your-machine>
+ ```
+
+keywords:
+- name: real analysis
+- name: complex analysis
+
+categories:
+- name: Mathematics/Real Calculus and Topology
+
+documentation: |-
+  ## Coqtail and Vim
+
+  Note that this project is distinct from [this other project named
+  Coqtail](https://github.com/whonore/Coqtail), which helps using Coq in Vim.
+
+  ## Developer's todo list
+
+  Big things:
+
+  - prove linear and non-linear theory of ℂ is decidable (using Groebner basis)
+
+  Lemmas to prove:
+
+  - Mertens' Theorem for Complex numbers
+  - (expand this list to your wish)
+
+  Maintenance:
+
+  - Use `-Q` instead of `-R` and fix the resulting loadpath problems
+  - Check for commented lemmas (and admits)
+  - Remove useless `Require`s
+  - Check for admits (run `./todos.sh`).
+  - Check for commented results (run `./todos.sh comments`)
+---
