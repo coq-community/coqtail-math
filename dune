@@ -1,0 +1,6 @@
+(coq.theory
+ (name Coqtail)
+ (package coq-coqtail)
+ (synopsis "Library of mathematical theorems and tools proved inside the Coq"))
+
+(include_subdirs qualified)

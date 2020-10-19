@@ -1,12 +1,4 @@
 -R . Coqtail
--I Arith
--I Complex
--I Fresh
--I Hierarchy
--I Monad
--I mytheories
--I Reals
--I Tactics
 
 Arith/Hurwitz_def.v
 Arith/Hurwitz_prop.v

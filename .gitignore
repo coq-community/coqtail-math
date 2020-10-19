@@ -40,6 +40,6 @@
 *.v.html
 *.stamp
 *.native
-src/Makefile.coq
-src/Makefile.coq.conf
+Makefile.coq
+Makefile.coq.conf
 *.nia.cache
