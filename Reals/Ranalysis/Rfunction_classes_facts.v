@@ -4,6 +4,7 @@ Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 Require Import Rfunction_classes_def.
 Require Import MyR_dist.
+Require Import Tactics.
 
 Local Open Scope R_scope.
 
