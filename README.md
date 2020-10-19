@@ -27,8 +27,11 @@ and complex analysis.
 
 - Author(s):
   - Guillaume Allais
+  - Sylvain Dailler
+  - Hugo Férée
   - Jean-Marie Madiot
   - Pierre-Marie Pédrot
+  - Amaury Pouly
 - Coq-community maintainer(s):
   - Jean-Marie Madiot ([**@jmadiot**](https://github.com/jmadiot))
 - License: [GNU Lesser General Public License v3.0 only](LICENSE)

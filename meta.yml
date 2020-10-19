@@ -15,8 +15,11 @@ description: |-
 
 authors:
 - name: Guillaume Allais
+- name: Sylvain Dailler
+- name: Hugo Férée
 - name: Jean-Marie Madiot
 - name: Pierre-Marie Pédrot
+- name: Amaury Pouly
 
 maintainers:
 - name: Jean-Marie Madiot
