@@ -107,10 +107,6 @@ Reals/Ranalysis/Rfunction_def.v
 Reals/Ranalysis/Rfunction_facts.v
 Reals/Ranalysis/Rinterval.v
 Reals/Ratan.v
-Reals/Raxioms/Raxioms.v
-Reals/Raxioms/Rcauchy_lemmas.v
-Reals/Raxioms/Rcauchy.v
-Reals/Raxioms/Rdefinitions.v
 Reals/Reirr.v
 Reals/Rextensionality.v
 Reals/RFsequence_facts.v
