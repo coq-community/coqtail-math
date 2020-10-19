@@ -6,7 +6,6 @@ Require Import Rfunction_def Functions.
 Require Import Rsequence_def.
 Require Import List.
 Require Import Option.
-Require Import Ass_handling.
 
 Local Open Scope Rseq_scope.
 

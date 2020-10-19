@@ -3,8 +3,6 @@ Require Import Rinterval Rfunctions Rfunction_def.
 Require Import Ranalysis_def Rfunction_facts.
 Require Import MyRIneq MyR_dist Lra.
 
-Require Import Ass_handling.
-
 Local Open Scope R_scope.
 
 (** * Example of dense domains *)

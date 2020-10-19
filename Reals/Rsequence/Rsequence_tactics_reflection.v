@@ -3,7 +3,7 @@ Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts.
 
 Require Import List.
 Require Import Option.
-Require Import Ass_handling.
+Require Import Tactics.
 
 (* Reifications of sequences, limits and being the limit of a
    particular sequence. *)
@@ -175,8 +175,8 @@ Lemma tactic_correctness : forall r env un l,
    is_limit un l.
 Proof.
 unfold rseq_precondition ; intros r env un l ;
- destruct_eq (comp_rseq r env) ;
- destruct_eq (comp_limit r env) ;
+ destruct (comp_rseq r env) eqn:E; symmetry in E;
+ destruct (comp_limit r env) eqn:E'; symmetry in E';
  intros [].
  intros ; eapply is_limit_ext ;
   [ eapply comp_rseq_limit_compat | |] ;

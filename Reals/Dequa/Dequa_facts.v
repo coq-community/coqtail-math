@@ -6,7 +6,7 @@ Require Import Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def.
 Require Import List.
 Require Import Max.
-Require Import Ass_handling.
+Require Import Tactics.
 Require Import Option.
 
 Local Open Scope R_scope.
@@ -37,9 +37,9 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
  inversion HN ; inversion HR3 ; subst ; exists (constant_infinite_cv_radius r) ;
   apply constant_is_cst.
 
- destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)).
-  destruct_eq (interp_side_equa_in_R s l).
-   symmetry in Heqb ; symmetry in Heqb0 ; specify5 IHs l r0 r1 Heqb Heqb0.
+ destruct (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+  destruct (interp_side_equa_in_R s l) eqn:Heqb0.
+   specialize (IHs l r0 r1 Heqb Heqb0).
    inversion HR3 as [Hrew] ; destruct Hrew.
    inversion HN as [Hrew] ; destruct Hrew.
    destruct IHs as [rho Hrho].
@@ -56,7 +56,7 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
 
  assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;
   unfold Bind in * ; destruct (nth_error l p).
-  specify2 Hrew s (eq_refl (Some s)) ; destruct s as [An rAn] ;
+  specialize (Hrew s (eq_refl (Some s))); destruct s as [An rAn] ;
   rewrite Hrew in HN ; inversion HN as [HN0] ; destruct HN0 ;
    inversion HR3 as [HR30] ; destruct HR30.
    assert (ppr: infinite_cv_radius (An_nth_deriv An k)).
@@ -67,9 +67,9 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
    erewrite <- nth_derive_sum_explicit ; reflexivity.
   inversion HR3.
 
- destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)).
-  destruct_eq (interp_side_equa_in_R s l).
-   symmetry in Heqb ; symmetry in Heqb0 ; specify5 IHs l r r0 Heqb Heqb0.
+ destruct (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+  destruct (interp_side_equa_in_R s l) eqn:Heqb0.
+   specialize (IHs l r r0 Heqb Heqb0).
    inversion HR3 as [Hrew] ; destruct Hrew.
    inversion HN as [Hrew] ; destruct Hrew.
    destruct IHs as [rho Hrho].
@@ -80,15 +80,14 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
   inversion HR3.
  inversion HN.
 
- destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
-  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
-   destruct_eq (interp_side_equa_in_R s1 l).
-    destruct_eq (interp_side_equa_in_R s2 l).
+ destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+  destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+   destruct (interp_side_equa_in_R s1 l) eqn:Heqb1.
+    destruct (interp_side_equa_in_R s2 l) eqn:Heqb2.
      inversion HN as [Hrew] ; destruct Hrew ;
      inversion HR3 as [Hrew] ; destruct Hrew.
-     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
-     specify5 IHs1 l r r1 Heqb Heqb1 ;
-     specify5 IHs2 l r0 r2 Heqb0 Heqb2.
+     specialize (IHs1 l r r1 Heqb Heqb1);
+     specialize (IHs2 l r0 r2 Heqb0 Heqb2).
      destruct IHs1 as [rho1 Hrho1] ;
      destruct IHs2 as [rho2 Hrho2].
      assert (pr : infinite_cv_radius (r - r0)).
@@ -101,15 +100,14 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
   inversion HN.
  inversion HN.
 
- destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
-  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
-   destruct_eq (interp_side_equa_in_R s1 l).
-    destruct_eq (interp_side_equa_in_R s2 l).
+ destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+  destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+   destruct (interp_side_equa_in_R s1 l) eqn:Heqb1.
+    destruct (interp_side_equa_in_R s2 l) eqn:Heqb2.
      inversion HN as [Hrew] ; destruct Hrew ;
      inversion HR3 as [Hrew] ; destruct Hrew.
-     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
-     specify5 IHs1 l r r1 Heqb Heqb1 ;
-     specify5 IHs2 l r0 r2 Heqb0 Heqb2.
+     specialize (IHs1 l r r1 Heqb Heqb1);
+     specialize (IHs2 l r0 r2 Heqb0 Heqb2).
      destruct IHs1 as [rho1 Hrho1] ;
      destruct IHs2 as [rho2 Hrho2].
      assert (pr : infinite_cv_radius (r + r0)).
@@ -122,15 +120,14 @@ intro s ; induction s ; simpl ; intros l Un f HN HR3.
   inversion HN.
  inversion HN.
 
- destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
-  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
-   destruct_eq (interp_side_equa_in_R s1 l).
-    destruct_eq (interp_side_equa_in_R s2 l).
+ destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+  destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+   destruct (interp_side_equa_in_R s1 l) eqn:Heqb1.
+    destruct (interp_side_equa_in_R s2 l) eqn:Heqb2.
      inversion HN as [Hrew] ; destruct Hrew ;
      inversion HR3 as [Hrew] ; destruct Hrew.
-     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
-     specify5 IHs1 l r r1 Heqb Heqb1 ;
-     specify5 IHs2 l r0 r2 Heqb0 Heqb2.
+     specialize (IHs1 l r r1 Heqb Heqb1);
+     specialize (IHs2 l r0 r2 Heqb0 Heqb2).
      destruct IHs1 as [rho1 Hrho1] ;
      destruct IHs2 as [rho2 Hrho2].
      assert (pr : infinite_cv_radius (r # r0)).
@@ -161,58 +158,51 @@ Proof.
 intro s ; induction s ; intros l un H.
  exists (fun _ => r) ; reflexivity.
 
- simpl in * ; destruct_eq (interp_side_equa_in_N s (map
- (@projT1 _ infinite_cv_radius) l)) ; symmetry in Heqb.
-  specify3 IHs l r0 Heqb ; destruct IHs as [f Hf] ;
+ simpl in * ; destruct (interp_side_equa_in_N s (map
+ (@projT1 _ infinite_cv_radius) l)) eqn: Heqb.
+  specialize (IHs l r0 Heqb); destruct IHs as [f Hf] ;
   exists ((fun _ => r) * f)%F ; rewrite Hf ; reflexivity.
  inversion H.
 
  assert (Hrew := map_nth_error (@projT1 _ infinite_cv_radius) p l) ;
- destruct_eq (nth_error l p).
-  specify2 Hrew s (eq_refl (Some s)).
+ destruct (nth_error l p) eqn:Heqb.
+  specialize (Hrew s (eq_refl (Some s))).
   destruct s as [An rAn] ; simpl in H, Hrew ; rewrite Hrew in H ;
    simpl in H ; exists (fun x => nth_derive (sum An rAn) (D_infty_Rpser An rAn k) (a * x)) ;
-   simpl ; rewrite <- Heqb ; reflexivity.
-  symmetry in Heqb ; simpl in H.
+   simpl ; rewrite Heqb ; reflexivity.
+   simpl in H.
  assert (T := map_nth_error2 (@projT1 _ infinite_cv_radius) _ _ Heqb).
  rewrite T in H ; inversion H.
 
  simpl in * ;
-  destruct_eq (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)) ;
-  symmetry in Heqb.
-   specify3 IHs l r Heqb ; destruct IHs as [f Hf].
+  destruct (interp_side_equa_in_N s (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+   specialize (IHs l r Heqb); destruct IHs as [f Hf].
    exists (- f)%F ; rewrite Hf ; reflexivity.
  inversion H.
 
  simpl in *.
-  destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;
-  symmetry in Heqb.
-   destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) ;
-   symmetry in Heqb0.
-    specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
-    specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
+  destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+   destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+    specialize (IHs1 l r Heqb); destruct IHs1 as [f Hf] ;
+    specialize (IHs2 l r0 Heqb0); destruct IHs2 as [g Hg].
     exists (f - g)%F ; rewrite Hf, Hg ; reflexivity.
    inversion H.
   inversion H.
 
  simpl in *.
-  destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;
-  symmetry in Heqb.
-   destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) ;
-   symmetry in Heqb0.
-    specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
-    specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
+  destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+   destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+    specialize (IHs1 l r Heqb); destruct IHs1 as [f Hf] ;
+    specialize (IHs2 l r0 Heqb0); destruct IHs2 as [g Hg].
     exists (f + g)%F ; rewrite Hf, Hg ; reflexivity.
    inversion H.
   inversion H.
 
  simpl in *.
-  destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) ;
-  symmetry in Heqb.
-   destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) ;
-   symmetry in Heqb0.
-    specify3 IHs1 l r Heqb ; destruct IHs1 as [f Hf] ;
-    specify3 IHs2 l r0 Heqb0 ; destruct IHs2 as [g Hg].
+  destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+   destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+    specialize (IHs1 l r Heqb); destruct IHs1 as [f Hf] ;
+    specialize (IHs2 l r0 Heqb0); destruct IHs2 as [g Hg].
     exists (f * g)%F ; rewrite Hf, Hg ; reflexivity.
    inversion H.
   inversion H.
@@ -223,18 +213,15 @@ Lemma interp_equa_in_N_R : forall (e : diff_equa)
   [| e |]N (map (@projT1 _ infinite_cv_radius) l) -> [| e |]R l.
 Proof.
 intros [s1 s2] l H ; simpl in *.
- destruct_eq (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)).
-  destruct_eq (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)).
-   destruct_eq (interp_side_equa_in_R s1 l).
-    destruct_eq (interp_side_equa_in_R s2 l).
-     symmetry in Heqb, Heqb0, Heqb1, Heqb2.
+ destruct (interp_side_equa_in_N s1 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb.
+  destruct (interp_side_equa_in_N s2 (map (@projT1 _ infinite_cv_radius) l)) eqn:Heqb0.
+   destruct (interp_side_equa_in_R s1 l) eqn:Heqb1.
+    destruct (interp_side_equa_in_R s2 l) eqn:Heqb2.
      destruct (interp_side_equa_in_N_R s1 l r r1 Heqb Heqb1) as [rho1 Hrho1].
      destruct (interp_side_equa_in_N_R s2 l r0 r2 Heqb0 Heqb2) as [rho2 Hrho2].
      rewrite <- Hrho1, <- Hrho2 ; apply sum_ext ; assumption.
-    symmetry in Heqb0 ;
     destruct (interp_side_equa_in_N_R_compat _ _ _ Heqb0) as [f Hf] ;
     rewrite Hf in Heqb2 ; inversion Heqb2.
-   symmetry in Heqb ;
    destruct (interp_side_equa_in_N_R_compat _ _ _ Heqb) as [f Hf] ;
    rewrite Hf in Heqb1 ; inversion Heqb1.
   inversion H.

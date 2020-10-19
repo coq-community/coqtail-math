@@ -2,7 +2,7 @@ Require Import Reals.
 Require Import Rsequence_def.
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_sums Rpser_cv_facts.
 Require Import Rinterval Ranalysis_def Rfunction_facts.
-Require Import Ass_handling.
+Require Import Tactics.
 
 (** * Extensionality of the common properties of functions. *)
 
@@ -81,7 +81,7 @@ Lemma weaksum_r_ext : forall (r : R) (rAn : Cv_radius_weak An r)
 Proof.
 intros r rAn rBn x.
  unfold weaksum_r ; destruct (Rlt_le_dec (Rabs x) r) ; trivial.
- destruct (Rpser_abel _ _ rAn x r0) as [l1 Hl1] ; copy Hl1 ;
+ destruct (Rpser_abel _ _ rAn x r0) as [l1 Hl1] . pose proof Hl1 as Hl0.
   rewrite Pser_ext in Hl0.
  destruct (Rpser_abel _ _ rBn x r0) as [l2 Hl2].
  simpl ; eapply Rpser_unique ; eassumption.

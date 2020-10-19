@@ -3,8 +3,6 @@ Require Import Rinterval Rfunctions Rfunction_def Rfunction_facts.
 Require Import Ranalysis_def Ranalysis_def_simpl.
 Require Import MyRIneq MyR_dist Lra.
 
-Require Import Ass_handling.
-
 Local Open Scope R_scope.
 
 (** stricly_whatever implies whatever *)

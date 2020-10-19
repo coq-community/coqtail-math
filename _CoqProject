@@ -158,6 +158,6 @@ Reals/Rtactic.v
 Reals/RTaylor.v
 Reals/Rtrigo_facts.v
 Reals/Rzeta2.v
+Reals/Tactics.v
 Reals/Triangular.v
 Reals/Wallis.v
-Tactics/Ass_handling.v

@@ -27,7 +27,6 @@ Require Import Rfunctions Rfunction_def Rextensionality.
 Require Import MyRIneq MyR_dist.
 Require Import Rtopology.
 
-Require Import Ass_handling.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
 Require Export Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 

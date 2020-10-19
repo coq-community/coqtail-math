@@ -31,7 +31,7 @@ Require Import MyRIneq MyNeq.
 Require Import Rinterval.
 Require Import RFsequence RFsequence_facts.
 
-Require Import Ass_handling.
+Require Import Tactics.
 
 Open Scope Rseq_scope.
 Open Scope R_scope.
@@ -112,7 +112,7 @@ destruct (Req_or_neq x) as [x_eq | x_neq].
         M * ((Rabs x / r) ^ (S (min m n)) * (1 - (Rabs x / r)
         ^ (S (max m n - S (min m n)))) / (1 - (Rabs x / r)))).
    destruct Hineq as [B HB] ; exists B ; intros m n m_neq_n.
-   specify3 HB m n m_neq_n ; unfold Rseq_shifts in HB ; rewrite sum_pow in HB ;
+   specialize (HB m n m_neq_n) ; unfold Rseq_shifts in HB ; rewrite sum_pow in HB ;
    [apply HB | apply Rlt_not_eq ; assumption].
  clear Hineq Hrew.
   assert (Final : exists M : R, 0 < M /\ forall m n : nat, m <> n ->

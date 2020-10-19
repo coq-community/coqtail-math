@@ -26,8 +26,6 @@ Require Import MyRIneq.
 Require Import Rtopology.
 Require Import Rinterval Rfunction_facts.
 
-Require Import Ass_handling.
-
 Local Open Scope R_scope.
 
 Definition dense (D : R -> Prop) x := forall eps, 0 < eps ->

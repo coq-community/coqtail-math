@@ -33,8 +33,6 @@ Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 Require Import Rinterval RIVT.
 
-Require Import Ass_handling.
-
 Local Open Scope R_scope.
 
 (** * Continuity of the reciprocal function *)

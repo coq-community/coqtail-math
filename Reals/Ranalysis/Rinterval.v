@@ -1,6 +1,6 @@
 Require Import Rbase Rfunctions Rfunction_def Rtopology Lra.
 Require Import MyRIneq MyNeq PSeries_reg.
-Require Import Ass_handling.
+Require Import Tactics.
 
 (** * The definitions used in this file: [middle], [interval], [Rball]. *)
 
@@ -228,13 +228,13 @@ Qed.
 Lemma interval_inhabited : forall lb ub x,
   interval lb ub x -> lb <= ub.
 Proof.
-intros ; etransitivity ; ass_apply.
+intros ; etransitivity ; eapply_assumption.
 Qed.
 
 Lemma open_interval_inhabited : forall lb ub x,
   open_interval lb ub x -> lb < ub.
 Proof.
-intros ; etransitivity ; ass_apply.
+intros ; etransitivity ; eapply_assumption.
 Qed.
 
 Lemma interval_opp_compat : forall lb ub x,

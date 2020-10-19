@@ -24,7 +24,7 @@ Require Import Rinterval Rfunctions Rfunction_def Rfunction_facts.
 Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_continuity.
 Require Import MyRIneq MyR_dist Lra.
 
-Require Import Ass_handling.
+Require Import Tactics.
 
 Local Open Scope R_scope.
 
@@ -70,14 +70,14 @@ Qed.
 Lemma derivable_in_ext : forall f g D, f == g ->
   derivable_in D f -> derivable_in D g.
 Proof.
-intros f g D Heq Hf x Dx ; eapply derivable_pt_in_ext ; [| ass_apply] ; eassumption.
+intros f g D Heq Hf x Dx ; eapply derivable_pt_in_ext ; [| eapply_assumption] ; eassumption.
 Qed.
 
 Lemma derivable_in_ext_strong : forall f g (D : R -> Prop),
   (forall x, D x -> f x = g x) ->
   derivable_in D f -> derivable_in D g.
 Proof.
-intros f g D Heq Hf x Dx ; eapply derivable_pt_in_ext_strong ; [| | ass_apply] ; eassumption.
+intros f g D Heq Hf x Dx ; eapply derivable_pt_in_ext_strong ; [| | eapply_assumption] ; eassumption.
 Qed.
 
 (** Link between the stdlib's definition an ours. *)
@@ -174,7 +174,7 @@ intros lb ub f x l x_in Hl eps eps_pos ; destruct (Hl _ eps_pos) as [d [d_pos Hd
  assert (delta_pos : 0 < delta).
   apply Rmin_pos_lt ; [apply open_interval_dist_pos |] ; assumption.
  exists (mkposreal _ delta_pos) ; intros h h_neq h_bd ;
- specify Hd (x + h) ; unfold growth_rate in * ;
+ specialize (Hd (x + h)) ; unfold growth_rate in * ;
  replace (x + h - x) with h in Hd by ring ; apply Hd ; split.
   split.
    apply open_interval_dist_bound ; [apply open_interval_interval
@@ -519,7 +519,7 @@ Lemma derivable_in_scal: forall D a f,
   derivable_in D f ->
   derivable_in D (mult_real_fct a f).
 Proof.
-intros D a f Hf x x_in ; specify2 Hf x x_in ;
+intros D a f Hf x x_in ; specialize (Hf x x_in);
  apply derivable_pt_in_scal ; assumption.
 Qed.
 

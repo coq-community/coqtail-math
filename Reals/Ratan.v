@@ -29,7 +29,7 @@ Require Import RIVT.
 Require Import Rseries_facts.
 Require Import Rsequence_cv_facts.
 Require Import MyRIneq.
-Require Import Ass_handling.
+Require Import Tactics.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts Ranalysis5.
 
 Open Scope R_scope.
@@ -120,7 +120,7 @@ intros y y_pos ; destruct (cos_cv_0_left (/ (2 * y)) (PI / 6)) as [x [x_in Hx]].
     transitivity (sin (PI / 6)).
      right ; rewrite sin_PI6 ; unfold Rdiv ; ring.
      left ; apply strictly_increasing_interval_sin ;
-      try apply open_interval_interval ; (exact PI6_in || ass_apply).
+      try apply open_interval_interval ; (exact PI6_in || eapply_assumption).
 Qed.
 
 Lemma tan_cv_pos_infty : forall y ,
@@ -178,7 +178,7 @@ Definition atan (y : R) : R := let (x, _) := exists_atan y in x.
 
 Lemma reciprocal_tan_atan : reciprocal tan atan.
 Proof.
-intros y _ ; unfold atan ; destruct (exists_atan y) ; ass_apply.
+intros y _ ; unfold atan ; destruct (exists_atan y) ; eapply_assumption.
 Qed.
 
 Lemma reciprocal_open_interval_atan_tan :
@@ -265,11 +265,11 @@ intro x ; pose (d := interval_dist (- PI / 2) (PI / 2) (atan x)) ;
    rewrite derive_open_interval_tan_strong.
     apply Rgt_not_eq, One_plus_sqr_pos_lt.
     split ; apply strictly_increasing_atan ; (exact I || apply x_in).
-    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
-    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    rewrite reciprocal_open_interval_atan_tan ; eapply_assumption.
+    rewrite reciprocal_open_interval_atan_tan ; eapply_assumption.
     split ; apply strictly_increasing_atan ; (exact I || apply x_in).
-    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
-    rewrite reciprocal_open_interval_atan_tan ; ass_apply.
+    rewrite reciprocal_open_interval_atan_tan ; eapply_assumption.
+    rewrite reciprocal_open_interval_atan_tan ; eapply_assumption.
 Qed.
 
 Lemma derivable_atan : derivable atan.
@@ -514,13 +514,13 @@ Lemma derivable_arctan_pos : forall lb ub x,
   derivable_pt_lim_in (open_interval lb ub) arctan x (/ (1 + x ^ 2)).
 Proof.
 intros lb ub x lb_lb x_in.
- assert (x_pos : 0 < x) by (transitivity 1 ; [lra | apply Rle_lt_trans with lb ; ass_apply]).
+ assert (x_pos : 0 < x) by (transitivity 1 ; [lra | apply Rle_lt_trans with lb ; eapply_assumption]).
  assert (Rinvx_in : Rball 0 1 (/ x)).
   rewrite Rball_0_simpl, Rabs_Rinv_pos, <- Rinv_1 ; [| assumption].
-  apply Rinv_1_lt_contravar ; [reflexivity | apply Rle_lt_trans with lb ; ass_apply].
+  apply Rinv_1_lt_contravar ; [reflexivity | apply Rle_lt_trans with lb ; eapply_assumption].
  eapply derivable_pt_lim_in_ext_strong.
   assumption.
-  intros y y_in ; symmetry ; apply arctan_explicit_pos ; transitivity lb ; [| left] ; ass_apply.
+  intros y y_in ; symmetry ; apply arctan_explicit_pos ; transitivity lb ; [| left] ; eapply_assumption.
   replace (/ (1 + x ^ 2)) with (0 - ((- 1 / (x ^ 2)) * / (1 + (/ x) ^ 2))).
   apply derivable_pt_lim_in_minus.
    apply derivable_pt_lim_in_const.
@@ -557,18 +557,18 @@ intros x x_in ; destruct (Req_dec x 0) as [x_eq | x_neq].
   intros ; eapply derivable_Rball_derivable_pt.
    eapply derivable_Rball_arctan_sum.
    rewrite Rball_0_simpl ; apply Rabs_def1.
-    apply Rle_lt_trans with ub ; ass_apply.
-    apply Rlt_le_trans with lb ; ass_apply.
+    apply Rle_lt_trans with ub ; eapply_assumption.
+    apply Rlt_le_trans with lb ; eapply_assumption.
  assert (arctan_der : forall  c, lb < c < ub -> derivable_pt arctan_sum c).
-  intros ; apply arctan_der1 ; split ; left ; ass_apply.
+  intros ; apply arctan_der1 ; split ; left ; eapply_assumption.
  destruct (MVT arctan_sum atan lb ub) with arctan_der atan_der as [c [c_bd Hc]].
   assumption.
   intros c c_in ; eapply derivable_continuous_pt, arctan_der1 ; assumption.
   intros ; apply continuity_atan.
  assert (c_in : Rball 0 1 c).
   rewrite Rball_0_simpl ; apply Rabs_def1.
-   transitivity ub ; ass_apply.
-   transitivity lb ; ass_apply.
+   transitivity ub ; eapply_assumption.
+   transitivity lb ; eapply_assumption.
  assert (eq_in_0 : atan 0 = arctan_sum 0) by (rewrite atan_0, arctan_sum_0_0 ; reflexivity).
  assert (eq_in_c : derive_pt arctan_sum c (arctan_der c c_bd) = derive_pt atan c (atan_der c c_bd)).
   rewrite derive_pt_atan ; apply derive_pt_eq_0, derivable_pt_lim_Rball_pt_lim with 0 1.

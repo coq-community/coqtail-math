@@ -3,7 +3,6 @@ Require Import Rfunctions Rfunction_facts Rextensionality.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 Require Import Rfunction_classes_def.
-Require Import Ass_handling.
 Require Import MyR_dist.
 
 Local Open Scope R_scope.
@@ -223,7 +222,7 @@ Lemma C_Rball_opp: forall c r n f,
   C_Rball c r n f -> C_Rball c r n (- f)%F.
 Proof.
 intros c r n ; induction n ; intros f Hf ; inversion_clear Hf.
- constructor ; intros x Dx ; apply limit_Ropp ; ass_apply ; assumption.
+ constructor ; intros x Dx ; apply limit_Ropp ; eapply_assumption ; assumption.
  apply Cb_S with (derivable_in_opp _ _ pr) ;
  apply C_Rball_ext with (- derive_Rball c r f pr)%F.
  symmetry ; apply Req_Rball_eq ; intro ; apply derive_Rball_opp.
@@ -289,7 +288,7 @@ intros c r n ; induction n ; intros f g Cnf Cng ;
  inversion_clear Cnf ; inversion_clear Cng.
 
  constructor ; intros x x_in ; apply limit_plus ;
-  ass_apply ; assumption.
+  eapply_assumption ; assumption.
  
  apply Cb_S with (derivable_in_plus _ _ _ pr pr0) ;
  apply C_Rball_ext with (derive_Rball c r f pr + derive_Rball c r g pr0)%F.
@@ -393,7 +392,7 @@ Lemma C_Rball_scal : forall c r n f a,
   C_Rball c r n f -> C_Rball c r n (mult_real_fct a f).
 Proof.
 intros c r n ; induction n ; intros f a Cnf ; inversion_clear Cnf.
- constructor ; intros x x_in ; eapply limit_scal ; do 2 ass_apply.
+ constructor ; intros x x_in ; eapply limit_scal ; do 2 eapply_assumption.
 
  apply Cb_S with (derivable_in_scal _ _ _ pr) ;
  apply C_Rball_ext with  (mult_real_fct a (derive_Rball c r f pr)).
@@ -460,7 +459,7 @@ Lemma C_Rball_mult : forall c r n f g,
 Proof.
 intros c r n ; induction n ; intros f g Cnf Cng ;
  inversion Cnf ; inversion Cng ; subst.
-  constructor ; intros x x_in ; apply limit_mul ; ass_apply ; assumption.
+  constructor ; intros x x_in ; apply limit_mul ; eapply_assumption ; assumption.
 
   assert (pr1 : derivable_in (Rball c r) (f * g)%F)
    by (apply derivable_in_mult ; assumption).
@@ -566,7 +565,7 @@ Lemma D_Rball_infty_opp: forall c r f,
   D_Rball_infty c r f ->
   D_Rball_infty c r (- f)%F.
 Proof.
-intro_all ; apply D_Rball_opp ; ass_apply.
+intro_all ; apply D_Rball_opp ; eapply_assumption.
 Qed.
 
 Lemma C_infty_opp : forall f, C_infty f -> C_infty (- f)%F.
@@ -578,7 +577,7 @@ Lemma C_Rball_infty_opp: forall c r f,
   C_Rball_infty c r f ->
   C_Rball_infty c r (- f)%F.
 Proof.
-intro_all ; apply C_Rball_opp ; ass_apply.
+intro_all ; apply C_Rball_opp ; eapply_assumption.
 Qed.
 
 Lemma D_infty_plus : forall f g,
@@ -592,7 +591,7 @@ Lemma D_Rball_infty_plus : forall c r f g,
   D_Rball_infty c r g ->
   D_Rball_infty c r (f + g)%F.
 Proof.
- intro_all ; apply D_Rball_plus ; ass_apply.
+ intro_all ; apply D_Rball_plus ; eapply_assumption.
 Qed.
 
 Lemma C_infty_plus : forall f g,
@@ -606,7 +605,7 @@ Lemma C_Rball_infty_plus : forall c r f g,
   C_Rball_infty c r g ->
   C_Rball_infty c r (f + g)%F.
 Proof.
- intro_all ; apply C_Rball_plus ; ass_apply.
+ intro_all ; apply C_Rball_plus ; eapply_assumption.
 Qed.
 
 Lemma D_infty_minus : forall f g,
@@ -620,7 +619,7 @@ Lemma D_Rball_infty_minus : forall c r f g,
   D_Rball_infty c r g ->
   D_Rball_infty c r (f - g)%F.
 Proof.
- intro_all ; apply D_Rball_minus ; ass_apply.
+ intro_all ; apply D_Rball_minus ; eapply_assumption.
 Qed.
 
 Lemma C_infty_minus : forall f g,
@@ -634,7 +633,7 @@ Lemma C_Rball_infty_minus : forall c r f g,
   C_Rball_infty c r g ->
   C_Rball_infty c r (f - g)%F.
 Proof.
- intro_all ; apply C_Rball_minus ; ass_apply.
+ intro_all ; apply C_Rball_minus ; eapply_assumption.
 Qed.
 
 Lemma D_infty_scal : forall f a,
@@ -647,7 +646,7 @@ Lemma D_Rball_infty_scal : forall c r f a,
   D_Rball_infty c r f ->
   D_Rball_infty c r (mult_real_fct a f).
 Proof.
- intro_all ; apply D_Rball_scal ; ass_apply.
+ intro_all ; apply D_Rball_scal ; eapply_assumption.
 Qed.
 
 Lemma C_infty_scal : forall f a,
@@ -660,7 +659,7 @@ Lemma C_Rball_infty_scal : forall c r f a,
   C_Rball_infty c r f ->
   C_Rball_infty c r (mult_real_fct a f).
 Proof.
- intro_all ; apply C_Rball_scal ; ass_apply.
+ intro_all ; apply C_Rball_scal ; eapply_assumption.
 Qed.
 
 Lemma D_infty_mult : forall f g,
@@ -674,7 +673,7 @@ Lemma D_Rball_infty_mult : forall c r f g,
   D_Rball_infty c r g ->
   D_Rball_infty c r (f * g)%F.
 Proof.
- intro_all ; apply D_Rball_mult ; ass_apply.
+ intro_all ; apply D_Rball_mult ; eapply_assumption.
 Qed.
 
 Lemma C_infty_mult : forall f g,
@@ -688,7 +687,7 @@ Lemma C_Rball_infty_mult : forall c r f g,
   C_Rball_infty c r g ->
   C_Rball_infty c r (f * g)%F.
 Proof.
- intro_all ; apply C_Rball_mult ; ass_apply.
+ intro_all ; apply C_Rball_mult ; eapply_assumption.
 Qed.
 
 Lemma D_infty_comp : forall f g,

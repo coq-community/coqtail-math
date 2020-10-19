@@ -3,7 +3,7 @@ Require Import Rinterval Rfunctions Rfunction_def.
 Require Import Ranalysis_def Ranalysis_def_simpl Rfunction_facts.
 Require Import MyRIneq MyR_dist Lra.
 
-Require Import Ass_handling.
+Require Import Tactics.
 
 Local Open Scope R_scope.
 
@@ -99,7 +99,7 @@ Qed.
 Lemma continuity_in_opp : forall D f,
   continuity_in D f -> continuity_in D (- f)%F.
 Proof.
-intros D f Hf x x_in ; apply limit_Ropp ; ass_apply ; assumption.
+intros D f Hf x x_in ; apply limit_Ropp ; eapply_assumption ; assumption.
 Qed.
 
 Lemma continuity_pt_in_opp_rev : forall f D x,
@@ -115,7 +115,7 @@ Lemma continuity_in_plus : forall D f g,
   continuity_in D f -> continuity_in D g ->
   continuity_in D (f + g)%F.
 Proof.
-intros f g a b Hf Hg x x_in ; apply limit_plus ; ass_apply ;
+intros f g a b Hf Hg x x_in ; apply limit_plus ; eapply_assumption ;
  assumption.
 Qed.
 
@@ -123,7 +123,7 @@ Lemma continuity_in_minus : forall D f g,
   continuity_in D f -> continuity_in D g ->
   continuity_in D (f - g)%F.
 Proof.
-intros f g a b Hf Hg x x_in ; apply limit_minus ; ass_apply ;
+intros f g a b Hf Hg x x_in ; apply limit_minus ; eapply_assumption ;
  assumption.
 Qed.
 
@@ -131,7 +131,7 @@ Lemma continuity_in_mult : forall D f g,
   continuity_in D f -> continuity_in D g ->
   continuity_in D (f * g)%F.
 Proof.
-intros f g a b Hf Hg x x_in ; apply limit_mul ; ass_apply ;
+intros f g a b Hf Hg x x_in ; apply limit_mul ; eapply_assumption ;
  assumption.
 Qed.
 

@@ -30,7 +30,6 @@ Require Import SeqProp.
 Require Import MyRIneq.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl.
 Require Import Ranalysis_continuity.
-Require Import Ass_handling.
 
 Local Open Scope R_scope.
 

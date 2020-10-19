@@ -7,7 +7,7 @@ Require Import Lra MyRIneq.
 Require Import Rsequence_facts Rsequence_sums_facts RFsequence RFsequence_facts.
 Require Import Rpser_def Rpser_base_facts Rpser_radius_facts Rpser_sums Rpser_sums_facts.
 
-Require Import Ass_handling.
+Require Import Tactics.
 
 Local Open Scope R_scope.
 
@@ -449,7 +449,7 @@ assert (pr : Cv_radius_weak An (middle (Rabs z) r)).
  assert (Rabs (z + h) < r).
   apply Rlt_trans with (middle (Rabs z) r) ;
   [| apply middle_is_in_the_middle] ; assumption.
- specify2 Hd1 h h_neq.
+ specialize (Hd1 h h_neq).
  repeat erewrite sum_r_unfold.
  eapply Rle_lt_trans ; [| eapply Hd1].
  right ; apply Rabs_eq_compat ; apply Rminus_eq_compat.
@@ -523,7 +523,7 @@ intros An rho z eps eps_pos.
  assert (d'_pos : 0 < d').
   unfold Rmin ; apply Rmin_pos_lt ; [apply d | lra].
  pose (delta := mkposreal d' d'_pos) ; exists delta ; intros h h_neq h_bd ;
- specify2 Hd h h_neq ; eapply Rle_lt_trans ; [| eapply Hd].
+ specialize (Hd h h_neq); eapply Rle_lt_trans ; [| eapply Hd].
  right ; apply Rabs_eq_compat ; apply Rminus_eq_compat.
  unfold Rdiv ; apply Rmult_eq_compat_r ; unfold sum ; apply Rminus_eq_compat ;
  apply weaksum_r_unique_strong ; auto.

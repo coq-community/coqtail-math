@@ -27,7 +27,7 @@ Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Rextensionality Rpser_usual.
 Require Import Rsequence_cv_facts.
 Require Import MyRIneq.
-Require Import Ass_handling.
+Require Import Tactics.
 
 Open Scope R_scope.
 
@@ -110,7 +110,7 @@ Lemma strictly_increasing_interval_sin :
   strictly_increasing_interval (- PI / 2) (PI / 2) sin.
 Proof.
  replace (- PI / 2) with (- (PI / 2)) by field.
- do 5 intro ; apply sin_increasing_1 ; ass_apply.
+ do 5 intro ; apply sin_increasing_1 ; eapply_assumption.
 Qed.
 
 Lemma injective_interval_sin : injective_interval (- PI / 2) (PI / 2) sin.
