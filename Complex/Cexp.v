@@ -364,7 +364,7 @@ apply Cseq_cv_re_compat.
 auto.
 Qed.
 
-Lemma binomial_diag : forall n, Binomial.C n n = 1.
+Lemma binomial_diag : forall n, Binomial.C n n = 1%R.
 Proof.
 intros n.
 unfold Binomial.C.
@@ -374,7 +374,7 @@ field.
 INR_solve; apply fact_neq_0.
 Qed.
 
-Lemma binomial_zero : forall n, Binomial.C n 0 = 1.
+Lemma binomial_zero : forall n, Binomial.C n 0 = 1%R.
 Proof.
 intros n.
 unfold Binomial.C.
