@@ -4,7 +4,7 @@ shortname: coqtail-math
 opam_name: coq-coqtail
 organization: coq-community
 community: true
-travis: true
+action: true
 
 synopsis: Library of mathematical theorems and tools proved inside the Coq
 
@@ -39,11 +39,11 @@ supported_coq_versions:
 
 tested_coq_nix_versions:
 - version_or_url: https://github.com/coq/coq-on-cachix/tarball/master
-- version_or_url: '8.12'
-- version_or_url: '8.11'
 
 tested_coq_opam_versions:
 - version: dev
+- version: '8.12'
+- version: '8.11'
 
 namespace: Coqtail
 
