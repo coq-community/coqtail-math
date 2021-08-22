@@ -21,10 +21,10 @@ USA.
 
 Require Export Cbase.
 Require Export Cnorm.
-Require Import Omega.
 Require Import Ctacfield.
 Require Import Cprop_base.
 Require Import Cpow.
+Require Import Lia.
 
 Open Scope C_scope.
 
@@ -122,7 +122,7 @@ Proof.
 unfold Cdiv.
 intros.
 rewrite <- sum_f_C0_const.
-field. apply not_0_INC. intuition.
+field. apply not_0_INC. intuition lia.
 Qed.
 
 Lemma sum_f_C0_mult : forall (z : C) (f : nat -> C) (N : nat),   

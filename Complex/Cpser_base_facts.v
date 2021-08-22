@@ -5,6 +5,7 @@ Require Import Cpow.
 Require Import Cprop_base.
 Require Import Csequence_def Csequence_facts.
 Require Import Cpser_def.
+Require Import Lia.
 
 Local Open Scope R_scope.
 Local Open Scope C_scope.
@@ -173,7 +174,7 @@ intros An r N Rho.
   rewrite Cnorm_pow, Rinv_pow, <- Cnorm_inv, <- Cnorm_pow, <- Cnorm_Cmult,
   <- Cpow_inv.
   assert (Hrew : (n = n - N + N)%nat).
-   intuition.
+   intuition lia.
    repeat rewrite Cnorm_Cmult ; rewrite Hrew at 1 ; rewrite Rmult_assoc ;
    apply Rmult_eq_compat_l ; rewrite <- Cnorm_Cmult ; apply Cnorm_eq_compat.
    rewrite Hrew at 1 ; rewrite Cpow_add, Cmult_assoc, Cinv_r, Cmult_1_r ;

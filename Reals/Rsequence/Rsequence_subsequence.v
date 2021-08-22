@@ -102,7 +102,7 @@ destruct (le_le_S_dec x y).
  assumption.
  
  pose proof (nat_seq_strict_growing_trans an H x y).
- intuition.
+ intuition lia.
 Qed.
 
 (** Properties on extractors *)
@@ -271,7 +271,7 @@ destruct (Rseq_extractor_partition phi Hphi n) as [N Hpart].
    pose proof (nat_seq_growing_trans phi (fun x => lt_le_weak _ _ (Hphi _)) Nu (S N) Hinv).
    pose proof (le_trans _ _ _ H nNu).
    pose proof (lt_le_trans _ _ _ HnSN H).
-   intuition.
+   intuition lia.
  
  pose proof (Hu N HNuN) as Hun.
  pose proof (Hu (S N) (le_S _ _ HNuN)) as Husn.

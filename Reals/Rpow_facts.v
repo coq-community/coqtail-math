@@ -1,4 +1,4 @@
-Require Import Reals MyRIneq Fourier Omega Lia Lra.
+Require Import Reals MyRIneq Fourier Lia Lra.
 Require Import Rsequence_usual_facts.
 
 Local Open Scope R_scope.
@@ -153,15 +153,15 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
         (1 + Rabs x) / 2 * Rabs (INR (i + M) * x ^ (i + M))).
  intros M i M_lb.
  apply Rle_lt_trans with (Rabs ((INR (i + S M) / (INR (i + M))) * ((INR (i + M)) * x ^ (i + S M)))).
- right ; apply Rabs_eq_compat ; field ; apply Rgt_not_eq ; intuition; try lia.
- replace (i + S M)%nat with (S (i + M))%nat by intuition ;
+ right ; apply Rabs_eq_compat ; field ; apply Rgt_not_eq ; apply lt_0_INR; lia.
+ replace (i + S M)%nat with (S (i + M))%nat by intuition lia.
  rewrite <- tech_pow_Rmult.
  repeat (rewrite Rabs_mult ; rewrite <- Rmult_assoc).
  apply Rmult_lt_compat_r.
  apply Rabs_pos_lt ; apply pow_nonzero ; assumption.
  rewrite Rmult_comm, <- Rmult_assoc.
  apply Rmult_lt_compat_r.
- apply Rabs_pos_lt ; apply Rgt_not_eq ; intuition.
+ apply Rabs_pos_lt ; apply Rgt_not_eq ; apply lt_0_INR; lia.
  replace (INR (S (i + M)) / INR (i + M)) with (1 + / INR (i + M)).
  apply Rlt_le_trans with (Rabs x * (1 + 1 / Rabs x) / 2).
  unfold Rdiv ; rewrite Rmult_assoc ; apply Rmult_lt_compat_l.
@@ -171,16 +171,16 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
   clear ; intros ; lra.
  apply Temp.
  replace (/INR (i + M)) with (R_dist (/INR (S (i + pred M))) 0).
- apply HN ; intuition.
+ apply HN ; intuition lia.
  unfold R_dist ; rewrite Rminus_0_r ; replace (S (i + pred M))%nat with (i + M)%nat.
- apply Rabs_right ; left ; apply Rinv_0_lt_compat ; intuition.
- intuition.
+ apply Rabs_right ; left ; apply Rinv_0_lt_compat ; apply lt_0_INR; lia.
+ intuition lia.
  apply Rle_ge ; apply Rle_zero_pos_plus1.
- left ; apply Rinv_0_lt_compat ; intuition.
+ left ; apply Rinv_0_lt_compat; apply lt_0_INR; lia.
  right ; field.
  apply Rgt_not_eq ; apply Rabs_pos_lt ; assumption.
  replace (INR (S (i + M))) with (1 + INR (i + M)).
- field ; apply Rgt_not_eq ; intuition.
+ field ; apply Rgt_not_eq ; apply lt_0_INR; lia.
  replace (S (i + M)) with (1 + (i + M))%nat by intuition ; rewrite S_O_plus_INR.
  intuition.
  pose (An_0 := Rabs (INR (S N))).
@@ -201,15 +201,15 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
  unfold R_dist, Rminus ; rewrite Ropp_0 ; rewrite Rplus_0_r.
  assert (Temp : forall m n, (m >= n)%nat -> {p | (m = n + p)%nat}).
    clear ; intros m n ; induction n ; intro H.
-   exists m ; intuition.
+   exists m ; intuition lia.
    case (le_lt_eq_dec _ _ H) ; clear H ; intro H.
-   assert (H' : (m >= n)%nat) by intuition.
+   assert (H' : (m >= n)%nat) by intuition lia.
    destruct (IHn H') as (p, Hp) ; destruct p.
-   exists 0%nat ; apply False_ind ; intuition.
-   exists p ; intuition.
-   exists 0%nat ; intuition.
+   exists 0%nat ; apply False_ind ; intuition lia.
+   exists p ; intuition lia.
+   exists 0%nat ; intuition lia.
   destruct (Temp n (N2 + S N)%nat n_lb) as (p,Hp).
-  rewrite Hp. replace (S (N2 + S N + p))%nat with ((S N2 + p) + S N)%nat by intuition.
+  rewrite Hp. replace (S (N2 + S N + p))%nat with ((S N2 + p) + S N)%nat by intuition lia.
  assert (H' := tech4 (fun i : nat => Rabs (INR (i + S N) * x ^ (i + S N))) k
              (S N2 + p) k_pos Temp2).
  apply Rle_lt_trans with (Rabs (INR (0 + S N) * x ^ (0 + S N)) * k ^ (S N2 + p)).

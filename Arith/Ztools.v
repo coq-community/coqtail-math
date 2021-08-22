@@ -1,4 +1,4 @@
-Require Import ZArith Omega Lia Znumtheory.
+Require Import ZArith Lia Znumtheory.
 
 (** * Contains some useful lemmas not in stdlib and a tactic *)
 
@@ -90,7 +90,7 @@ Defined.
 Lemma Z_mult_div_mod : forall a b, b <> 0 -> b * (a / b) = a - a mod b.
 Proof.
   intros a b N.
-  pose proof Z_div_mod_eq_full a b N; lia.
+  pose proof Z_div_mod_eq_full a b; lia.
 Qed.
 
 Lemma Zdivide_square : forall a b, (a | b) -> (a * a | b * b).

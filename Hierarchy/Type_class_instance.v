@@ -19,9 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
+Require Import Arith ZArith.
 Require Import RelationClasses.
 Require Import Type_class_definition.
-Require Import Omega.
 Require Import Lia.
 
 (*proof that nat = semiring_commutative*)

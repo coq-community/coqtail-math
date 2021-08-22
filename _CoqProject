@@ -1,5 +1,9 @@
 -R . Coqtail
 
+-arg -w -arg -deprecated-hint-without-locality
+-arg -w -arg -deprecated-hint-rewrite-without-locality
+-arg -w -arg -deprecated-instance-without-locality
+
 Arith/Hurwitz_def.v
 Arith/Hurwitz_prop.v
 Arith/Lagrange_four_square.v

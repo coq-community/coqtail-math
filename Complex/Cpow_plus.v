@@ -24,6 +24,7 @@ Require Import Cbase.
 Require Import Cprop_base.
 Require Import Cfunctions.
 Require Import Cpow.
+Require Import Lia.
 
 Open Scope C_scope.
 
@@ -41,22 +42,21 @@ replace (INC (S n * fact n)) with (INC (S n) * INC (fact n))
 by (rewrite mult_INC ; reflexivity).
 
 unfold Cdiv. rewrite Cinv_mult_distr.
-  apply (Cmult_eq_reg_l (INC (S (n - k)))). apply not_0_INC. intuition.
+  apply (Cmult_eq_reg_l (INC (S (n - k)))). apply not_0_INC. intuition lia.
   rewrite Cmult_add_distr_l. repeat rewrite mult_INC.
   field_simplify.
     rewrite Cmult_comm. rewrite <- Cmult_add_distr_l.
     unfold Cdiv. repeat rewrite Cmult_assoc. apply Cmult_eq_compat_l.
     rewrite Cadd_comm. 
     replace (INC (S n) + - INC (S (n - k))) with (INC (S n) - INC (S (n - k))) by intuition. 
-    rewrite <- minus_INC. intuition.
-   intuition.
+    rewrite <- minus_INC. simpl. rewrite minus_INC. rewrite minus_INC. ring. lia. lia. lia.
   split. apply not_0_INC. apply fact_neq_0. split. apply not_0_INC. apply fact_neq_0.
-   apply not_0_INC. intuition.
+   apply not_0_INC. intuition lia.
    split. apply not_0_INC. apply fact_neq_0. split. apply not_0_INC. apply fact_neq_0.
-   apply not_0_INC. intuition.
- apply not_0_INC. intuition.
+   apply not_0_INC. intuition lia.
+ apply not_0_INC. intuition lia.
 apply not_0_INC. intro Habs. apply mult_is_O in Habs. elim Habs; apply fact_neq_0.
-Qed. 
+Qed.
 
 (* begin hide *)
 Lemma equi_binom_add : 
@@ -168,10 +168,10 @@ replace (sum_f_C0
     INC (S k * fact (S n)) / INC (fact (S k) * fact (S n - S k + 1))) n).
 2: { apply sum_f_C0_eq_seq. intros m H.
 repeat rewrite fact_simpl. repeat rewrite mult_INC.
-replace (S n - S m + 1)%nat with (S n - m)%nat by intuition.
+replace (S n - S m + 1)%nat with (S n - m)%nat by intuition lia.
 replace (S (S n) - S m)%nat with (S n - m)%nat by intuition.
 field. 
-split ; try split ; apply not_0_INC ; try apply fact_neq_0 ; intuition.
+split ; try split ; apply not_0_INC ; try apply fact_neq_0 ; intuition lia.
 }
 ring_simplify.
 replace (S n - S n)%nat with O by intuition.
@@ -179,5 +179,5 @@ replace (S (S n) - S (S n))%nat with O by intuition.
 repeat rewrite fact_simpl.
 repeat rewrite mult_INC. simpl (INC 0).
 field_simplify. unfold Cdiv. repeat rewrite Cmult_0_r. rewrite Cmult_0_l. reflexivity.
-split ; try split ; try split ; try split ; try apply not_0_INC ; try apply fact_neq_0 ; intuition.
+split ; try split ; try split ; try split ; try apply not_0_INC ; try apply fact_neq_0 ; intuition lia.
 Qed.
