@@ -1,10 +1,10 @@
-Require Import Rbase Ranalysis Lra.
+Require Import Rbase Ranalysis Lia Lra.
 Require Import Rfunctions Rfunction_facts Rextensionality.
 Require Import Rinterval Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
 Require Import Ranalysis_continuity Ranalysis_derivability Ranalysis_monotonicity.
 Require Import Rfunction_classes_def.
 Require Import MyR_dist.
-Require Import Tactics.
+Require Import Reals.Tactics.
 
 Local Open Scope R_scope.
 
@@ -152,7 +152,7 @@ intro m ; induction m ; intros n f Hnm Dmf.
  destruct n ; [apply Dmf | elim (le_Sn_O _ Hnm)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
-  apply IHm ; [| apply D_pred] ; intuition.
+  apply IHm ; [| apply D_pred] ; intuition lia.
 Qed.
 
 Lemma D_Rball_le: forall c r m n f, (n <= m)%nat ->
@@ -162,7 +162,7 @@ intros c r m ; induction m ; intros n f Hnm Dmf.
  destruct n ; [apply Dmf | elim (le_Sn_O _ Hnm)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
-  apply IHm ; [| apply D_Rball_pred] ; intuition.
+  apply IHm ; [| apply D_Rball_pred] ; intuition lia.
 Qed.
 
 Lemma C_le : forall m n f, (n <= m)%nat -> C m f -> C n f.
@@ -171,7 +171,7 @@ intro m ; induction m ; intros n f H Cmf.
  destruct n ; [apply Cmf | elim (le_Sn_O _ H)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
-  apply IHm ; [| apply C_pred] ; intuition.
+  apply IHm ; [| apply C_pred] ; intuition lia.
 Qed.
 
 Lemma C_Rball_le : forall c r m n f, (n <= m)%nat ->
@@ -181,7 +181,7 @@ intros c r m ; induction m ; intros n f H Cmf.
  destruct n ; [apply Cmf | elim (le_Sn_O _ H)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
-  apply IHm ; [| apply C_Rball_pred] ; intuition.
+  apply IHm ; [| apply C_Rball_pred] ; intuition lia.
 Qed.
 
 (** * Compatibility of C, D with common operators *)

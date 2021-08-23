@@ -1,4 +1,4 @@
-Require Import ZArith Omega Znumtheory.
+Require Import ZArith Znumtheory.
 Require Import MyNat Ztools.
 
 (** * Results about [eqm], congruence modulo some integer *)

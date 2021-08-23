@@ -33,6 +33,7 @@ Require Import CFsequence.
 Require Import Cnorm.
 Require Import Cprop_base.
 Require Import Ctacfield.
+Require Import Lia.
 Require Import Lra.
 Require Import Max.
 Require Import Cmet.
@@ -416,7 +417,7 @@ Proof.
       [| ring ].
   replace (sum_f_R0 An N + sum_f_R0 (fun l:nat => An (S N + l)%nat) n)%R with
   (sum_f_R0 An (S (N + n)))%R.
-  apply HN' ; intuition.
+  apply HN' ; intuition lia.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := sigma_split An N_pos N_ub) ; unfold sigma in H.
@@ -424,7 +425,7 @@ Proof.
   replace (sum_f_R0 An (S (N + n))) with
   (sum_f_R0 (fun k:nat => An (0 + k)%nat) (S (N + n))).
   replace (sum_f_R0 An N) with (sum_f_R0 (fun k:nat => An (0 + k)%nat) N).
-  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition lia.
   rewrite Hrew in H.
   apply H.
   apply sum_eq; intros ;  reflexivity.
@@ -439,7 +440,7 @@ Proof.
       [| ring ].
       replace ((CFpartial_sum (fun n0 : nat => fn n0 x) N + sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n))
       with (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)%nat).
-  apply HN' ; intuition.
+  apply HN' ; intuition lia.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := Csigma_split (fun n => fn n x) O (S (N + n)) N N_pos N_ub) ; unfold Csigma in H.
@@ -447,7 +448,7 @@ Proof.
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)) with
   (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) (S (N + n))).
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) N) with (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) N).
-  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition lia.
   rewrite Hrew in H.
   apply H.
   unfold CFpartial_sum ; apply sum_f_C0_eq_seq ; intros ;  reflexivity.
@@ -462,7 +463,7 @@ Proof.
       [| ring ].
   replace (sum_f_R0 An N + sum_f_R0 (fun l:nat => An (S N + l)%nat) n)%R with
   (sum_f_R0 An (S (N + n)))%R.
-  apply HN' ; intuition.
+  apply HN' ; intuition lia.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := sigma_split An N_pos N_ub) ; unfold sigma in H.
@@ -470,7 +471,7 @@ Proof.
   replace (sum_f_R0 An (S (N + n))) with
   (sum_f_R0 (fun k:nat => An (0 + k)%nat) (S (N + n))).
   replace (sum_f_R0 An N) with (sum_f_R0 (fun k:nat => An (0 + k)%nat) N).
-  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition lia.
   rewrite Hrew in H.
   apply H.
   apply sum_eq; intros ;  reflexivity.
@@ -485,7 +486,7 @@ Proof.
       [| ring ].
       replace ((CFpartial_sum (fun n0 : nat => fn n0 x) N + sum_f_C0 (fun l:nat => fn (S N + l)%nat x) n))
       with (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)%nat).
-  apply HN' ; intuition.
+  apply HN' ; intuition lia.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := Csigma_split (fun n => fn n x) O (S (N + n)) N N_pos N_ub) ; unfold Csigma in H.
@@ -493,7 +494,7 @@ Proof.
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)) with
   (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) (S (N + n))).
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) N) with (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) N).
-  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition.
+  assert (Hrew : (S (N + n) - S N)%nat = n) by intuition lia.
   rewrite Hrew in H.
   apply H.
   unfold CFpartial_sum ; apply sum_f_C0_eq_seq ; intros ;  reflexivity.

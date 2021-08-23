@@ -21,7 +21,7 @@ USA.
 
 (** Properties of real sequences. *)
 
-Require Export Omega Lia.
+Require Export Lia.
 Require Export Reals.
 Require Export Rsequence_def.
 Require Export Rsequence_base_facts.
@@ -178,7 +178,7 @@ Proof.
 intros N Un l H eps eps_pos.
 destruct (H eps eps_pos) as [M HM].
 exists (M - N)%nat; intros n nSN.
-apply HM ; intuition.
+apply HM ; intuition lia.
 Qed.
 
 Lemma Rseq_cv_pos_infty_shifts_compat : forall Un N,

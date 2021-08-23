@@ -412,10 +412,11 @@ Proof.
   rewrite <-Zpow_mod. f_equal.
   rewrite <-!Z.pow_mul_r.
   rewrite Z.pow_add_r.
-  f_equal.
-  all: try lia.
-  apply Z.mul_nonneg_nonneg; try lia.
-  apply Z.pow_nonneg; lia.
+  f_equal. lia.
+  lia.
+  lia.
+  apply Z.mul_nonneg_nonneg; try lia; try (apply Z.pow_nonneg; lia).
+  lia.
 Qed.
 
 Definition miller_rabin' (l : list Z) (n : Z) : bool :=

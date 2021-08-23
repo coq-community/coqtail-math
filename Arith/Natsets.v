@@ -1,4 +1,4 @@
-Require Import ZArith Omega Lia MyNat Div2.
+Require Import ZArith Lia MyNat Div2.
 
 (** Finite and computable subsets of [nat], by functions in [nat -> bool] *)
 

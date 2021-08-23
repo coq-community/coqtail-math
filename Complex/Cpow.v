@@ -20,7 +20,6 @@ USA.
 *)
 
 Require Export Cbase.
-Require Import Omega.
 
 Open Scope C_scope.
 

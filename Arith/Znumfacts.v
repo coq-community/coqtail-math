@@ -1,4 +1,4 @@
-Require Import ZArith Omega Lia Znumtheory.
+Require Import ZArith Lia Znumtheory.
 Require Import Natsets MyNat Ztools Zeqm.
 
 (** * Number theory : factorisation, computation of Bezout coefficients and modular inverse *)
