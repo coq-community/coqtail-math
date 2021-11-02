@@ -16,7 +16,7 @@ Coqtail is a library of mathematical theorems and tools proved inside
 the Coq proof assistant. Results range mostly from arithmetic to real
 and complex analysis."""
 
-build: [make "-j%{jobs}%" ]
+build: [make "-j%{jobs}%"]
 install: [make "install"]
 depends: [
   "coq" {(>= "8.11" & < "8.15~") | (= "dev")}
