@@ -562,7 +562,8 @@ Lemma first_miller_rabin_2_pseudo_prime :
   miller_rabin [2; 3] 2047 = false /\
   primeb              2047 = false.
 Proof.
-  now native_compute.
+  (*now native_compute.*)
+  now vm_compute.
 Qed.
 
 (** Below 1373653, it is enough to check a=3, but we check for <= 10000 *)
@@ -570,7 +571,8 @@ Qed.
 Lemma miller_rabin_2_3 n : n <= 10000 -> miller_rabin [2; 3] n = primeb n.
 Proof.
   apply MR_range_spec_2.
-  Time native_compute. (* 1.6 secs *)
+  (*Time native_compute.*) (* 1.6 secs *)
+  Time vm_compute.
   reflexivity.
 Time Qed. (* 1.6 secs *)
 
@@ -579,5 +581,6 @@ Lemma first_miller_rabin_2_3_pseudo_prime :
   miller_rabin [2; 3; 5] 1373653 = false /\
   primeb                 1373653 = false.
 Proof.
-  now native_compute.
+  (*now native_compute.*)
+  now vm_compute.
 Qed.
