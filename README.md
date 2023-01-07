@@ -44,13 +44,25 @@ and complex analysis.
 - Coq namespace: `Coqtail`
 - Related publication(s): none
 
-## Building instructions
+## Building and installation instructions
+
+The easiest way to install the latest released version of Coqtail
+is via [OPAM](https://opam.ocaml.org/doc/Install.html):
+
+```shell
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam install coq-coqtail
+```
+
+To instead build and install manually, do:
 
 ``` shell
-git clone https://github.com/coq-community/coqtail-math
+git clone https://github.com/coq-community/coqtail-math.git
 cd coqtail-math
-make   # or make -j <number-of-cores-on-your-machine>
+make   # or make -j <number-of-cores-on-your-machine> 
+make install
 ```
+
 
 ## Coqtail and Vim
 

@@ -1232,7 +1232,9 @@ rewrite minus_plus.
 rewrite H5 in H4.
 rewrite plus_comm.
 rewrite H4.
-auto. auto. auto with arith.
+lia.
+auto with arith.
+auto with arith.
 Qed.
 
 (** Lowest strict divisor is lowest divisor *)
