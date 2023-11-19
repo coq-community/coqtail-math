@@ -2785,10 +2785,12 @@ apply limit_div_pos_inv.
 apply limit_div_neg_ext with (fun x => (f x) / (- g x)).
 intros. field. apply g_not_0. apply H.
 assert (Dg' : forall x, open_interval a b x -> derivable_pt (- g) x). intros. reg. apply Dg; intuition.
-apply Hopital_gpinf_Lninf_right with Df Dg'; try assumption; try reg; try (now intuition). apply limit_div_pos_inv. 
+apply Hopital_gpinf_Lninf_right with Df Dg'; try assumption; try reg.
+intros; apply continuity_pt_opp; apply Cg; assumption.
+apply limit_div_pos_inv.
 apply limit_div_neg_ext with g. intros. unfold opp_fct. ring. apply Zg.
 intros. intro. apply g'_not_0 with x Hopen. rewrite (pr_nu _ _ _ (derivable_pt_opp g x (Dg x Hopen))) in H.
-rewrite  derive_pt_opp in H. apply Ropp_eq_0_compat in H. rewrite <- H. ring.
+rewrite derive_pt_opp in H. apply Ropp_eq_0_compat in H. rewrite <- H. ring.
 intros m Hm. destruct (Hlimder m Hm) as [alp [Halp Hsolve]]. 
 exists alp. split. assumption.
 intros. specialize (Hsolve x Hopen H).
