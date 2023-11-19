@@ -191,7 +191,11 @@ Lemma bezout_inj : forall a b,
   {u : Z & {v | u * a + v * b = Z.gcd a b}}.
 Proof.
   intros a b.
-  destruct (euclid a b) as (u, v, d, E, H).
+  destruct (extgcd a b) as [[u v] d] eqn:Heqd.
+  apply extgcd_correct in Heqd.
+  destruct Heqd as [E Hgc].
+  pose proof (Zgcd_is_gcd a b) as H.
+  rewrite <- Hgc in H; clear Hgc.
   destruct (Z_le_dec 0 d) as [L|L].
     exists u; exists v.
     rewrite (Zis_gcd_gcd _ _ _ L H).

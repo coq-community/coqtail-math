@@ -116,7 +116,7 @@ Proof.
   rewrite Zminus_mod, modsym_mod_compat.
   rewrite Zminus_mod_idemp_l.
   do 2 rewrite Zminus_mod_idemp_r.
-  rewrite Zminus_diag, Zmod_0_l.
+  rewrite Z.sub_diag, Zmod_0_l.
   ring.
 Qed.
 

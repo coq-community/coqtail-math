@@ -49,7 +49,7 @@ Program Instance monoid_commutative_nat : Monoid_Commutative nat eq plus 0 :=
 Solve All Obligations with int_hierarchy.
 
 Program Instance monoid_nat_mult_1 : Monoid nat eq mult 1 :=
-{monoid_iden_l := mult_1_l }.
+{monoid_iden_l := Nat.mul_1_l }.
 Solve All Obligations with int_hierarchy.
 
 Program Instance semiring_nat : SemiRing nat eq plus mult 0 1 :=
@@ -67,7 +67,7 @@ Program Instance monoid_Z : Monoid Z eq Zplus 0%Z :=
 Solve All Obligations with int_hierarchy.
 
 Program Instance monoid_mult_Z : Monoid Z eq Zmult 1%Z :=
-{monoid_iden_l := Zmult_1_l}.
+{monoid_iden_l := Z.mul_1_l}.
 Solve All Obligations with int_hierarchy.
 
 Program Instance group_Z : Group Z eq Zplus 0%Z :=

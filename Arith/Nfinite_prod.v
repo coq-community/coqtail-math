@@ -93,7 +93,7 @@ induction n.
 intros.
 unfold Nfinite_prod_0_n.
 unfold Nat.pow.
-rewrite mult_1_r.
+rewrite Nat.mul_1_r.
 apply H.
 auto with arith.
 intros.
@@ -189,7 +189,7 @@ apply Ndiv_mult_compat.
 apply IHn with k.
 auto. auto.
 simpl.
-rewrite mult_comm.
+rewrite Nat.mul_comm.
 apply Ndiv_mult_compat.
 rewrite <- H.
 auto.

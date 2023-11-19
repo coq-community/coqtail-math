@@ -292,7 +292,7 @@ Section Commutative_Ring.
      apply AP; clear AP.
     rewrite CRsum_simpl_r.
     repeat rewrite Nbinomial_diag.
-    repeat rewrite minus_diag.
+    repeat rewrite Nat.sub_diag.
     apply CRadd_eq_compat.
      apply CRsum_eq_compat_weak.
      intro.
