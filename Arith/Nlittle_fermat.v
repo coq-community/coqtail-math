@@ -196,10 +196,15 @@ rewrite H0.
 clear H0.
 
 rewrite minus_L0.
-rewrite minus_plus.
-rewrite minus_plus.
+rewrite (Nat.add_comm (a ^ _)) at 1.
+rewrite Nat.add_sub.
+rewrite (Nat.add_comm 1).
+rewrite Nat.add_sub.
 replace (a ^ S (S p) + 1 + x - a - 1) with (1+(a ^ S (S p) + x - a) - 1).
-rewrite minus_plus.
+symmetry.
+rewrite (Nat.add_comm 1).
+symmetry.
+rewrite Nat.add_sub.
 rewrite minus_L1.
 auto with arith.
 destruct a.

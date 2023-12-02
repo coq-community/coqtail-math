@@ -80,8 +80,8 @@ intros q m k q_neq_1.
  simpl ; unfold q_pow_i.
  unfold Cdiv ; rewrite Cmult_assoc.
  rewrite Cmult_1_r, Cinv_r, Cmult_1_r.
- rewrite plus_0_r ; reflexivity.
- intro Hf ; apply q_neq_1 ; intuition.
+ rewrite Nat.add_0_r ; reflexivity.
+ intro Hf ; apply q_neq_1 ; intuition (auto with complex).
  simpl sum_f_C0 ; rewrite IHk ; clear IHk.
  unfold Cdiv, q_pow_i ; simpl.
  replace (q ^ (m + S k)) with (q ^ m * (q ^ (S k))).
@@ -89,10 +89,10 @@ intros q m k q_neq_1.
  apply Cmult_eq_compat_l.
  replace (q ^ S k) with ((q ^ S k * (C1 - q)) * / (C1 - q)).
  simpl ; auto with complex.
- field ; intro Hf ; apply q_neq_1 ; intuition.
+ field ; intro Hf ; apply q_neq_1 ; intuition (auto with complex).
  rewrite Cmult_assoc, Cinv_r, Cmult_1_r.
  reflexivity.
- intro Hf ; apply q_neq_1 ; intuition.
+ intro Hf ; apply q_neq_1 ; intuition (auto with complex).
 induction k.
  replace (m + 1)%nat with (S m) by ring ; simpl. rewrite Cmult_1_r. field.
  replace (m + S (S k))%nat with (S (m + S k)) by ring ; simpl ;
@@ -202,7 +202,7 @@ Lemma sum_f_C0_triang : forall (f : nat -> C) (N : nat),
      Cnorm (sum_f_C0 f N) <= sum_f_R0 (fun n => Cnorm (f n)) N.
 Proof.
 induction N ; simpl.
- intuition.
+ intuition (auto with real).
  apply Rle_trans with (Cnorm (sum_f_C0 f N) + Cnorm (f (S N)))%R.
  apply Cnorm_triang.
  apply Rplus_le_compat_r ; assumption.

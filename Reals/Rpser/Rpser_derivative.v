@@ -146,7 +146,8 @@ assert (lb_lt_x : - middle (Rabs x) (Rabs r) < x).
     rewrite <- Lim_eq.
     unfold SP in Temp ; unfold Rpser_partial_sum_derive.
     assert (Hrew : n = S (pred n)).
-     apply S_pred with N ; intuition.
+     symmetry.
+     apply Nat.lt_succ_pred with N ; intuition.
     rewrite Hrew.
     unfold R_dist ; rewrite Rabs_minus_sym ; apply Temp.
   assert (Dfn_eq_fn' : forall (x0 : R) (n : nat), - middle (Rabs x) (Rabs r) < x0 ->

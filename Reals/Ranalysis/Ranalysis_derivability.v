@@ -90,7 +90,7 @@ intros f D x l Hl eps eps_pos ; destruct (Hl _ eps_pos) as [delta Hdelta] ;
   apply delta.
   intros y [[Dy xny] xy_bd] ; simpl ; unfold R_dist, growth_rate ;
    replace (f y) with (f (x + (y - x))) by (f_equal ; ring) ; apply Hdelta.
-   intro Hf ; apply xny ; revert Hf ; clear ; intuition.
+   intro Hf ; apply xny ; revert Hf ; clear ; intuition (auto with real).
    apply xy_bd.
 Qed.
 

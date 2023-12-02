@@ -49,7 +49,7 @@ destruct n; [reflexivity|].
 rewrite tech2 with a O (S n); [|intuition].
 rewrite tech5.
 simpl (sum_f_R0 a 0).
-replace (S n - 1)%nat with n by (simpl; apply minus_n_O).
+replace (S n - 1)%nat with n by (simpl; symmetry; apply Nat.sub_0_r).
 assert (REW : forall S S' A B, S = S' -> S + A - (B + S') = A - B) by (intros; subst; ring).
 apply REW.
 reflexivity.
@@ -63,7 +63,7 @@ destruct n; [reflexivity|].
 rewrite tech2 with a O (S n); [|intuition].
 rewrite tech5.
 simpl (sum_f_R0 a 0).
-replace (S n - 1)%nat with n by (simpl; apply minus_n_O).
+replace (S n - 1)%nat with n by (simpl; symmetry; apply Nat.sub_0_r).
 assert (REW : forall S S' A B, S = S' -> A + S - (S' + B) = A - B) by (intros; subst; ring).
 apply REW.
 reflexivity.
@@ -96,7 +96,7 @@ intro n.
 apply continuity_implies_RiemannInt.
   apply le_INR; do 2 constructor.
 intros x [Hnx HxSn]; apply Hcont.
-apply (Rle_trans 0 (INR n) x (le_INR _ _ (le_O_n n)) Hnx).
+apply (Rle_trans 0 (INR n) x (le_INR _ _ (Nat.le_0_l n)) Hnx).
 Qed.
 
 Lemma Rser_RiemannInt_link_general_term_integrable : forall (n : nat), 

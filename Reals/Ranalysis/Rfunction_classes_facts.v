@@ -149,7 +149,7 @@ Qed.
 Lemma D_le: forall m n f, (n <= m)%nat -> D m f -> D n f.
 Proof.
 intro m ; induction m ; intros n f Hnm Dmf.
- destruct n ; [apply Dmf | elim (le_Sn_O _ Hnm)].
+ destruct n ; [apply Dmf | elim (Nat.nle_succ_0 _ Hnm)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
   apply IHm ; [| apply D_pred] ; intuition lia.
@@ -159,7 +159,7 @@ Lemma D_Rball_le: forall c r m n f, (n <= m)%nat ->
   D_Rball c r m f -> D_Rball c r n f.
 Proof.
 intros c r m ; induction m ; intros n f Hnm Dmf.
- destruct n ; [apply Dmf | elim (le_Sn_O _ Hnm)].
+ destruct n ; [apply Dmf | elim (Nat.nle_succ_0 _ Hnm)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
   apply IHm ; [| apply D_Rball_pred] ; intuition lia.
@@ -168,7 +168,7 @@ Qed.
 Lemma C_le : forall m n f, (n <= m)%nat -> C m f -> C n f.
 Proof.
 intro m ; induction m ; intros n f H Cmf.
- destruct n ; [apply Cmf | elim (le_Sn_O _ H)].
+ destruct n ; [apply Cmf | elim (Nat.nle_succ_0 _ H)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
   apply IHm ; [| apply C_pred] ; intuition lia.
@@ -178,7 +178,7 @@ Lemma C_Rball_le : forall c r m n f, (n <= m)%nat ->
   C_Rball c r m f -> C_Rball c r n f.
 Proof.
 intros c r m ; induction m ; intros n f H Cmf.
- destruct n ; [apply Cmf | elim (le_Sn_O _ H)].
+ destruct n ; [apply Cmf | elim (Nat.nle_succ_0 _ H)].
  destruct (eq_nat_dec n (S m)) as [Heq | Hneq].
   subst ; assumption.
   apply IHm ; [| apply C_Rball_pred] ; intuition lia.

@@ -26,7 +26,7 @@ Require Import Rseries_def.
 Require Import Lra.
 Require Import RiemannInt.
 Require Import SeqProp.
-Require Import Max.
+Require Import PeanoNat.
 Require Import RIneq MyRIneq.
 
 Require Import Ranalysis_def Ranalysis_def_simpl Ranalysis_facts.
@@ -429,10 +429,10 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
  rewrite Rabs_mult.
  transitivity (eps1 + Rabs (f x - fn N x) + Rabs h * Rabs (fn' N c - g x)).
  do 2 apply Rplus_lt_compat_r ; rewrite Rabs_minus_sym ; apply HN2.
- apply le_trans with (max N1 N2) ; [apply le_max_r | apply le_max_l].
+ apply Nat.le_trans with (max N1 N2) ; [apply Nat.le_max_r | apply Nat.le_max_l].
  transitivity (eps1 + eps1 + Rabs h * Rabs (fn' N c - g x)).
  apply Rplus_lt_compat_r, Rplus_lt_compat_l ; unfold R_dist in HN1 ;
- rewrite Rabs_minus_sym ; apply HN1, le_trans with (max N1 N2) ; apply le_max_l.
+ rewrite Rabs_minus_sym ; apply HN1, Nat.le_trans with (max N1 N2) ; apply Nat.le_max_l.
  replace (fn' N c - g x)  with ((fn' N c - g c) +  (g c - g x)) by ring.
  apply Rle_lt_trans with (eps1 + eps1 + Rabs h * Rabs (fn' N c - g c) + Rabs h * Rabs (g c - g x)).
  do 3 rewrite Rplus_assoc ; do 2 apply Rplus_le_compat_l ; rewrite <- Rmult_plus_distr_l ;
@@ -441,7 +441,7 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
           Rabs h * Rabs (g c - g x)).
  apply Rplus_lt_compat_r, Rplus_lt_compat_l, Rmult_lt_compat_l.
   apply Rabs_pos_lt ; assumption.
-  rewrite Rabs_minus_sym ; apply HN3 ; [apply le_max_r |].
+  rewrite Rabs_minus_sym ; apply HN3 ; [apply Nat.le_max_r |].
    apply interval_size_Boule_middle, c_deduc, open_interval_interval ; assumption.
  apply Rlt_le_trans with (eps1 + eps1 + Rabs h * (eps / 3 / 2) + Rabs h * (eps / 3 / 2)) ;
   [| right ; unfold eps1 ; field] ; repeat rewrite Rplus_assoc ;
@@ -480,10 +480,10 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
  rewrite Rabs_mult.
  transitivity (eps1 + Rabs (f x - fn N x) + Rabs h * Rabs (fn' N c - g x)).
  do 2 apply Rplus_lt_compat_r ; rewrite Rabs_minus_sym ; apply HN2.
- apply le_trans with (max N1 N2) ; [apply le_max_r | apply le_max_l].
+ apply Nat.le_trans with (max N1 N2) ; [apply Nat.le_max_r | apply Nat.le_max_l].
  transitivity (eps1 + eps1 + Rabs h * Rabs (fn' N c - g x)).
  apply Rplus_lt_compat_r, Rplus_lt_compat_l ; unfold R_dist in HN1 ;
- rewrite Rabs_minus_sym ; apply HN1, le_trans with (max N1 N2) ; apply le_max_l.
+ rewrite Rabs_minus_sym ; apply HN1, Nat.le_trans with (max N1 N2) ; apply Nat.le_max_l.
  replace (fn' N c - g x)  with ((fn' N c - g c) +  (g c - g x)) by ring.
  apply Rle_lt_trans with (eps1 + eps1 + Rabs h * Rabs (fn' N c - g c) + Rabs h * Rabs (g c - g x)).
  do 3 rewrite Rplus_assoc ; do 2 apply Rplus_le_compat_l ; rewrite <- Rmult_plus_distr_l ;
@@ -492,7 +492,7 @@ intros fn fn' f g x lb ub pr x_in Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont eps eps_po
           Rabs h * Rabs (g c - g x)).
  apply Rplus_lt_compat_r, Rplus_lt_compat_l, Rmult_lt_compat_l.
   apply Rabs_pos_lt ; assumption.
-  rewrite Rabs_minus_sym ; apply HN3 ; [apply le_max_r |].
+  rewrite Rabs_minus_sym ; apply HN3 ; [apply Nat.le_max_r |].
    apply interval_size_Boule_middle, c_deduc, open_interval_interval ; assumption.
  apply Rlt_le_trans with (eps1 + eps1 + Rabs h * (eps / 3 / 2) + Rabs h * (eps / 3 / 2)) ;
   [| right ; unfold eps1 ; field] ; repeat rewrite Rplus_assoc ;

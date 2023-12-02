@@ -42,8 +42,8 @@ induction n.
 compute. reflexivity.
 intros.
 unfold Nfinite_sum_0_n. fold Nfinite_sum_0_n.
-rewrite plus_assoc_reverse.
-rewrite plus_assoc_reverse.
+rewrite <- Nat.add_assoc.
+rewrite <- Nat.add_assoc.
 assert (g (S n) + Nfinite_sum_0_n n g = Nfinite_sum_0_n n g + g (S n)).
 auto with arith.
 rewrite H.

@@ -178,7 +178,7 @@ exists (Rmax M (Un (S N))).
 intros n Hn.
 destruct (le_lt_eq_dec n (S N)) as [He|He]; try assumption.
 eapply Rle_trans; [apply IHN|apply RmaxLess1].
-apply lt_n_Sm_le; assumption.
+apply Nat.lt_succ_r; assumption.
 rewrite He; apply RmaxLess2.
 Qed.
 
@@ -193,7 +193,7 @@ exists (Rmin m (Un (S N))).
 intros n Hn.
 destruct (le_lt_eq_dec n (S N)) as [He|He]; try assumption.
 eapply Rle_trans; [apply Rmin_l|apply IHN].
-apply lt_n_Sm_le; assumption.
+apply Nat.lt_succ_r; assumption.
 rewrite He; apply Rmin_r.
 Qed.
 
@@ -235,7 +235,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; lia.
 Qed.
@@ -270,7 +270,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; lia.
 Qed.
@@ -286,7 +286,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; lia.
 Qed.
@@ -306,7 +306,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; lia.
 Qed.
@@ -323,7 +323,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; lia.
 Qed.
@@ -340,7 +340,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 unfold Rseq_minus in HN.
 rewrite Hn0; apply HN; lia.

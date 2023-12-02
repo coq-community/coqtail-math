@@ -282,8 +282,8 @@ exists n.
 intros p q Hp Hq.
 eapply Rlt_trans.
 apply sequence_cauchy; [apply Hp|apply Hq].
-let t := type of (M n (le_refl n)) in assert (Hr: t).
-apply M; apply le_refl.
+let t := type of (M n (Nat.le_refl n)) in assert (Hr: t).
+apply M; apply Nat.le_refl.
 rewrite Rabs_right in Hr.
 unfold Rdiv in Hr.
 apply Rmult_lt_reg_l with (r := / R_dist lb ub).
@@ -313,28 +313,28 @@ apply le_epsilon;
 intros eps Heps;
 destruct (l_is_limit (eps / 2)) as [N H].
 lra.
-destruct (sequence_bound n (Max.max N n)) as [Hb _].
-apply Max.le_max_r.
+destruct (sequence_bound n (Nat.max N n)) as [Hb _].
+apply Nat.le_max_r.
 eapply Rle_trans; [apply Hb|].
 apply Rabs_max.
 apply Rle_trans with (r2 := eps / 2); [|lra].
-left; apply H; apply Max.le_max_l.
+left; apply H; apply Nat.le_max_l.
 lra.
-destruct (sequence_bound n (Max.max N n)) as [_ Hb].
-apply Max.le_max_r.
+destruct (sequence_bound n (Nat.max N n)) as [_ Hb].
+apply Nat.le_max_r.
 assert (l - eps <= snd (Dn n)); [|lra].
 eapply Rle_trans; [|apply Hb].
 apply Rabs_min.
 apply Rle_trans with (r2 := eps / 2); [|lra].
 left; rewrite Rabs_minus_sym; apply H.
-apply Max.le_max_l.
+apply Nat.le_max_l.
 Qed.
 
 Lemma l_not_in_Rn : forall n, ~(Rn n = l).
 Proof.
 intros n Hn.
 apply (diagonal_not_in n n).
-apply le_refl.
+apply Nat.le_refl.
 rewrite Hn; apply l_in_Dn.
 Qed.
 

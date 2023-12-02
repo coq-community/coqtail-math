@@ -111,18 +111,16 @@ Qed.
 Lemma An_nth_deriv_0 : forall An, An_nth_deriv An 0 == An.
 Proof.
  intros An n ; unfold An_nth_deriv, Rseq_shifts, Rseq_div, Rseq_mult, Rdiv ;
- rewrite plus_0_l ; field ; apply not_0_INR ; apply fact_neq_0.
+ rewrite Nat.add_0_l ; field ; apply not_0_INR ; apply fact_neq_0.
 Qed.
 
 Lemma An_nth_deriv_S : forall An k,
  An_nth_deriv An (S k) == An_deriv (An_nth_deriv An k).
 Proof.
 assert (Hrew : forall n, / Rseq_fact n = INR (S n) * / Rseq_fact (S n)).
- intro n ; unfold Rseq_fact ; rewrite fact_simpl, mult_INR, Rinv_mult_distr,
+ intro n ; unfold Rseq_fact ; rewrite fact_simpl, mult_INR, Rinv_mult,
  <- Rmult_assoc.
  symmetry ; apply Rinv_r_simpl_r ; apply not_0_INR ; lia.
- apply not_0_INR ; lia.
- apply INR_fact_neq_0.
 intros An k n ; unfold An_nth_deriv, An_deriv, Rseq_shift, Rseq_shifts,
  Rseq_div, Rseq_mult, Rdiv ; rewrite Hrew, <- plus_n_Sm.
  simpl ; ring.

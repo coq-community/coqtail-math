@@ -29,8 +29,8 @@ Require Import Lia.
 (* begin hide *)
 Ltac int_hierarchy := match goal with
   | |- forall a, ?b => intro; int_hierarchy
-  | |- ?a = ?b => rewrite mult_plus_distr_l; int_hierarchy
-  | |- ?a = ?b => rewrite mult_plus_distr_r; int_hierarchy
+  | |- ?a = ?b => rewrite Nat.mul_add_distr_l; int_hierarchy
+  | |- ?a = ?b => rewrite Nat.mul_add_distr_r; int_hierarchy
   | |- ?a = ?b => progress auto
   | |- ?a = ?b => lia
   | |- ?a = ?b => progress auto with *
@@ -41,7 +41,7 @@ end.
 (* end hide *)
 
 Program Instance monoid_nat : Monoid nat eq plus 0 :=
-{monoid_iden_l := plus_0_l}.
+{monoid_iden_l := Nat.add_0_l}.
 Solve All Obligations with int_hierarchy.
 
 Program Instance monoid_commutative_nat : Monoid_Commutative nat eq plus 0 :=

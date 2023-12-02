@@ -99,7 +99,7 @@ assert (b ^ S n +
 rewrite Nfinite_sum_split_lower.
 rewrite Nbinomial_0.
 simpl.
-rewrite <- minus_n_O.
+rewrite Nat.sub_0_r.
 rewrite Nat.add_0_r.
 assert (Nfinite_sum_0_n n
   (fun k : nat => Nbinomial n (S k) * a ^ S k * b ^ (n - k)) =
@@ -112,13 +112,14 @@ destruct H.
 intros.
 assert (S(n-S k)=n-k).
 induction n.
-apply le_Sn_O in H.
+apply Nat.nle_succ_0 in H.
 contradiction.
 apply le_le_S_eq in H.
 destruct H.
-rewrite <- minus_Sn_m.
+rewrite Nat.sub_succ_l.
 rewrite IHn.
-apply  minus_Sn_m.
+symmetry.
+apply Nat.sub_succ_l.
 apply le_S_n.
 auto with arith.
 apply le_S_n.
@@ -130,7 +131,7 @@ unfold eq_nat in H.
 apply eq_nat_eq in H.
 rewrite H.
 rewrite Nat.sub_diag.
-rewrite <- minus_Sn_m.
+rewrite Nat.sub_succ_l.
 rewrite Nat.sub_diag.
 reflexivity.
 auto with arith.

@@ -83,10 +83,9 @@ Proof.
 intros x y H.
 unfold Rdiv.
 rewrite Rabs_mult.
-rewrite Rabs_Rinv. field.
+rewrite Rabs_inv. field.
 apply Rabs_no_R0.
 assumption.
-intuition.
 Qed.
 
 Lemma sqrt_Rabs_mult_compat : forall x, sqrt (x * x) = Rabs x.
@@ -168,7 +167,7 @@ Lemma Rabs_left1_inv : forall x, 0 >= x -> Rabs x = -x.
 Proof.
 intros.
 apply Rabs_left1.
-intuition.
+intuition (auto with real).
 Qed.
 
 Lemma Rabs_add : forall x y, x >= 0 -> y >= 0 -> Rabs (x + y) = Rabs x + Rabs y.
@@ -304,11 +303,10 @@ Proof.
 intros x H.
 assert (H0 : ( x <> 0)).
 intro H1. rewrite H1 in H. lra.
-rewrite Rabs_Rinv.
+rewrite Rabs_inv.
 rewrite Rabs_right.
 reflexivity.
 left. assumption.
-assumption.
 Qed.
 
 Lemma Rabs_Rinv_neg : forall x, 0 > x -> Rabs (/x) = - / x.
@@ -316,11 +314,10 @@ Proof.
 intros x H.
 assert (H0 : ( x <> 0)).
 intro H1. rewrite H1 in H. lra.
-rewrite Rabs_Rinv.
+rewrite Rabs_inv.
 rewrite Rabs_left.
 field. assumption.
 intuition.
-assumption.
 Qed.
 
 Lemma minus_INR1 : forall a b, (a >= b)%nat -> INR (a - b) = INR a - INR b.
@@ -336,16 +333,16 @@ Proof.
 intros a b H H1.
 rewrite sqrt_mult.
 reflexivity.
-intuition. intuition.
+intuition (auto with real). intuition  (auto with real).
 Qed.
 
 Lemma sqrt_mult_opp : forall a b, 0 >= a -> 0 >= b -> sqrt (a * b) = sqrt (-a) * sqrt (-b).
 Proof.
 intros a b H H1.
 rewrite <- (sqrt_mult (-a) (-b)).
-intuition.
-intuition.
-intuition.
+intuition (auto with real).
+intuition (auto with real).
+intuition (auto with real).
 Qed.
 
 Ltac elim_INR x := (* idtac "elim_INR (" x ")" *)
@@ -647,13 +644,13 @@ Proof.
  destruct a; [ inversion Ha | clear Ha ].
  destruct b; [ inversion Hb | clear Hb ].
  simpl.
- apply lt_O_Sn.
+ apply Nat.lt_0_succ.
 Qed.
 
 Ltac nat_solve := match goal with
-  | |- (0 <= ?n)%nat => apply le_O_n
+  | |- (0 <= ?n)%nat => apply Nat.le_0_l
   | |- (0 < ?a * ?b)%nat => apply mult_lt_O_compat; nat_solve
-  | |- (0 < S ?a)%nat => apply lt_O_Sn
+  | |- (0 < S ?a)%nat => apply Nat.lt_0_succ
   | |- (?a > ?b)%nat => unfold gt; nat_solve
   | |- (?a >= ?b)%nat => unfold ge; nat_solve
   | |- (0 < fact ?n)%nat => apply lt_O_fact

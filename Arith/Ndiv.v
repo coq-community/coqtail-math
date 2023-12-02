@@ -1209,24 +1209,23 @@ destruct (le_dec n p).
 apply (Nat.add_le_mono_l (p-n) q n) in H3.
 rewrite Nat.add_comm in H3.
 rewrite Nat.sub_add in H3.
-apply (minus_le_compat_r p (n+q) q) in H3.
-rewrite Nat.add_comm in H3.
-rewrite minus_plus in H3.
+apply (Nat.sub_le_mono_r p (n+q) q) in H3.
+rewrite Nat.add_sub in H3.
 auto.
 auto.
 apply Nat.le_trans with p.
-apply le_minus.
+apply Nat.le_sub_l.
 auto.
 auto.
 
 destruct H1.
-rewrite <- minus_Sn_m.
-rewrite <- minus_n_n.
-simpl. rewrite <- minus_n_O.
+rewrite Nat.sub_succ_l.
+rewrite Nat.sub_diag.
+simpl. rewrite Nat.sub_0_r.
 apply Ndiv_algo_correct in H4.
 rewrite H4. auto. auto. auto.
 
-rewrite <- minus_Sn_m.
+rewrite Nat.sub_succ_l.
 simpl.
 apply Ndiv_algo_correct in H4.
 assert(q<=m).
@@ -1234,9 +1233,11 @@ auto with arith.
 apply Nle_plus in H5.
 destruct H5.
 rewrite H5.
-rewrite minus_plus.
+rewrite Nat.add_comm at 2.
+rewrite Nat.add_sub.
 rewrite Nat.add_comm.
-rewrite minus_plus.
+rewrite Nat.add_comm at 1.
+rewrite Nat.add_sub.
 rewrite H5 in H4.
 rewrite Nat.add_comm.
 rewrite H4.
@@ -1255,9 +1256,9 @@ auto. auto with arith. auto. auto with arith.
 apply Nle_plus in H.
 destruct H.
 rewrite H.
-rewrite minus_plus.
-rewrite Nat.add_comm.
-rewrite minus_plus.
+rewrite Nat.add_comm at 2.
+rewrite Nat.add_sub.
+rewrite Nat.add_sub.
 auto.
 auto.
 Qed.
@@ -1299,16 +1300,16 @@ simpl.
 assert(~(p-S n|p)).
 apply H1.
 split.
-apply (minus_le_compat_r (S(S(S(S n)))) p (S n)) in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_n_n in H.
+apply (Nat.sub_le_mono_r (S(S(S(S n)))) p (S n)) in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_diag in H.
 auto with arith.
 auto.
 auto.
 auto with arith.
-apply lt_minus.
+apply Nat.sub_lt.
 apply Nat.le_trans with (S(S(S n))).
 auto with arith. auto.
 auto with arith.
@@ -1317,25 +1318,25 @@ assert (~Ndiv_algo (p-S n) p=true).
 intro.
 apply H1 with (p-S n).
 split.
-apply (minus_le_compat_r (S(S(S(S n)))) p (S n)) in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_n_n in H.
+apply (Nat.sub_le_mono_r (S(S(S(S n)))) p (S n)) in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_diag in H.
 auto with arith.
 auto.
 auto.
 auto.
-apply lt_minus.
+apply Nat.sub_lt.
 apply Nat.le_trans with (S(S(S(S n)))).
 auto. auto. auto with arith.
 apply Ndiv_algo_complete.
 unfold gt.
-apply (minus_le_compat_r (S(S(S(S n)))) p (S n)) in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_Sn_m in H.
-rewrite <- minus_n_n in H.
+apply (Nat.sub_le_mono_r (S(S(S(S n)))) p (S n)) in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_succ_l in H.
+rewrite Nat.sub_diag in H.
 apply Nat.le_trans with 3. auto. auto. auto. auto. auto. auto. auto with arith.
 
 destruct (Ndiv_algo (p-S n) p).
@@ -1351,9 +1352,9 @@ destruct p. inversion H.
 do 3 apply eq_add_S in H.
 rewrite H.
 unfold Nleast_div_ge.
-rewrite <- minus_Sn_m.
-rewrite <- minus_Sn_m.
-rewrite <- minus_n_n.
+rewrite Nat.sub_succ_l.
+rewrite Nat.sub_succ_l.
+rewrite Nat.sub_diag.
 assert(~(Ndiv_algo 2 (S(S(S p)))=true)).
 intro.
 apply H1 with 2.
@@ -1370,7 +1371,7 @@ rewrite H.
 auto.
 auto.
 auto.
-Qed. 
+Qed.
 
 (** Implication of primality on lowest strict divisor *)
 Theorem Nprime_least_div_p : forall p, Nprime p -> Nleast_div p = p.
@@ -1381,9 +1382,9 @@ destruct p.
 apply Nnot_prime_0 in H. contradiction.
 destruct p.
 apply Nnot_prime_1 in H. contradiction.
-rewrite minus_Sn_m.
+rewrite <- Nat.sub_succ_l.
 apply Nat.le_trans with (S (S p)).
-apply lt_n_S.
+apply Nat.succ_lt_mono.
 auto with arith. auto. auto with arith.
 auto.
 Qed.
@@ -1449,7 +1450,7 @@ apply Nleast_div_div.
 auto with arith.
 destruct H2.
 destruct q.
-rewrite mult_0_l in H2.
+rewrite Nat.mul_0_l in H2.
 rewrite H2 in H.
 inversion H.
 destruct q.
@@ -1523,6 +1524,7 @@ auto.
 Qed.
 
 (** * Compatibility of coprimality with multiplication *)
+
 Theorem Nrel_prime_mult_compat : forall p n m,
   Nrel_prime p n -> Nrel_prime p m -> Nrel_prime p (n * m).
 Proof.
@@ -1589,7 +1591,7 @@ split.
 apply Nleast_div_gt_1. auto with arith.
 split.
 destruct q.
-rewrite mult_0_l in H1.
+rewrite Nat.mul_0_l in H1.
 rewrite H1 in H.
 inversion H.
 destruct q.
@@ -1702,7 +1704,7 @@ apply Nat.mul_le_mono_r.
 auto.
 auto with arith.
 destruct q.
-rewrite mult_0_l in H0. rewrite H0 in H. inversion H.
+rewrite Nat.mul_0_l in H0. rewrite H0 in H. inversion H.
 destruct q.
 rewrite Nat.mul_1_l in H0.
 assert(Ngreatest_div n<n).
@@ -1727,7 +1729,7 @@ destruct H3.
 replace q with (q*1).
 rewrite H0.
 rewrite H2.
-apply mult_S_lt_compat_l.
+apply Nat.mul_lt_mono_pos_l; [apply Nat.lt_0_succ|].
 auto. ring.
 symmetry in H3.
 apply Ngreatest_div_1_prime in H3.
@@ -1748,7 +1750,7 @@ apply Nat.mul_le_mono_r.
 auto.
 auto with arith.
 destruct q.
-rewrite mult_0_l in H1.
+rewrite Nat.mul_0_l in H1.
 rewrite H1 in H. inversion H.
 auto with arith.
 apply Ndiv_le in H2.
@@ -1765,13 +1767,13 @@ rewrite H1.
 rewrite H2.
 destruct n.
 inversion H.
-apply mult_S_lt_compat_l.
+apply Nat.mul_lt_mono_pos_l; [apply Nat.lt_0_succ|].
 auto. ring.
 destruct n.
 inversion H.
 auto with arith.
 
-apply le_antisym; auto.
+apply Nat.le_antisymm; auto.
 Qed.
 
 Lemma div_mod a b : a <> 0 -> (a | b) <-> b mod a = 0.

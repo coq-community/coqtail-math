@@ -120,7 +120,7 @@ Lemma Rseq_sum_shifts_compat : forall Un k n,
   Rseq_sum (Rseq_shifts Un (S k)) n = (Rseq_shifts (Rseq_sum Un) (S k) n - Rseq_sum Un k)%R.
 Proof.
 intros Un k n ; induction n.
- unfold Rseq_shifts, Rseq_minus ; simpl ; rewrite plus_0_r ; ring.
+ unfold Rseq_shifts, Rseq_minus ; simpl ; rewrite Nat.add_0_r ; ring.
  simpl ; rewrite IHn ; unfold Rseq_minus, Rseq_shifts ;
   simpl ; rewrite <- (plus_n_Sm k n) ; simpl ; ring.
 Qed.
@@ -129,7 +129,7 @@ Lemma Rseq_sum_split_compat : forall Un k n, (k < n)%nat ->
   (Rseq_sum Un n = Rseq_sum Un k + Rseq_sum (Rseq_shifts Un (S k)) (n - S k))%R.
 Proof.
 intros Un k n kltn ; rewrite Rseq_sum_shifts_compat ; ring_simplify.
- unfold Rseq_shifts ; rewrite le_plus_minus_r ; [reflexivity | lia].
+ unfold Rseq_shifts ; rewrite Nat.add_comm, Nat.sub_add ; [reflexivity | lia].
 Qed.
 
 Lemma Rseq_sum_reindex_compat : forall Un n,
@@ -138,7 +138,7 @@ Proof.
 intros Un n ; revert Un ; induction n ; intro Un.
  reflexivity.
  do 2 rewrite Rseq_sum_simpl.
- rewrite (IHn (fun i => Un (S n - i)%nat)), minus_diag.
+ rewrite (IHn (fun i => Un (S n - i)%nat)), Nat.sub_diag.
  rewrite (Rseq_sum_ext_strong (fun i => Un (S n - (n - i))%nat) (Rseq_shift Un)).
  rewrite Rseq_sum_shift_compat ; unfold Rseq_shift ; simpl ; ring.
  intros m m_bd ; unfold Rseq_shift ; replace (S n - (n - m))%nat with (S m) by lia ;
@@ -170,7 +170,7 @@ intros An Bn n ; induction n.
   intros p p_ub ; unfold Rseq_mult ; replace (S n - p)%nat with (S (n - p)) by lia ;
   reflexivity.
  transitivity (Rseq_sum (fun i => (An i * (Rseq_sum Bn (S n - i)))%R) (S n)).
- rewrite Rseq_sum_simpl, minus_diag ; apply Rplus_eq_compat ; [| trivial].
+ rewrite Rseq_sum_simpl, Nat.sub_diag ; apply Rplus_eq_compat ; [| trivial].
  apply Rseq_sum_ext_strong ; intros p p_ub ; unfold Rseq_plus ;
  replace (S n - p)%nat with (S (n - p)) by lia ; rewrite Rseq_sum_simpl ; ring.
  rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ; intros p p_ub ;
@@ -307,7 +307,7 @@ intros An d d_pos An_pos HAn.
     rewrite (Rseq_sum_split_compat _ _ _ n_lb) ; apply Rplus_le_le_0_compat.
      transitivity d.
       left ; assumption.
-      rewrite (minus_n_O N) ;  erewrite Rseq_sum_ext ;
+      rewrite <- (Nat.sub_0_r N) ;  erewrite Rseq_sum_ext ;
        [| symmetry ; eapply Rseq_shifts_0 ] ; assumption.
      apply Rseq_sum_pos ; intros ; apply An_pos.
     destruct IHM as [N HN] ; destruct (HAn (S (S N))) as [N' [N'_lb HN']] ; exists N' ;

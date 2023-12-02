@@ -20,7 +20,7 @@ USA.
 *)
 
 (** Properties of real sequences. *)
-Require Import Max.
+Require Import PeanoNat.
 Require Export Rseries_facts.
 Require Export Rsequence_facts.
 Require Import Lia Lra.

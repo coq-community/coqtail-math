@@ -123,7 +123,7 @@ Lemma decreasing_in_Rmin_simpl :
 Proof.
 intros D f f_dec x y Dx Dy Hxy ;
  assert (flb_lt_fub : f y <= f x) by (apply f_dec ; assumption) ;
- unfold Rmin ; destruct (Rle_dec (f x) (f y)) ; intuition.
+ unfold Rmin ; destruct (Rle_dec (f x) (f y)) ; intuition (auto with real).
 Qed.
 
 Lemma decreasing_in_Rmax_simpl :
@@ -132,7 +132,7 @@ Lemma decreasing_in_Rmax_simpl :
 Proof.
 intros D f f_dec x y Dx Dy Hxy ;
  assert (flb_lt_fub : f y <= f x) by (apply f_dec ; assumption) ;
- unfold Rmax ; destruct (Rle_dec (f x) (f y)) ; intuition.
+ unfold Rmax ; destruct (Rle_dec (f x) (f y)) ; intuition (auto with real).
 Qed.
 
 (** Image of an interval throught a monotonous function *)

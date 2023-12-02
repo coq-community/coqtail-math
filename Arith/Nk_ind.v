@@ -19,8 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Plus.
-Require Import Le.
+Require Import PeanoNat.
 Require Import Compare.
 Open Scope nat_scope.
 

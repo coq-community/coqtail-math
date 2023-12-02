@@ -50,7 +50,7 @@ Qed.
 
 Lemma Cpow_S : forall (z : C) (n : nat), z ^ (S n) = z ^ n * z.
 Proof.
-intros. simpl. intuition.
+intros. simpl. intuition (auto with complex).
 Qed.
 
 Lemma Cpow_add : forall (z : C) (n m : nat), z ^ (n + m) = z ^ n * z ^ m.
@@ -70,7 +70,7 @@ Qed.
 Lemma Cpow_mul : forall z n m, z ^ (n * m) = (z ^ n) ^ m.
 Proof.
 intros z n m ; induction m.
- rewrite mult_0_r ; reflexivity.
+ rewrite Nat.mul_0_r ; reflexivity.
  simpl ; rewrite <- IHm ; rewrite <- Cpow_add ;
  replace (n * S m)%nat with (n + n * m)%nat by ring ; reflexivity.
 Qed.

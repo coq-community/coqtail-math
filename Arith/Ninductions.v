@@ -1,4 +1,3 @@
-
 Require Import Arith MyNat.
 
 Lemma nat_strong : forall (P : nat -> Prop), P O ->
@@ -19,5 +18,5 @@ intros P P0 P1 PSS ; apply nat_strong.
  assumption.
  intros [] HN.
   assumption.
-  apply PSS, HN, le_n_Sn.
+  apply PSS, HN, Nat.le_succ_diag_r.
 Qed.

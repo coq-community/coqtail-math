@@ -52,9 +52,8 @@ Qed.
 
 Lemma Rabs_Rdiv : forall a b, b <> 0 -> Rabs a / Rabs b = Rabs (a / b).
 Proof.
-intros a b b_neq ; unfold Rdiv ; rewrite Rabs_mult, Rabs_Rinv.
+intros a b b_neq ; unfold Rdiv ; rewrite Rabs_mult, Rabs_inv.
  reflexivity.
- assumption.
 Qed.
 
 Lemma Rplus_pos_lt : forall x h, 0 < h -> x < x + h.
@@ -113,7 +112,7 @@ Qed.
 
 Lemma Rinv_lt_contravar_rev : forall x y, 0 < x -> 0 < y -> /x < /y -> y < x.
 Proof.
-intros x y x_pos y_pos Hxy ; rewrite <- (Rinv_involutive x), <- (Rinv_involutive y) ;
+intros x y x_pos y_pos Hxy ; rewrite <- (Rinv_inv x), <- (Rinv_inv y) ;
  try (apply Rgt_not_eq ; assumption).
  apply Rinv_lt_contravar ; [| assumption] ; apply Rmult_lt_0_compat ;
  apply Rinv_0_lt_compat ; assumption.
@@ -194,7 +193,8 @@ Qed.
 Lemma Rmax_opp_opp_Rmin : forall r1 r2, Rmax (-r1) (-r2) = - (Rmin r1 r2).
 Proof.
 intros r1 r2.
-replace (Rmin r1 r2) with (Rmin (--r1) (--r2)) by (rewrite Ropp_involutive ; intuition).
+replace (Rmin r1 r2) with (Rmin (--r1) (--r2))
+  by (rewrite Ropp_involutive ; intuition (auto with real)).
  rewrite Rmin_opp_opp_Rmax ; rewrite Ropp_involutive ; reflexivity.
 Qed.
 
@@ -281,7 +281,7 @@ Qed.
 Lemma Rabs_le : forall r, - Rabs r <= r.
 Proof.
 intros r ; unfold Rabs ; destruct (Rcase_abs r) ;
- [| apply Rle_trans with 0] ; intuition.
+ [| apply Rle_trans with 0] ; intuition (auto with real).
 Qed.
 
 Lemma Req_dec : forall r1 r2, {r1 = r2} + {r1 <> r2}.

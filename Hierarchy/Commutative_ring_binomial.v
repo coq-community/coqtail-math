@@ -307,7 +307,7 @@ Section Commutative_Ring.
     apply CRadd_eq_compat.
      simpl; repeat rewrite binomial_zero; ring.
      apply CRsum_eq_compat; intros j Hj.
-     rewrite <- minus_Sn_m with (S n) _; [|lia].
+     rewrite (Nat.sub_succ_l _ (S n)); [|lia].
      simpl.
      rewrite <- CRmul_scal_compat.
      apply CRscal_eq_compat.

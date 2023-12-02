@@ -53,16 +53,16 @@ unfold Rseq_cv_pos_infty in Hinf.
 destruct (Hinf (l+1)%R) as [ N HN].
 destruct (Hl 1) as [N0 HN0].
 auto with *.
-apply Rlt_irrefl with (Un (Max.max N N0)).
+apply Rlt_irrefl with (Un (Nat.max N N0)).
 apply Rlt_trans with (l+1)%R.
-replace (Un (Max.max N N0)) with (l+(Un (Max.max N N0)-l))%R by ring.
+replace (Un (Nat.max N N0)) with (l+(Un (Nat.max N N0)-l))%R by ring.
 apply Rplus_lt_compat_l.
-apply Rle_lt_trans with (Rabs (Un (Max.max N N0) - l)).
+apply Rle_lt_trans with (Rabs (Un (Nat.max N N0) - l)).
 apply RRle_abs.
 apply HN0.
-apply Max.le_max_r.
+apply Nat.le_max_r.
 apply HN.
-apply Max.le_max_l.
+apply Nat.le_max_l.
 Qed.
 
 (** Rseq monotonic definitions implies usual meaning *)
@@ -70,16 +70,13 @@ Lemma Rseq_growing_trans : forall an, Rseq_growing an -> forall y x:nat,
   (x <= y)%nat -> (an x <= an y)%R.
 Proof.
 induction y.
- intros x Hxy; rewrite (le_n_O_eq x Hxy); intuition.
- 
+ intros x Hxy; rewrite (proj1 (Nat.le_0_r x) Hxy); intuition (auto with real).
  intros x Hxy; destruct (Compare.le_decide _ _ Hxy) as [Hyx|Hyx].
   apply Rle_trans with (an y).
    apply IHy.
-   apply gt_S_le.
-   apply Hyx.
-   
-   apply H.
-  
+   apply Nat.succ_le_mono.
+   apply Hyx.   
+   apply H.  
   subst; apply Rle_refl.
 Qed.
 
@@ -87,17 +84,14 @@ Lemma Rseq_strictly_growing_trans : forall an, Rseq_strictly_growing an -> foral
   (x < y)%nat -> (an x < an y)%R.
 Proof.
 induction y.
- intros x Hx0. inversion Hx0.
- 
+ intros x Hx0. inversion Hx0. 
  intros x Hxy.
  destruct (Compare.le_decide _ _ Hxy) as [Hyx|Hyx].
   apply Rlt_trans with (an y).
    apply IHy.
-   apply gt_S_le.
-   apply Hyx.
-   
-   apply H.
-  
+   apply Nat.succ_le_mono.
+   apply Hyx.   
+   apply H.  
   rewrite <- Hyx. apply H.
 Qed.
 
@@ -110,7 +104,7 @@ destruct (H eps epspos) as [N Hu].
 exists (S N); intros n nSN.
 destruct n; [inversion nSN | ].
 replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
-intuition.
+intuition (auto with arith).
 Qed.
 
 Lemma Rseq_cv_pos_infty_shift_compat : forall Un, Rseq_cv_pos_infty (Rseq_shift Un) -> Rseq_cv_pos_infty Un.
@@ -120,7 +114,7 @@ destruct (H M) as [N Hu].
 exists (S N); intros n nSN.
 destruct n; [inversion nSN | ].
 replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
-intuition.
+intuition (auto with arith).
 Qed.
 
 Lemma Rseq_cv_neg_infty_shift_compat : forall Un, Rseq_cv_neg_infty (Rseq_shift Un) -> Rseq_cv_neg_infty Un.
@@ -130,7 +124,7 @@ destruct (H M) as [N Hu].
 exists (S N); intros n nSN.
 destruct n; [inversion nSN | ].
 replace (Un (S n)) with (Rseq_shift Un n) by reflexivity.
-intuition.
+intuition (auto with arith).
 Qed.
 
 Lemma Rseq_cv_shift_compat_reciprocal : forall Un l, Rseq_cv Un l -> Rseq_cv (Rseq_shift Un) l.

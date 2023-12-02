@@ -24,7 +24,7 @@ USA.
 Require Import Reals.
 Require Import RFsequence.
 Require Import Lra.
-Require Import Max.
+Require Import PeanoNat.
 
 Open Scope R_scope.
 
@@ -34,7 +34,7 @@ Proof.
 intros x ub lb lb_lt_x x_lt_ub.
  assert (T : 0 < ub - lb).
   lra.
- unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition.
+ unfold Rdiv ; apply Rlt_mult_inv_pos ; intuition (auto with real).
 Qed.
 
 Definition mkposreal_lb_ub : forall (x lb ub:R) (lb_lt_x:lb<x) (x_lt_ub:x<ub), posreal.
@@ -57,7 +57,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  destruct Hdelta1 as (delta1_pos, g_cont).
  assert (delta_pos : 0 < Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1).
   apply Rmin_pos ; [apply Rmin_pos | intuition] ; unfold Rdiv ;
-  apply Rlt_mult_inv_pos ; intuition ; apply Rlt_Rminus ; intuition.
+  apply Rlt_mult_inv_pos ; intuition (auto with real) ; apply Rlt_Rminus ; intuition.
  pose (delta := mkposreal (Rmin (Rmin ((x-lb)/2) ((ub-x)/2)) delta1) (delta_pos)).
  exists delta ; intros h h_neq h_ub.
  assert (eps'_pos : 0 < (Rabs h) * eps / 4).
@@ -100,7 +100,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  elim (fn_CV_f (x+h) lb_lt_xh xh_lt_ub ((Rabs h) * eps / 4) eps'_pos) ;
  clear fn_CV_f ; intros N1 fnxh_CV_fxh.
  elim (fn'_CVU_g (eps/8) eps_8_pos) ; intros N3 fn'c_CVU_gc.
- pose (N := max (max N1 N2) N3).
+ pose (N := Nat.max (Nat.max N1 N2) N3).
  assert (Main : Rabs ((f (x+h) - fn N (x+h)) - (f x - fn N x) + (fn N (x+h) - fn N x - h * (g x))) < (Rabs h)*eps).
  apply Rle_lt_trans with (Rabs (f (x + h) - fn N (x + h) - (f x - fn N x)) +  Rabs ((fn N (x + h) - fn N x - h * g x))).
  apply Rabs_triang.
@@ -136,7 +136,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
   replace (- (fn N (x + h) - fn N x)) with (fn N x - fn N (x + h)) by field.
   assumption.
   unfold id ; field.
-  apply Rlt_not_eq ; intuition.
+  apply Rlt_not_eq ; intuition (auto with real).
  clear Hc.
  rewrite <- Hc'.
  replace (derive_pt (fn N) c (pr1 c P)) with (fn' N c).
@@ -145,11 +145,11 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  apply Rlt_trans with (Rabs h * eps / 4 + Rabs (f x - fn N x) + Rabs h * Rabs (fn' N c - g x)).
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_r ; unfold R_dist in fnxh_CV_fxh ;
  rewrite Rabs_minus_sym ; apply fnxh_CV_fxh.
- unfold N ; apply le_trans with (max N1 N2) ; apply le_max_l.
+ unfold N ; apply Nat.le_trans with (Nat.max N1 N2) ; apply Nat.le_max_l.
  apply Rlt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 + Rabs h * Rabs (fn' N c - g x)).
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l.
  unfold R_dist in fnx_CV_fx ; rewrite Rabs_minus_sym ; apply fnx_CV_fx.
- unfold N ; apply le_trans with (max N1 N2) ; [apply le_max_r | apply le_max_l].
+ unfold N ; apply Nat.le_trans with (Nat.max N1 N2) ; [apply Nat.le_max_r | apply Nat.le_max_l].
  replace (fn' N c - g x)  with ((fn' N c - g c) +  (g c - g x)) by field.
  apply Rle_lt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 +
           Rabs h * Rabs (fn' N c - g c) + Rabs h * Rabs (g c - g x)).
@@ -162,7 +162,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l ; apply Rmult_lt_compat_l.
  apply Rabs_pos_lt ; assumption.
  apply fn'c_CVU_gc.
- unfold N ; apply le_max_r.
+ unfold N ; apply Nat.le_max_r.
  unfold Boule.
  assert (Rabs (c - (lb + ub) / 2) < (ub - lb) / 2).
   apply Rabs_def1.
@@ -256,11 +256,11 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  apply Rlt_trans with (Rabs h * eps / 4 + Rabs (f x - fn N x) + Rabs h * Rabs (fn' N c - g x)).
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_r ; unfold R_dist in fnxh_CV_fxh ;
  rewrite Rabs_minus_sym ; apply fnxh_CV_fxh.
- unfold N ; apply le_trans with (max N1 N2) ; apply le_max_l.
+ unfold N ; apply Nat.le_trans with (Nat.max N1 N2) ; apply Nat.le_max_l.
  apply Rlt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 + Rabs h * Rabs (fn' N c - g x)).
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l.
  unfold R_dist in fnx_CV_fx ; rewrite Rabs_minus_sym ; apply fnx_CV_fx.
- unfold N ; apply le_trans with (max N1 N2) ; [apply le_max_r | apply le_max_l].
+ unfold N ; apply Nat.le_trans with (Nat.max N1 N2) ; [apply Nat.le_max_r | apply Nat.le_max_l].
  replace (fn' N c - g x)  with ((fn' N c - g c) +  (g c - g x)) by field.
  apply Rle_lt_trans with (Rabs h * eps / 4 + Rabs h * eps / 4 +
           Rabs h * Rabs (fn' N c - g c) + Rabs h * Rabs (g c - g x)).
@@ -273,7 +273,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  apply Rplus_lt_compat_r ; apply Rplus_lt_compat_l ; apply Rmult_lt_compat_l.
  apply Rabs_pos_lt ; assumption.
  apply fn'c_CVU_gc.
- unfold N ; apply le_max_r.
+ unfold N ; apply Nat.le_max_r.
  unfold Boule.
  assert (Rabs (c - (lb + ub) / 2) < (ub - lb) / 2).
   apply Rabs_def1.
@@ -306,7 +306,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  rewrite Rabs_right. apply Req_le ; reflexivity.
  lra.
  apply Rlt_le_trans with delta ; [intuition | unfold delta ; apply Rmin_r].
- rewrite Rabs_right in h_ub ; intuition.
+ rewrite Rabs_right in h_ub ; intuition (auto with *).
  rewrite Rplus_assoc ; rewrite Rplus_assoc ; rewrite <- Rmult_plus_distr_l.
  replace (Rabs h * eps / 4 + (Rabs h * eps / 4 + Rabs h * (eps / 8 + eps / 8))) with
       (Rabs h * (eps / 4 + eps / 4 + eps / 8 + eps / 8)) by field.
@@ -333,7 +333,7 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
  rewrite Main ; reflexivity.
  reflexivity.
  replace ((f (x + h) - f x) / h - g x) with ((/h) * ((f (x + h) - f x) - h * g x)). 
- rewrite Rabs_mult ; rewrite Rabs_Rinv.
+ rewrite Rabs_mult ; rewrite Rabs_inv.
  replace eps with (/ Rabs h * (Rabs h * eps)).
  apply Rmult_lt_compat_l.
  apply Rinv_0_lt_compat ; apply Rabs_pos_lt ; assumption.
@@ -341,7 +341,6 @@ intros fn fn' f g x lb ub lb_lt_x x_lt_ub Dfn_eq_fn' fn_CV_f fn'_CVU_g g_cont ep
           (fn N (x + h) - fn N x - h * g x)) by field.
  assumption.
  field ; apply Rgt_not_eq ; apply Rabs_pos_lt ; assumption.
- assumption.
  field. assumption.
 Qed.
 

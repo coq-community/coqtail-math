@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Max.
+Require Import PeanoNat.
 Require Import Reals.
 Require Import Rintegral.
 Require Import Rintegral_usual.
@@ -345,10 +345,10 @@ destruct Heq as (m, Heq).
 destruct (Hseq eps Heps) as (N, Hseq2).
 exists (max N m).
 intros n Hn. 
-assert (Hm : (n >= m)%nat). apply le_trans with (max N m) ; intuition.
+assert (Hm : (n >= m)%nat). apply Nat.le_trans with (max N m) ; intuition.
 unfold R_dist in *.
 rewrite <- (Heq n) ; intuition;
-try (apply Hseq2; intuition; apply le_trans with (max N m) ; intuition).
+try (apply Hseq2; intuition; apply Nat.le_trans with (max N m) ; intuition).
 Qed.
 
 Lemma sqrt_id : forall n : nat, (INR n <> 0)%R -> sqrt (2 * n) / (2 * n) = /sqrt (2 * n).
@@ -389,11 +389,11 @@ unfold Rseq_constant. rewrite Rabs_R1. rewrite Rmult_1_r.
 apply Rle_trans with (Rabs (Un n)).
 apply sqrt_var_maj.
 unfold R_dist in *. left.
-assert (HN : (n >= N1)%nat). apply le_trans with (max N N1) ; intuition.
+assert (HN : (n >= N1)%nat). apply Nat.le_trans with (Nat.max N N1) ; intuition.
 generalize (HUn1 n HN) ; intros HU1.
 rewrite Rminus_0_r in HU1. assumption.
 left. 
-assert (HN : (n >= N)%nat). apply le_trans with (max N N1) ; intuition.
+assert (HN : (n >= N)%nat). apply Nat.le_trans with (Nat.max N N1) ; intuition.
 generalize (HUn n HN) ; intros HU1.
 unfold R_dist in HU1.
 rewrite Rminus_0_r in HU1. assumption.
@@ -443,7 +443,7 @@ apply Rseq_equiv_sym.
 intros eps Heps.
 assert (H1 : 0 < 1) by lra.
 destruct (Rpser_little_O_partial_sum _ Un 1 1 H1 Hu ln_plus_cv_radius eps Heps) as [N HN].
-exists (Max.max M N); intros n Hn.
+exists (Nat.max M N); intros n Hn.
 unfold Rseq_minus; simpl.
 pattern Un at 2; replace (Un n) with (Un n ^ 1) by field.
 eapply Rle_trans; [right|apply HN].
@@ -451,8 +451,8 @@ eapply Rle_trans; [right|apply HN].
   rewrite Rabs_minus_sym.
   apply f_equal; field.
   replace (Un n) with (Un n - 0) by field; apply HM.
-  eapply le_trans; [apply Max.le_max_l|eassumption].
-eapply le_trans; [apply Max.le_max_r|eassumption].
+  eapply Nat.le_trans; [apply Nat.le_max_l|eassumption].
+eapply Nat.le_trans; [apply Nat.le_max_r|eassumption].
 Qed.
 
 Lemma Rseq_cv_inv_INR_0_1 : Rseq_cv (fun n => - / (2 * INR n + 1))%R 0%R.
@@ -601,7 +601,7 @@ repeat rewrite <- pow_mult.
 repeat rewrite Rinv_mult_distr.
 replace (2 ^ (4 * n))%R with (2 ^ (2 * n) * 2 ^ (2 * n))%R by (repeat rewrite pow_mult ; 
 rewrite <- Rpow_mult_distr ; replace (2 ^ 2 * 2 ^ 2)%R with (2 ^ 4)%R by (unfold pow ; ring) ; ring).
-rewrite (mult_comm n 4).
+rewrite (Nat.mul_comm n 4).
 replace (n ^ (4 * n))%R with (n ^ (2 * n) * n ^ (2 * n))%R by 
 (rewrite <- pow_add ; ring_simplify (2 * n + 2 * n)%nat ; ring).
 replace ((/exp 1) ^ (4 * n))%R with ((/exp 1) ^ (2 * n) * (/exp 1) ^ (2 * n))%R by 

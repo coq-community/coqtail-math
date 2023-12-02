@@ -25,7 +25,7 @@ Require Import Rinterval.
 Require Import Rsequence_def Rsequence_base_facts Rsequence_subsequence Rsequence_rewrite_facts.
 Require Import Rsequence_cv_facts Rsequence_facts Rsequence_bound_facts Rsequence_sums_facts.
 Require Import Rpow_facts.
-Require Import Max.
+Require Import PeanoNat.
 Require Import Lra MyRIneq MyNat MyNNR.
 
 Local Open Scope R_scope.
@@ -315,7 +315,7 @@ destruct (Req_dec r 0) as [r_eq | r_neq].
  exists (B * (/ Rabs (r ^ k))) ; intros x [i Hi] ; subst.
  apply Rle_trans with (Rseq_shifts (gt_abs_pser An r) k i * / Rabs (r ^ k)).
  unfold gt_abs_pser, gt_pser, Rseq_shifts, Rseq_abs, Rseq_mult ; simpl ;
- rewrite plus_comm, pow_add, <- Rmult_assoc, (Rabs_mult (An (i + k)%nat * r ^ i)) ;
+ rewrite Nat.add_comm, pow_add, <- Rmult_assoc, (Rabs_mult (An (i + k)%nat * r ^ i)) ;
  right ; field ; assumption.
  apply Rmult_le_compat_r ; [left ; apply Rinv_0_lt_compat ;
   assert (T := Rabs_pos (r ^k)) ; apply Rle_neq_lt ; auto|].
@@ -326,7 +326,7 @@ destruct (Rseq_partial_bound (gt_pser An r) k) as [C HC] ;
  apply Rle_trans with C ; [apply HC | apply RmaxLess2] ; assumption.
  apply Rle_trans with (B * Rabs (r ^ k))%R ; [| apply RmaxLess1].
  destruct (lt_exist k i k_ub) as [p Hp] ; subst ; unfold gt_abs_pser, gt_pser,
- Rseq_abs, Rseq_mult ; rewrite plus_comm, pow_add, plus_comm, <- Rmult_assoc,
+ Rseq_abs, Rseq_mult ; rewrite Nat.add_comm, pow_add, Nat.add_comm, <- Rmult_assoc,
  Rabs_mult ; apply Rmult_le_compat_r ; [apply Rabs_pos |] ; apply HB ; exists p ;
  unfold Rseq_shifts, gt_abs_pser, gt_pser, Rseq_abs, Rseq_mult ; reflexivity.
 Qed.
@@ -381,10 +381,10 @@ Proof.
 intros An Bn r1 r2 RhoA RhoB.
 assert (r''_bd1 : Rabs (Rmin (Rabs r1) (Rabs r2)) <= Rabs r1).
  unfold Rmin ; case (Rle_dec (Rabs r1) (Rabs r2)) ; intro H ;
- rewrite Rabs_Rabsolu ; intuition.
+ rewrite Rabs_Rabsolu ; intuition (auto with real).
 assert (r''_bd2 : Rabs (Rmin (Rabs r1) (Rabs r2)) <= Rabs r2).
  unfold Rmin ; case (Rle_dec (Rabs r1) (Rabs r2)) ; intro H ;
- rewrite Rabs_Rabsolu ; intuition.
+ rewrite Rabs_Rabsolu ; intuition (auto with real).
 assert (Rho'A := Cv_radius_weak_le_compat An _ _ r''_bd1 RhoA).
 assert (Rho'B := Cv_radius_weak_le_compat Bn _ _ r''_bd2 RhoB).
  destruct Rho'A as (C, HC) ;
@@ -833,15 +833,15 @@ intros An Bn x la lb Hla Hlb eps eps_pos.
  by (apply middle_is_in_the_middle ; assumption).
  destruct (Hla _ eps'_pos) as [Na HNa] ;
  destruct (Hlb _ eps'_pos) as [Nb HNb] ;
- exists (max Na Nb) ; intros n n_lb.
+ exists (Nat.max Na Nb) ; intros n n_lb.
  rewrite Rseq_pps_plus_compat ; eapply Rle_lt_trans.
  eapply R_dist_plus.
  apply Rlt_le_trans with (eps' + eps').
   eapply Rlt_trans.
    eapply Rplus_lt_compat_l ; eapply HNb ;
-    apply le_trans with (max Na Nb) ; [apply le_max_r | assumption].
+    apply Nat.le_trans with (Nat.max Na Nb) ; [apply Nat.le_max_r | assumption].
    apply Rplus_lt_compat_r ; apply HNa ;
-    apply le_trans with (max Na Nb) ; [apply le_max_l | assumption].
+    apply Nat.le_trans with (Nat.max Na Nb) ; [apply Nat.le_max_l | assumption].
   right ; unfold eps', middle ; field.
 Qed.
 

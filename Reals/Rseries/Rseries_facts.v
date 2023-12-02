@@ -26,7 +26,7 @@ Require Export Rsequence.
 Require Export Rseries_def Rseries_base_facts Rseries_pos_facts.
 Require Export Rseries_remainder_facts Rseries_cv_facts Rseries_usual.
 Require Import Lra.
-Require Import Max.
+Require Import PeanoNat.
 Require Import Rtactic MyRIneq.
 
 Local Open Scope R_scope.
@@ -40,11 +40,11 @@ sum_f_R0 (fun k : nat => Un (S n + k)%nat) n2.
 Proof.
 intros Un n n2.
 induction n2.
- simpl. ring_simplify. rewrite plus_0_r. reflexivity.
+ simpl. ring_simplify. rewrite Nat.add_0_r. reflexivity.
  
  repeat rewrite tech5. rewrite <- IHn2. 
  rewrite <- plus_n_Sm. do 2 rewrite plus_Sn_m.
- rewrite plus_comm.
+ rewrite Nat.add_comm.
  ring.
 Qed.
 
@@ -56,15 +56,15 @@ intros Un n N HnN.
 induction n.
  simpl ; ring.
 
- rewrite tech5. rewrite IHn ; intuition.
+ rewrite tech5. rewrite IHn ; intuition (auto with real).
  do 3 rewrite S_INR.
  inversion HnN.
-  rewrite minus_diag. ring.
-   
-  rewrite not_le_minus_0. 
+ rewrite Nat.sub_diag. ring.
+
+ rewrite (proj2 (Nat.sub_0_le _ _)).
    ring.
-   intuition.
-Qed.   
+   lia.
+Qed.
 
 Open Scope Rseq_scope.
 
@@ -574,11 +574,11 @@ assert (forall k n, (k >= S n)%nat -> sum_f_R0 (fun k0 : nat => Un (k0 - S n)%na
    simpl. ring.
    
    rewrite sum_reorder_0. repeat rewrite S_INR.
-    rewrite <- minus_diag_reverse.
+    rewrite Nat.sub_diag.
     simpl. ring.
     
     intuition.
-   rewrite tech5. rewrite IHHmn0. rewrite <- minus_Sn_m.
+   rewrite tech5. rewrite IHHmn0. rewrite Nat.sub_succ_l.
     rewrite tech5. ring.
 
     intuition.

@@ -118,8 +118,8 @@ Proof.
 induction n.
 intros.
 compute.
-apply le_n_O_eq in H.
-rewrite <- H in H0.
+apply Nat.le_0_r in H.
+rewrite H in H0.
 exact H0.
 
 intros.
@@ -159,7 +159,7 @@ intros.
 rewrite Nfinite_prod_split_upper.
 rewrite Nfinite_prod_split_lower.
 rewrite IHn.
-rewrite <- minus_n_O.
+rewrite Nat.sub_0_r.
 assert (Nfinite_prod_0_n n (fun k : nat => f (S n - S k)) =
   Nfinite_prod_0_n n (fun k : nat => f (n - k))).
 apply Nfinite_prod_subtle_eq_compat.

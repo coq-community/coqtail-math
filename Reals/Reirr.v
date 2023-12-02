@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Max.
+Require Import PeanoNat.
 
 Require Import Rseries_facts.
 Require Import Rsequence_facts.
@@ -57,7 +57,7 @@ destruct b.
  
  rewrite fact_simpl. rewrite mult_INR. 
  field_simplify.
-  simpl. rewrite <- minus_n_O. reflexivity.
+  simpl. rewrite Nat.sub_0_r. reflexivity.
  
  INR_solve.
 Qed.
@@ -258,7 +258,7 @@ induction Hnb.
    apply not_0_INR. intuition.
    
    rewrite fact_simpl. rewrite mult_INR.
-   rewrite <- minus_Sn_m ; [|intuition].
+   rewrite Nat.sub_succ_l ; [|intuition].
    assert (/INR (S m) <= /INR (S n)) by (apply Rle_Rinv ; intuition) .
    rewrite <- tech_pow_Rmult.
    rewrite Rinv_mult_distr.
@@ -282,8 +282,8 @@ Lemma identite1 : forall b, INR (fact b) * / INR (fact (S (S b))) <
 Proof.
 intros b.
 do 2 rewrite fact_simpl.
-rewrite <- minus_Sn_m ; [|intuition].
-rewrite <- minus_diag_reverse.
+rewrite Nat.sub_succ_l ; [|intuition].
+rewrite Nat.sub_diag.
 rewrite <- tech_pow_Rmult. simpl pow.
 do 2 rewrite mult_INR. field_simplify.
  unfold Rdiv. rewrite Rinv_mult_distr.

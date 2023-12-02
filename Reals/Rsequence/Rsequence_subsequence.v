@@ -58,19 +58,20 @@ Lemma nat_seq_growing_trans : forall an : nat -> nat, (forall x, an x <= an (S x
   forall y x, x <= y -> an x <= an y.
 Proof.
 induction y.
- intros x Hx0; rewrite (le_n_O_eq x Hx0).
- apply le_refl.
+ intros x Hx0.
+ rewrite <- (proj1 (Nat.le_0_r x) Hx0).
+ apply Nat.le_refl.
  
  intros x Hxy.
  destruct (Compare.le_decide _ _ Hxy) as [Hyx|Hyx].
-  apply le_trans with (an y).
+  apply Nat.le_trans with (an y).
    apply IHy.
-   apply gt_S_le.
+   apply Nat.succ_le_mono.
    apply Hyx.
    
    apply H.
   
-  subst; apply le_refl.
+  subst; apply Nat.le_refl.
 Qed.
 
 (* Strictly growing sequence *)
@@ -82,11 +83,11 @@ induction y.
  
  intros x Hxy.
  destruct (Compare.le_decide _ _ Hxy) as [Hyx|Hyx].
-  apply le_trans with (an y).
+  apply Nat.le_trans with (an y).
    apply IHy.
-   apply gt_S_le.
+   apply Nat.succ_le_mono.
    apply Hyx.
-   apply lt_le_weak.
+   apply Nat.lt_le_incl.
    apply H.
   
   rewrite <- Hyx.
@@ -110,9 +111,9 @@ Lemma Rsubseq_n_le_extractor_n : forall phi n, is_extractor phi -> n <= phi n.
 Proof.
 intros phi n Hphi.
 induction n.
- apply le_O_n.
+ apply Nat.le_0_l.
  
- eapply le_trans with (S (phi n)).
+ eapply Nat.le_trans with (S (phi n)).
  apply (le_n_S _ _ IHn).
  apply Hphi.
 Qed.
@@ -127,7 +128,7 @@ destruct Hsub as [phi Hphi].
 unfold extracted in *; simpl in Hphi.
 rewrite Hphi.
 apply HN.
-apply le_trans with n.
+apply Nat.le_trans with n.
  apply Hn.
  apply Rsubseq_n_le_extractor_n; destruct phi; auto.
 Qed.
@@ -143,7 +144,7 @@ exists N; intros n Hn.
 destruct Hsub as [phi Hphi].
 rewrite Hphi.
 apply HN.
-apply le_trans with n.
+apply Nat.le_trans with n.
  apply Hn.
  apply Rsubseq_n_le_extractor_n; destruct phi; auto. 
 Qed.
@@ -170,7 +171,7 @@ induction n.
    rewrite e.
    intuition.
 
-  intro l'; rewrite (le_antisym _ _ l l').
+  intro l'; rewrite (Nat.le_antisymm _ _ l l').
   exists 0.
   split.
    constructor.
@@ -199,7 +200,7 @@ Lemma extractor_Rseq_iter_S : forall k, is_extractor (Rseq_iter_S k).
 Proof.
 intros k n. 
 unfold Rseq_iter_S.
-apply plus_lt_compat_l; constructor.
+apply Nat.add_lt_mono_l; constructor.
 Qed.
 
 Lemma is_extractor_mult_2 : is_extractor (mult 2).
@@ -253,13 +254,13 @@ destruct (uncv (eps / 3) spliteps) as [Nu Hu].
 exists (phi Nu).
 intros n nNu.
 destruct (Rseq_extractor_partition phi Hphi n) as [N Hpart].
- apply le_trans with (phi Nu).
+ apply Nat.le_trans with (phi Nu).
   apply nat_seq_growing_trans.
    intros x.
-   apply lt_le_weak.
+   apply Nat.lt_le_incl.
    apply Hphi.
    
-   apply le_O_n.
+   apply Nat.le_0_l.
   
   exact nNu.
  
@@ -268,9 +269,9 @@ destruct (Rseq_extractor_partition phi Hphi n) as [N Hpart].
    exact goal.
    
    destruct Hpart as [HNn HnSN].
-   pose proof (nat_seq_growing_trans phi (fun x => lt_le_weak _ _ (Hphi _)) Nu (S N) Hinv).
-   pose proof (le_trans _ _ _ H nNu).
-   pose proof (lt_le_trans _ _ _ HnSN H).
+   pose proof (nat_seq_growing_trans phi (fun x => Nat.lt_le_incl _ _ (Hphi _)) Nu (S N) Hinv).
+   pose proof (Nat.le_trans _ _ _ H nNu).
+   pose proof (Nat.lt_le_trans _ _ _ HnSN H).
    intuition lia.
  
  pose proof (Hu N HNuN) as Hun.
@@ -278,7 +279,7 @@ destruct (Rseq_extractor_partition phi Hphi n) as [N Hpart].
  rewrite ephi in Hun.
  rewrite ephi in Husn.
  assert (vn (phi N) <= vn n <= vn (phi (S N)))%R.
-  split; apply (Rseq_growing_trans _ vngrow); intuition.
+  split; apply (Rseq_growing_trans _ vngrow); intuition (auto with arith).
  rewrite R_dist_sym in Husn.
  replace eps with (eps / 3 + eps / 3 + eps / 3) by field.
  eapply Rle_lt_trans.
@@ -327,7 +328,7 @@ exists N; split.
 assumption.
 exists N0; intros n Hn.
 apply HN0.
-apply le_trans with n.
+apply Nat.le_trans with n.
 assumption.
 apply Rsubseq_n_le_extractor_n; destruct phi; assumption.
 Qed.
@@ -344,7 +345,7 @@ destruct (Heq eps Heps) as [N HN].
 exists N.
 intros n Hn; unfold Rseq_minus.
 apply HN.
-apply le_trans with (phi N).
+apply Nat.le_trans with (phi N).
 apply Rsubseq_n_le_extractor_n; assumption.
 apply nat_seq_growing_trans; auto with *.
 Qed.
@@ -361,7 +362,7 @@ destruct (Heq eps Heps) as [N HN].
 exists N.
 intros n Hn; unfold Rseq_minus.
 apply HN.
-apply le_trans with (phi N).
+apply Nat.le_trans with (phi N).
 apply Rsubseq_n_le_extractor_n; assumption.
 apply nat_seq_growing_trans;auto with *.
 Qed.

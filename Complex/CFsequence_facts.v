@@ -35,7 +35,7 @@ Require Import Cprop_base.
 Require Import Ctacfield.
 Require Import Lia.
 Require Import Lra.
-Require Import Max.
+Require Import PeanoNat.
 Require Import Cmet.
 Require Import Canalysis_def.
 Require Import Canalysis_deriv.
@@ -98,11 +98,11 @@ assert (zh_in : Boule c r (z + h)).
 
 apply Rlt_le_trans with (Rplus (Rplus eps' (Cnorm (f z - fn N z)))  (Cnorm (fn N (z + h) - fn N z - h * g z))).
  do 2 apply Rplus_lt_compat_r ; rewrite Cnorm_minus_sym ; apply fnzh_cv_fzh.
- unfold ge ; apply le_trans with (max Nz Nzh)%nat ; [apply le_max_r | apply le_max_l].
+ unfold ge ; apply Nat.le_trans with (max Nz Nzh)%nat ; [apply Nat.le_max_r | apply Nat.le_max_l].
 
 apply Rle_trans with (Rplus (Rplus eps' eps') (Cnorm (fn N (z + h) - fn N z - h * g z))).
  apply Rplus_le_compat_r ; apply Rplus_le_compat_l ; left ; rewrite Cnorm_minus_sym ;
- apply fnz_cv_fz ; unfold ge ; apply le_trans with (max Nz Nzh)%nat ; apply le_max_l.
+ apply fnz_cv_fz ; unfold ge ; apply Nat.le_trans with (max Nz Nzh)%nat ; apply Nat.le_max_l.
 
 apply Rle_trans with (Cnorm h * eps / 2 + Cnorm h * eps / 2)%R.
  apply Rle_trans with (Cnorm h * eps / 4 + Cnorm h * eps / 4 + Cnorm h * eps / 2)%R.
@@ -181,7 +181,7 @@ assert (zuh_in : Boule c r (z + u *h)).
  apply Interval_to_boule ; assumption.
  rewrite (derive_pt_eq_0 _ _ _ (fn_deriv u u_in_I) (Dfn_eq_fn' _ N zuh_in)).
  unfold C_dist in fn'c_cvu_gc ; left ; apply fn'c_cvu_gc ;
- [unfold N ; apply le_max_r |] ; assumption.
+ [unfold N ; apply Nat.le_max_r |] ; assumption.
 
 apply Rle_trans with (eps / 8 + eps / 8)%R ; [apply Rplus_le_compat_l | right ; field].
 
@@ -235,7 +235,7 @@ assert (zvh_in : Boule c r (z + v *h)).
  apply Interval_to_boule ; assumption.
  rewrite (derive_pt_eq_0 _ _ _ (fn_deriv v v_in_I) (Dfn_eq_fn' _ N zvh_in)).
  unfold C_dist in fn'c_cvu_gc ; left ; apply fn'c_cvu_gc ;
- [unfold N ; apply le_max_r |] ; assumption.
+ [unfold N ; apply Nat.le_max_r |] ; assumption.
 
 apply Rle_trans with (eps / 8 + eps / 8)%R ; [apply Rplus_le_compat_l | right ; field].
 
@@ -332,7 +332,7 @@ intros An fn z l1 l2 fn_cv An_cv fn_bd.
   assert (Main : Cnorm l1 - eps < l2 + eps).
    apply Rlt_trans with (Cnorm (CFpartial_sum (fun n : nat => fn n z) N)).
    apply Rlt_minus_exchange ; apply Rle_lt_trans with (Cnorm (CFpartial_sum (fun n : nat => fn n z) N - l1)) ;
-   [apply Cnorm_triang_rev_r | apply Hfn ;  apply le_max_l].
+   [apply Cnorm_triang_rev_r | apply Hfn ;  apply Nat.le_max_l].
    apply Rle_lt_trans with (Rabs (sum_f_R0 An N)).
    apply Rle_trans with (sum_f_R0 (fun n => Cnorm (fn n z)) N).
    unfold CFpartial_sum ; apply sum_f_C0_triang.
@@ -360,7 +360,7 @@ intros An fn z l1 l2 fn_cv An_cv fn_bd.
    change R0 with (IZR 0). rewrite Rabs_R0 ; assumption.
    assumption.
    unfold R_dist ; apply Rabs_triang_inv.
-   apply HAn ; apply le_max_r.
+   apply HAn ; apply Nat.le_max_r.
    assert (Cnorm l1 < Cnorm l1).
    apply Rlt_trans with (l2 + 2 * eps)%R.
    lra.
@@ -421,7 +421,7 @@ Proof.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := sigma_split An N_pos N_ub) ; unfold sigma in H.
-  do 2 rewrite <- minus_n_O in H.
+  do 2 rewrite Nat.sub_0_r in H.
   replace (sum_f_R0 An (S (N + n))) with
   (sum_f_R0 (fun k:nat => An (0 + k)%nat) (S (N + n))).
   replace (sum_f_R0 An N) with (sum_f_R0 (fun k:nat => An (0 + k)%nat) N).
@@ -444,7 +444,7 @@ Proof.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := Csigma_split (fun n => fn n x) O (S (N + n)) N N_pos N_ub) ; unfold Csigma in H.
-  do 2 rewrite <- minus_n_O in H.
+  do 2 rewrite Nat.sub_0_r in H.
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)) with
   (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) (S (N + n))).
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) N) with (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) N).
@@ -467,7 +467,7 @@ Proof.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := sigma_split An N_pos N_ub) ; unfold sigma in H.
-  do 2 rewrite <- minus_n_O in H.
+  do 2 rewrite Nat.sub_0_r in H.
   replace (sum_f_R0 An (S (N + n))) with
   (sum_f_R0 (fun k:nat => An (0 + k)%nat) (S (N + n))).
   replace (sum_f_R0 An N) with (sum_f_R0 (fun k:nat => An (0 + k)%nat) N).
@@ -490,7 +490,7 @@ Proof.
   assert (N_pos : (0 <= N)%nat) by intuition.
   assert (N_ub : (N < S (N + n))%nat) by intuition.
   intros; assert (H := Csigma_split (fun n => fn n x) O (S (N + n)) N N_pos N_ub) ; unfold Csigma in H.
-  do 2 rewrite <- minus_n_O in H.
+  do 2 rewrite Nat.sub_0_r in H.
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) (S N + n)) with
   (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) (S (N + n))).
   replace (CFpartial_sum (fun n0 : nat => fn n0 x) N) with (sum_f_C0 (fun n : nat => fn (0 + n)%nat x) N).

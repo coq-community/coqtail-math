@@ -155,7 +155,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
     apply Hcond.
     
     apply False_ind, Hxb.
-    apply Rle_trans with a; intuition.
+    apply Rle_trans with a; intuition (auto with real).
     destruct (Rle_dec x b) as [Hxb | Hxb].
       (* a <= x <= b *)	
       intros eps Heps.
@@ -233,7 +233,7 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
           apply Rle_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
             apply Rle_trans with (Rmin delta (b - a)).
-              intuition. 
+              intuition (auto with real).
               apply Rmin_r.
         lra.
         
@@ -276,16 +276,16 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
         assert(- h <= x - b) as Hf.
           apply Rle_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
-              intuition.
+              intuition (auto with real).
         lra.
-        intuition.      
+        intuition (auto with real).
         
     destruct (Rle_dec (x + h) b) as [Hh | Hh].
       apply False_ind, (RIneq.Rle_not_lt _ _ Hh).
         assert(- h <= x - b) as Hf.
           apply Rle_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
-              intuition.
+              intuition (auto with real).
         lra.
         
         rewrite Hrew2, Rabs_R0; assumption; apply Heps.
@@ -300,16 +300,16 @@ assert(forall x, derivable_pt_abs (C1_continuation f a b d) x (C1_continuation_d
       assert(- h <= x - b) as Hf.
         apply Rle_trans with (Rabs h).
           rewrite <- Rabs_Ropp; apply RRle_abs.
-          intuition.
+          intuition (auto with real).
         lra.
-        intuition.      
+        intuition (auto with real).
         
     destruct (Rle_dec (x + h) b) as [Hh | Hh].
       apply False_ind, (RIneq.Rle_not_lt _ _ Hh).
         assert(- h < x - b) as Hf.
           apply Rle_lt_trans with (Rabs h).
             rewrite <- Rabs_Ropp; apply RRle_abs.
-              intuition.
+              intuition (auto with real).
         lra.
   
   rewrite Hrew2, Rabs_R0; assumption.

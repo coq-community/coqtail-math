@@ -8,14 +8,14 @@ Lemma pow_lt_compat : forall x y, 0 <= x -> x < y ->
 Proof.
 intros x y x_pos x_lt_y n n_lb.
  induction n.
- apply False_ind ; intuition; try lia.
+ apply False_ind ; intuition (auto with arith); try lia.
  destruct n.
  simpl ; repeat (rewrite Rmult_1_r) ; assumption.
  assert (Hrew : forall a n, a ^ S (S n) = a * a ^ S n).
   intros a m ; simpl ; reflexivity.
  destruct x_pos as [x_pos | x_null].
  do 2 rewrite Hrew.
-  repeat (rewrite Hrew) ; apply Rmult_gt_0_lt_compat ; [apply pow_lt | | | apply IHn] ; intuition.
+  repeat (rewrite Hrew) ; apply Rmult_gt_0_lt_compat ; [apply pow_lt | | | apply IHn] ; intuition (auto with arith).
   apply Rlt_gt ; transitivity x ; assumption.
  rewrite Hrew, <- x_null, Rmult_0_l ; apply pow_lt ;
   apply Rle_lt_trans with x ; [right |] ; auto.
@@ -33,7 +33,7 @@ Qed.
 
 Lemma pow2_sqr : forall r, r² = r ^ 2.
 Proof.
-intros ; rewrite <- (mult_1_r 2), pow_Rsqr, pow_1 ; reflexivity.
+intros ; rewrite <- (Nat.mul_1_r 2), pow_Rsqr, pow_1 ; reflexivity.
 Qed.
 
 Lemma pow2_pos : forall r, 0 <= r ^ 2.
@@ -93,12 +93,10 @@ Proof.
 intros x x_bd eps eps_pos.
  case (Req_or_neq x) ; intro Hx.
   exists 0%nat ; intros ; unfold R_dist ; rewrite Rminus_0_r ;
-  rewrite Hx ; rewrite pow_i ; [| intuition] ; rewrite Rmult_0_r ; rewrite Rabs_R0 ;
+  rewrite Hx ; rewrite pow_i ; [| intuition (auto with arith)] ; rewrite Rmult_0_r ; rewrite Rabs_R0 ;
   assumption.
  assert (H : Un_cv (fun n => /INR (S n)) 0).
-  apply cv_infty_cv_R0.
-  intros n Hf ; replace 0 with (INR 0) in Hf by intuition.
-  discriminate (INR_eq _ _ Hf).
+  apply cv_infty_cv_0.
   intro B ; assert (0 <= IZR (up (Rabs B))).
   apply Rle_trans with (Rabs B) ; [apply Rabs_pos |] ;
   apply Rge_le ; left ; apply (proj1 (archimed (Rabs B))).
@@ -111,13 +109,13 @@ intros x x_bd eps eps_pos.
   apply (proj1 (archimed (Rabs B))).
   rewrite HN.
   rewrite <- INR_IZR_INZ.
-  intuition.
-  intuition.
+  intuition (auto with real).
+  intuition (auto with arith real).
   assert (Rinv_r_pos : 0 < (1 + 1 / Rabs x) / 2 - 1).
    apply Rlt_Rminus ; apply Rle_lt_trans with ((1 + 1)/2).
    right ; field.
    unfold Rdiv ; apply Rmult_lt_compat_r.
-   apply Rinv_0_lt_compat ; intuition.
+   apply Rinv_0_lt_compat ; intuition (auto with real).
    apply Rplus_lt_compat_l ; rewrite Rmult_1_l ; rewrite <- Rinv_1 ;
    apply Rinv_lt_contravar.
    rewrite Rmult_1_r ; apply Rabs_pos_lt ; assumption. 
@@ -125,12 +123,12 @@ intros x x_bd eps eps_pos.
    pose (k := (1 + Rabs x) / 2).
    assert (k_pos : 0 <= k).
     unfold k ; replace 0 with (0/2) by field ; unfold Rdiv ; apply Rmult_le_compat_r.
-    left ; apply Rinv_0_lt_compat ; intuition.
+    left ; apply Rinv_0_lt_compat ; intuition (auto with real).
     apply Rle_zero_pos_plus1 ; apply Rabs_pos.
  assert (k_lt_1 : ((1 + Rabs x) / 2) < 1).
   apply Rlt_le_trans with ((1 + 1) /2).
   unfold Rdiv ; apply Rmult_lt_compat_r.
-  apply Rinv_0_lt_compat ; intuition.
+  apply Rinv_0_lt_compat ; intuition (auto with real).
   apply Rplus_lt_compat_l ; assumption.
   right ; field.
   assert (Main : forall M eps, 0 < eps -> 0 < M -> exists N, forall n, (n >= N)%nat ->
@@ -186,7 +184,7 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
  pose (An_0 := Rabs (INR (S N))).
  assert (An_0_pos : 0 < An_0 * Rabs x ^ (S N)). 
   apply Rmult_lt_0_compat.
-  unfold An_0 ; apply Rabs_pos_lt ; apply Rgt_not_eq ; intuition.
+  unfold An_0 ; apply Rabs_pos_lt ; apply Rgt_not_eq ; intuition (auto with *).
   apply pow_lt ; apply Rabs_pos_lt ; assumption.
  destruct (Main (An_0 * Rabs x ^ (S N)) eps eps_pos An_0_pos) as (N2, HN2).
  exists (N2 + S N)%nat ; intros n n_lb.
@@ -216,5 +214,5 @@ assert (Temp : forall M i : nat, (M >= S N)%nat -> Rabs (INR (i + S M) * x ^ (i 
  apply H'.
  simpl (0 + S N)%nat ; rewrite Rabs_mult ; fold An_0 ; unfold k ; rewrite <- RPow_abs ;
  apply HN2.
- intuition.
+ intuition (auto with arith).
 Qed.

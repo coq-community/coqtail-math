@@ -368,7 +368,7 @@ Lemma binomial_diag : forall n, Binomial.C n n = 1%R.
 Proof.
 intros n.
 unfold Binomial.C.
-rewrite minus_diag.
+rewrite Nat.sub_diag.
 simpl.
 field.
 INR_solve; apply fact_neq_0.
@@ -379,7 +379,7 @@ Proof.
 intros n.
 unfold Binomial.C.
 simpl.
-rewrite <- minus_n_O.
+rewrite Nat.sub_0_r.
 field.
 INR_solve; apply fact_neq_0.
 Qed.
@@ -413,7 +413,7 @@ induction n.
      by (intros; subst; ring); apply AP; clear AP.
     rewrite sum_f_C0_simpl.
     repeat rewrite binomial_diag.
-    repeat rewrite minus_diag.
+    repeat rewrite Nat.sub_diag.
     apply Cadd_eq_compat.
      apply Csum_eq_compat_weak; intro; simpl; ring.
      simpl; ring.
@@ -422,7 +422,7 @@ induction n.
     apply Cadd_eq_compat.
      simpl; repeat rewrite binomial_zero; ring.
      apply Csum_eq_compat; intros j Hj.
-     rewrite <- minus_Sn_m with (S n) _; [|lia].
+     rewrite (Nat.sub_succ_l _ (S n)); [|lia].
      simpl; ring.
    
    intros j Hj.

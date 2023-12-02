@@ -28,13 +28,13 @@ unfold lt ; intros n m ; induction pr1 using le_ind ; intro pr2.
       generalize (refl_equal(S n)).
       pattern (S n) at 2 4 6 10, pr2; case pr2; [intro | intros m l e].
       rewrite <- eq_rect_eq_nat; trivial.
-      contradiction (le_Sn_n m); rewrite <- e; assumption.
+      contradiction (Nat.nle_succ_diag_l m); rewrite <- e; assumption.
       reflexivity.
     replace (le_S (S n) m pr1) with
       (eq_rect _ (fun n0 => S n <= n0) (le_S (S n) m pr1) _ (refl_equal (S m))).
       generalize (refl_equal (S m)).
       pattern (S m) at 1 3 4 6, pr2; case pr2; [intro Heq | intros m0 l HeqS].
-      contradiction (le_Sn_n m); rewrite Heq; assumption.
+      contradiction (Nat.nle_succ_diag_l m); rewrite Heq; assumption.
       injection HeqS; intro Heq; generalize l HeqS.
       rewrite <- Heq; intros; rewrite <- eq_rect_eq_nat.
       rewrite (IHpr1 l0); reflexivity.
