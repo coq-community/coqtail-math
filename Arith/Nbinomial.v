@@ -58,13 +58,13 @@ induction n.
 intros.
 compute.
 destruct m.
-apply lt_irrefl in H.
+apply Nat.lt_irrefl in H.
 contradiction.
 reflexivity.
 intros.
 unfold Nsimple_binomial. fold Nsimple_binomial.
 destruct m.
-apply lt_n_O in H.
+apply Nat.nlt_0_r in H.
 contradiction.
 assert (n<m).
 auto with arith.
@@ -200,10 +200,10 @@ Proof.
 induction n.
 intros.
 destruct k.
-apply le_Sn_O in H.
+apply Nat.nle_succ_0 in H.
 contradiction.
 rewrite Nbinomial_outside.
-rewrite mult_0_r.
+rewrite Nat.mul_0_r.
 assert (Nfinite_prod_0_n (pred (S k)) (fun x : nat => 0 - x) =
   Nfinite_prod_0_n (pred (S k)) (fun x : nat => 0)).
 apply Nfinite_prod_eq_compat.
@@ -219,14 +219,14 @@ apply le_le_S_eq in H0.
 destruct H0.
 assert (Q: S k<=S n).
 exact H0.
-apply (le_trans k) in H0.
+apply (Nat.le_trans k) in H0.
 
 destruct k.
-apply le_Sn_O in H.
+apply Nat.nle_succ_0 in H.
 contradiction.
 
 rewrite <- Nbinomial_pascal.
-rewrite mult_plus_distr_l.
+rewrite Nat.mul_add_distr_l.
 apply le_le_S_eq in H.
 destruct H.
 apply le_le_S_eq in H0.
@@ -234,19 +234,19 @@ destruct H0.
 
 rewrite IHn.
 unfold fact. fold fact.
-rewrite <- mult_assoc.
+rewrite <- Nat.mul_assoc.
 rewrite IHn.
 assert (exists k', k=S k').
 destruct k.
-apply le_Sn_n in H. contradiction.
+apply Nat.nle_succ_diag_l in H. contradiction.
 exists k. reflexivity.
 destruct H1.
 rewrite H1.
 
 assert (pred (S(S x))=S(pred (S x))).
-rewrite pred_of_minus.
-rewrite <- minus_Sn_m.
-rewrite pred_of_minus.
+rewrite <- Nat.sub_1_r.
+rewrite Nat.sub_succ_l.
+rewrite <- Nat.sub_1_r.
 reflexivity.
 auto with arith.
 rewrite H2.
@@ -262,20 +262,20 @@ assert (Nfinite_prod_0_n (pred (S x)) (fun x0 : nat => n - x0) * (n - S (pred (S
   (n - S (pred (S x))) * Nfinite_prod_0_n (pred (S x)) (fun x0 : nat => n - x0)).
 auto with arith.
 rewrite H3. clear H3.
-rewrite <- mult_plus_distr_r.
-rewrite <- minus_n_O.
+rewrite <- Nat.mul_add_distr_r.
+rewrite Nat.sub_0_r.
 assert (S (S x) + (n - S (pred (S x))) = S n).
 rewrite <- pred_Sn.
 assert (n-S x=S n-S(S x)).
 auto with arith.
 rewrite H3.
-symmetry.
-apply le_plus_minus.
+rewrite Nat.add_comm.
+apply Nat.sub_add.
 rewrite <- H1.
 auto with arith.
 auto with arith.
 auto with arith.
-apply le_trans with (S k).
+apply Nat.le_trans with (S k).
 auto with arith.
 auto with arith.
 auto with arith.
@@ -285,9 +285,9 @@ auto with arith.
 rewrite H1.
 rewrite Nbinomial_diag.
 rewrite Nbinomial_outside.
-rewrite mult_0_r.
-rewrite plus_0_r.
-rewrite mult_1_r.
+rewrite Nat.mul_0_r.
+rewrite Nat.add_0_r.
+rewrite Nat.mul_1_r.
 rewrite Nfinite_prod_index_reversal.
 rewrite <- H1.
 rewrite Nfactorial_is_finite_prod.
@@ -298,22 +298,28 @@ assert (exists p, k=k0+p).
 apply Nle_plus.
 exact H2.
 destruct H3.
-rewrite plus_comm in H3. 
+rewrite Nat.add_comm in H3. 
 rewrite H3.
-rewrite plus_comm.
+rewrite Nat.add_comm.
 assert (x-0=k0+x-(k0+0)).
-apply minus_plus_simpl_l_reverse.
-rewrite <- minus_n_O in H4.
-rewrite plus_0_r in H4.
+rewrite Nat.sub_0_r, Nat.add_0_r.
+rewrite Nat.add_comm.
+symmetry.
+rewrite Nat.add_sub; reflexivity.
+rewrite Nat.sub_0_r in H4.
+rewrite Nat.add_0_r in H4.
 rewrite <- H4.
 assert (S(k0+x)=S k0+x).
 auto with arith.
 rewrite H5. clear H4. clear H5.
 assert (S k0-0=x+S k0-(x+0)).
-apply minus_plus_simpl_l_reverse.
-rewrite plus_0_r in H4.
-rewrite <- minus_n_O in H4.
-rewrite plus_comm in H4.
+rewrite Nat.sub_0_r, Nat.add_0_r.
+rewrite Nat.add_comm.
+symmetry.
+rewrite Nat.add_sub; reflexivity.
+rewrite Nat.add_0_r in H4.
+rewrite Nat.sub_0_r in H4.
+rewrite Nat.add_comm in H4.
 exact H4.
 auto with arith.
 assert (0=k).
@@ -354,10 +360,11 @@ rewrite Nbinomial_diag.
 rewrite <- pred_Sn.
 rewrite Nfactorial_is_finite_prod.
 rewrite Nfinite_prod_index_reversal.
-rewrite mult_1_r.
+rewrite Nat.mul_1_r.
 apply Nfinite_prod_subtle_eq_compat.
 intros.
-apply minus_Sn_m.
+symmetry.
+apply Nat.sub_succ_l.
 exact H1.
 Qed.
 
@@ -372,7 +379,7 @@ destruct H.
 destruct k.
 inversion H.
 simpl. auto with arith.
-rewrite <- minus_n_O. apply Ndiv_n_n.
+rewrite Nat.sub_0_r. apply Ndiv_n_n.
 destruct H.
 destruct k.
 inversion H.

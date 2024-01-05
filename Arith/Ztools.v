@@ -121,7 +121,7 @@ Qed.
 
 Lemma Zle_0_square : forall a, 0 <= a * a.
 Proof.
-  intros []; intuition; try (simpl; intro H; inversion H).
+  intros []; intuition auto; try (simpl; intro H; inversion H).
 Qed.
 
 Lemma Zeq_0_square : forall a, a * a = 0 -> a = 0.

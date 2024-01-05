@@ -133,7 +133,7 @@ intros x y x_pos x_lt_y.
   assumption.
  rewrite Rabs_pos_eq ;
  [ apply middle_is_in_the_middle |] ;
- intuition.
+ intuition (auto with real).
 Qed.
 
 Lemma middle_le_le_pos : forall x y, 0 <= x -> 0 <= y -> 0 <= middle x y.
@@ -222,7 +222,7 @@ Qed.
 Lemma open_interval_interval : forall lb ub x,
      open_interval lb ub x -> interval lb ub x.
 Proof.
- intros ; split ; unfold open_interval in * ; intuition.
+ intros ; split ; unfold open_interval in * ; intuition (auto with real).
 Qed.
 
 Lemma interval_inhabited : forall lb ub x,
@@ -241,7 +241,7 @@ Lemma interval_opp_compat : forall lb ub x,
      interval lb ub x ->
      interval (-ub) (-lb) (-x).
 Proof.
-intros ; unfold interval in * ; split ; intuition ; lra.
+intros ; unfold interval in * ; split ; intuition (auto with real) ; lra.
 Qed.
 
 Lemma interval_minus_compat : forall lb ub x y,
@@ -271,9 +271,9 @@ Proof.
 intros lb ub x y x_in_I y_in_I.
   split ; unfold middle, interval in *.
   replace lb with ((lb + lb) * /2) by field.
-  unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
+  unfold Rdiv ; apply Rmult_le_compat_r ; intuition (auto with real).
   replace ub with ((ub + ub) * /2) by field.
-  unfold Rdiv ; apply Rmult_le_compat_r ; intuition.
+  unfold Rdiv ; apply Rmult_le_compat_r ; intuition (auto with real).
 Qed.
 
 Lemma open_interval_middle_compat:  forall lb ub x y,
@@ -283,9 +283,9 @@ Proof.
 intros lb ub x y x_in_I y_in_I.
   split ; unfold middle, open_interval in *.
   replace lb with ((lb + lb) * /2) by field.
-  unfold Rdiv ; apply Rmult_lt_compat_r ; intuition.
+  unfold Rdiv ; apply Rmult_lt_compat_r ; intuition (auto with real).
   replace ub with ((ub + ub) * /2) by field.
-  unfold Rdiv ; apply Rmult_lt_compat_r ; intuition.
+  unfold Rdiv ; apply Rmult_lt_compat_r ; intuition (auto with real).
 Qed.
 
 (** Decidability results. *)
@@ -358,7 +358,7 @@ intros lb1 lb2 ub1 ub2 Hord Hext.
      [| transitivity (middle lb1 ub1) ; [apply middle_is_in_the_middle | apply Hf]] ;
      assumption.
     apply False_ind, Hf, Hext, middle_is_in_the_middle ; assumption.
-   assert (lb_eq: lb1 = lb2) by intuition ; split ; trivial.
+   assert (lb_eq: lb1 = lb2) by intuition (auto with real) ; split ; trivial.
   destruct (Rlt_le_dec ub1 ub2).
    assert (Hf: ~ open_interval lb1 ub1 (middle ub1 ub2)).
     intro Hf ; apply Rlt_irrefl with ub1 ; transitivity (middle ub1 ub2) ;
@@ -371,7 +371,7 @@ intros lb1 lb2 ub1 ub2 Hord Hext.
     [apply middle_is_in_the_middle | apply Hf] ; assumption.
    apply False_ind, Hf, Hext ; rewrite lb_eq ; split ; [transitivity ub2 |] ;
    auto ; apply middle_is_in_the_middle ; assumption.
-  intuition.
+  intuition (auto with real).
 Qed.
 
 (** open interval are included into interval *)

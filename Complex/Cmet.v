@@ -281,8 +281,8 @@ intros f D l z Hf l_neq ; intros eps eps_pos ; elim (Hf ((Cnorm l) / 2)%R).
   apply Rmult_integral_contrapositive_currified ; apply Cnorm_no_R0 ; assumption.
   left ; apply Rinv_0_lt_compat ; apply Cnorm_pos_lt ;
   apply Cmult_integral_contrapositive_currified ; assumption.
- rewrite Cmult_comm; rewrite Cnorm_Cmult ; rewrite Rinv_mult_distr.
- unfold Rsqr, Rdiv ; rewrite Rinv_mult_distr ; repeat rewrite <- Rmult_assoc.
+ rewrite Cmult_comm; rewrite Cnorm_Cmult ; rewrite Rinv_mult.
+ unfold Rsqr, Rdiv ; rewrite Rinv_mult ; repeat rewrite <- Rmult_assoc.
  apply Rmult_lt_compat_r.
  apply Rinv_0_lt_compat; apply Cnorm_pos_lt; assumption.
  apply Rmult_lt_reg_l with (Cnorm (f x) * Cnorm l * / 2)%R.
@@ -293,19 +293,15 @@ intros f D l z Hf l_neq ; intros eps eps_pos ; elim (Hf ((Cnorm l) / 2)%R).
  rewrite Rmult_1_r ; assumption.
  field ; apply Cnorm_no_R0 ; assumption.
  apply Cnorm_no_R0 ; assumption.
- apply Cnorm_no_R0 ; assumption.
- apply Cnorm_no_R0 ; assumption.
- apply Cnorm_no_R0 ; assumption.
- apply Cnorm_no_R0 ; assumption.
  apply Cmult_integral_contrapositive_currified ; assumption.
  field ; split ; assumption.
  apply Cnorm_gt_not_eq ; apply Rlt_gt ; apply Rle_lt_trans with (Cnorm l / 2)%R ;
  [assert (Temp := Cnorm_pos l) ; lra | assumption].
  split ; [| apply Rlt_le_trans with (Rmin delta1 delta2) ; [| apply Rmin_r]] ; assumption.
  split ; [| apply Rlt_le_trans with (Rmin delta1 delta2) ; [| apply Rmin_l]] ; assumption.
- unfold Rdiv ; repeat apply Rmult_lt_0_compat ; intuition ;
+ unfold Rdiv ; repeat apply Rmult_lt_0_compat ; intuition (auto with real) ;
  apply Cnorm_pos_lt ; assumption.
- unfold Rdiv ; repeat apply Rmult_lt_0_compat ; intuition ;
+ unfold Rdiv ; repeat apply Rmult_lt_0_compat ; intuition (auto with real) ;
  apply Cnorm_pos_lt ; assumption.
 Qed.
 

@@ -96,12 +96,12 @@ assert (Hsum : forall x, Rabs x < r -> St x = Sp x + Sr x).
     apply weaksum_r_sums; assumption.
     assert (Hcvv := weaksum_r_sums Vn r prv x Hx).
     intros eps Heps; destruct (Hcvv eps Heps) as [n0 Hn0].
-    exists (Max.max N n0); intros n Hn.
+    exists (Nat.max N n0); intros n Hn.
     assert (Rseq_pps Un x n = Rseq_pps Un x N + Rseq_pps Vn x n) as ->; swap 1 2.
     assert (Hrw : exists p, n = (N + p)%nat).
       exists (n - N)%nat.
       assert (n >= N)%nat.
-        eapply le_trans; [apply Max.le_max_l|eexact Hn].
+        eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
       lia.
     destruct Hrw as [p Hp]; subst n.
     unfold R_dist.
@@ -112,9 +112,9 @@ assert (Hsum : forall x, Rabs x < r -> St x = Sp x + Sr x).
     rewrite <- Rplus_assoc with (r2 := - Sp x).
     rewrite Rplus_opp_r.
     rewrite Rplus_0_l.
-    apply Hn0; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+    apply Hn0; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
     assert (Hle : (N <= n)%nat).
-      eapply le_trans; [apply Max.le_max_l|eexact Hn].
+      eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
     clear - Un Hle.
     apply partial_sum; apply Hle.
 assert (Hmul : forall x, Rabs x < r -> Sr x = x ^ (S N) * Ss x).
@@ -191,10 +191,10 @@ destruct (Hct 1) as [alp [Halp Hd]]; [lra|].
 assert (Hradius : exists P, forall p, (p >= P)%nat -> Rabs (En p) < r /\ Rabs (En p) < alp).
   destruct (Hcv r H) as [P1 HP1].
   destruct (Hcv alp Halp) as [P2 HP2].
-  exists (Max.max P1 P2); intros p Hp.
+  exists (Nat.max P1 P2); intros p Hp.
   rewrite <- (Rminus_0_r (En p)); split.
-  apply HP1; eapply le_trans; [apply Max.le_max_l|apply Hp].
-  apply HP2; eapply le_trans; [apply Max.le_max_r|apply Hp].
+  apply HP1; eapply Nat.le_trans; [apply Nat.le_max_l|apply Hp].
+  apply HP2; eapply Nat.le_trans; [apply Nat.le_max_r|apply Hp].
 destruct Hradius as [P HP].
 exists (Rabs (Ss 0) + 1); split.
   apply Rle_ge; apply Rplus_le_le_0_compat.

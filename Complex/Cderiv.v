@@ -70,12 +70,10 @@ intros f d D z Hf_D eps eps_pos ; unfold continue_in, D_in, limit1_in,
   elim (Hf_D (eps / 2)%R eps_2_pos) ; clear Hf_D ; intros alpha [alpha_pos Hf_D].
   pose (delta := Rmin (eps / (2 * Cnorm (d z))) (Rmin (1/2) alpha)) ; exists delta ;
   split ; [apply Rmin_pos |].
-  unfold Rdiv ; rewrite Rinv_mult_distr ; repeat apply Rmult_lt_0_compat.
+  unfold Rdiv ; rewrite Rinv_mult ; repeat apply Rmult_lt_0_compat.
   assumption.
   lra.
   apply Rinv_0_lt_compat ; apply Cnorm_pos_lt ; assumption.
-  apply Rgt_not_eq ; lra.
-  apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
   apply Rmin_pos ; lra.
   intros x' [[Dx' z_neq_x'] x'_bd] ; simpl ; unfold C_dist.
   apply Rlt_trans with (Cnorm (x' - z) * eps + Cnorm (x' - z) * Cnorm (d z))%R.

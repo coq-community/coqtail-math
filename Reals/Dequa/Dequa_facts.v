@@ -5,7 +5,7 @@ Require Import Rfunction_classes.
 Require Import Nth_derivative_def Nth_derivative_facts.
 Require Import Dequa_def.
 Require Import List.
-Require Import Max.
+Require Import PeanoNat.
 Require Import Tactics.
 Require Import Option.
 

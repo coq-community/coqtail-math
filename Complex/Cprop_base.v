@@ -487,7 +487,7 @@ intros z n z_neq ; induction n.
  simpl ; rewrite Cinv_mult_distr ; [| assumption |].
  rewrite <- IHn ; reflexivity.
  clear -z_neq ; induction n.
- simpl ; intuition.
+ simpl ; intuition (auto with complex).
  simpl ; apply Cmult_integral_contrapositive ; split ; assumption.
 Qed.
 
@@ -560,7 +560,8 @@ Proof.
 intros n m H1.
 induction m.
 simpl.
-replace (n-0)%nat with n by intuition ; auto with complex.
+replace (n-0)%nat with n by intuition (auto with arith). 
+auto with complex.
 destruct n.
  inversion H1.
 replace (S n - S m)%nat with (n - m)%nat by intuition.
@@ -569,10 +570,10 @@ replace (INC (S n) - INC m) with (C1 + INC n - INC m) in IHm.
  replace (INC (S n - m)) with (C1 + INC (n - m)) in IHm.
   assert ( H :( C1 + INC (n - m) = C1 + INC n - INC m) -> (INC (n - m) = INC n - INC m)).
    unfold Cminus ; rewrite Cadd_assoc ; apply (Cadd_eq_reg_l C1).
-  apply H. apply IHm. intuition.
+  apply H. apply IHm. intuition (auto with arith).
  replace (S n - m)%nat with (S (n - m))%nat.
   rewrite S_INC. auto with complex.
- intuition.
+ intuition (auto with arith).
 rewrite S_INC. ring.
 Qed.
 Hint Resolve minus_INC : complex.
@@ -580,7 +581,7 @@ Hint Resolve minus_INC : complex.
 Lemma mult_INC : forall n m:nat, INC (n * m) = INC n * INC m.
 Proof.
 intros n m; induction n.
-intuition.
+intuition (auto with complex).
 rewrite S_INC. simpl (S n * m)%nat. rewrite add_INC.
 rewrite IHn.
 ring.
@@ -590,10 +591,10 @@ Hint Resolve mult_INC: complex.
 Lemma Cre_INC_pos : forall n : nat, 0 <= Cre (INC n).
 Proof.
 induction n.
-intuition.
+intuition (auto with real).
 rewrite S_INC.
 destruct (INC n); simpl in *.
-intuition.
+intuition (auto with real).
 Qed.
 
 Lemma Cim_INC_0 : forall n : nat, R0 = Cim (INC n).
@@ -602,7 +603,7 @@ induction n. intuition.
 rewrite S_INC.
 rewrite Cim_add_distr.
 rewrite <- IHn.
-intuition.
+intuition (auto with real).
 Qed.
 
 (** * Cnorm *)
@@ -705,7 +706,7 @@ induction n; induction m.
    apply Cnorm_sqr_pos. unfold Cnorm_sqr. simpl. apply Cnorm_sqr_pos.
 - revert n IHn m IHm.
   intros n1 H3 n0 H1 H4.
-assert (H : (n1<n0 -> S n1 < S n0)%nat). intuition.
+assert (H : (n1<n0 -> S n1 < S n0)%nat). intuition (auto with arith).
 apply H.
 apply H3.
 do 2 rewrite S_INC in H4.
@@ -850,7 +851,7 @@ induction n.
 intuition.
 rewrite S_INC.
 rewrite <- Cim_add_compat.
-rewrite IHn. simpl. intuition.
+rewrite IHn. simpl. intuition (auto with real).
 Qed.
 
 Lemma Cre_INC_INR : forall n, Cre (INC n) = INR n.
@@ -1129,7 +1130,7 @@ intros.
 induction n. intuition.
 replace (2 * S n)%nat with (2 + 2 * n)%nat by ring.
 rewrite Rdef_pow_add. replace ((-x) ^ 2)%R with (x ^ 2)%R by ring.
-rewrite IHn. intuition. 
+rewrite IHn. intuition (auto with real).
 Qed.
 
 Lemma Rpow_2_1 : forall x n, ((-x) ^ (S (2 * n)) = - (x ^ (S (2 * n))))%R.

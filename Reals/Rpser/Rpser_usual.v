@@ -24,7 +24,7 @@ Require Import Rsequence_def Rsequence_facts Rsequence_cv_facts Rsequence_sums_f
 Require Import Rsequence_base_facts Rsequence_rewrite_facts Rsequence_usual_facts.
 Require Import Rsequence_subsequence.
 
-Require Import Max.
+Require Import PeanoNat.
 Require Import Lra.
 
 Require Import Rpser_def Rpser_def_simpl Rpser_base_facts Rpser_cv_facts Rpser_radius_facts.
@@ -535,7 +535,7 @@ intros x [x_lb x_ub] ; unfold arctan_sum ; destruct (MyRIneq.Req_dec x 1) as [He
  apply sum_f_R0_ext; intros n.
  change ((-1) ^ n * / INR (S (2 * n)) * (1 ^ 2) ^ n = (-1) ^ n * / INR (2 * n + 1)).
  rewrite 2 Rfunctions.pow1.
- rewrite plus_comm; simpl plus; simpl mult.
+ rewrite Nat.add_comm; simpl plus; simpl mult.
  ring.
 
  apply sum_r_sums, Rabs_def1.

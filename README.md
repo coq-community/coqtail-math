@@ -39,7 +39,7 @@ and complex analysis.
 - Coq-community maintainer(s):
   - Jean-Marie Madiot ([**@jmadiot**](https://github.com/jmadiot))
 - License: [GNU Lesser General Public License v3.0 only](LICENSE)
-- Compatible Coq versions: 8.11 or later
+- Compatible Coq versions: 8.17 or later
 - Additional dependencies: none
 - Coq namespace: `Coqtail`
 - Related publication(s): none

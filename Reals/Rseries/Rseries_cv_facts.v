@@ -2,7 +2,7 @@ Require Import Rsequence.
 Require Import Rseries_def Rseries_base_facts Rseries_pos_facts.
 Require Import MyNat MyRIneq.
 
-Require Import Max.
+Require Import PeanoNat.
 Require Import Lra Rtactic.
 
 Local Open Scope R_scope.
@@ -65,7 +65,7 @@ intros An Bn n ; induction n.
    symmetry ; apply Rseq_sum_plus_compat.
     intros p p_ub ; unfold Rseq_mult, Rseq_plus ;
     replace (S n - p)%nat with (S (n - p)) by lia ; simpl ; ring.
-    unfold Rseq_mult ; rewrite minus_diag ; reflexivity.
+    unfold Rseq_mult ; rewrite Nat.sub_diag ; reflexivity.
    rewrite Rseq_sum_reindex_compat ; apply Rseq_sum_ext_strong ; intros p Hp ;
     unfold Rseq_mult ; replace (S n - (S n - p))%nat with p by lia ;
     apply Rmult_comm.
@@ -102,17 +102,17 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
    apply Rplus_le_compat ; [trivial | reflexivity].
  pose (eps3 := eps / 8 / INR (S N1) / (MB + 1)).
  assert (eps3_pos: 0 < eps3).
-  repeat apply Rlt_mult_inv_pos ; intuition ; lra.
+  repeat apply Rlt_mult_inv_pos ; intuition (auto with real arith) ; lra.
  destruct (Rser_cv_zero An _ Hla _ eps3_pos) as [N2 HN2t].
  assert (HN2: forall n : nat, (n >= N2)%nat -> Rabs (An n) < eps3).
   intros p p_lb ; rewrite <- (Rminus_0_r (An p)) ; apply HN2t ; assumption.
  clear HN2t.
  pose (eps4 := eps / 2 / (Rabs lb + 1)). 
  assert (eps4_pos: 0 < eps4).
-  repeat apply Rlt_mult_inv_pos ; intuition.
+  repeat apply Rlt_mult_inv_pos ; intuition (auto with real).
   apply Rle_lt_0_plus_1, Rabs_pos.
  destruct (Hla _ eps4_pos) as [N3 HN3].
- pose (N := max (max (S N1) (N1 + N2)) N3) ; exists N ; intros n n_lb.
+ pose (N := Nat.max (Nat.max (S N1) (N1 + N2)) N3) ; exists N ; intros n n_lb.
  rewrite Rseq_prod_rewrite.
  replace ((Rseq_sum Bn # An) n) with
   (Rseq_sum ((Rseq_sum Bn - lb) * (fun i => An (n - i)%nat)
@@ -130,8 +130,8 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  apply Rle_lt_trans with (Rseq_shifts (Rseq_sum Un) (S N1) (n - S N1)).
  right ; unfold Rseq_shifts.
  assert (HNn: (S N1 <= n)%nat).
-  transitivity (max (S N1) (N1 + N2)) ; [| transitivity N ;
-  [| assumption]] ; apply le_max_l.
+  transitivity (Nat.max (S N1) (N1 + N2)) ; [| transitivity N ;
+  [| assumption]] ; apply Nat.le_max_l.
  replace (S N1 + (n - S N1))%nat with n by lia ; reflexivity.
  apply Rle_lt_trans with (Rseq_sum Un N1 + Rseq_sum (Rseq_shifts Un (S N1)) (n - S N1)).
  rewrite Rseq_sum_shifts_compat ; right ; ring.
@@ -153,8 +153,8 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  rewrite Rmult_1_r ; apply Rlt_le_trans with (Rseq_sum eps3 N1).
  apply Rseq_sum_lt_compat_strong ; intros p p_lb.
   assert ((N1 + N2 <= n)%nat).
-   transitivity (max (S N1) (N1 + N2)) ; [apply le_max_r |
-   transitivity N ; [apply le_max_l | assumption]].
+   transitivity (Nat.max (S N1) (N1 + N2)) ; [apply Nat.le_max_r |
+   transitivity N ; [apply Nat.le_max_l | assumption]].
  unfold Rseq_abs ; apply HN2 ; lia.
  right ; rewrite Rmult_comm ; apply Rseq_sum_constant_compat.
  apply Rmult_lt_compat_r ; [| apply Rmult_lt_compat_l].
@@ -185,7 +185,7 @@ intros An Bn la lb lna Hla Hlb Hlna eps eps_pos.
  right ; unfold eps2 ; field ; apply Rgt_not_eq ; assumption.
  rewrite Rabs_mult ; apply Rle_lt_trans with (eps4 * Rabs lb).
  apply Rmult_le_compat_r ; [apply Rabs_pos |].
- left ; apply HN3, le_trans with N ; [apply le_max_r | assumption].
+ left ; apply HN3, Nat.le_trans with N ; [apply Nat.le_max_r | assumption].
  replace eps with (eps4 * 2 * (Rabs lb + 1)) by (unfold eps4 ; field ;
   apply Rgt_not_eq ; apply Rle_lt_0_plus_1, Rabs_pos).
  field_simplify ; unfold Rdiv ; lra || (apply Rmult_lt_compat_r ; [rewrite Rinv_1 |] ; lra).

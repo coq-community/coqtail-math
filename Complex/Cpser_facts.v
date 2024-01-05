@@ -425,7 +425,7 @@ destruct An_frac_event as [N HN].
   assumption.
  apply Cv_radius_weak_padding_neg_compat with N ;
  destruct Rho as [T HT] ; exists T ; intros u Hu ; destruct Hu as [n Hn] ;
- rewrite Hn ; unfold_gt ; rewrite plus_comm ; apply HT ;
+ rewrite Hn ; unfold_gt ; rewrite Nat.add_comm ; apply HT ;
  exists n ; reflexivity.
 Qed.
 

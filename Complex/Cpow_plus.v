@@ -35,8 +35,8 @@ Proof.
 intros n k H.
 do 2 rewrite fact_simpl.
 replace (INC (fact k * (S (n - k) * fact (n - k)))) with (INC (S (n-k)) * INC (fact k * fact (n-k))) by
-(rewrite mult_comm ; symmetry ; rewrite mult_comm ; rewrite <- mult_INC ; 
-rewrite mult_assoc ; reflexivity).
+(rewrite Nat.mul_comm ; symmetry ; rewrite Nat.mul_comm ; rewrite <- mult_INC ; 
+rewrite Nat.mul_assoc ; reflexivity).
 
 replace (INC (S n * fact n)) with (INC (S n) * INC (fact n)) 
 by (rewrite mult_INC ; reflexivity).
@@ -55,7 +55,7 @@ unfold Cdiv. rewrite Cinv_mult_distr.
    split. apply not_0_INC. apply fact_neq_0. split. apply not_0_INC. apply fact_neq_0.
    apply not_0_INC. intuition lia.
  apply not_0_INC. intuition lia.
-apply not_0_INC. intro Habs. apply mult_is_O in Habs. elim Habs; apply fact_neq_0.
+apply not_0_INC. intro Habs. apply Nat.eq_mul_0 in Habs. elim Habs; apply fact_neq_0.
 Qed.
 
 (* begin hide *)
@@ -80,7 +80,7 @@ rewrite H.
 replace ((0%R +i  zI) * (zR +i 0%R) ^ k * (0%R +i zI) ^ (n - k) ) with
  ( (zR +i 0%R) ^ k * (0%R +i zI) ^ (S n - k)) by 
 (symmetry ; rewrite Cmult_comm ; rewrite <- Cmult_assoc ; rewrite Cmult_comm ; 
-rewrite <- Cpow_S ; rewrite minus_Sn_m ; intuition ;apply Hinf).
+rewrite <- Cpow_S ; rewrite <- Nat.sub_succ_l ; intuition ;apply Hinf).
 (*end replace*)
 replace ((zR +i 0%R) ^ k * (0%R +i zI) ^ (S n - k) * INC (fact n) *
  / INC (fact k * fact (n - k)) -
@@ -94,7 +94,7 @@ replace (INC (fact n) * / INC (fact k * fact (n - k)) -
  INC (fact (S n)) * / INC (fact k * fact (S n - k))) with
 (-(INC (k * fact n) / INC ( fact k * fact (S (n-k))))).
 2: { rewrite <- binom_add_INC.
-rewrite minus_Sn_m. unfold Cdiv. rewrite Copp_add_distr. rewrite Copp_mult_distr_l_reverse.
+rewrite <- Nat.sub_succ_l. unfold Cdiv. rewrite Copp_add_distr. rewrite Copp_mult_distr_l_reverse.
 rewrite Copp_invol.
 replace (fact k * fact (n-k))%nat with (fact (n-k) * fact k)%nat by ring.
 reflexivity. apply Hinf. apply Hinf. }
@@ -104,7 +104,7 @@ rewrite H1.
 rewrite Cpow_S. ring_simplify.
 replace ((n- k +1)%nat) with (S(n-k))%nat by ring.
 field_simplify. unfold Cdiv. repeat rewrite Cmult_0_l. reflexivity.
-apply not_0_INC. intro Habs.  apply mult_is_O in Habs. elim Habs.
+apply not_0_INC. intro Habs.  apply Nat.eq_mul_0 in Habs. elim Habs.
 apply fact_neq_0. apply fact_neq_0.
 Qed.
 

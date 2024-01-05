@@ -123,7 +123,7 @@ Lemma sum_sums : forall  (An : nat -> R) (Pr : infinite_cv_radius An),
       forall x, Rpser An x (sum An Pr x).
 Proof.
 intros An Pr x.
- apply weaksum_r_sums ; intuition.
+ apply weaksum_r_sums ; intuition (auto with real).
 Qed.
 
 (** Proof that the sum is unique *)

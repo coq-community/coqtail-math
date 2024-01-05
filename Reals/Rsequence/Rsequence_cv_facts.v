@@ -22,7 +22,7 @@ USA.
 Require Import Lia.
 Require Import Rsequence_def.
 Require Import Rsequence_base_facts.
-Require Import Max Rinterval MyRIneq Ranalysis_def Lra.
+Require Import PeanoNat Rinterval MyRIneq Ranalysis_def Lra.
 
 Open Scope R_scope.
 Open Scope Rseq_scope.
@@ -70,7 +70,7 @@ Proof.
 intros Un Vn lu lv Hu Hv eps Heps.
 destruct (Hu (eps/2)%R) as [Nu HNu]; [lra|].
 destruct (Hv (eps/2)%R) as [Nv HNv]; [lra|].
-exists (Max.max Nu Nv).
+exists (Nat.max Nu Nv).
 intros n Hn.
 unfold R_dist; unfold Rseq_plus.
 replace (Un n + Vn n - (lu + lv))%R
@@ -78,8 +78,8 @@ replace (Un n + Vn n - (lu + lv))%R
 eapply Rle_lt_trans; [apply Rabs_triang|].
 replace eps with (eps/2 + eps/2)%R by field.
 apply Rplus_lt_compat.
-apply (HNu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply (HNv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (HNu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply (HNv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -112,7 +112,7 @@ unfold eps2; repeat apply Rmult_gt_0_compat; try lra.
 apply Rinv_0_lt_compat; assumption.
 destruct (Hu eps1) as [Nu HNu]; [assumption|].
 destruct (Hv eps2) as [Nv HNv]; [assumption|].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold R_dist; unfold Rseq_mult.
 replace (Un n * Vn n - lu * lv)%R
   with ((Un n * Vn n - Un n * lv) + (Un n * lv - lu * lv))%R
@@ -127,7 +127,7 @@ eapply Rle_lt_trans.
 replace (eps / 2)%R with (Mb * (eps / 2 / Mb))%R
   by (field; apply Rgt_not_eq; assumption).
 apply Rmult_lt_compat_l; [assumption|].
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 unfold Rminus; rewrite <- Ropp_mult_distr_l_reverse.
 rewrite <- Rmult_plus_distr_r.
 rewrite Rabs_mult.
@@ -135,7 +135,7 @@ destruct (Req_dec lv 0) as [Hlv|Hlv].
   rewrite Hlv; rewrite Rabs_R0; rewrite Rmult_0_r; lra.
   eapply Rlt_le_trans.
   apply Rmult_lt_compat_r; [apply Rabs_pos_lt; assumption|].
-  apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+  apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 unfold eps1.
 unfold Rdiv; rewrite Rmult_assoc; rewrite <- Rmult_1_r.
 apply Rmult_le_compat_l; [lra|].
@@ -166,14 +166,14 @@ destruct (Hu (Rabs lu / 2))%R as [Ninf Hinf].
 apply Rmult_lt_0_compat; [apply Rabs_pos_lt|lra]; assumption.
 destruct (Hu (/2 * Rabs lu * Rabs lu * eps))%R as [N HN].
 repeat apply Rmult_lt_0_compat; (apply Rabs_pos_lt || lra); assumption.
-exists (Max.max Ninf N).
+exists (Nat.max Ninf N).
 intros n Hn.
 unfold R_dist; unfold Rseq_inv.
 assert (Habs : Rabs lu / 2 <= Rabs (Un n)).
 replace (Rabs lu / 2)%R with
   (Rabs lu - Rabs lu / 2)%R by field.
 assert (Hr : Rabs (Un n - lu) < Rabs lu / 2).
-apply Hinf; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply Hinf; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 unfold Rabs; repeat destruct Rcase_abs;
 unfold Rabs in Hr; repeat destruct Rcase_abs in Hr; lra.
 assert (Hpos : Un n <> 0).
@@ -188,13 +188,13 @@ subst; elim H; reflexivity.
 replace (/ Un n - / lu)%R with
   (/ lu * / Un n * (lu - Un n))%R by (field; tauto).
 repeat rewrite Rabs_mult.
-repeat rewrite Rabs_Rinv; try assumption.
+repeat rewrite Rabs_inv; try assumption.
 rewrite Rabs_minus_sym.
 eapply Rlt_le_trans.
 apply Rmult_lt_compat_l.
 apply Rmult_lt_0_compat; apply Rinv_0_lt_compat;
 apply Rabs_pos_lt; assumption.
-apply HN; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HN; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 replace (/ Rabs lu * / Rabs (Un n) * (/2 * Rabs lu * Rabs lu * eps))%R
   with (/ Rabs (Un n) * (/2 * Rabs lu) * eps)%R
   by (field; split; apply Rabs_no_R0; assumption).
@@ -286,10 +286,10 @@ Proof.
 intros Un l Heven Hodd eps eps_pos ;
  destruct (Heven _ eps_pos) as [N1 HN1] ;
  destruct (Hodd _ eps_pos) as [N2 HN2] ;
- exists (max (2 * N1) (S (2 * N2))) ; intros n n_lb ;
+ exists (Nat.max (2 * N1) (S (2 * N2))) ; intros n n_lb ;
  destruct (n_modulo_2 n) as [[p Hp] | [p Hp]] ; subst.
-  apply HN1 ; assert (H := max_lub_l _ _ _ n_lb) ; lia.
-  apply HN2 ; assert (H := max_lub_r _ _ _ n_lb) ; lia.
+  apply HN1 ; assert (H := Nat.max_lub_l _ _ _ n_lb) ; lia.
+  apply HN2 ; assert (H := Nat.max_lub_r _ _ _ n_lb) ; lia.
 Qed.
 
 End Rseq_cv.
@@ -308,12 +308,12 @@ Proof.
 intros Hu Hv M.
 destruct (Hu (M / 2)%R) as [Nu HNu].
 destruct (Hv (M / 2)%R) as [Nv HNv].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_plus.
 replace M with (M / 2 + M / 2)%R by field.
 apply Rplus_lt_compat.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -384,7 +384,7 @@ Proof.
 intros Hu Hv M.
 destruct (Hu (Rabs M)) as [Nu HNu].
 destruct (Hv 1) as [Nv HNv].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_mult.
 apply Rle_lt_trans with (Rabs M).
 apply RRle_abs.
@@ -392,8 +392,8 @@ replace (Rabs M) with ((Rabs M)*1)%R by apply Rmult_1_r.
 apply Rmult_le_0_lt_compat.
 apply Rabs_pos.
 apply Rle_0_1.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 
@@ -405,7 +405,7 @@ Proof.
 intros Hu Hv M.
 destruct (Hu (- (Rabs M))%R) as [Nu HNu].
 destruct (Hv (-1)) as [Nv HNv].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_mult.
 apply Rle_lt_trans with (Rabs M).
 apply RRle_abs.
@@ -414,8 +414,8 @@ replace (Rabs M)%R with (( - -Rabs M) *( - - 1))%R by ring.
 apply Rmult_le_0_lt_compat.
 rewrite Ropp_involutive; apply Rabs_pos.
 lra.
-apply Ropp_lt_contravar; apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply Ropp_lt_contravar; apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply Ropp_lt_contravar; apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply Ropp_lt_contravar; apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -426,7 +426,7 @@ Proof.
 intros Hu Hv M.
 destruct (Hu (Rabs M)%R) as [Nu HNu].
 destruct (Hv (-1)) as [Nv HNv].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_mult.
 apply Rlt_le_trans with (- Rabs M)%R.
 replace (Un n * Vn n)%R with (-(Un n * (- Vn n)))%R by ring.
@@ -435,8 +435,8 @@ replace (Rabs M)%R with ((Rabs M) * (- - 1))%R by ring.
 apply Rmult_le_0_lt_compat.
 apply Rabs_pos.
 lra.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply Ropp_lt_contravar; apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply Ropp_lt_contravar; apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 replace M with (- -M)%R by ring; apply Ropp_le_contravar; rewrite Ropp_involutive.
 rewrite <- Rabs_Ropp.
 apply RRle_abs.
@@ -994,12 +994,12 @@ Proof.
 intros Hu Hv M.
 destruct (Hu (M / 2)%R) as [Nu HNu].
 destruct (Hv (M / 2)%R) as [Nv HNv].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_plus.
 replace M with (M / 2 + M / 2)%R by field.
 apply Rplus_lt_compat.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -1037,8 +1037,8 @@ eapply Rlt_trans; [|apply HN; assumption].
 apply Rinv_0_lt_compat; assumption.
 unfold R_dist; unfold Rseq_inv.
 replace (/Un n - 0)%R with (/ Un n)%R; [|field; auto with real].
-rewrite <- Rinv_involutive; [|apply Rgt_not_eq; assumption].
-rewrite Rabs_Rinv; [|auto with real].
+rewrite <- Rinv_inv.
+rewrite Rabs_inv.
 apply Rinv_lt_contravar.
 apply Rmult_gt_0_compat.
 apply Rinv_0_lt_compat; assumption.
@@ -1072,8 +1072,8 @@ eapply Rlt_trans; [apply HN; assumption|].
 apply Ropp_lt_gt_0_contravar; apply Rinv_0_lt_compat; assumption.
 unfold R_dist; unfold Rseq_inv.
 replace (/ Un n - 0)%R with (/ Un n)%R; [|field; auto with real].
-rewrite <- Rinv_involutive; [|apply Rgt_not_eq; assumption].
-rewrite Rabs_Rinv; [|auto with real].
+rewrite <- Rinv_inv.
+rewrite Rabs_inv.
 apply Rinv_lt_contravar.
 apply Rmult_gt_0_compat.
 apply Rinv_0_lt_compat; assumption.
@@ -1112,11 +1112,11 @@ destruct (Hcv (/ Mp)%R) as [N HN].
 apply Rinv_0_lt_compat; assumption.
 exists N; intros n Hn.
 apply Rle_lt_trans with Mp; [apply RmaxLess2|].
-pattern Mp; rewrite <- Rinv_involutive; [|auto with real].
+pattern Mp; rewrite <- Rinv_inv.
 assert (Hd : Un n <> 0).
 apply He.
 unfold Rseq_abs, Rseq_inv.
-rewrite Rabs_Rinv; [|assumption].
+rewrite Rabs_inv.
 apply Rinv_lt_contravar.
 apply Rmult_lt_0_compat; [|auto with real].
 apply Rabs_pos_lt; assumption.
@@ -1171,14 +1171,14 @@ assert (H: forall eps, eps > 0 -> Rabs (lu1 - lu2) <= eps).
   intros eps Heps.
   destruct (H1 (eps / 2)%R) as [N1 HN1]; [lra|].
   destruct (H2 (eps / 2)%R) as [N2 HN2]; [lra|].
-  pose (N := Max.max N1 N2).
+  pose (N := Nat.max N1 N2).
   replace (lu1 - lu2)%R
     with ((lu1 - Un N) + (Un N - lu2))%R by field.
   replace eps with (eps / 2 + eps / 2)%R by field.
   eapply Rle_trans; [apply Rabs_triang|].
   apply Rplus_le_compat.
-    left; rewrite Rabs_minus_sym; apply HN1; apply Max.le_max_l.
-    left; apply HN2; apply Max.le_max_r.
+    left; rewrite Rabs_minus_sym; apply HN1; apply Nat.le_max_l.
+    left; apply HN2; apply Nat.le_max_r.
 apply Rle_antisym; apply le_epsilon;
 intros eps Heps; apply H in Heps;
 unfold Rabs in Heps; destruct Rcase_abs; lra.
@@ -1189,15 +1189,15 @@ Lemma Rseq_cv_Rseq_cv_pos_infty_incompat : forall An l,
 Proof.
 intros An l Hl Hinfty ; destruct (Hl _ Rlt_0_1) as [M HM] ;
  destruct (Hinfty (Rabs l + 1)%R) as [N HN] ;
- apply (Rlt_irrefl (An (max M N))) ; transitivity (Rabs l + 1)%R.
+ apply (Rlt_irrefl (An (Nat.max M N))) ; transitivity (Rabs l + 1)%R.
  rewrite <- (Rabs_right (An _)).
- apply Rminus_lt_compat_l_rev, Rle_lt_trans with (R_dist (An (max M N)) l).
+ apply Rminus_lt_compat_l_rev, Rle_lt_trans with (R_dist (An (Nat.max M N)) l).
   apply Rabs_triang_inv.
-  apply HM, le_max_l.
+  apply HM, Nat.le_max_l.
   apply Rle_ge ; transitivity (Rabs l + 1)%R.
    apply Rplus_le_le_0_compat ; [apply Rabs_pos | lra].
-   left ; apply HN, le_max_r.
-  apply HN, le_max_r.
+   left ; apply HN, Nat.le_max_r.
+  apply HN, Nat.le_max_r.
 Qed.
 
 Lemma Rseq_cv_Rseq_cv_neg_infty_incompat : forall An l,
@@ -1218,12 +1218,12 @@ Proof.
 intros Un Vn Wn l Hu Hw H eps Heps.
 destruct (Hu eps Heps) as [Nu HNu].
 destruct (Hw eps Heps) as [Nw HNw].
-exists (Max.max Nu Nw); intros n Hn.
+exists (Nat.max Nu Nw); intros n Hn.
 eapply Rle_lt_trans.
   apply RmaxAbs; apply Rplus_le_compat_r; apply (H n).
   unfold Rmax; destruct Rle_dec as [_|_].
-  apply HNw; eapply le_trans; [apply Max.le_max_r|eassumption].
-  apply HNu; eapply le_trans; [apply Max.le_max_l|eassumption].
+  apply HNw; eapply Nat.le_trans; [apply Nat.le_max_r|eassumption].
+  apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eassumption].
 Qed.
 
 (** * Limit of (non) negative terms *)

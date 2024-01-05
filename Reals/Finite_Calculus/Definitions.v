@@ -28,15 +28,15 @@ Proof.
 intros a b ; revert a ; induction b ; intros a f altb.
  inversion altb ; reflexivity.
  unfold Int in * ; destruct a ; simpl minus.
-  rewrite Rseq_sum_simpl ; rewrite (minus_n_O b), IHb ; [| apply le_0_n].
-  unfold Rseq_shifts, D ; rewrite <- minus_n_O ; simpl plus ;
+  rewrite Rseq_sum_simpl ; rewrite <- (Nat.sub_0_r b), IHb ; [| apply Nat.le_0_l].
+  unfold Rseq_shifts, D ; rewrite Nat.sub_0_r ; simpl plus ;
   rewrite S_INR ; ring.
   erewrite Rseq_sum_ext ; [| apply Rseq_shift_shifts] ;
   rewrite Rseq_sum_shift_compat.
   unfold Rseq_shift ; rewrite Rseq_sum_simpl, IHb ; unfold Rseq_shifts, D.
-  rewrite minus_Sn_m, le_plus_minus_r, plus_0_r, S_INR, S_INR.
+  rewrite <- Nat.sub_succ_l, (fun n => Nat.add_comm n (_ - n)), Nat.sub_add, Nat.add_0_r, S_INR, S_INR.
    ring.
-   transitivity (S a) ; [apply le_n_Sn | assumption].
+   transitivity (S a) ; [apply Nat.le_succ_diag_r | assumption].
    apply le_S_n ; assumption.
    apply le_S_n ; assumption.
 Qed.

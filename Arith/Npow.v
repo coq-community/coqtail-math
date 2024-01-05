@@ -36,7 +36,7 @@ Proof.
 intros.
 unfold Npower.
 unfold iter_nat.
-apply mult_1_r.
+apply Nat.mul_1_r.
 Qed.
 
 (** Relation with successor *)
@@ -81,22 +81,22 @@ intros.
 inversion H.
 intros.
 rewrite Npower_succ.
-rewrite mult_plus_distr_r.
-apply plus_le_compat.
+rewrite Nat.mul_add_distr_r.
+apply Nat.add_le_mono.
 rewrite Npower_succ.
-apply mult_le_compat_l.
+apply Nat.mul_le_mono_l.
 destruct c.
 compute. auto.
-apply le_trans with (a^(S c)+b^(S c)).
+apply Nat.le_trans with (a^(S c)+b^(S c)).
 auto with arith.
 apply IHc.
 auto with arith.
 
 rewrite Npower_succ.
-apply mult_le_compat_l.
+apply Nat.mul_le_mono_l.
 destruct c.
 compute. auto.
-apply le_trans with (a^(S c)+b^(S c)).
+apply Nat.le_trans with (a^(S c)+b^(S c)).
 auto with arith.
 apply IHc.
 auto with arith.
@@ -112,17 +112,17 @@ generalize x q H H0.
 clear H H0. clear x q.
 induction x.
 intros.
-rewrite plus_0_r in H0.
+rewrite Nat.add_0_r in H0.
 rewrite H0.
 auto.
 
 intros.
-rewrite <- plus_Snm_nSm in H0.
+rewrite <- Nat.add_succ_comm in H0.
 simpl in H0.
 rewrite H0.
 rewrite Npower_succ.
 replace (n^p) with (1*n^p).
-apply mult_le_compat.
+apply Nat.mul_le_mono.
 auto.
 apply IHx.
 auto.

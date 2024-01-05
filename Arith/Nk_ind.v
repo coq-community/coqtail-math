@@ -19,8 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import Plus.
-Require Import Le.
+Require Import PeanoNat.
 Require Import Compare.
 Open Scope nat_scope.
 
@@ -136,7 +135,7 @@ Proof.
 induction k.
 intro.
 unfold kth_S.
-rewrite plus_0_r.
+rewrite Nat.add_0_r.
 rewrite plus_1_r.
 reflexivity.
 intro.
@@ -302,8 +301,8 @@ intros.
 assert (forall n, (forall k, k<=n -> P k)).
 apply (nat_ind (fun n=>forall k, k<=n -> P k)).
 intros.
-apply le_n_O_eq in H1.
-rewrite <- H1.
+apply Nat.le_0_r in H1.
+rewrite H1.
 exact H.
 intros.
 apply le_le_S_eq in H2.

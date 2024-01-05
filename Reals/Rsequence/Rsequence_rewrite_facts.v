@@ -16,14 +16,14 @@ Qed.
 Lemma Rseq_shifts_0 : forall Un,
   Rseq_shifts Un 0 == Un.
 Proof.
-intros Un n ; unfold Rseq_shifts ; rewrite plus_0_l ;
+intros Un n ; unfold Rseq_shifts ; rewrite Nat.add_0_l ;
 reflexivity.
 Qed.
 
 Lemma Rseq_shifts_O : forall Un k,
   Rseq_shifts Un k O = Un k.
 Proof.
-intros Un k ; unfold Rseq_shifts ; rewrite plus_0_r ;
+intros Un k ; unfold Rseq_shifts ; rewrite Nat.add_0_r ;
 reflexivity.
 Qed.
 
@@ -43,7 +43,7 @@ Qed.
 Lemma Rseq_shifts_fusion : forall An k m,
   (Rseq_shifts (Rseq_shifts An k) m == Rseq_shifts An (k + m))%Rseq.
 Proof.
-intros ; unfold Rseq_shifts ; intro ; rewrite plus_assoc ; reflexivity.
+intros ; unfold Rseq_shifts ; intro ; rewrite Nat.add_assoc ; reflexivity.
 Qed.
 
 (** Unfolding definitions *)

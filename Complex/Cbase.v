@@ -28,7 +28,7 @@ intro x.
 case (Rgt_ge_dec x 0) ; intro H1.
 right ; intro Hfalse ; rewrite Hfalse in H1 ; apply False_ind ; lra.
 case (Rle_lt_or_eq_dec x 0).
-intuition.
+intuition (auto with real).
 clear H1 ; intro H1 ; right ; intro Hfalse ; rewrite Hfalse in H1 ; apply False_ind ; lra.
 intro H ; left ; assumption.
 Qed.

@@ -18,7 +18,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
-Require Import Max.
+Require Import PeanoNat.
 Require Import Reals.
 Require Export Setoid Morphisms.
 Require Import Rsequence_def.
@@ -50,13 +50,13 @@ replace 0 with (0 * 0)%R by field.
 apply Rmult_ge_compat; (assumption || apply Rge_refl).
 destruct Hu as [Nu Hu];
 destruct Hv as [Nv Hv].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 apply Rle_trans with (r2 := (Mu * Rabs (Vn n))%R).
-apply (Hu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply (Hu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite Rmult_assoc.
 apply Rmult_le_compat_l.
 apply Rge_le; assumption.
-apply (Hv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (Hv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -75,13 +75,13 @@ Proof.
 intros Un Vn Wn Hu Hv eps Heps.
 destruct (Hu 1) as [Nu HNu]; [lra|].
 destruct (Hv eps) as [Nv Hnv]; [assumption|].
-exists (Max.max Nu Nv).
+exists (Nat.max Nu Nv).
 intros n Hn.
 apply Rle_trans with (r2 := (Rabs (Vn n))%R).
 rewrite <- Rmult_1_l; apply (HNu n).
-eapply le_trans; [apply Max.le_max_l|eexact Hn].
+eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 apply (Hnv n).
-eapply le_trans; [apply Max.le_max_r|eexact Hn].
+eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -150,7 +150,7 @@ pattern eps' at 3; replace eps' with (1 * eps')%R by field.
 apply Rmult_le_compat; (auto with real || apply Rmin_l).
 destruct (Hu eps') as [Nu HNu]; [assumption|].
 destruct (Hv eps') as [Nv HNv]; [assumption|].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 replace eps
   with (eps / 3 + (eps / 3 + eps / 3))%R by field.
 do 2 rewrite Rmult_plus_distr_r. 
@@ -158,10 +158,10 @@ unfold Rseq_minus.
 eapply Rle_trans; [apply R_dist_tri with (z := Vn n)|].
 apply Rplus_le_compat.
 eapply Rle_trans.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 apply Rmult_le_compat_r; [apply Rabs_pos|apply Rmin_r].
 eapply Rle_trans.
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 replace (Vn n) with ((Vn n - Un n) + Un n)%R by field.
 eapply Rle_trans.
 apply Rmult_le_compat_l; [lra|apply Rabs_triang].
@@ -170,7 +170,7 @@ apply Rplus_le_compat.
 eapply Rle_trans.
 apply Rmult_le_compat_l; [left; assumption|].
 rewrite Rabs_minus_sym.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite <- Rmult_assoc; apply Rmult_le_compat_r; [apply Rabs_pos|].
 eapply Rle_trans; [eexact Heps2|apply Rmin_r].
 apply Rmult_le_compat_r; [apply Rabs_pos|apply Rmin_r].
@@ -225,15 +225,15 @@ eapply Rlt_le_trans; [apply Rlt_0_1|apply RmaxLess1].
 destruct (Ho (eps * / Rmax 1 M))%R as [No HNo].
 apply Rmult_lt_0_compat; [lra|].
 apply Rinv_0_lt_compat; assumption.
-exists (Max.max No NO); intros n Hn.
+exists (Nat.max No NO); intros n Hn.
 eapply Rle_trans.
-apply HNO; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNO; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 replace eps with ((Rmax 1 M) * eps * / (Rmax 1 M))%R
   by (field; apply Rgt_not_eq; assumption).
 do 2 rewrite Rmult_assoc.
 apply Rmult_le_compat; [apply Rge_le; assumption|apply Rabs_pos|apply RmaxLess2|].
 eapply Rle_trans.
-apply HNo; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite Rmult_assoc; apply Rmult_le_compat_r; [|apply Rle_refl].
 replace 0%R with (0 * 0)%R by field.
 apply Rmult_le_compat; try apply Rle_refl.
@@ -249,16 +249,16 @@ destruct Hv as [M [HM [NO HNO]]].
 destruct (Hu (eps * / Rmax 1 M)%R) as [No HNo].
 apply Rmult_gt_0_compat; [lra|].
 apply Rinv_0_lt_compat; eapply Rlt_le_trans; [apply Rlt_0_1|apply RmaxLess1].
-exists (Max.max NO No); intros n Hn.
+exists (Nat.max NO No); intros n Hn.
 eapply Rle_trans.
-apply HNo; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 rewrite Rmult_assoc.
 apply Rmult_le_compat_l; [lra|].
 eapply Rle_trans.
 apply Rmult_le_compat_l.
 left; apply Rinv_0_lt_compat.
 eapply Rlt_le_trans; [apply Rlt_0_1|apply RmaxLess1].
-apply HNO; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNO; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite <- Rmult_assoc.
 rewrite <- Rmult_1_l; apply Rmult_le_compat_r; [apply Rabs_pos|].
 pattern 1 at 2; rewrite <- (Rinv_l (Rmax 1 M)).
@@ -276,7 +276,7 @@ intros Un Vn Wn He HO.
 destruct HO as [M [HM [NO HNO]]].
 destruct (He 1) as [Ne HNe]; [lra|].
 exists (2 * M)%R; split; [lra|].
-exists (Max.max Ne NO); intros n Hn.
+exists (Nat.max Ne NO); intros n Hn.
 replace (Vn n) with (Vn n - Un n + Un n)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
 change 2 with (1 + 1)%R.
@@ -284,10 +284,10 @@ rewrite Rmult_assoc; rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat; rewrite Rmult_1_l.
 rewrite Rabs_minus_sym.
 eapply Rle_trans.
-apply HNe; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNe; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite Rmult_1_l.
-apply HNO; eapply le_trans; [apply Max.le_max_r|eexact Hn].
-apply HNO; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNO; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
+apply HNO; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -298,9 +298,9 @@ apply Rseq_equiv_sym in He.
 destruct HO as [M [HM [NO HNO]]].
 destruct (He 1) as [Ne HNe]; [lra|].
 exists (M * 2)%R; split; [lra|].
-exists (Max.max Ne NO); intros n Hn.
+exists (Nat.max Ne NO); intros n Hn.
 eapply Rle_trans.
-apply HNO; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNO; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 rewrite Rmult_assoc.
 apply Rmult_le_compat_l; [lra|].
 replace (Un n) with (Un n - Vn n + Vn n)%R by field.
@@ -309,7 +309,7 @@ change 2 with (1 + 1)%R.
 rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat.
 rewrite Rabs_minus_sym.
-apply HNe; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNe; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite Rmult_1_l; apply Rle_refl.
 Qed.
 
@@ -322,7 +322,7 @@ assert (Heps' : eps' > 0).
 unfold eps'; unfold Rmin; destruct Rle_dec; lra.
 destruct (He (eps' / 2)%R) as [Ne HNe]; [lra|].
 destruct (Ho (eps' / 2)%R) as [No HNo]; [lra|].
-exists (Max.max Ne No); intros n Hn.
+exists (Nat.max Ne No); intros n Hn.
 replace (Vn n) with (Vn n - Un n + Un n)%R by field.
 replace eps with (eps / 2 + eps / 2)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
@@ -330,19 +330,19 @@ rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat.
 rewrite Rabs_minus_sym.
 eapply Rle_trans.
-apply HNe; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNe; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 eapply Rle_trans with (eps / 2 * Rabs (Un n))%R.
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 unfold eps'; unfold Rmin; destruct Rle_dec; lra.
 apply Rmult_le_compat_l; [lra|].
 eapply Rle_trans.
-apply HNo; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 rewrite <- Rmult_1_l.
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 rewrite <- Rmult_1_l.
 apply Rmult_le_compat; try lra; apply Rmin_l.
 eapply Rle_trans.
-apply HNo; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 apply Rmult_le_compat_r; [lra|apply Rmin_r].
 Qed.
@@ -360,9 +360,9 @@ assert (Heps2 : eps2 > 0).
 unfold eps2; lra.
 destruct (Ho eps1) as [No HNo]; [assumption|].
 destruct (He eps2) as [Ne HNe]; [assumption|].
-exists (Max.max No Ne); intros n Hn.
+exists (Nat.max No Ne); intros n Hn.
 eapply Rle_trans.
-apply HNo; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 unfold eps1; unfold Rdiv.
 rewrite Rmult_assoc; apply Rmult_le_compat_l; [lra|].
 rewrite <- Rmult_1_l.
@@ -378,7 +378,7 @@ rewrite Rmult_plus_distr_r; rewrite Rmult_1_l.
 apply Rplus_le_compat_r.
 rewrite Rabs_minus_sym.
 eapply Rle_trans.
-apply HNe; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNe; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 apply Rmult_le_compat_r; [apply Rabs_pos|].
 unfold eps2; lra.
 Qed.
@@ -434,14 +434,14 @@ intros Hu Hv.
 destruct Hu as [Mu [HMu [Nu Hu]]].
 destruct Hv as [Mv [HMv [Nv Hv]]].
 exists (Mu + Mv)%R; split; [lra|].
-exists (Max.max Nu Nv).
+exists (Nat.max Nu Nv).
 intros n Hn.
 unfold Rseq_plus.
 eapply Rle_trans; [apply Rabs_triang|].
 rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat.
-apply (Hu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply (Hv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (Hu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply (Hv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (** Multiplicative compatibility. *)
@@ -475,15 +475,15 @@ destruct Hv as [Mv [HMv [Nv Hv]]].
 exists (Mu * Mv)%R; split.
 replace 0 with (0 * 0)%R by field.
 apply Rmult_ge_compat; auto with real.
-exists (Max.max Nu Nv).
+exists (Nat.max Nu Nv).
 intros n Hn.
 unfold Rseq_mult.
 do 2 (rewrite Rabs_mult).
 replace (Mu * Mv * (Rabs (Wn n) * Rabs (Xn n)))%R
   with ((Mu * Rabs (Wn n)) * (Mv * Rabs (Xn n)))%R by field.
 apply Rmult_le_compat; try (apply Rabs_pos).
-apply (Hu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply (Hv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (Hu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply (Hv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 End Rseq_big_O_compat.
@@ -541,15 +541,15 @@ intros Hu Hv.
 intros eps Heps.
 destruct (Hu (eps/2)%R) as [Nu HNu]; [lra|].
 destruct (Hv (eps/2)%R) as [Nv HNv]; [lra|].
-exists (Max.max Nu Nv).
+exists (Nat.max Nu Nv).
 intros n Hn.
 unfold Rseq_plus.
 eapply Rle_trans; [apply Rabs_triang|].
 replace eps with (eps / 2 + eps / 2)%R by field.
 rewrite Rmult_plus_distr_r.
 apply Rplus_le_compat.
-apply (HNu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply (HNv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (HNu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply (HNv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (** Multiplicative compatibility. *)
@@ -584,15 +584,15 @@ destruct (Hu (sqrt eps)) as [Nu HNu];
 [apply sqrt_lt_R0; assumption|].
 destruct (Hv (sqrt eps)) as [Nv HNv];
 [apply sqrt_lt_R0; assumption|].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_mult.
 repeat rewrite Rabs_mult.
 rewrite <- (sqrt_def eps); [|left; assumption].
 replace (sqrt eps * sqrt eps * (Rabs (Wn n) * Rabs (Xn n)))%R
   with ((sqrt eps * Rabs (Wn n)) * (sqrt eps * Rabs (Xn n)))%R by field.
 apply Rmult_le_compat; try apply Rabs_pos.
-apply (HNu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply (HNv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (HNu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply (HNv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (** Inverse contravariance. *)
@@ -605,8 +605,8 @@ intros eps Heps.
 destruct (Hu eps) as [N HN]; [assumption|].
 exists N; intros n Hn.
 unfold Rseq_inv.
-rewrite Rabs_Rinv; [|apply Hnv].
-rewrite Rabs_Rinv; [|apply Hnu].
+rewrite Rabs_inv.
+rewrite Rabs_inv.
 apply (Rmult_le_reg_l (Rabs (Un n))); [apply Rabs_pos_lt; apply Hnu|].
 apply (Rmult_le_reg_l (Rabs (Vn n))); [apply Rabs_pos_lt; apply Hnv|].
 field_simplify.
@@ -677,7 +677,7 @@ apply Rmult_gt_0_compat; [assumption|].
 apply Rinv_0_lt_compat; lra.
 destruct (Hu eps1) as [Nu HNu]; [assumption|].
 destruct (Hv eps2) as [Nv HNv]; [assumption|].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold Rseq_minus; unfold Rseq_mult.
 replace (Un n * Vn n - Wn n * Xn n)%R
   with ((Un n * Vn n - Wn n * Vn n) + (Wn n * Vn n - Wn n * Xn n))%R
@@ -691,7 +691,7 @@ replace (Un n * Vn n - Wn n * Vn n)%R
   with ((Un n - Wn n) * Vn n)%R by ring.
 repeat rewrite Rabs_mult; rewrite <- Rmult_assoc.
 apply Rmult_le_compat_r; [apply Rabs_pos|].
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 replace (Wn n * Vn n - Wn n * Xn n)%R
   with (Wn n * (Vn n - Xn n))%R by field.
 repeat rewrite Rabs_mult.
@@ -704,8 +704,8 @@ apply Rmult_le_compat; try apply Rabs_pos.
 replace (Wn n) with ((Wn n - Un n) + Un n)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
 apply Rplus_le_compat_r; rewrite Rabs_minus_sym.
-apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (** Addition and little-O. *)
@@ -721,17 +721,17 @@ apply Rmult_lt_0_compat; [lra|].
 apply Rinv_0_lt_compat; lra.
 destruct (Hu (eps / 2)%R) as [N HN]; [lra|].
 destruct (Ho (eps * / (2 + eps))%R) as [No HNo]; [assumption|].
-exists (Max.max N No); intros n Hn.
+exists (Nat.max N No); intros n Hn.
 unfold Rseq_plus; unfold Rseq_minus.
 replace (Wn n - (Un n + En n))%R
   with (Wn n + - Un n + - En n)%R by field.
 replace eps with (eps / 2 + eps / 2)%R by field.
 eapply Rle_trans; [apply Rabs_triang|].
 rewrite Rmult_plus_distr_r; apply Rplus_le_compat.
-apply HN; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HN; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite Rabs_Ropp.
 eapply Rle_trans.
-apply HNo; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 replace (Un n) with (Un n - Wn n + Wn n)%R by field.
 eapply Rle_trans.
 apply Rmult_le_compat_l; [left; assumption|apply Rabs_triang].
@@ -739,7 +739,7 @@ eapply Rle_trans.
 apply Rmult_le_compat_l; [left; assumption|].
 apply Rplus_le_compat_r.
 rewrite Rabs_minus_sym.
-apply HN; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HN; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 right; field; apply Rgt_not_eq; lra.
 Qed.
 
@@ -765,11 +765,11 @@ apply Rplus_le_compat_l; apply Rabs_pos.
 destruct (H 1) as [Ncv HNcv]; [lra|].
 destruct (Ho (/ (1 + Rabs l) * eps))%R as [No HNo].
 apply Rmult_gt_0_compat; assumption.
-exists (Max.max Ncv No).
+exists (Nat.max Ncv No).
 intros n Hn.
 unfold R_dist; rewrite Rminus_0_r.
 eapply Rle_lt_trans; [apply HNo|].
-eapply le_trans; [apply Max.le_max_r|eexact Hn].
+eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 rewrite Rmult_comm; rewrite <- Rmult_assoc.
 rewrite <- Rmult_1_l; apply Rmult_lt_compat_r; [assumption|].
 eapply Rlt_le_trans.
@@ -778,7 +778,7 @@ replace (Vn n) with (Vn n - l + l)%R by field.
 eapply Rle_lt_trans.
 apply Rabs_triang.
 apply Rplus_lt_compat_r.
-apply HNcv; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HNcv; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 right; apply Rinv_r; apply Rgt_not_eq.
 eapply Rlt_le_trans with (r2 := 1); [lra|].
 pattern 1 at 1; rewrite <- Rplus_0_r.
@@ -792,13 +792,13 @@ Proof.
 intros H M.
 destruct (H M) as [N HN].
 destruct (Ho 1) as [No HNo]; [lra|].
-exists (Max.max N No); intros n Hn.
+exists (Nat.max N No); intros n Hn.
 eapply Rlt_le_trans.
-apply (HN n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply (HN n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 rewrite <- Rmult_1_l.
 apply Rle_trans with (Rabs (Un n)).
 unfold Rabs; repeat destruct Rcase_abs; lra.
-apply HNo; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNo; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 End Rseq_little_O_cv.
@@ -849,7 +849,7 @@ assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
   destruct (Heq (eps / 2 * /(M + 1)))%R as [Neq HNeq].
   repeat apply Rmult_gt_0_compat; try (assumption || lra).
   apply Rinv_0_lt_compat; lra.
-  exists (Max.max Ncv Neq); intros n Hn.
+  exists (Nat.max Ncv Neq); intros n Hn.
   unfold R_dist.
   replace (Vn n - l)%R
     with ((Vn n - Un n) + (Un n - l))%R by field. 
@@ -858,7 +858,7 @@ assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
   apply Rplus_lt_compat.
   rewrite Rabs_minus_sym.
   eapply Rle_lt_trans.
-  apply HNeq; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+  apply HNeq; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
   rewrite <- Rmult_1_r; rewrite Rmult_assoc.
   apply Rmult_lt_compat_l; [lra|].
   apply Rmult_lt_reg_l with (r := (M + 1)%R); [lra|].
@@ -867,7 +867,7 @@ assert (Hcompat : forall Un Vn l, Un ~ Vn -> Rseq_cv Un l -> Rseq_cv Vn l).
   rewrite Rmult_1_l.
   pattern (Rabs (Un n)); rewrite <- Rplus_0_r.
   apply Rplus_le_lt_compat; [apply Hb|lra].
-  apply HNcv; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+  apply HNcv; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 intros Un Vn Heq l l' Hl; subst l'.
 split; apply Hcompat; auto; symmetry; auto.
 Qed.
@@ -883,15 +883,15 @@ intros H M.
 pose (Mp := Rmax 1 M).
 destruct (Heq (/2)%R) as [N HN]; [lra|].
 destruct (H (2 * Mp)%R) as [Nm HNm].
-exists (Max.max N Nm); intros n Hn.
+exists (Nat.max N Nm); intros n Hn.
 assert (HMp : 0 < Mp).
 eapply Rlt_le_trans with 1%R; [lra|apply RmaxLess1].
 assert (Hpos : 0 < Un n).
 eapply Rlt_trans with (2 * Mp)%R.
 apply Rmult_gt_0_compat; [lra|assumption].
-apply HNm; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNm; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 assert (Hq : Rabs (Un n - Vn n) <= /2 * Rabs (Un n)).
-apply HN; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HN; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 assert (Hp : /2 * Rabs (Un n) <= Rabs (Vn n)).
 replace (/2)%R with (1 + - /2)%R by field.
 replace (Vn n)%R with (Un n - (Un n - Vn n))%R by field.
@@ -907,7 +907,7 @@ apply Rmult_lt_reg_l with 2%R; [lra|].
 rewrite <- Rmult_assoc.
 rewrite Rinv_r; [|apply Rgt_not_eq; lra].
 rewrite Rmult_1_l.
-apply HNm; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNm; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 apply Rge_le; assumption.
 Qed.
 
@@ -918,14 +918,14 @@ intros H M.
 pose (Mp := Rmin (-1) M).
 destruct (Heq (/2)%R) as [N HN]; [lra|].
 destruct (H (2 * Mp)%R) as [Nm HNm].
-exists (Max.max N Nm); intros n Hn.
+exists (Nat.max N Nm); intros n Hn.
 assert (HMp : Mp < 0).
 eapply Rle_lt_trans with (-1)%R; [apply Rmin_l|lra].
 assert (Hpos : Un n < 0).
 eapply Rlt_trans with (2 * Mp)%R; [|lra].
-apply HNm; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNm; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 assert (Hq : Rabs (Un n - Vn n) <= /2 * Rabs (Un n)).
-apply HN; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply HN; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 assert (Hp : /2 * Rabs (Un n) <= Rabs (Vn n)).
 replace (/2)%R with (1 + - /2)%R by field.
 replace (Vn n)%R with (Un n - (Un n - Vn n))%R by field.
@@ -942,7 +942,7 @@ apply Rmult_lt_reg_l with 2%R; [lra|].
 rewrite <- Rmult_assoc.
 rewrite Rinv_r; [|apply Rgt_not_eq; lra].
 rewrite Rmult_1_l.
-apply HNm; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNm; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -956,7 +956,7 @@ unfold R_dist, Rseq_div.
 replace (Un n / Vn n - 1)%R
   with ((Un n - Vn n) / Vn n)%R by (field; apply Hv).
 unfold Rdiv.
-rewrite Rabs_mult; rewrite Rabs_Rinv; [|apply Hv].
+rewrite Rabs_mult; rewrite Rabs_inv.
 rewrite Rabs_minus_sym.
 rewrite Rmult_comm.
 apply (Rmult_lt_reg_l (Rabs (Vn n))).
@@ -1045,14 +1045,24 @@ apply Rseq_equiv_sym in H.
 destruct (H eps Heps) as [N HN].
 destruct Upos as (m1, Upos).
 destruct Vpos as (m2, Vpos).
-exists (max (max N m1) m2); intros n Hn.
+exists (Nat.max (Nat.max N m1) m2); intros n Hn.
 unfold Rseq_minus, Rseq_inv in *.
 assert (Hm1 : (n >= m1)%nat).
- apply le_trans with (max (max N m1) m2). apply le_trans with (max N m1). intuition. intuition. intuition.
+ apply Nat.le_trans with (Nat.max (Nat.max N m1) m2).
+ apply Nat.le_trans with (Nat.max N m1).
+ intuition (auto with arith).
+ intuition (auto with arith).
+ intuition.
 assert (Hm2 : (n >= m2)%nat).
- apply le_trans with (max (max N m1) m2). intuition. intuition.
+ apply Nat.le_trans with (Nat.max (Nat.max N m1) m2).
+ intuition (auto with arith).
+ intuition.
 assert (HN1 : (n >= N)%nat).
- apply le_trans with (max (max N m1) m2). apply le_trans with (max N m1). intuition. intuition. intuition.
+ apply Nat.le_trans with (Nat.max (Nat.max N m1) m2).
+ apply Nat.le_trans with (Nat.max N m1).
+ intuition (auto with arith).
+ intuition (auto with arith).
+ intuition.
 replace (/ Un n - / Vn n)%R with ((Vn n - Un n) */ (Un n * Vn n))%R by (field; auto).
 rewrite Rabs_mult.
 replace (Rabs (/Un n))%R with (Rabs (Vn n) * (Rabs (/ (Un n * Vn n))))%R.

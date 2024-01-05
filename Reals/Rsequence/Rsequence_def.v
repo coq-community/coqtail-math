@@ -73,7 +73,8 @@ Proof.
 intro n ; induction n.
  left ; exists O ; intuition.
  case IHn ; intro H ; destruct H as (p,Hp) ;
- [right ; exists p | left ; exists (S p)] ; intuition; rewrite Hp; simpl; eauto with *.
+ [right ; exists p | left ; exists (S p)] ; intuition (auto with arith);
+   rewrite Hp; simpl; eauto with *.
 Qed.
 
 Definition Rseq_zip Un Vn n := match n_modulo_2 n with

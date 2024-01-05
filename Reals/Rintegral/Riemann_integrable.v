@@ -1,4 +1,4 @@
-Require Import Max.
+Require Import PeanoNat.
 Require Import Reals.
 Require Import Lra.
 Require Import RiemannInt.

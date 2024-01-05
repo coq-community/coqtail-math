@@ -164,7 +164,7 @@ replace ((a / (a * a + b * b) * (a / (a * a + b * b)) +
     (1 / (a * a + b * b))%R.
  rewrite <- Rmult_1_l ; rewrite <- sqrt_1 at 2 ; rewrite sqrt_div.
   reflexivity.
-  intuition.
+  intuition (auto with real).
  case (Req_or_neq a) ; intro Ha.
  case (Req_or_neq b) ; intro Hb.
   destruct Hz ; subst ; reflexivity.
@@ -191,7 +191,7 @@ destruct z1 as (r0, r1) ; destruct z2 as (r2, r3) ; simpl ; apply Rsqr_incr_0. u
   apply Ropp_le_ge_contravar in H ; rewrite Ropp_0 in H.
   assert (H0 : (-(r0^2 * r3^2 - 2 * r0 * r3 * r1 * r2 + r1^2 * r2^2) = 2 * r0 * r2 * r1 * r3 - (r0^2 * r3^2 + r2^2 * r1^2))%R).
   ring.
- rewrite <- H0 ; intuition.
+ rewrite <- H0 ; intuition (auto with real).
  ring_simplify ; repeat (rewrite Rplus_assoc) ; apply Rplus_le_compat_l.
  rewrite Rplus_comm ; rewrite Rplus_assoc ; apply Rplus_le_compat_l ;
  rewrite Rplus_assoc ; apply Rplus_le_compat_l ; rewrite Rplus_assoc ;
@@ -261,11 +261,11 @@ assert (Hrew : forall r, (r*r = r²)%R).
  intro a ; reflexivity.
  rewrite <- sqrt_Rsqr_abs.
  apply sqrt_le_1.
-  intuition.
-  apply Rplus_le_le_0_compat ; rewrite Hrew ; intuition.
+  intuition (auto with real).
+  apply Rplus_le_le_0_compat ; rewrite Hrew ; intuition (auto with real).
   apply Rle_trans with (r²+0)%R.
-   intuition.
-   repeat (rewrite Hrew) ; apply Rplus_le_compat_l ; intuition.
+   intuition (auto with real).
+   repeat (rewrite Hrew) ; apply Rplus_le_compat_l ; intuition (auto with real).
 Qed.
 
 Lemma Cim_le_Cnorm : forall z, Rabs (Cim z) <= Cnorm z.
@@ -275,11 +275,11 @@ assert (Hrew : forall r, (r*r = r²)%R).
  intro a ; reflexivity.
  rewrite <- sqrt_Rsqr_abs.
  apply sqrt_le_1.
-  intuition.
-  apply Rplus_le_le_0_compat ; rewrite Hrew ; intuition.
+  intuition (auto with real).
+  apply Rplus_le_le_0_compat ; rewrite Hrew ; intuition (auto with real).
   apply Rle_trans with (0 + r0²)%R.
-   intuition.
-   repeat (rewrite Hrew) ; apply Rplus_le_compat_r ; intuition.
+   intuition (auto with real).
+   repeat (rewrite Hrew) ; apply Rplus_le_compat_r ; intuition (auto with real).
 Qed.
 
 Lemma Cnorm_le_Cre_Cim : forall z, Cnorm z <= Rabs (Cre z) + Rabs (Cim z).
@@ -294,7 +294,7 @@ rewrite <- sqrt_square.
    apply Rplus_le_compat ; apply RRle_abs.
    rewrite Rmult_plus_distr_r ; repeat rewrite Rmult_plus_distr_l.
    repeat (rewrite Rplus_assoc) ; apply Rplus_le_compat_l.
-   apply Rle_trans with (0 + Rabs b * Rabs b)%R ; [intuition |].
+   apply Rle_trans with (0 + Rabs b * Rabs b)%R ; [intuition (auto with real) |].
    rewrite <- Rplus_assoc ; apply Rplus_le_compat_r ;
     apply Rplus_le_le_0_compat ; apply Rmult_le_pos ; apply Rabs_pos.
  apply Rplus_le_le_0_compat ; apply Rabs_pos.

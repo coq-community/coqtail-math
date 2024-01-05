@@ -29,9 +29,11 @@ Proof.
   apply Nle_plus in H.
   destruct H.
   rewrite H.
-  rewrite minus_plus.
-  rewrite <- plus_assoc.
-  rewrite minus_plus.
+  rewrite (Nat.add_comm q) at 2.
+  rewrite Nat.add_sub.
+  rewrite <- Nat.add_assoc.
+  rewrite (Nat.add_comm q).
+  rewrite Nat.add_sub.
   auto.
 Qed.
 
@@ -41,25 +43,31 @@ Proof.
   apply Nle_plus in H.
   destruct H.
   rewrite H.
-  rewrite minus_plus.
-  rewrite plus_assoc.
+  rewrite (Nat.add_comm q) at 1.
+  rewrite Nat.add_sub.
+  rewrite Nat.add_assoc.
   replace (x+q+x0) with (q+(x+x0)).
-  rewrite minus_plus.
+  rewrite (Nat.add_comm q).
+  rewrite Nat.add_sub.
   auto.
   ring.
 Qed.
+
 Lemma minus_L2 : forall n p q, n>=p+q -> n-p-q=n-(p+q).
 Proof.
   intros.
   apply Nle_plus in H.
   destruct H.
   rewrite H.
-  rewrite minus_plus.
+  rewrite Nat.add_comm at 2.
+  rewrite Nat.add_sub.
   replace (p+q+x-p) with (q+x).
-  rewrite minus_plus.
+  rewrite Nat.add_comm.
+  rewrite Nat.add_sub.
   auto.
-  rewrite <- plus_assoc.
-  rewrite minus_plus.
+  rewrite <- Nat.add_assoc.
+  rewrite (Nat.add_comm p).
+  rewrite Nat.add_sub.
   auto.
 Qed.
 
@@ -73,13 +81,14 @@ Proof.
   assert (S n+m=S(n+m)).
   auto with arith.
   rewrite H0.
-  rewrite <- minus_Sn_m.
+  symmetry.
+  rewrite Nat.sub_succ_l.
   rewrite IHn.
   auto with arith.
   exact H.
   assert (m<=n+m).
   auto with arith.
-  apply le_trans with m.
+  apply Nat.le_trans with m.
   exact H. exact H1.
 Qed.
 
@@ -102,11 +111,11 @@ Proof.
   rewrite Nfinite_sum_split_upper.
   rewrite Nbinomial_0.
   rewrite Nbinomial_diag.
-  rewrite mult_1_l.
-  rewrite mult_1_l.
+  rewrite Nat.mul_1_l.
+  rewrite Nat.mul_1_l.
   rewrite Npower_1_n.
   rewrite Npower_1_n.
-  rewrite mult_1_r.
+  rewrite Nat.mul_1_r.
   assert (1 +
   (Nfinite_sum_0_n x
      (fun k : nat =>
@@ -116,17 +125,17 @@ Proof.
      (fun k : nat =>
       Nbinomial (S (S x)) (S k) * a ^ S k * 1 ^ (S (S x) - S k)) + 1 +
    a ^ S (S x)) - a ^ S (S x) - 1).
-  rewrite plus_assoc.
+  rewrite Nat.add_assoc.
   auto with arith.
   rewrite H1. clear H1.
   
 
   rewrite plus_minus.
-  rewrite minus_diag.
-  rewrite plus_0_r.
+  rewrite Nat.sub_diag.
+  rewrite Nat.add_0_r.
   rewrite plus_minus.
-  rewrite minus_diag.
-  rewrite plus_0_r.
+  rewrite Nat.sub_diag.
+  rewrite Nat.add_0_r.
 
   rewrite <- H0.
   apply Nfinite_sum_div_compat.
@@ -187,29 +196,34 @@ rewrite H0.
 clear H0.
 
 rewrite minus_L0.
-rewrite minus_plus.
-rewrite minus_plus.
+rewrite (Nat.add_comm (a ^ _)) at 1.
+rewrite Nat.add_sub.
+rewrite (Nat.add_comm 1).
+rewrite Nat.add_sub.
 replace (a ^ S (S p) + 1 + x - a - 1) with (1+(a ^ S (S p) + x - a) - 1).
-rewrite minus_plus.
+symmetry.
+rewrite (Nat.add_comm 1).
+symmetry.
+rewrite Nat.add_sub.
 rewrite minus_L1.
 auto with arith.
 destruct a.
 rewrite Npower_0_n. auto. auto with arith.
-apply le_trans with ((S a)^1).
+apply Nat.le_trans with ((S a)^1).
 rewrite Npower_n_1.
 auto.
 apply Npower_le_compat_r.
 auto with arith.
 auto with arith.
 rewrite minus_L1.
-rewrite plus_assoc.
+rewrite Nat.add_assoc.
 auto with arith.
 destruct a.
 rewrite Npower_0_n.
 simpl. auto with arith.
 auto with arith.
-apply le_trans with ((S a)^(S(S p))).
-apply le_trans with ((S a)^1).
+apply Nat.le_trans with ((S a)^(S(S p))).
+apply Nat.le_trans with ((S a)^1).
 rewrite Npower_n_1. auto.
 apply Npower_le_compat_r.
 auto with arith.
@@ -218,7 +232,7 @@ auto with arith.
 auto with arith.
 rewrite H0 in H1.
 revert H1; match goal with |- (?a | ?b) -> (?a | ?c) => cut (b = c) end. now intros ->.
-replace (a + 1) with (1 + a) by ring; simpl. repeat rewrite <-plus_assoc. lia.
+replace (a + 1) with (1 + a) by ring; simpl. repeat rewrite <- Nat.add_assoc. lia.
 lia.
 lia.
 Qed.
@@ -240,11 +254,11 @@ auto.
 simpl.
 rewrite Npower_succ in H1.
 replace (a * a ^ S p - a) with (a * a ^ S p - a*1) in H1.
-rewrite <- mult_minus_distr_l in H1.
+rewrite <- Nat.mul_sub_distr_l in H1.
 apply Ngauss in H1.
 auto.
 apply Nrel_prime_sym. auto.
-rewrite mult_1_r.
+rewrite Nat.mul_1_r.
 auto.
 Qed.
 

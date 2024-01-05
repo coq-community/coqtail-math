@@ -189,10 +189,8 @@ intros f x v f_diff.
   destruct (f_diff v_neq (eps / 2)%R eps_2_pos) as ([alpha alpha_pos], Halpha).
   assert (delta_pos : 0 < Rmin (/ (2 * Cnorm v)) alpha).
    apply Rmin_pos.
-   rewrite Rinv_mult_distr.
+   rewrite Rinv_mult.
    apply Rlt_mult_inv_pos ; [lra | apply Cnorm_pos_lt ; assumption].
-   apply Rgt_not_eq ; lra.
-   apply Rgt_not_eq ; apply Cnorm_pos_lt ; assumption.
    assumption.
   exists (mkposreal (Rmin (/(2 * Cnorm v)) alpha) delta_pos).
   intros h h_ub ; simpl ; unfold C_dist ; destruct (Ceq_dec h 0) as [h_eq | h_neq].
@@ -218,7 +216,7 @@ intros f x v f_diff.
    repeat apply Rmult_lt_compat_r ; [| apply Cnorm_pos_lt | rewrite Cnorm_IRC_Rabs] ;
    assumption.
    apply Rle_lt_trans with (eps / 2)%R.
-   unfold Rdiv ; rewrite Rmult_comm ; apply Rmult_le_compat_l ; intuition ;
+   unfold Rdiv ; rewrite Rmult_comm ; apply Rmult_le_compat_l ; intuition (auto with real) ;
    apply Rle_trans with (/(2*Cnorm v) * Cnorm v)%R.
    apply Rmult_le_compat_r ; [apply Cnorm_pos | apply Rmin_l].
    right ; field.

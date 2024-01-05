@@ -19,9 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 USA.
 *)
 
-Require Import NArith.
+Require Import PeanoNat NArith.
 Require Import Lia.
-Require Import Max.
 
 Inductive eqmod (n:nat) : nat -> nat -> Prop :=
      | eqmod_base : forall k, k < n -> eqmod n k k
@@ -58,7 +57,7 @@ intros n m l l_ub eqmodnl p p_ub p_neq Hf ;
  inversion Hf.
  assert (Temp := eqmod_bounded _ _ _ Hf).
  apply False_ind ; clear -H1 Temp ; intuition lia.
- assert (Temp := Plus.plus_reg_l _ _ _ H) ; rewrite <- Temp ; assumption.
+ assert (Temp := proj1 (Nat.add_cancel_l _ _ _) H) ; rewrite <- Temp ; assumption.
 Qed.
 
 Lemma eqmod_uniqueness2 : forall n m l l', l < n -> l' < n -> eqmod n m l' -> eqmod n m l -> l = l'.
@@ -77,7 +76,7 @@ intros n m l l' eqmodnl eqmodnl'.
  apply False_ind ; intuition lia.
  apply IHeqmodnl ; inversion eqmodnl'.
  apply False_ind ; intuition lia.
- assert (Temp := Plus.plus_reg_l _ _ _ H) ;
+ assert (Temp := proj1 (Nat.add_cancel_l _ _ _) H) ;
  rewrite <- Temp ; assumption.
 Qed.
 
@@ -85,7 +84,7 @@ Lemma disjoints_prelim : forall n, 0 < n -> forall M m, m < max n M ->
       {k | k < n /\ eqmod n k m /\ forall l, l <> k -> ~ eqmod n l m}.
 Proof.
 intros n n_pos M ; induction M ; intros m m_ub.
- rewrite max_l in m_ub ; [| intuition].
+ rewrite max_l in m_ub ; [| intuition (auto with arith)].
  exists m ; repeat split ; [assumption | |].
  constructor ; assumption.
  intros l l_neq Hyp ; apply l_neq ; apply eqmod_uniqueness with (n:=n) (m:=m).
@@ -97,7 +96,7 @@ intros n n_pos M ; induction M ; intros m m_ub.
  case (pred_itere _ n_pos m) ; intro Hyp.
   exists 0 ; apply False_ind ; destruct Hyp as (_,Hf).
   assert (Hf' : n <= m).
-  apply Le.le_trans with (max n M) ; [apply Max.le_max_l | rewrite m_ub' ; intuition].
+  apply Nat.le_trans with (max n M) ; [apply Nat.le_max_l | rewrite m_ub' ; intuition].
   intuition lia.
   destruct Hyp as (k,Hk).
   case (Compare_dec.le_lt_dec k n) ; intro Temp.
@@ -118,11 +117,12 @@ intros n n_pos M ; induction M ; intros m m_ub.
   assumption.
   inversion eqmodnl.
   apply False_ind ; intuition lia.
-  assert (Temp2 := Plus.plus_reg_l _ _ _ H) ;
+  assert (Temp2 := proj1 (Nat.add_cancel_l _ _ _) H) ;
   replace n with (n+0) in Temp by intuition ; rewrite Temp2, Temp in H1.
   clear -H1 ; inversion H1.
   apply False_ind ; intuition lia.
-  repeat (rewrite itere_S in H) ; assert (Temp2 := Plus.plus_reg_l _ _ _ H) ; rewrite <- Temp2 ;
+  repeat (rewrite itere_S in H) ;
+    assert (Temp2 := proj1 (Nat.add_cancel_l _ _ _) H) ; rewrite <- Temp2 ;
   assumption.
   constructor.
   apply (eqmod_bounded _ _ _ eqmodnl).
@@ -135,7 +135,8 @@ intros n n_pos M ; induction M ; intros m m_ub.
   intros l l_neq_p eqmodnl.
   rewrite Hk in eqmodnl ; inversion eqmodnl.
   clear -H ; intuition lia.
-  repeat (rewrite itere_S in H) ; assert (Temp2 := Plus.plus_reg_l _ _ _ H) ;
+  repeat (rewrite itere_S in H) ;
+    assert (Temp2 := proj1 (Nat.add_cancel_l _ _ _) H) ;
   replace n with (n+0) in Temp by intuition.
   rewrite Temp2 in H1.
   apply (noteqmodnl _ l_neq_p H1).
@@ -143,27 +144,27 @@ intros n n_pos M ; induction M ; intros m m_ub.
   assert (max n M = M).
   clear -m_ub m_ub' ; induction n.
   intuition.
-  case (Max.max_dec (S n) M) ; intro H.
+  case (Nat.max_dec (S n) M) ; intro H.
   rewrite H in m_ub'.
-  case (Max.max_dec (S n) (S M)) ; intro H'.
+  case (Nat.max_dec (S n) (S M)) ; intro H'.
   rewrite H' in m_ub ; apply False_ind ; intuition lia.
   assert (M < m).
-  apply Lt.le_lt_trans with (max (S n) M).
-  apply Max.le_max_r.
+  apply Nat.le_lt_trans with (max (S n) M).
+  apply Nat.le_max_r.
   rewrite H ; assumption.
   rewrite H' in m_ub.
   apply False_ind ; intuition lia.
   assumption.
   assert (m < max (S n) (S M)).
-  apply Lt.lt_le_trans with (max n (S M)).
+  apply Nat.lt_le_trans with (max n (S M)).
   assumption.
   generalize M ; clear ; induction n.
   intuition.
   intro M ; replace (max (S (S n)) (S M)) with (S (max (S n) M)) by intuition.
   replace (max (S n) (S M)) with (S (max n M)) by intuition.
-  apply Le.le_n_S.
+  apply (proj1 (Nat.succ_le_mono _ _)).
   destruct M.
-  repeat (rewrite Max.max_comm ; simpl); intuition.
+  repeat (rewrite Nat.max_comm ; simpl); intuition.
   apply IHn.
   simpl in H0.
   intuition lia.
@@ -172,7 +173,7 @@ Qed.
 Lemma disjoints : forall n, 0 < n -> forall m,
       {k | k < n /\ eqmod n k m /\ forall l, l <> k -> ~ eqmod n l m}.
 Proof.
-intros n n_pos m ; apply disjoints_prelim with (M:= (S m)) ; intuition.
+intros n n_pos m ; apply disjoints_prelim with (M:= (S m)) ; intuition (auto with arith).
 Qed.
 
 Lemma surjectif : forall n m p, m < n -> eqmod n m (n * p + m).
@@ -181,7 +182,7 @@ intros n m p m_ub ; induction p.
  replace (n * 0) with 0 by lia ; constructor ; assumption.
  replace ((n * S p) + m) with (n + ((n * p) + m)).
  constructor ; assumption.
- rewrite Mult.mult_succ_r ; lia.
+ rewrite Nat.mul_succ_r ; lia.
 Qed.
 
 Lemma n_decomp : forall N n m p, 0 < n -> p < (S N) * n -> eqmod n m p -> {k | p = k * n + m}.
@@ -196,34 +197,35 @@ intro N ; induction N ; intros n m p n_pos p_ub p_eqmodn.
   rewrite H in p_eqmodn.
   replace (S N * n) with (N * n + n) in p_eqmodn.
   destruct (IHN n m (N * n) n_pos) as (k, Hk).
-  apply Mult.mult_lt_compat_r ; [constructor | apply n_pos].
+  apply Nat.mul_lt_mono_pos_r ; [apply n_pos | constructor].
   inversion p_eqmodn.
   apply False_ind.
   assert (N * n < 0).
-  apply Plus.plus_lt_reg_l with n.
+  apply Nat.add_lt_mono_l with n.
   intuition lia.
-  apply (Lt.lt_n_O _ H3).
+  apply (Nat.nlt_0_r _ H3).
   replace l with (N * n) in H2.
   assumption.
   intuition lia.
-  exists (S k) ; simpl ; rewrite <- Plus.plus_assoc ; rewrite <- Hk ; intuition.
-  apply Plus.plus_comm.
+  exists (S k) ; simpl ; rewrite <- Nat.add_assoc ; rewrite <- Hk ; intuition.
+  apply Nat.add_comm.
   assert (Hrew : p = n + (p - n)).
-  apply Minus.le_plus_minus.
-  apply Le.le_trans with (S N * n) ; intuition lia;
-  try (apply Le.le_trans with (S 0 * n) ; intuition ; apply Mult.mult_le_compat_r ;
-  intuition).
+  rewrite Nat.add_comm.
+  rewrite Nat.sub_add; [reflexivity|].
+  apply Nat.le_trans with (S N * n) ; intuition lia;
+  try (apply Nat.le_trans with (S 0 * n) ; intuition ;
+   apply Nat.mul_le_mono_r ; intuition).
   destruct (IHN n m (p-n) n_pos) as (k, Hk).
-  apply Plus.plus_lt_reg_l with n.
+  apply Nat.add_lt_mono_l with n.
   rewrite <- Hrew ; intuition.
-  rewrite Plus.plus_comm in Hrew ; rewrite Hrew in p_eqmodn ; inversion p_eqmodn.
-  apply False_ind ; apply Lt.lt_irrefl with n.
-  apply Lt.lt_trans with (S N * n).
+  rewrite Nat.add_comm in Hrew ; rewrite Hrew in p_eqmodn ; inversion p_eqmodn.
+  apply False_ind ; apply Nat.lt_irrefl with n.
+  apply Nat.lt_trans with (S N * n).
   intuition lia.
-  apply Lt.lt_trans with p.
+  apply Nat.lt_trans with p.
   assumption.
   rewrite Hrew ; assumption.
   assert (Hrew' : l = p - n) by intuition lia.
   rewrite Hrew' in H1 ; assumption.
-  exists (S k) ; simpl ; rewrite <- Plus.plus_assoc ; rewrite <- Hk ; intuition.
+  exists (S k) ; simpl ; rewrite <- Nat.add_assoc ; rewrite <- Hk ; intuition.
 Qed.

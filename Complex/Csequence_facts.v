@@ -20,7 +20,7 @@ USA.
 *)
 
 Require Import MyReals.
-Require Import Max.
+Require Import PeanoNat.
 Require Import Rsequence_def.
 Require Import Rsequence_facts.
 Require Import Rsequence_base_facts.
@@ -73,7 +73,7 @@ assert (Hn0 : exists n0, (n = Ne + n0)%nat).
 induction Hn.
 exists N; reflexivity.
 destruct IHHn as [n0 H]; exists (S n0).
-rewrite <- plus_Snm_nSm; simpl; rewrite H; reflexivity.
+rewrite <- Nat.add_succ_comm; simpl; rewrite H; reflexivity.
 destruct Hn0 as [n0 Hn0].
 rewrite Hn0; apply HN; lia.
 Qed.
@@ -146,18 +146,18 @@ split ; intro H.
  field.
  destruct H as [Hre Him] ; intros eps eps_pos ;
  assert (eps_2_pos : 0 < eps/2) by lra ; destruct (Hre _ eps_2_pos) as (N1, HN1) ;
- destruct (Him _ eps_2_pos) as (N2, HN2) ; exists (max N1 N2) ; intros n Hn.
+ destruct (Him _ eps_2_pos) as (N2, HN2) ; exists (Nat.max N1 N2) ; intros n Hn.
  apply Rle_lt_trans with (Rabs (Cre (Un n - lu)) + Rabs (Cim (Un n - lu)))%R.
  apply Cnorm_le_Cre_Cim.
  unfold R_dist in * ; apply Rlt_trans with (Rabs (Cre (Un n - lu)) + eps/2)%R.
  apply Rplus_lt_compat_l ; rewrite <- Cim_minus_compat ; apply HN2.
- apply le_trans with (max N1 N2)%nat.
- apply le_max_r.
+ apply Nat.le_trans with (Nat.max N1 N2)%nat.
+ apply Nat.le_max_r.
  assumption.
  apply Rlt_le_trans with (eps/2 + eps/2)%R.
  apply Rplus_lt_compat_r ; rewrite <- Cre_minus_compat ; apply HN1.
- apply le_trans with (max N1 N2)%nat.
- apply le_max_l.
+ apply Nat.le_trans with (Nat.max N1 N2)%nat.
+ apply Nat.le_max_l.
  assumption.
  right ; field.
 Qed.
@@ -185,18 +185,18 @@ intro Un_cauchy ; split ; intros eps eps_pos ;
  assert (eps_2_pos : 0 < eps / 2) by lra ;
  destruct (Cre_cauchy (eps / 2)%R eps_2_pos) as [N1 HN1] ;
  destruct (Cim_cauchy (eps / 2)%R eps_2_pos) as [N2 HN2] ;
- unfold R_dist in * ; exists (max N1 N2) ; intros m n m_ub n_ub.
+ unfold R_dist in * ; exists (Nat.max N1 N2) ; intros m n m_ub n_ub.
  apply Rle_lt_trans with (Rabs (Cre (Un m - Un n)) + Rabs (Cim (Un m - Un n)))%R ;
  [apply Cnorm_le_Cre_Cim | apply Rlt_le_trans with (eps / 2 + eps / 2)%R ;
  [| right ; field]].
  apply Rlt_trans with (Rabs (Cre (Un m - Un n)) + eps / 2)%R.
  apply Rplus_lt_compat_l ; rewrite <- Cim_minus_compat ; apply HN2 ;
- apply le_trans with (max N1 N2) ; [apply le_max_r | assumption |
- apply le_max_r | assumption].
+ apply Nat.le_trans with (Nat.max N1 N2) ; [apply Nat.le_max_r | assumption |
+ apply Nat.le_max_r | assumption].
  apply Rplus_lt_compat_r.
  rewrite <- Cre_minus_compat ; apply HN1 ;
- apply le_trans with (max N1 N2) ; [apply le_max_l | assumption |
- apply le_max_l | assumption].
+ apply Nat.le_trans with (Nat.max N1 N2) ; [apply Nat.le_max_l | assumption |
+ apply Nat.le_max_l | assumption].
 Qed.
 
 End Cseq_cv_R_to_C.
@@ -268,7 +268,7 @@ Proof.
 intros eps Heps.
 destruct (Hu (eps/2)%R) as [Nu HNu]; [lra|].
 destruct (Hv (eps/2)%R) as [Nv HNv]; [lra|].
-exists (Max.max Nu Nv).
+exists (Nat.max Nu Nv).
 intros n Hn.
 unfold R_dist; unfold Cseq_add.
 replace (Un n + Vn n - (lu + lv))%C
@@ -276,8 +276,8 @@ replace (Un n + Vn n - (lu + lv))%C
 eapply Rle_lt_trans; [apply Cnorm_triang|].
 replace eps with (eps/2 + eps/2)%R by field.
 apply Rplus_lt_compat.
-apply (HNu n); eapply le_trans; [apply Max.le_max_l|eexact Hn].
-apply (HNv n); eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply (HNu n); eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
+apply (HNv n); eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 Qed.
 
 (**********)
@@ -327,7 +327,7 @@ unfold eps2; repeat apply Rmult_gt_0_compat; try lra.
 apply Rinv_0_lt_compat; assumption.
 destruct (Hu eps1) as [Nu HNu]; [assumption|].
 destruct (Hv eps2) as [Nv HNv]; [assumption|].
-exists (Max.max Nu Nv); intros n Hn.
+exists (Nat.max Nu Nv); intros n Hn.
 unfold R_dist; unfold Cseq_mult.
 replace (Un n * Vn n - lu * lv)%C
   with ((Un n * Vn n - Un n * lv) + (Un n * lv - lu * lv))%C by field.
@@ -341,7 +341,7 @@ eapply Rle_lt_trans.
 replace (eps / 2)%R with (Mb * (eps / 2 / Mb))%R
   by (field; apply Rgt_not_eq; assumption).
 apply Rmult_lt_compat_l; [assumption|].
-apply HNv; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HNv; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 unfold Cminus ; rewrite <- Copp_mult_distr_l_reverse.
 rewrite <- Cmult_add_distr_r.
 rewrite Cnorm_Cmult.
@@ -349,7 +349,7 @@ destruct (Ceq_dec lv C0) as [Hlv|Hlv].
   rewrite Hlv ; rewrite Cnorm_C0 ; rewrite Rmult_0_r; lra.
 eapply Rlt_le_trans.
   apply Rmult_lt_compat_r; [apply Cnorm_pos_lt; assumption|].
-  apply HNu; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+  apply HNu; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
 unfold eps1.
 unfold Rdiv; rewrite Rmult_assoc; rewrite <- Rmult_1_r.
 apply Rmult_le_compat_l; [lra|].
@@ -371,14 +371,14 @@ destruct (Hu (Cnorm lu / 2))%R as [Ninf Hinf].
 apply Rmult_lt_0_compat; [apply Cnorm_pos_lt|lra]; assumption.
 destruct (Hu (/2 * Cnorm lu * Cnorm lu * eps))%R as [N HN].
 repeat apply Rmult_lt_0_compat; (apply Cnorm_pos_lt || lra); assumption.
-exists (Max.max Ninf N).
+exists (Nat.max Ninf N).
 intros n Hn.
 unfold R_dist; unfold Cseq_inv.
 assert (Habs : Cnorm lu / 2 <= Cnorm (Un n)).
 replace (Cnorm lu / 2)%R with
   (Cnorm lu - Cnorm lu / 2)%R by field.
 assert (Hr : Cnorm (Un n - lu) < Cnorm lu / 2).
-apply Hinf; eapply le_trans; [apply Max.le_max_l|eexact Hn].
+apply Hinf; eapply Nat.le_trans; [apply Nat.le_max_l|eexact Hn].
  rewrite Cnorm_minus_sym in Hr.
  assert (Temp := Cnorm_triang_rev_r (lu - Un n) lu).
  replace (Cnorm (Un n)) with (Cnorm (- Un n)) by (apply Cnorm_opp) ;
@@ -406,7 +406,7 @@ eapply Rlt_le_trans.
 apply Rmult_lt_compat_l.
 apply Rmult_lt_0_compat; apply Rinv_0_lt_compat;
 apply Cnorm_pos_lt; assumption.
-apply HN; eapply le_trans; [apply Max.le_max_r|eexact Hn].
+apply HN; eapply Nat.le_trans; [apply Nat.le_max_r|eexact Hn].
 replace (/ Cnorm lu * / Cnorm (Un n) * (/2 * Cnorm lu * Cnorm lu * eps))%R
   with (/ Cnorm (Un n) * (/2 * Cnorm lu) * eps)%R by (field; split ;
   apply Cnorm_no_R0 ; assumption).
@@ -465,7 +465,7 @@ pose (e / 2)%R as e'.
 assert (e'pos : e' > 0) by (unfold e'; lra).
 destruct (Hre e' e'pos) as [Nre HNre].
 destruct (Him e' e'pos) as [Nim HNim].
-exists (max Nre Nim).
+exists (Nat.max Nre Nim).
 intros n Hn.
 replace e with (e' + e')%R by (unfold e'; field).
 eapply Rle_lt_trans.
@@ -473,13 +473,13 @@ eapply Rle_lt_trans.
  apply Rplus_lt_compat.
   rewrite <- Cre_minus_compat.
   apply HNre.
-  eapply le_trans.
-   apply le_max_l.
+  eapply Nat.le_trans.
+   apply Nat.le_max_l.
    apply Hn.
   rewrite <- Cim_minus_compat.
   apply HNim.
-  eapply le_trans.
-   apply le_max_r.
+  eapply Nat.le_trans.
+   apply Nat.le_max_r.
    apply Hn.
 Qed.
 

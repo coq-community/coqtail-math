@@ -16,8 +16,8 @@ Lemma Cv_radius_weak_0 : forall An, Cv_radius_weak An 0.
 Proof.
 intro An ; exists (Cnorm (An O)) ; intros x [n Hn] ; rewrite Hn ;
  unfold_gt ; destruct n.
-  rewrite Cpow_0 ; right ; apply Cnorm_eq_compat ; intuition.
-  rewrite IRC_pow_compat, pow_i, Cmult_0_r, Cnorm_C0 ; [apply Cnorm_pos | intuition].
+  rewrite Cpow_0 ; right ; apply Cnorm_eq_compat ; intuition (auto with complex).
+  rewrite IRC_pow_compat, pow_i, Cmult_0_r, Cnorm_C0 ; [apply Cnorm_pos | intuition (auto with arith)].
 Qed.
 
 Lemma finite_cv_radius_pos : forall An r, finite_cv_radius An r -> 0 <= r.
@@ -77,7 +77,7 @@ intros An r r' r'_bd Rho.
   rewrite r_eq ; exists (Cnorm (An 0%nat)) ; intros x Hx ; destruct Hx as (u, Hu) ;
   rewrite Hu ; unfold_gt ; clear ; induction u.
   apply Req_le ; apply Cnorm_eq_compat ; rewrite Cpow_0. apply Cmult_1_r.
-  rewrite C0_pow ; [| intuition] ; rewrite Cmult_0_r ;
+  rewrite C0_pow ; [| intuition (auto with arith)] ; rewrite Cmult_0_r ;
   rewrite Cnorm_C0 ; apply Cnorm_pos.
   assert (r_pos : 0 < Rabs r).
    apply Rlt_le_trans with (Rabs r') ; [apply Rabs_pos_lt |] ; assumption.
@@ -129,7 +129,7 @@ intros An r Rho N.
   intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn ; unfold_gt ; destruct n.
   simpl ; rewrite Cmult_1_r ; right ; reflexivity.
   rewrite Cnorm_Cmult, Cnorm_pow, Cnorm_IRC_Rabs, RPow_abs, pow_i,
-  Rabs_R0, Rmult_0_r ; [apply Cnorm_pos | intuition].
+  Rabs_R0, Rmult_0_r ; [apply Cnorm_pos | intuition (auto with arith)].
  destruct Rho as [M HM].
  exists (M * (/ Rabs r) ^ N)%R.
  intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
@@ -160,7 +160,7 @@ intros An r N Rho.
   unfold_gt ; destruct n.
    simpl ; rewrite Cmult_1_r ; right ; reflexivity.
    rewrite Cnorm_Cmult, Cnorm_pow, Cnorm_IRC_Rabs, r_eq, Rabs_R0, pow_i,
-   Rmult_0_r ; [apply Cnorm_pos | intuition].
+   Rmult_0_r ; [apply Cnorm_pos | intuition (auto with arith)].
  exists (Rmax (M * Cnorm (r ^ N)) M') ; intros u Hu ; destruct Hu as [n Hn] ; rewrite Hn.
  destruct (le_lt_dec n N) as [n_lb | n_ub].
  apply Rle_trans with M' ; [apply HM' | apply RmaxLess2] ; assumption.
@@ -171,7 +171,7 @@ intros An r N Rho.
   apply Rmult_le_compat_r ; [apply Cnorm_pos |].
   apply HM ; exists (n - N)%nat.
   unfold_gt.
-  rewrite Cnorm_pow, Rinv_pow, <- Cnorm_inv, <- Cnorm_pow, <- Cnorm_Cmult,
+  rewrite Cnorm_pow, <- pow_inv, <- Cnorm_inv, <- Cnorm_pow, <- Cnorm_Cmult,
   <- Cpow_inv.
   assert (Hrew : (n = n - N + N)%nat).
    intuition lia.
@@ -181,7 +181,6 @@ intros An r N Rho.
    [reflexivity | apply Cpow_neq_compat ; apply IRC_neq_compat ; assumption].
    apply IRC_neq_compat ; assumption.
    apply IRC_neq_compat ; assumption.
-   apply Cnorm_no_R0 ; apply IRC_neq_compat ; assumption.
 Qed.
 
 Lemma Cv_radius_weak_plus : forall (An Bn : nat -> C) (r1 r2 : R),
@@ -191,10 +190,10 @@ Proof.
 intros An Bn r1 r2 RhoA RhoB.
 assert (r''_bd1 : Rabs (Rmin (Rabs r1) (Rabs r2)) <= Rabs r1).
  unfold Rmin ; case (Rle_dec (Rabs r1) (Rabs r2)) ; intro H ;
- rewrite Rabs_Rabsolu ; intuition.
+ rewrite Rabs_Rabsolu ; intuition (auto with real).
 assert (r''_bd2 : Rabs (Rmin (Rabs r1) (Rabs r2)) <= Rabs r2).
  unfold Rmin ; case (Rle_dec (Rabs r1) (Rabs r2)) ; intro H ;
- rewrite Rabs_Rabsolu ; intuition.
+ rewrite Rabs_Rabsolu ; intuition (auto with real).
 assert (Rho'A := Cv_radius_weak_le_compat An _ _ r''_bd1 RhoA).
 assert (Rho'B := Cv_radius_weak_le_compat Bn _ _ r''_bd2 RhoB).
  destruct Rho'A as (C, HC) ;

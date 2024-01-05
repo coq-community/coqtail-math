@@ -1,4 +1,4 @@
-Require Import ZArith Lia MyNat Div2.
+Require Import ZArith Lia MyNat.
 
 (** Finite and computable subsets of [nat], by functions in [nat -> bool] *)
 
@@ -259,7 +259,7 @@ Proof.
     clear; induction bound; auto with *.
     
     simpl.
-    rewrite (plus_comm domain), <- plus_assoc, (plus_comm _ domain).
+    rewrite (Nat.add_comm domain), <- Nat.add_assoc, (Nat.add_comm _ domain).
     rewrite <- IHdomain; clear.
     induction bound.
       simpl.
@@ -267,8 +267,8 @@ Proof.
         simpl.
     unfold is_duplicate, is_duplicate_outside.
     destruct (lt_dec (f domain) bound) as [L|NL].
-      repeat rewrite plus_assoc.
-      rewrite (plus_comm _ 1).
+      repeat rewrite Nat.add_assoc.
+      rewrite (Nat.add_comm _ 1).
       rewrite <- (plus_assoc 1), <- IHdomain.
         simpl.
     remember (f domain) as y0.
@@ -292,7 +292,7 @@ Proof.
       
       simpl.
       rewrite IHdomain.
-      rewrite plus_comm.
+      rewrite Nat.add_comm.
       f_equal.
       destruct (eq_nat_dec (f bound) domain).
 *)    
@@ -315,10 +315,10 @@ Il faut faire une partie "count outside" qui parle de la bornitude
       
       simpl.
       rewrite <- IHbound.
-      repeat rewrite plus_assoc.
+      repeat rewrite Nat.add_assoc.
       
       f_equal.
-      rewrite plus_comm.
+      rewrite Nat.add_comm.
       f_equal.
       
       destruct (eq_nat_dec (f domain) bound).

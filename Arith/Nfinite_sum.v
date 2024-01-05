@@ -42,8 +42,8 @@ induction n.
 compute. reflexivity.
 intros.
 unfold Nfinite_sum_0_n. fold Nfinite_sum_0_n.
-rewrite plus_assoc_reverse.
-rewrite plus_assoc_reverse.
+rewrite <- Nat.add_assoc.
+rewrite <- Nat.add_assoc.
 assert (g (S n) + Nfinite_sum_0_n n g = Nfinite_sum_0_n n g + g (S n)).
 auto with arith.
 rewrite H.
@@ -107,8 +107,8 @@ intros.
 unfold Nfinite_sum_0_n. fold Nfinite_sum_0_n.
 unfold Nfinite_sum_0_n in IHn. fold Nfinite_sum_0_n in IHn.
 rewrite IHn.
-rewrite plus_assoc.
-rewrite plus_assoc.
+rewrite Nat.add_assoc.
+rewrite Nat.add_assoc.
 auto with arith.
 Qed.
 
@@ -152,7 +152,7 @@ assert (p+q=n).
 auto with arith.
 clear H.
 assert (Nfinite_sum_0_n (S (S n)) f=f(S(S n))+Nfinite_sum_0_n (S n) f).
-rewrite plus_comm.
+rewrite Nat.add_comm.
 apply Nfinite_sum_split_upper.
 rewrite H. clear H.
 rewrite (IHn p q).
@@ -188,7 +188,7 @@ assert (f (S (S n)) +
   (Nfinite_sum_0_n p f + Nfinite_sum_0_n q (fun k : nat => f (kth_S p k)))
   =
   Nfinite_sum_0_n p f + (Nfinite_sum_0_n q (fun k : nat => f (kth_S p k))+f (S (S n)))).
-rewrite plus_comm.
+rewrite Nat.add_comm.
 auto with arith.
 rewrite H. clear H.
 assert (Nfinite_sum_0_n (S q) (fun k : nat => f (kth_S p k)) =

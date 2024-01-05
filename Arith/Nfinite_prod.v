@@ -93,7 +93,7 @@ induction n.
 intros.
 unfold Nfinite_prod_0_n.
 unfold Nat.pow.
-rewrite mult_1_r.
+rewrite Nat.mul_1_r.
 apply H.
 auto with arith.
 intros.
@@ -118,8 +118,8 @@ Proof.
 induction n.
 intros.
 compute.
-apply le_n_O_eq in H.
-rewrite <- H in H0.
+apply Nat.le_0_r in H.
+rewrite H in H0.
 exact H0.
 
 intros.
@@ -159,7 +159,7 @@ intros.
 rewrite Nfinite_prod_split_upper.
 rewrite Nfinite_prod_split_lower.
 rewrite IHn.
-rewrite <- minus_n_O.
+rewrite Nat.sub_0_r.
 assert (Nfinite_prod_0_n n (fun k : nat => f (S n - S k)) =
   Nfinite_prod_0_n n (fun k : nat => f (n - k))).
 apply Nfinite_prod_subtle_eq_compat.
@@ -189,7 +189,7 @@ apply Ndiv_mult_compat.
 apply IHn with k.
 auto. auto.
 simpl.
-rewrite mult_comm.
+rewrite Nat.mul_comm.
 apply Ndiv_mult_compat.
 rewrite <- H.
 auto.

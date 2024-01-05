@@ -303,7 +303,7 @@ eapply Rser_pos_maj_cv.
  intro; apply Rlt_le; apply Rinv_0_lt_compat; apply pow_lt; INR_solve.
  
  intro n; apply Rle_Rinv; unfold Rseq_shift ; try (apply pow_lt; INR_solve).
- unfold pow; INR_solve; try (apply mult_le_compat; lia).
+ unfold pow; INR_solve; try (apply Nat.mul_le_mono; lia).
 Qed.
 
 (** * Sums indexed by relative integers (from -N to N) *)
@@ -1329,7 +1329,7 @@ repeat rewrite mult_INR.
 replace (INR 1) with 1 by trivial.
 replace (INR 2) with 2 by trivial.
 field; INR_solve.
-eapply le_trans.
+eapply Nat.le_trans.
  constructor 2; constructor.
  assumption.
 Qed.
@@ -1657,7 +1657,7 @@ eapply Rseq_cv_asymptotic_eq_compat.
  exists (S O).
  intros n Hb.
   assert (H : exists n', n = S n').
-   exists (pred n); apply S_pred with O; apply Hb.
+   exists (pred n); symmetry; apply Nat.lt_succ_pred with O; apply Hb.
   destruct H; subst.
   unfold Rseq_plus.
   symmetry; apply bound_eq.
