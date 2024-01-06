@@ -270,18 +270,6 @@ clear Hn HN; induction n; simpl; try rewrite IHn; field.
 unfold k; field; apply Rgt_not_eq; eapply Rle_lt_trans; [eexact Hp|eexact Hr].
 Qed.
 
-Lemma even_2n : forall n : nat, Nat.Even n -> {p : nat | n = Nat.double p}.
-Proof.
-intros n H_even; exists (Nat.div2 n).
-apply Nat.Even_double; assumption.
-Defined.
-
-Lemma odd_S2n : forall n : nat, Nat.Odd n -> {p : nat | n = S (Nat.double p)}.
-Proof.
-intros n H_odd; exists (Nat.div2 n).
-apply Nat.Odd_double; assumption.
-Defined.
-
 (**********)
 Lemma Rseq_poly_pow_gt_1_little_O : forall d r, r > 1 -> (Rseq_poly d) = o(Rseq_pow r).
 Proof.
@@ -389,12 +377,12 @@ exists (2 * N)%nat; intros n Hn.
 unfold Rseq_poly; unfold Rseq_pow.
 pose (m :=
   match Nat.Even_Odd_dec n with
-  | left evn => proj1_sig (even_2n n evn)
-  | right odd => S (proj1_sig (odd_S2n n odd))
+  | left evn => proj1_sig (Nat.Even_EvenT n evn)
+  | right odd => S (proj1_sig (Nat.Odd_OddT n odd))
   end).
 assert (Hm : (n <= 2 * m /\ 2 * m <= S n)%nat).
 destruct (Nat.Even_Odd_dec n) as [Hm|Hm];
-[destruct (even_2n n Hm) as [p Hp]|destruct (odd_S2n n Hm) as [p Hp]];
+[destruct (Nat.Even_EvenT n Hm) as [p Hp]|destruct (Nat.Odd_OddT n Hm) as [p Hp]];
 simpl in m; unfold Nat.double in Hp; unfold m; lia.
 destruct Hm as [Hml Hmr].
 apply Rle_trans with (Rabs (INR (2 * m) ^ (2 * kk))).
