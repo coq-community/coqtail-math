@@ -42,6 +42,7 @@ tested_coq_nix_versions:
 
 tested_coq_opam_versions:
 - version: dev
+- version: '8.20'
 - version: '8.19'
 - version: '8.18'
 - version: '8.17'
